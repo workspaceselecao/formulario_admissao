@@ -81,6 +81,33 @@
   .btn-export:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,53,26,0.36); }
   .btn-export:active { transform: translateY(0); }
   .btn-export svg { width: 16px; height: 16px; }
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn-download-empty {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  }
+  .btn-download-empty:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.6);
+    transform: translateY(-1px);
+  }
+  .btn-download-empty:active { transform: translateY(0); }
+  .btn-download-empty svg { width: 16px; height: 16px; }
 
   /* ── LAYOUT ── */
   .container {
@@ -457,6 +484,7 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 640px) {
     .page-header { padding: 20px 20px; flex-direction: column; gap: 14px; align-items: flex-start; }
+    .header-actions { width: 100%; flex-wrap: wrap; }
     .container { padding: 24px 16px 60px; }
     .section-body { padding: 20px 16px 16px; }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -472,12 +500,20 @@
     <div class="brand">ATENTO <span>·</span> Ficha Cadastral</div>
     <div class="subtitle">F-075 (PR-011) 33 · Admissão Operacional e Administrativo</div>
   </div>
-  <button class="btn-export" onclick="gerarPDF()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
-    Exportar PDF
-  </button>
+  <div class="header-actions">
+    <button class="btn-download-empty" type="button" onclick="baixarFichaVazia()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Baixar Ficha Cadastral vazia
+    </button>
+    <button class="btn-export" onclick="gerarPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Exportar PDF
+    </button>
+  </div>
 </header>
 
 <div class="container">
@@ -1583,6 +1619,30 @@ async function gerarPDF(){
   } catch (error) {
     console.error(error);
     showToast("Falha ao gerar PDF. Verifique o console.", false);
+  }
+}
+async function baixarFichaVazia(){
+  try {
+    let bytes = templateBytes;
+    if (!bytes) {
+      const resp = await fetch(TEMPLATE_PATH, { cache: "no-store" });
+      if (!resp.ok) throw new Error(`Falha ao baixar template (${resp.status})`);
+      bytes = await resp.arrayBuffer();
+    }
+
+    const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Ficha_Cadastral_vazia.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Download da ficha vazia iniciado.");
+  } catch (error) {
+    console.error(error);
+    showToast("Não foi possível baixar a ficha vazia.", false);
   }
 }
 
