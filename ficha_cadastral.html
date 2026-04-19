@@ -1093,6 +1093,25 @@ function escreverNoMarcador(page, font, linhas, valor, options = {}){
   });
   return true;
 }
+function escreverAcimaDoRotulo(page, font, linhas, valor, frase, options = {}){
+  const texto = String(valor || "").trim();
+  if (!texto) return false;
+  const anchor = encontrarFrase(linhas, frase, options.ocorrencia || 0);
+  if (!anchor) return false;
+
+  const size = options.size ?? 9;
+  const larguraTexto = font.widthOfTextAtSize(texto, size);
+  const centroRotuloX = (anchor.x + anchor.right) / 2;
+
+  page.drawText(texto, {
+    x: centroRotuloX - (larguraTexto / 2) + (options.offsetX ?? 0),
+    y: anchor.y + (options.offsetY ?? 12),
+    size,
+    font,
+    maxWidth: options.maxWidth ?? 330
+  });
+  return true;
+}
 function escreverNaLinha(page, font, linhas, contextoLinha, valor, options = {}){
   const texto = String(valor || "").trim();
   if (!texto) return;
@@ -1305,13 +1324,23 @@ async function gerarPDF(){
       marcarCheckboxPorFrase(page, font, textLines, ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"], data.valeTipo === "FLEX");
     }
 
-    escreverNoMarcador(page, font, textLines, data.assinaturaNome, {
-      contextoLinha: "NOME COMPLETO DO CANDIDATO",
-      ancora: "NOME COMPLETO DO CANDIDATO",
-      maxWidth: 330,
-      offsetX: 6,
-      offsetY: 2
-    });
+    const assinaturaNomeOk = escreverAcimaDoRotulo(
+      page,
+      font,
+      textLines,
+      data.assinaturaNome,
+      "NOME COMPLETO DO CANDIDATO",
+      { maxWidth: 330, offsetY: 12 }
+    );
+    if (!assinaturaNomeOk) {
+      escreverNoMarcador(page, font, textLines, data.assinaturaNome, {
+        contextoLinha: "NOME COMPLETO DO CANDIDATO",
+        ancora: "NOME COMPLETO DO CANDIDATO",
+        maxWidth: 330,
+        offsetX: 6,
+        offsetY: 2
+      });
+    }
     escreverNoMarcador(page, font, textLines, data.assinaturaData, {
       contextoLinha: "NOME COMPLETO DO CANDIDATO",
       ancora: "DATA",

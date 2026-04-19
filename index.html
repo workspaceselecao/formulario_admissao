@@ -508,6 +508,26 @@
       return true;
     }
 
+    function escreverAcimaDoRotulo(page, font, linhas, valor, frase, options = {}) {
+      const texto = String(valor || "").trim();
+      if (!texto) return false;
+      const anchor = encontrarFrase(linhas, frase, options.ocorrencia || 0);
+      if (!anchor) return false;
+
+      const size = options.size ?? 9;
+      const larguraTexto = font.widthOfTextAtSize(texto, size);
+      const centroRotuloX = (anchor.x + anchor.right) / 2;
+
+      page.drawText(texto, {
+        x: centroRotuloX - (larguraTexto / 2) + (options.offsetX ?? 0),
+        y: anchor.y + (options.offsetY ?? 12),
+        size,
+        font,
+        maxWidth: options.maxWidth ?? 330
+      });
+      return true;
+    }
+
     function formatarTelefoneBR(valor) {
       const digitos = String(valor || "").replace(/\D/g, "");
       if (digitos.length === 11) {
@@ -839,13 +859,23 @@
           marcarCheckboxPorFrase(page, font, textLines, ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"], data.valeTipo === "FLEX");
         }
 
-        escreverNoMarcador(page, font, textLines, data.nomeCompleto, {
-          contextoLinha: "NOME COMPLETO DO CANDIDATO",
-          ancora: "NOME COMPLETO DO CANDIDATO",
-          maxWidth: 330,
-          offsetX: 6,
-          offsetY: 2
-        });
+        const assinaturaNomeOk = escreverAcimaDoRotulo(
+          page,
+          font,
+          textLines,
+          data.nomeCompleto,
+          "NOME COMPLETO DO CANDIDATO",
+          { maxWidth: 330, offsetY: 12 }
+        );
+        if (!assinaturaNomeOk) {
+          escreverNoMarcador(page, font, textLines, data.nomeCompleto, {
+            contextoLinha: "NOME COMPLETO DO CANDIDATO",
+            ancora: "NOME COMPLETO DO CANDIDATO",
+            maxWidth: 330,
+            offsetX: 6,
+            offsetY: 2
+          });
+        }
         escreverNoMarcador(page, font, textLines, new Date().toLocaleDateString("pt-BR"), {
           contextoLinha: "NOME COMPLETO DO CANDIDATO",
           ancora: "DATA",
