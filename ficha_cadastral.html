@@ -609,7 +609,7 @@
         </div>
         <div class="field">
           <label>Complemento</label>
-          <input type="text" id="complemento" placeholder="Apto, Bloco...">
+          <input type="text" id="complemento" placeholder="Apto, Bloco..." maxlength="35">
         </div>
         <div class="field">
           <label>Bairro</label>
@@ -1447,7 +1447,7 @@ async function gerarPDF(){
       pis: v("pis"),
       endereco: v("endereco"),
       numero: v("endNum"),
-      complemento: v("complemento"),
+      complemento: v("complemento").slice(0, 35),
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
