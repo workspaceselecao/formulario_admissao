@@ -458,16 +458,27 @@
       const texto = String(valor || "").trim();
       if (!texto) return;
 
-      const linha = encontrarLinhaPorContexto(
+      let linha = encontrarLinhaPorContexto(
         linhas,
         options.contextoLinha || options.ancoraLinha || options.ancora,
         options.ocorrenciaLinha || 0
       );
       if (!linha) return;
 
-      const anchor = options.ancora
+      let anchor = options.ancora
         ? encontrarFraseNaLinha(linha, options.ancora, options.ocorrenciaAncora || 0)
         : null;
+      if (!anchor && options.ancora) {
+        const anchorGlobal = encontrarFrase(linhas, options.ancora, options.ocorrenciaAncora || 0);
+        if (anchorGlobal) {
+          linha = anchorGlobal.linha;
+          anchor = {
+            inicio: anchorGlobal.inicio,
+            fim: anchorGlobal.fim,
+            right: anchorGlobal.right
+          };
+        }
+      }
       const linhaAbaixo = options.linhaAbaixo === true;
       const gapY = options.gapY ?? 13;
       const xPadrao = linhaAbaixo ? 4 : 8;
@@ -485,6 +496,17 @@
         font,
         maxWidth: options.maxWidth ?? 220
       });
+    }
+
+    function formatarTelefoneBR(valor) {
+      const digitos = String(valor || "").replace(/\D/g, "");
+      if (digitos.length === 11) {
+        return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
+      }
+      if (digitos.length === 10) {
+        return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 6)}-${digitos.slice(6)}`;
+      }
+      return String(valor || "").trim();
     }
 
     function marcarCheckbox(page, font, linhas, contextoLinha, palavra, ativo, options = {}) {
@@ -512,8 +534,8 @@
       return {
         nomeCompleto: fd.get("nomeCompleto") || "",
         nomeSocial: fd.get("nomeSocial") || "",
-        telefone: fd.get("telefone") || "",
-        celular: fd.get("celular") || "",
+        telefone: formatarTelefoneBR(fd.get("telefone") || ""),
+        celular: formatarTelefoneBR(fd.get("celular") || ""),
         email: fd.get("email") || "",
         estadoCivil: fd.get("estadoCivil") || "",
         primeiroEmprego: fd.get("primeiroEmprego") || "SIM",
@@ -604,21 +626,24 @@
           maxWidth: 280
         });
         escreverNoMarcador(page, font, textLines, data.telefone, {
-          contextoLinha: "Telefone:",
-          ancora: "Telefone:",
+          contextoLinha: ["Telefone:", "Celular:"],
+          ancora: ["Telefone:", "Telefone"],
           linhaAbaixo: true,
+          gapY: 10,
           maxWidth: 100
         });
         escreverNoMarcador(page, font, textLines, data.celular, {
-          contextoLinha: "Telefone:",
-          ancora: "Celular:",
+          contextoLinha: ["Telefone:", "Celular:"],
+          ancora: ["Celular:", "Celular"],
           linhaAbaixo: true,
+          gapY: 10,
           maxWidth: 100
         });
         escreverNoMarcador(page, font, textLines, data.email, {
-          contextoLinha: "E-mail:",
-          ancora: "E-mail:",
+          contextoLinha: ["E-mail:", "Email:"],
+          ancora: ["E-mail:", "Email:"],
           linhaAbaixo: true,
+          gapY: 10,
           maxWidth: 240
         });
         escreverNoMarcador(page, font, textLines, data.estadoCivil, {
@@ -633,7 +658,6 @@
         escreverNoMarcador(page, font, textLines, data.pis, {
           contextoLinha: "Primeiro emprego:",
           ancora: "Informar PIS:",
-          linhaAbaixo: true,
           maxWidth: 180
         });
 
@@ -732,12 +756,12 @@
         const qtdX = colunaQtd ? colunaQtd.x + 4 : 330;
         const valorX = colunaValor ? colunaValor.x + 4 : 430;
 
-        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: qtdX, maxWidth: 60, offsetY: -10 });
-        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: valorX, maxWidth: 80, offsetY: -10 });
-        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: qtdX, maxWidth: 60, offsetY: -10 });
-        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80, offsetY: -10 });
-        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60, offsetY: -10 });
-        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80, offsetY: -10 });
+        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: qtdX, maxWidth: 60 });
+        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: valorX, maxWidth: 80 });
+        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: qtdX, maxWidth: 60 });
+        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80 });
+        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
+        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
 
         marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VA", { ocorrenciaPalavra: 0 });
         marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VR", { ocorrenciaPalavra: 1 });
