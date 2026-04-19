@@ -1,0 +1,3714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha Cadastral – Hub de Recrutamento & Seleção</title>
+<link rel="icon" type="image/png" href="icone.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-header-nav.css">
+<style>
+  /* ── TOKENS (página) ─────────────────── */
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf9f7;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --border-strong: #9e9890;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --label: #5a554e;
+    --success: #2d7a4a;
+    --input-focus-border: #efa27f;
+    --accent-border-subtle: rgba(1, 66, 106, 0.2);
+    --accent-border-medium: rgba(1, 66, 106, 0.28);
+    --accent-shadow-subtle: rgba(12, 40, 68, 0.06);
+    --accent-shadow-medium: rgba(1, 66, 106, 0.14);
+    --overlay-bg: rgba(10, 10, 10, 0.45);
+    --destructive: #a33;
+    --destructive-bg: rgba(180, 60, 50, 0.08);
+    --separator-subtle: rgba(0, 0, 0, 0.06);
+    --separator-medium: rgba(0, 0, 0, 0.1);
+    --accent-tap-hover: rgba(1, 66, 106, 0.07);
+    --accent-tap-focus: rgba(1, 66, 106, 0.09);
+    --accent-focus-ring: rgba(1, 66, 106, 0.28);
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .btn-export {
+    --btn-fill-a: #3b2447;
+    --btn-fill-b: #efa27f;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(to top right, var(--btn-fill-a), var(--btn-fill-b));
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.2s, transform 0.12s;
+    text-shadow: 0 1px 2px rgba(30, 14, 38, 0.35);
+    animation: btn-export-spark-glow 2.5s ease-in-out infinite;
+    box-shadow:
+      0 2px 14px rgba(59, 36, 71, 0.38),
+      0 0 22px rgba(239, 162, 127, 0.28);
+  }
+  .btn-export::before {
+    content: "";
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -75%;
+    width: 58%;
+    background: linear-gradient(
+      88deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.06) 62%,
+      transparent 100%
+    );
+    transform: skewX(-16deg);
+    animation: btn-export-spark-sweep 2.75s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .btn-export:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 22px rgba(59, 36, 71, 0.42),
+      0 0 32px rgba(239, 162, 127, 0.48),
+      0 0 46px rgba(255, 228, 210, 0.35);
+  }
+  .btn-export:active { transform: translateY(0); filter: brightness(0.98); }
+  .btn-export svg { width: 16px; height: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+  @keyframes btn-export-spark-glow {
+    0%, 100% {
+      box-shadow:
+        0 2px 14px rgba(59, 36, 71, 0.38),
+        0 0 20px rgba(239, 162, 127, 0.26),
+        0 0 36px rgba(239, 162, 127, 0.12);
+    }
+    50% {
+      box-shadow:
+        0 3px 18px rgba(59, 36, 71, 0.46),
+        0 0 34px rgba(239, 162, 127, 0.52),
+        0 0 52px rgba(255, 235, 220, 0.42);
+    }
+  }
+  @keyframes btn-export-spark-sweep {
+    0% { transform: skewX(-16deg) translateX(-8%); opacity: 0; }
+    8% { opacity: 1; }
+    42% { transform: skewX(-16deg) translateX(320%); opacity: 1; }
+    43%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-export { animation: none; box-shadow: 0 2px 14px rgba(59, 36, 71, 0.38); }
+    .btn-export::before { animation: none; opacity: 0; }
+  }
+  .form-actions-bottom {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .btn-download-empty {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  }
+  .btn-download-empty:hover {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+    border-color: var(--accent-dark);
+    transform: translateY(-1px);
+  }
+  .btn-download-empty:active { transform: translateY(0); }
+  .btn-download-empty svg { width: 16px; height: 16px; }
+  .download-empty-wrapper {
+    position: relative;
+  }
+  .download-format-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 10px 26px rgba(1,66,106,0.16);
+    padding: 6px;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .download-format-menu.show { display: flex; }
+  .download-format-option {
+    border: 1px solid transparent;
+    background: #fff;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
+  }
+  .download-format-option:hover {
+    background: var(--accent-soft);
+    border-color: var(--border);
+    color: var(--accent-dark);
+  }
+  .btn-carta-bradesco {
+    width: fit-content;
+    justify-content: center;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .section-progress {
+    margin-top: 16px;
+  }
+  .section-progress-track {
+    background: var(--border);
+    border-radius: 100px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .section-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .address-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .address-cep { grid-column: span 2; }
+  .address-endereco { grid-column: span 5; }
+  .address-numero { grid-column: span 1; }
+  .address-complemento { grid-column: span 4; }
+  .address-bairro { grid-column: span 4; }
+  .address-cidade { grid-column: span 6; }
+
+  /* ── SECTION CARDS ── */
+  .section-card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card:hover { box-shadow: var(--shadow-lg); }
+  .section-card.etapa-fluxo[hidden] {
+    display: none !important;
+  }
+  .gate-dependentes-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .gate-dependentes-acoes .btn-gate {
+    min-width: 120px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-mid);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .gate-dependentes-acoes .btn-gate:hover:not(.btn-gate--selecionado) {
+    border-color: var(--accent);
+    color: var(--accent-dark);
+  }
+  .gate-dependentes-acoes .btn-gate--selecionado {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(1, 66, 106, 0.28);
+  }
+  .gate-dependentes-acoes .btn-gate--selecionado:hover {
+    border-color: var(--accent-dark);
+    background: var(--accent-dark);
+    color: #fff;
+  }
+  #dependentesConteudo {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-body {
+    padding: 28px 28px 20px;
+  }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .col-span-4 { grid-column: span 4; }
+
+  .banco-colunas {
+    grid-column: span 2;
+    gap: 20px;
+    align-items: start;
+  }
+  .banco-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface, #fafbfc);
+  }
+  .banco-col-titulo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+  }
+  .banco-col .radio-inline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .banco-col .radio-label {
+    width: 100%;
+  }
+  .banco-col-detalhes {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 520px) {
+    .banco-col-detalhes {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  /* Banco principal: oculta colunas de detalhes até seleção */
+  .banco-col--bradesco,
+  .banco-col--next,
+  .banco-col--santander {
+    display: none !important;
+  }
+  body:has(input[name="bancoPrincipal"][value="bradesco"]:checked) .banco-col--bradesco {
+    display: flex !important;
+    grid-column: span 2 !important;
+  }
+  body:has(input[name="bancoPrincipal"][value="next"]:checked) .banco-col--next {
+    display: flex !important;
+    grid-column: span 2 !important;
+  }
+  body:has(input[name="bancoPrincipal"][value="santander"]:checked) .banco-col--santander {
+    display: flex !important;
+    grid-column: span 2 !important;
+  }
+  /* Nome completo + CPF na mesma linha (Dados Pessoais) */
+  .nome-cpf-row {
+    display: grid;
+    grid-column: span 2;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  /* ── FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+
+  .field input,
+  .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, background 0.18s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--input-focus-border);
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: none;
+  }
+  .field select.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: none;
+  }
+  .radio-inline.group-invalid,
+  .check-group.group-invalid {
+    outline: 2px solid #d1432f;
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+
+  .signature-pad-wrap { margin-bottom: 20px; }
+  .signature-pad-wrap label {
+    font-size: 11px; font-weight: 600; color: var(--label);
+    letter-spacing: 0.6px; text-transform: uppercase; font-family: 'Poppins', sans-serif;
+    display: block; margin-bottom: 8px;
+  }
+  .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
+  .signature-canvas-outer {
+    position: relative;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    max-width: 100%;
+  }
+  .signature-canvas-outer.desativada {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .signature-pad-wrap.desativada .btn-signature-clear {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: none; }
+  #assinaturaCanvas {
+    display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280;
+    max-height: 200px; touch-action: none; cursor: crosshair;
+    position: relative; z-index: 1;
+  }
+  #assinaturaGuide {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .signature-pad-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .signature-pad-tools .nao-assinar-manual-label {
+    margin: 0 0 0 auto;
+    padding: 7px 10px;
+  }
+  /* Botão e checkbox sempre na mesma linha, com a mesma altura (alinhamento consistente) */
+  .signature-pad-tools .btn-signature-clear,
+  .signature-pad-tools .nao-assinar-manual-label {
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .signature-pad-tools .btn-signature-clear {
+    justify-content: center;
+  }
+  .btn-signature-clear {
+    background: var(--surface); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
+  .field input::placeholder { color: var(--text-light); }
+  .field select { cursor: pointer; }
+  /* Date picker nativo (mobile/desktop): não herdar appearance:none dos inputs de texto */
+  .field input[type="date"] {
+    width: 100%;
+    min-height: 42px;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+
+  /* Primeiro emprego | PIS (compacto) | Deficiência — mesma linha no desktop */
+  .emprego-def-row {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 14px 18px;
+    width: 100%;
+  }
+  .emprego-def-row > .field--primeiro-emprego {
+    flex: 0 0 auto;
+  }
+  .emprego-def-row > .field--pis {
+    flex: 0 1 auto;
+    max-width: min(11rem, 20%);
+    min-width: 8.75rem;
+  }
+  .emprego-def-row > .field--pis input {
+    width: 100%;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  .emprego-def-row > .field--deficiencia {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  /* ── CHECKBOXES ── */
+  .check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+    user-select: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .check-label:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .check-label input[type="checkbox"],
+  .check-label input[type="radio"] {
+    width: 15px; height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .check-label.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+
+  /* ── RADIO GROUP ── */
+  .radio-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-label:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .radio-label input { accent-color: var(--accent); width: 14px; height: 14px; }
+  .radio-label.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(1,66,106,0.28);
+  }
+  .radio-label.active input {
+    accent-color: #fff;
+  }
+
+  .field-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .field-inline-row .field-label-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    white-space: nowrap;
+  }
+
+  /* ── DEPENDENTES TABLE ── */
+  .dep-table { width: 100%; border-collapse: collapse; }
+  .dep-table th {
+    background: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'Poppins', sans-serif;
+    border-bottom: 1px solid var(--border);
+  }
+  .dep-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  .dep-table tr:last-child td { border-bottom: none; }
+  .dep-table input {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.18s;
+  }
+  .dep-table input:focus { border-color: var(--input-focus-border); box-shadow: none; }
+  .dep-table input::placeholder { color: var(--text-light); }
+  .dep-table input[type="date"] {
+    min-height: 40px;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+  .dep-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-add-dependente {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.12s;
+  }
+  .btn-add-dependente:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-dark);
+    color: var(--accent-dark);
+    transform: translateY(-1px);
+  }
+  .btn-add-dependente:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── VT TABLE ── */
+  .vt-table { width: 100%; border-collapse: collapse; }
+  .vt-table th {
+    background: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    text-align: left;
+    font-family: 'Poppins', sans-serif;
+    border-bottom: 1px solid var(--border);
+  }
+  .vt-table th:not(:first-child) { text-align: center; }
+  .vt-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+  }
+  .vt-table tr:last-child td { border-bottom: none; }
+  .vt-table td:not(:first-child) { text-align: center; }
+  .vt-table input {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    width: 80px;
+    text-align: center;
+    transition: border-color 0.18s;
+  }
+  .vt-table input:focus { border-color: var(--input-focus-border); box-shadow: none; }
+  .vt-table input::placeholder { color: var(--text-light); }
+  .vt-table.vt-desativada { opacity: 0.68; }
+  .vt-nao-optante-label {
+    margin-top: 14px;
+  }
+
+  /* ── AVISO ── */
+  .aviso-box {
+    background: #fffbf5;
+    border: 1.5px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #6b5a3a;
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+  .aviso-box strong { color: #8a4a10; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--text);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.20);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  #toast.show { display: flex; }
+  #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; flex-shrink: 0; }
+  body.modal-open { overflow: hidden; }
+
+  /* ── MODAL LGPD ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.58);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(620px, 100%);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+  }
+  .modal-head.modal-head--atencao {
+    background: #8a4510;
+    color: #fff;
+  }
+  .modal-head {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .modal-body {
+    padding: 18px;
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-body strong { color: var(--text); }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px 18px;
+  }
+  .btn-modal {
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-modal.cancel {
+    background: #fff;
+    color: var(--text-mid);
+  }
+  .btn-modal.cancel:hover {
+    border-color: var(--text-mid);
+    color: var(--text);
+  }
+  .btn-modal.confirm {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-modal.confirm:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+  }
+
+  /* ── RESPONSIVE ── */
+  /* Telas muito estreitas: compacta o botão para o par continuar na mesma linha */
+  @media (max-width: 360px) {
+    .signature-pad-tools .btn-signature-clear {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
+    .page-header {
+      padding: 20px 20px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+    body.page-header-mobile .page-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateZ(0);
+      transition: transform 0.22s ease;
+    }
+    body.page-header-mobile {
+      padding-top: var(--page-header-h, 180px);
+      transition: padding-top 0.22s ease;
+    }
+    body.page-header-mobile.page-header--away {
+      padding-top: 0;
+    }
+    body.page-header-mobile.page-header--away .page-header {
+      transform: translateY(-100%);
+    }
+    .form-actions-bottom { width: 100%; flex-direction: column; }
+    .download-empty-wrapper { width: 100%; }
+    .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
+    .download-format-menu { left: 0; right: 0; min-width: 0; }
+    .container { padding: 24px 16px 60px; }
+    .section-body { padding: 20px 16px 16px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
+    .address-grid { grid-template-columns: 1fr; }
+    .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade { grid-column: span 1; }
+    .nome-cpf-row {
+      grid-template-columns: 1fr;
+      grid-column: span 1;
+    }
+    .dep-table, .vt-table { font-size: 12px; }
+
+    .dep-table thead { display: none; }
+    .dep-table,
+    .dep-table tbody,
+    .dep-table tr,
+    .dep-table td {
+      display: block;
+      width: 100%;
+    }
+    .dep-table tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .dep-table tr:last-child { border-bottom: none; }
+    .dep-table td {
+      padding: 0;
+      border-bottom: none;
+    }
+    .dep-table td:first-child { grid-column: 1 / -1; }
+    .dep-table td::before {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-light);
+      font-family: 'Poppins', sans-serif;
+    }
+    .dep-table td:nth-child(1)::before { content: "Nome completo"; }
+    .dep-table td:nth-child(2)::before { content: "Data de nascimento"; }
+    .dep-table td:nth-child(3)::before { content: "CPF"; }
+    .dep-actions { justify-content: stretch; }
+    .btn-add-dependente { width: 100%; }
+    .emprego-def-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .emprego-def-row > .field--deficiencia {
+      margin-left: 0;
+    }
+    .emprego-def-row > .field--pis {
+      max-width: none;
+      width: 100%;
+      min-width: 0;
+    }
+    .emprego-def-row > .field--pis input {
+      font-size: 14px;
+      padding: 10px 14px;
+    }
+  }
+</style>
+<style>html[data-guard-hidden] body{display:none!important}</style>
+<script src="guard.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <button type="button" class="header-menu-btn" id="headerMenuBtn" aria-expanded="false" aria-controls="headerNavPanel" aria-label="Abrir menu">
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+  </button>
+  <div class="page-header-main">
+    <div class="brand">
+      <img src="icone.png" alt="Logo" class="brand-logo">
+      <span class="brand-text">Ficha Cadastral</span>
+    </div>
+  </div>
+</header>
+
+<div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
+<nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-labelledby="headerNavTitle" aria-hidden="true">
+  <div class="header-nav-panel-inner">
+    <div class="header-nav-panel-head">
+      <h2 class="header-nav-panel-title" id="headerNavTitle">Ficha Cadastral</h2>
+      <button type="button" class="header-nav-close-btn" id="headerNavCloseBtn" aria-label="Fechar menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <ul class="header-nav-links" role="list">
+      <li>
+        <a href="index.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Início
+        </a>
+      </li>
+      <li>
+        <a href="assistencia_medica.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 2.3A4 4 0 0 0 2 6v4a4 4 0 0 0 4 4h1v3a3 3 0 0 0 3 3"/><path d="M8 19v3"/><path d="M16 19v3"/><path d="M12 18v3"/><circle cx="16" cy="6" r="3"/><path d="M9 12a3 3 0 0 0 3-3V6"/></svg>
+          Assistência Médica
+        </a>
+      </li>
+      <li>
+        <a href="carta_bradesco.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Carta Conta Salário (Bradesco)
+        </a>
+      </li>
+      <li>
+        <span class="header-nav-link header-nav-link--disabled" aria-disabled="true" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Termos de Aceite
+        </span>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-link--destructive rascunho-descartar" id="btnDescartarRascunho">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          Descartar rascunho
+        </button>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-download" onclick="baixarFichaVazia()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Baixar Modelo da Ficha Cadastral (PDF)
+        </button>
+      </li>
+      <li>
+        <a href="/admin" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Configurações
+        </a>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-link--destructive" onclick="atentoEndSession()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          Encerrar acesso
+        </button>
+      </li>
+    </ul>
+    <ul class="header-nav-links header-nav-links--legal" role="list" aria-label="Privacidade e documentação">
+      <li>
+        <a href="/politica-de-privacidade" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Política de Privacidade
+        </a>
+      </li>
+      <li>
+        <a href="/termos-de-uso" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Termos de Uso
+        </a>
+      </li>
+      <li>
+        <a href="/privacidade-e-seguranca" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Privacidade e segurança
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- DADOS PESSOAIS -->
+  <div class="section-card etapa-fluxo" id="etapaPessoal" data-etapa="pessoal">
+    <div class="section-header"><div class="dot"></div>Dados Pessoais</div>
+    <div class="section-body">
+      <div class="grid grid-2" style="margin-bottom:18px">
+        <div class="nome-cpf-row">
+          <div class="field field--nome-completo">
+            <label>Nome Completo <span class="req">*</span></label>
+            <input type="text" id="nomeCompleto" placeholder="Conforme Certidão de Nascimento ou Casamento">
+          </div>
+          <div class="field field--cpf">
+            <label>CPF <span class="req">*</span></label>
+            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
+          </div>
+        </div>
+        <div class="field col-span-2">
+          <label>Nome Social <span style="font-weight:400;color:var(--text-light)">(Inclusão no crachá)</span></label>
+          <input type="text" id="nomeSocial" placeholder="Nome social (opcional)">
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input type="tel" id="telefone" placeholder="(00) 0000-0000">
+        </div>
+        <div class="field">
+          <label>Celular (WhatsApp)<span class="req">*</span></label>
+          <input type="tel" id="celular" placeholder="(00) 00000-0000">
+        </div>
+        <div class="field">
+          <label>E-mail <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="seu@email.com">
+        </div>
+        <div class="field">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="estadoCivil">
+            <option value="">SELECIONE...</option>
+            <option>SOLTEIRO(A)</option>
+            <option>CASADO(A)</option>
+            <option>DIVORCIADO(A)</option>
+            <option>VIÚVO(A)</option>
+            <option>UNIÃO ESTÁVEL</option>
+            <option>SEPARADO(A)</option>
+          </select>
+        </div>
+        <div class="col-span-2 emprego-def-row">
+          <div class="field field--primeiro-emprego">
+            <label>Primeiro Emprego? <span class="req">*</span></label>
+            <div class="radio-inline" id="grupoPrimeiroEmprego" style="margin-top:4px">
+              <label class="radio-label"><input type="radio" name="primeiroEmprego" value="sim" onchange="togglePIS(this)"> Sim</label>
+              <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
+            </div>
+          </div>
+          <div class="field field--pis" id="pisField">
+            <label>PIS <span class="req">*</span></label>
+            <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" required>
+          </div>
+          <div class="field field--deficiencia">
+            <label>Possui Deficiência? <span class="req">*</span></label>
+            <div class="radio-inline" id="grupoDeficiencia" style="margin-top:4px">
+              <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
+              <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div id="defGroup" style="display:none">
+          <div class="field-label-text" style="margin-bottom:8px;font-size:11px;color:var(--label);font-family:'Poppins',sans-serif;letter-spacing:0.5px;text-transform:uppercase">Tipo de Deficiência</div>
+          <div class="check-group">
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Física"> Física</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Auditiva"> Auditiva</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Visual"> Visual</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Intelectual"> Intelectual</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Múltipla"> Múltipla</label>
+          </div>
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressPessoal"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPENDENTES -->
+  <div class="section-card etapa-fluxo" id="etapaDependentes" data-etapa="dependentes" hidden>
+    <div class="section-header"><div class="dot"></div>Dependentes</div>
+    <div class="section-body">
+      <div id="perguntaDependentes">
+        <p style="margin:0 0 14px;font-size:14px;color:var(--text-mid);line-height:1.55">
+          Deseja incluir dependentes?
+        </p>
+        <div class="gate-dependentes-acoes">
+          <button type="button" class="btn-gate" id="btnDependentesSim">Sim</button>
+          <button type="button" class="btn-gate" id="btnDependentesNao">Não</button>
+        </div>
+      </div>
+      <div id="dependentesConteudo" hidden>
+        <table class="dep-table">
+          <thead>
+            <tr>
+              <th style="width:40%">Nome</th>
+              <th style="width:25%">Data de Nascimento</th>
+              <th style="width:35%">CPF do Dependente</th>
+            </tr>
+          </thead>
+          <tbody id="dependentesBody">
+            <tr data-dependente-index="1">
+              <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
+              <td><input type="date" id="dep1Nasc" autocomplete="off"></td>
+              <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="dep-actions">
+          <button type="button" class="btn-add-dependente" id="btnAddDependente" onclick="adicionarDependente()">+ Adicionar dependente</button>
+        </div>
+        <div class="section-progress">
+          <div class="section-progress-track"><div class="section-progress-fill" id="progressDependentes"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENDEREÇO -->
+  <div class="section-card etapa-fluxo" id="etapaEndereco" data-etapa="endereco" hidden>
+    <div class="section-header"><div class="dot"></div>Endereço</div>
+    <div class="section-body">
+      <div class="address-grid">
+        <div class="field address-cep">
+          <label>CEP</label>
+          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="onCepInput(this)" onblur="buscarCepEPreencher(true)">
+        </div>
+        <div class="field address-endereco">
+          <label>Endereço <span class="req">*</span></label>
+          <input type="text" id="endereco" placeholder="Rua / Av.">
+        </div>
+        <div class="field address-numero">
+          <label>Número</label>
+          <input type="text" id="endNum" placeholder="Nº" inputmode="numeric" autocomplete="off">
+        </div>
+        <div class="field address-complemento">
+          <label>Complemento</label>
+          <input type="text" id="complemento" placeholder="Apto, Bloco..." maxlength="35">
+        </div>
+        <div class="field address-bairro">
+          <label>Bairro</label>
+          <input type="text" id="bairro" placeholder="Bairro">
+        </div>
+        <div class="field address-cidade">
+          <label>Cidade - UF <span class="req">*</span></label>
+          <input type="text" id="cidade" placeholder="Cidade - UF">
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressEndereco"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DADOS BANCÁRIOS -->
+  <div class="section-card etapa-fluxo" id="etapaBancario" data-etapa="bancario" hidden>
+    <div class="section-header"><div class="dot"></div>Dados Conta Bancária</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field col-span-2" id="grupoBancoPrincipal">
+          <label>Banco <span class="req">*</span></label>
+          <div class="radio-inline" id="bancoPrincipalRadioGroup" style="margin-top:8px;flex-wrap:wrap">
+            <label class="radio-label"><input type="radio" name="bancoPrincipal" value="bradesco" onchange="selecionarBancoPrincipal(this)"> BRADESCO</label>
+            <label class="radio-label"><input type="radio" name="bancoPrincipal" value="next" onchange="selecionarBancoPrincipal(this)"> NEXT</label>
+            <label class="radio-label"><input type="radio" name="bancoPrincipal" value="santander" onchange="selecionarBancoPrincipal(this)"> SANTANDER</label>
+          </div>
+        </div>
+        <div class="field col-span-2" id="grupoTipoConta">
+          <div class="grid grid-2 banco-colunas" style="margin-top:8px">
+            <div class="banco-col banco-col--bradesco">
+              <p class="banco-col-titulo">Bradesco</p>
+              <div class="radio-inline">
+                <label class="radio-label"><input type="radio" name="tipoConta" value="conta_corrente" onchange="toggleBanco(this)"> Conta Corrente</label>
+                <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário</label>
+                <label class="radio-label"><input type="radio" name="tipoConta" value="poupanca_bradesco" onchange="toggleBanco(this)"> Conta Poupança</label>
+              </div>
+              <div class="banco-col-detalhes" id="bradescoDetalhes" hidden>
+                <div class="field">
+                  <label>Agência <span class="req">*</span></label>
+                  <input type="text" id="agenciaBradesco" placeholder="0000" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaBradesco" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
+              </div>
+              <div id="cartaBradescoField" hidden>
+                <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
+                  Preencher Carta de Abertura de Conta
+                </button>
+              </div>
+            </div>
+            <div class="banco-col banco-col--next">
+              <p class="banco-col-titulo">Next</p>
+              <div class="radio-inline">
+                <label class="radio-label"><input type="radio" name="tipoConta" value="next_digital" onchange="toggleBanco(this)"> Conta Corrente Digital</label>
+              </div>
+              <div class="banco-col-detalhes" id="nextDetalhes" hidden>
+                <div class="field">
+                  <label>Agência <span class="req">*</span></label>
+                  <input type="text" id="agenciaNext" placeholder="0000" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaNext" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="banco-col banco-col--santander">
+              <p class="banco-col-titulo">Santander</p>
+              <div class="radio-inline">
+                <label class="radio-label"><input type="radio" name="tipoConta" value="santander_corrente" onchange="toggleBanco(this)"> Conta Corrente</label>
+                <label class="radio-label"><input type="radio" name="tipoConta" value="santander_salario" onchange="toggleBanco(this)"> Conta Salário</label>
+              </div>
+              <div class="banco-col-detalhes" id="santanderDetalhes" hidden>
+                <div class="field">
+                  <label>Agência <span class="req">*</span></label>
+                  <input type="text" id="agenciaSantander" placeholder="0000" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaSantander" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressBancario"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALE TRANSPORTE -->
+  <div class="section-card etapa-fluxo" id="etapaTransporte" data-etapa="transporte" hidden>
+    <div class="section-header"><div class="dot"></div>Benefícios – Vale Transporte</div>
+    <div class="section-body">
+      <table class="vt-table">
+        <thead>
+          <tr>
+            <th>Vale Transporte</th>
+            <th>Quantidade (Por dia - Ida/Volta)</th>
+            <th>Valor Unitário (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ônibus</td>
+            <td><input type="number" id="vtOnibusQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtOnibusVal" placeholder="R$ 0,00" inputmode="decimal" autocomplete="off" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td>Metrô / Trem</td>
+            <td><input type="number" id="vtMetroQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtMetroVal" placeholder="R$ 0,00" inputmode="decimal" autocomplete="off" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td>Intermunicipal</td>
+            <td><input type="number" id="vtInterQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtInterVal" placeholder="R$ 0,00" inputmode="decimal" autocomplete="off" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td>Integração</td>
+            <td><input type="number" id="vtIntegracaoQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtIntegracaoVal" placeholder="R$ 0,00" inputmode="decimal" autocomplete="off" spellcheck="false"></td>
+          </tr>
+        </tbody>
+      </table>
+      <label class="check-label vt-nao-optante-label">
+        <input type="checkbox" id="vtNaoOptante" name="vtNaoOptante" autocomplete="off">
+        NÃO OPTANTE
+      </label>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressTransporte"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALE REFEIÇÃO/ALIMENTAÇÃO -->
+  <div class="section-card etapa-fluxo" id="etapaRefeicao" data-etapa="refeicao" hidden>
+    <div class="section-header"><div class="dot"></div>Vale Refeição / Alimentação</div>
+    <div class="section-body">
+      <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:var(--label);letter-spacing:0.5px;text-transform:uppercase;font-family:'Poppins',sans-serif">
+        Escolha uma opção <span class="req">*</span>
+      </p>
+      <div class="check-group" id="grupoValeRef">
+        <label class="radio-label"><input type="radio" name="valeRef" value="va"> 100% Vale Alimentação</label>
+        <label class="radio-label"><input type="radio" name="valeRef" value="vr"> 100% Vale Refeição</label>
+        <label class="radio-label"><input type="radio" name="valeRef" value="flex"> Flexibilizado (50% VR e 50% VA)</label>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressRefeicao"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSINATURA -->
+  <div class="section-card etapa-fluxo" id="etapaDeclaracao" data-etapa="declaracao" hidden>
+    <div class="section-header"><div class="dot"></div>Declaração do Candidato</div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:18px;line-height:1.6">
+        Declaro que as informações prestadas nesta ficha são verdadeiras e que estou ciente das responsabilidades assumidas ao assinar este documento.
+      </p>
+      <div class="signature-pad-wrap" id="signaturePadWrap">
+        <label>Assinatura manuscrita <span class="req" id="reqAssinaturaManuscrita">*</span></label>
+        <p class="signature-pad-hint" id="hintAssinaturaManuscrita">Desenhe sua assinatura com o mouse ou o dedo na área abaixo. O traço será incluído no PDF.</p>
+        <div class="signature-canvas-outer" id="signatureCanvasOuter">
+          <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
+          <canvas id="assinaturaGuide" width="1000" height="280"></canvas>
+        </div>
+        <div class="signature-pad-tools">
+          <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
+          <label class="check-label nao-assinar-manual-label">
+            <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off" aria-label="Não assinar">
+            Não assinar
+          </label>
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressDeclaracao"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="etapaAcoes" class="etapa-fluxo" hidden>
+  <div class="aviso-box" style="margin:20px 0 14px">
+    <strong>ATENÇÃO:</strong> Salve e baixe o arquivo PDF gerado, clicando no botão abaixo e encaminhe o arquivo PDF salvo no seu Portal do Candidato, na área de Ficha Única Cadastral.
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn-export" type="button" onclick="gerarPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Salvar e Baixar Ficha preenchida (PDF)
+    </button>
+  </div>
+  </div>
+
+</div>
+
+<div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitle" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
+    <div class="modal-body">
+      O preenchimento pode ser guardado como rascunho neste aparelho (navegador) para você retomar depois.<br>
+      Após gerar o PDF, os dados continuam no formulário e no rascunho local; para apagá-los de vez, use <strong>Descartar rascunho</strong> no menu.<br>
+      A <strong>empresa</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
+      <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
+      Deseja continuar com a geração do PDF?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="lgpdCancelarBtn" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="lgpdContinuarBtn" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
+<div id="modalCopiaAssistencia" class="modal-overlay" role="dialog" aria-labelledby="copiaAssistTitulo" hidden aria-hidden="true">
+  <div class="modal-card" style="max-width: 440px">
+    <div class="modal-head" id="copiaAssistTitulo">Assistência Médica</div>
+    <div class="modal-body">
+      O PDF da <strong>Ficha Cadastral</strong> foi gerado. Deseja abrir agora o formulário de
+      <strong>Adesão à Assistência Médica</strong> com nome, CPF, endereço, telefone, dependentes
+      (filhos), assinatura manuscrita e nome/data já preenchidos a partir desta ficha?
+    </div>
+    <label class="check-label" style="display: flex; align-items: center; gap: 8px; margin: 0 18px 12px; font-size: 13px; cursor: pointer; color: var(--text-mid)">
+      <input type="checkbox" id="naoPerguntarCopiaAssist"> Não perguntar novamente após gerar o PDF
+    </label>
+    <div class="modal-actions">
+      <button type="button" id="btnCopiaAssistNao" class="btn-modal cancel">Agora não</button>
+      <button type="button" id="btnCopiaAssistSim" class="btn-modal confirm">Sim, abrir Assistência Médica</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-labelledby="modalDescartarTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalDescartarTitulo">Descartar rascunho</div>
+    <div class="modal-body">
+      O rascunho guardado neste navegador e os dados atualmente no formulário serão apagados. Esta ação não pode ser desfeita.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDescartarRascunhoCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalDescartarRascunhoConfirmar" class="btn-modal confirm">Sim, descartar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarLimparAssinatura" class="modal-overlay" role="dialog" aria-labelledby="modalLimparAssinTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalLimparAssinTitulo">Limpar assinatura</div>
+    <div class="modal-body">
+      O traço da assinatura manuscrita será apagado da área de desenho. Deseja continuar?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalLimparAssinaturaCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalLimparAssinaturaConfirmar" class="btn-modal confirm">Sim, limpar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
+<!-- fontkit: necessário para a engine embutir as TTF declaradas em template.fontes
+     (Arial/Arial Narrow). Sem ele a engine cai no fallback Helvetica e reporta. -->
+<script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js" crossorigin="anonymous"></script>
+<script src="./embedded-docs.js"></script>
+<script>
+const TEMPLATE_EMBARCADO_DIR = "./ficha-cadastral-embutido";
+const TEMPLATE_EMBARCADO_PATH = TEMPLATE_EMBARCADO_DIR + "/template.json";
+const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
+const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const PDF_FONT_TEXTO = 9;
+const PDF_FONT_EVIDENCIA = 5.5;
+/** Margem inferior (pt) do carimbo de evidência da assinatura — acima da borda cortada do PDF. */
+const RODAPE_EVIDENCIA_MARGEM_Y_PT = 12;
+
+const LS_NS = "atento.forms:v1:";
+const LS_LEGACY = {
+  crossCopy: "cross_copy_ficha_para_assistencia_v1",
+  fichaNaoPerguntar: "ficha_cadastral_nao_perguntar_copia_assistencia",
+  fichaRascunho: "ficha_cadastral_rascunho_v2"
+};
+/** Evita falhas silenciosas (modo privado, quota, SecurityError). */
+const appStorage = {
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.getItem:", key, e);
+      }
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.setItem:", key, e);
+      }
+      return false;
+    }
+  },
+  removeItem(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.removeItem:", key, e);
+      }
+    }
+  }
+};
+function lsMigrateLegacy(newKey, legacyKey) {
+  if (appStorage.getItem(newKey) != null) return;
+  const old = appStorage.getItem(legacyKey);
+  if (old == null) return;
+  if (!appStorage.setItem(newKey, old)) return;
+  appStorage.removeItem(legacyKey);
+}
+function lsRemoveDual(newKey, legacyKey) {
+  appStorage.removeItem(newKey);
+  appStorage.removeItem(legacyKey);
+}
+const CROSS_COPY_FICHA_ASSISTENCIA_KEY = LS_NS + "cross_copy_ficha_para_assistencia";
+lsMigrateLegacy(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY.crossCopy);
+const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = LS_NS + "ficha_cadastral_nao_perguntar_copia_assistencia";
+lsMigrateLegacy(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, LS_LEGACY.fichaNaoPerguntar);
+const RASCUNHO_STORAGE_KEY = LS_NS + "ficha_cadastral_rascunho_v2";
+lsMigrateLegacy(RASCUNHO_STORAGE_KEY, LS_LEGACY.fichaRascunho);
+
+function setModalOverlayVisible(overlayEl, visible) {
+  if (!overlayEl) return;
+  if (visible) {
+    overlayEl.removeAttribute("hidden");
+    overlayEl.classList.add("show");
+    overlayEl.setAttribute("aria-hidden", "false");
+    overlayEl.setAttribute("aria-modal", "true");
+  } else {
+    overlayEl.setAttribute("hidden", "");
+    overlayEl.classList.remove("show");
+    overlayEl.setAttribute("aria-hidden", "true");
+    overlayEl.removeAttribute("aria-modal");
+  }
+}
+
+/** Primeiro token do nome; seguro para nome de arquivo. */
+function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
+  const token = String(nomeCompleto || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)[0];
+  const raw = token || "candidato";
+  return raw.replace(/[\\/:*?"<>|]/g, "").trim() || "candidato";
+}
+
+function sanitizarSegmentoNomeArquivo(s) {
+  return String(s || "")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Ajuste fino no corpo do formulário: a caixa alta do valor (0,72 do corpo) é
+ *  centralizada na altura do campo, para o texto caber na caixa impressa. */
+const ALTURA_TINTA_TEXTO = 0.72;
+let assinaturaCanvasCtx = null;
+let assinaturaCanvasTemTraço = false;
+let assinaturaDesenhando = false;
+let assinaturaUltPos = null;
+/** Pacote do template EMBARCADO (template.json + bytes de assets). A geração é
+ *  feita pela engine EmbeddedDocs — a mesma do painel administrativo. */
+let templateEmbarcado = null;
+let camposSchema = null;
+const cepCache = new Map();
+let cepBuscaEmAndamento = false;
+let ultimoCepBuscado = "";
+
+// ── MASKS ──
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if(v.length>3) v=v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  el.value=v;
+}
+function maskCPFInput(el){ maskCPF(el); }
+/** PIS/NIS: 000.00000.00-0 (11 dígitos). Sempre limita a 11 dígitos na origem. */
+function maskPIS(el) {
+  if (!el) return;
+  const d = String(el.value ?? "")
+    .normalize("NFKC")
+    .replace(/\D/g, "")
+    .slice(0, 11);
+  let v = "";
+  if (d.length <= 3) {
+    v = d;
+  } else if (d.length <= 8) {
+    v = `${d.slice(0, 3)}.${d.slice(3)}`;
+  } else if (d.length <= 10) {
+    v = `${d.slice(0, 3)}.${d.slice(3, 8)}.${d.slice(8)}`;
+  } else {
+    v = `${d.slice(0, 3)}.${d.slice(3, 8)}.${d.slice(8, 10)}-${d.slice(10)}`;
+  }
+  el.value = v;
+}
+/** Listeners dedicados: máscara não depende do handler inline e corre na fase capture antes de outros listeners. */
+function initPisMask() {
+  const pisEl = document.getElementById("pis");
+  if (!pisEl) return;
+  pisEl.setAttribute("maxlength", "14");
+  pisEl.maxLength = 14;
+  const aplicar = () => maskPIS(pisEl);
+  pisEl.addEventListener("input", aplicar, true);
+  pisEl.addEventListener("blur", aplicar);
+  pisEl.addEventListener("paste", () => queueMicrotask(aplicar));
+  pisEl.addEventListener("compositionend", aplicar);
+  aplicar();
+}
+function maskCep(el){
+  let v=el.value.replace(/\D/g,'').slice(0,8);
+  if(v.length>5) v=v.replace(/(\d{5})(\d{0,3})/,'$1-$2');
+  el.value=v;
+}
+function normalizarTextoEndereco(valor){
+  return String(valor || "").trim().toLocaleUpperCase("pt-BR");
+}
+function preencherEnderecoPorCep(dados){
+  const enderecoEl = document.getElementById("endereco");
+  const bairroEl = document.getElementById("bairro");
+  const cidadeEl = document.getElementById("cidade");
+  if (enderecoEl && dados.logradouro) enderecoEl.value = normalizarTextoEndereco(dados.logradouro);
+  if (bairroEl && dados.bairro) bairroEl.value = normalizarTextoEndereco(dados.bairro);
+  if (cidadeEl) {
+    const c = String(dados.cidade || "").trim();
+    const u = String(dados.uf || "").trim();
+    if (c && u) cidadeEl.value = normalizarTextoEndereco(`${c} - ${u}`);
+    else if (c) cidadeEl.value = normalizarTextoEndereco(c);
+  }
+}
+async function consultarCep(cep){
+  if (cepCache.has(cep)) return cepCache.get(cep);
+
+  const viaCepResp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+  if (viaCepResp.ok) {
+    const viaCepData = await viaCepResp.json();
+    if (!viaCepData.erro) {
+      const normalizadoViaCep = {
+        logradouro: viaCepData.logradouro || "",
+        bairro: viaCepData.bairro || "",
+        cidade: viaCepData.localidade || "",
+        uf: viaCepData.uf || "",
+        fonte: "ViaCEP"
+      };
+      cepCache.set(cep, normalizadoViaCep);
+      return normalizadoViaCep;
+    }
+  }
+
+  const brasilApiResp = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+  if (brasilApiResp.ok) {
+    const brasilApiData = await brasilApiResp.json();
+    const normalizadoBrasilApi = {
+      logradouro: brasilApiData.street || "",
+      bairro: brasilApiData.neighborhood || "",
+      cidade: brasilApiData.city || "",
+      uf: brasilApiData.state || "",
+      fonte: "BrasilAPI"
+    };
+    cepCache.set(cep, normalizadoBrasilApi);
+    return normalizadoBrasilApi;
+  }
+
+  return null;
+}
+async function buscarCepEPreencher(exibirMensagemErro = false){
+  const cepEl = document.getElementById("cep");
+  if (!cepEl) return;
+
+  const cepNumerico = cepEl.value.replace(/\D/g, "");
+  if (cepNumerico.length === 0) return;
+  if (cepNumerico.length !== 8) {
+    if (exibirMensagemErro) showToast("Informe um CEP válido com 8 dígitos.", false);
+    return;
+  }
+  if (cepBuscaEmAndamento && ultimoCepBuscado === cepNumerico) return;
+
+  try {
+    cepBuscaEmAndamento = true;
+    ultimoCepBuscado = cepNumerico;
+    const placeholderOriginal = cepEl.dataset.placeholderOriginal || cepEl.placeholder;
+    cepEl.dataset.placeholderOriginal = placeholderOriginal;
+    cepEl.placeholder = "BUSCANDO CEP...";
+
+    const dadosCep = await consultarCep(cepNumerico);
+    if (!dadosCep) {
+      showToast("CEP não encontrado.", false);
+      return;
+    }
+
+    preencherEnderecoPorCep(dadosCep);
+    updateProgress();
+  } catch (error) {
+    console.error("Falha ao buscar CEP:", error);
+    if (exibirMensagemErro) showToast("Não foi possível consultar o CEP agora.", false);
+  } finally {
+    cepBuscaEmAndamento = false;
+    const placeholderOriginal = cepEl.dataset.placeholderOriginal || "00000-000";
+    cepEl.placeholder = placeholderOriginal;
+  }
+}
+function onCepInput(el){
+  maskCep(el);
+  const cepNumerico = el.value.replace(/\D/g, "");
+  if (cepNumerico.length === 8) {
+    buscarCepEPreencher(false);
+  }
+}
+
+// ── Assinatura manuscrita (canvas) ──
+function obterPontoNoCanvas(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+  return {
+    x: ((clientX - r.left) * canvas.width) / r.width,
+    y: ((clientY - r.top) * canvas.height) / r.height
+  };
+}
+function marcarAssinaturaInvalidaCanvas(mostrar) {
+  const wrap = document.getElementById("signatureCanvasOuter");
+  if (wrap) wrap.classList.toggle("invalid", !!mostrar);
+}
+function isNaoAssinarManualmente() {
+  return document.getElementById("naoAssinarManualmente")?.checked === true;
+}
+function sincronizarCheckLabelNaoAssinarManualmente() {
+  const cb = document.getElementById("naoAssinarManualmente");
+  if (!cb) return;
+  cb.closest(".check-label")?.classList.toggle("active", cb.checked);
+}
+function atualizarUiNaoAssinarManualmente() {
+  const ativo = isNaoAssinarManualmente();
+  const wrap = document.getElementById("signaturePadWrap");
+  const outer = document.getElementById("signatureCanvasOuter");
+  const req = document.getElementById("reqAssinaturaManuscrita");
+  const hint = document.getElementById("hintAssinaturaManuscrita");
+  wrap?.classList.toggle("desativada", ativo);
+  outer?.classList.toggle("desativada", ativo);
+  if (req) req.style.display = ativo ? "none" : "";
+  if (hint) {
+    hint.textContent = ativo
+      ? "Com esta opção, o nome legível será impresso no PDF no lugar da rubrica manual."
+      : "Desenhe sua assinatura com o mouse ou o dedo na área abaixo. O traço será incluído no PDF.";
+  }
+  if (ativo) marcarAssinaturaInvalidaCanvas(false);
+  updateProgress();
+}
+function initAssinaturaCanvas() {
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas) return;
+  assinaturaCanvasCtx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
+  const ctx = assinaturaCanvasCtx;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineWidth = 2.8;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#1a1a1a";
+  ctx.globalCompositeOperation = "source-over";
+  desenharLinhaGuiaAssinatura();
+  const inícioTraco = (e) => {
+    if (e.button === 2) return;
+    assinaturaDesenhando = true;
+    e.preventDefault();
+    marcarAssinaturaInvalidaCanvas(false);
+    assinaturaUltPos = obterPontoNoCanvas(e, canvas);
+  };
+  const fimTraco = () => {
+    assinaturaDesenhando = false;
+    assinaturaUltPos = null;
+    if (isAssinaturaManuscritaPreenchida()) assinaturaCanvasTemTraço = true;
+    updateProgress();
+  };
+  const mover = (e) => {
+    if (!assinaturaDesenhando || !assinaturaCanvasCtx) return;
+    e.preventDefault();
+    const p = obterPontoNoCanvas(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(assinaturaUltPos.x, assinaturaUltPos.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    assinaturaUltPos = p;
+    assinaturaCanvasTemTraço = true;
+    agendarSalvarRascunho();
+    updateProgress();
+  };
+  canvas.addEventListener("pointerdown", inícioTraco);
+  canvas.addEventListener("pointermove", mover);
+  canvas.addEventListener("pointerup", fimTraco);
+  canvas.addEventListener("pointercancel", fimTraco);
+  canvas.addEventListener("pointerleave", fimTraco);
+  document.getElementById("btnLimparAssinatura")?.addEventListener("click", () => {
+    const temAlgoNoCanvas = assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida();
+    if (!temAlgoNoCanvas) {
+      showToast("Não há assinatura para limpar.", true);
+      return;
+    }
+    abrirModalConfirmarLimparAssinaturaFicha();
+  });
+}
+function desenharLinhaGuiaAssinatura() {
+  const guideCanvas = document.getElementById("assinaturaGuide");
+  if (!guideCanvas) return;
+  const gCtx = guideCanvas.getContext("2d");
+  gCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+  gCtx.save();
+  gCtx.strokeStyle = "#b0b0b0";
+  gCtx.lineWidth = 1;
+  gCtx.setLineDash([8, 4]);
+  const y = guideCanvas.height * 0.88;
+  gCtx.beginPath();
+  gCtx.moveTo(80, y);
+  gCtx.lineTo(guideCanvas.width - 80, y);
+  gCtx.stroke();
+  gCtx.restore();
+}
+function limparAssinaturaCanvas() {
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas || !assinaturaCanvasCtx) return;
+  assinaturaCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  assinaturaCanvasTemTraço = false;
+  marcarAssinaturaInvalidaCanvas(false);
+  desenharLinhaGuiaAssinatura();
+}
+function isAssinaturaManuscritaPreenchida() {
+  if (assinaturaCanvasTemTraço) return true;
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas) return false;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  const { width: W, height: H } = canvas;
+  const d = ctx.getImageData(0, 0, W, H).data;
+  const passo = 8;
+  for (let y = 0; y < H; y += passo) {
+    for (let x = 0; x < W; x += passo) {
+      const i = (y * W + x) * 4;
+      const a = d[i + 3];
+      if (a < 24) continue;
+      if (d[i] < 252 || d[i + 1] < 252 || d[i + 2] < 252) return true;
+    }
+  }
+  return false;
+}
+function canvasAssinaturaParaPngArrayBuffer() {
+  return new Promise((resolve, reject) => {
+    const canvas = document.getElementById("assinaturaCanvas");
+    if (!canvas) {
+      resolve(null);
+      return;
+    }
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          resolve(null);
+          return;
+        }
+        blob
+          .arrayBuffer()
+          .then(resolve)
+          .catch(reject);
+      },
+      "image/png",
+      0.95
+    );
+  });
+}
+async function obterIpPublicoEvidencia() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3500);
+  try {
+    const r = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal, cache: "no-store" });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return typeof j.ip === "string" ? j.ip.trim() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+function quebrarTextoEvidencia(font, texto, tamanho, larguraMax) {
+  const palavras = String(texto).split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let linha = "";
+  for (const p of palavras) {
+    const teste = linha ? linha + " " + p : p;
+    if (font.widthOfTextAtSize(teste, tamanho) <= larguraMax) {
+      linha = teste;
+    } else {
+      if (linha) linhas.push(linha);
+      linha = p;
+    }
+  }
+  if (linha) linhas.push(linha);
+  return linhas;
+}
+function desenharPngAjustadoNoCampo(page, png, box) {
+  if (!box || !png) return;
+  const x = Number(box.x) || 0;
+  const yBottom = Number(box.y) || 0;
+  const wMax = Number(box.largura) || 200;
+  const hMax = Number(box.altura) || 30;
+  const wImg = png.width;
+  const hImg = png.height;
+  if (!wImg || !hImg) return;
+  const base = Math.min(wMax / wImg, hMax / hImg);
+  let scale = base * 1.4;
+  let w = wImg * scale;
+  let h = hImg * scale;
+  if (w > wMax || h > hMax) {
+    scale = base;
+    w = wImg * scale;
+    h = hImg * scale;
+  }
+  // Rubrica JUSTIFICADA NO CENTRO da caixa (horizontal e vertical), igual ao
+  // nome legível — o traço fica no meio da área assinável, não colado à esquerda.
+  const cx = x + Math.max(0, (wMax - w) / 2);
+  const cy = yBottom + Math.max(0, (hMax - h) / 2);
+  page.drawImage(png, { x: cx, y: cy, width: w, height: h });
+}
+/** Caixa do rodapé para evidência técnica da assinatura (origem pdf-lib, y=0 na base da página). */
+function caixaRodapeEvidenciaPdf(page, overrides = {}) {
+  const { width: pageW } = page.getSize();
+  const margemX = Number(overrides.x) || 21;
+  const margemInferior = Number(overrides.y) || RODAPE_EVIDENCIA_MARGEM_Y_PT;
+  const largura =
+    Number(overrides.largura) || Math.max(200, pageW - margemX * 2);
+  return {
+    x: margemX,
+    y: margemInferior,
+    largura,
+    altura: Number(overrides.altura) || 10
+  };
+}
+
+function desenharEvidenciaAssinatura(page, font, box, linhas) {
+  if (!box || !linhas?.length) return;
+  const x = (Number(box.x) || 0) + 0.5;
+  const yRodape = Number(box.y) || 0;
+  const tamanho = PDF_FONT_EVIDENCIA;
+  const lineH = tamanho * 1.18;
+  const maxW = (Number(box.largura) || 500) - 1;
+  for (let i = 0; i < linhas.length; i++) {
+    page.drawText(linhas[i], {
+      x,
+      y: yRodape + 4 + i * lineH,
+      size: tamanho,
+      font,
+      maxWidth: maxW
+    });
+  }
+}
+function maskTelefone(el){
+  let v = el.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 10) {
+    v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  } else if (v.length > 6) {
+    v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+  } else if (v.length > 2) {
+    v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+  } else if (v.length > 0) {
+    v = `(${v}`;
+  }
+  el.value = v;
+}
+function posicionarCursorNoFim(el){
+  if (!el || document.activeElement !== el) return;
+  const fim = el.value.length;
+  requestAnimationFrame(() => {
+    try {
+      el.setSelectionRange(fim, fim);
+    } catch (_) {
+      // Alguns navegadores podem bloquear setSelectionRange em estados específicos.
+    }
+  });
+}
+function maskMoeda(el){
+  const digitos = el.value.replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  const valor = Number.isNaN(cents) ? 0 : cents / 100;
+  el.value = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(valor);
+  posicionarCursorNoFim(el);
+}
+function aplicarMaiusculas(el){
+  const original = el.value;
+  const upper = original.toLocaleUpperCase("pt-BR");
+  if (original !== upper) {
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    el.value = upper;
+    if (start !== null && end !== null) {
+      el.setSelectionRange(start, end);
+    }
+  }
+}
+function moedaParaPdf(valor){
+  const texto = String(valor || "").trim();
+  if (!texto) return "";
+  const digitos = texto.replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  const numero = Number.isNaN(cents) ? 0 : cents / 100;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(numero);
+}
+function quantidadeVtEhZero(qtd) {
+  const s = String(qtd ?? "").trim();
+  if (s === "") return true;
+  const n = Number.parseInt(s, 10);
+  return !Number.isFinite(n) || n === 0;
+}
+function valorMoedaPdfEhZero(valorFormatado) {
+  const digitos = String(valorFormatado ?? "").replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  return Number.isNaN(cents) || cents === 0;
+}
+function valeTransporteLinhaTodaZero(qtd, valorFormatado) {
+  return quantidadeVtEhZero(qtd) && valorMoedaPdfEhZero(valorFormatado);
+}
+
+const VT_INPUT_IDS_NA_OPTANTE = [
+  "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal",
+  "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
+];
+const VT_LINHAS = [
+  { qtd: "vtOnibusQtd", val: "vtOnibusVal" },
+  { qtd: "vtMetroQtd", val: "vtMetroVal" },
+  { qtd: "vtInterQtd", val: "vtInterVal" },
+  { qtd: "vtIntegracaoQtd", val: "vtIntegracaoVal" }
+];
+
+function linhaValeTransportePreenchida(qtdId, valId) {
+  return v(qtdId).length > 0 && moedaParaPdf(v(valId)) !== "0,00";
+}
+
+function etapaTransporteResolvida() {
+  if (document.getElementById("vtNaoOptante")?.checked === true) return true;
+  return VT_LINHAS.some(({ qtd, val }) => linhaValeTransportePreenchida(qtd, val));
+}
+
+function atualizarUiValeTransporteNaoOptante() {
+  const cb = document.getElementById("vtNaoOptante");
+  const ativo = !!(cb && cb.checked);
+  VT_INPUT_IDS_NA_OPTANTE.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = ativo;
+  });
+  document.querySelector(".vt-table")?.classList.toggle("vt-desativada", ativo);
+}
+
+function sincronizarCheckLabelVtNaoOptante() {
+  const cb = document.getElementById("vtNaoOptante");
+  if (!cb) return;
+  cb.closest(".check-label")?.classList.toggle("active", cb.checked);
+}
+
+function obterSegmentoDiagonalNaoOptanteVt(camposRaiz) {
+  const qi = camposRaiz?.vale_transporte?.itens?.integracao?.quantidade?.coordenadas;
+  const vo = camposRaiz?.vale_transporte?.itens?.onibus?.valor_unitario?.coordenadas;
+  if (!qi || !vo) return null;
+  const sx = Number(qi.x) || 0;
+  const sy = Number(qi.y) || 0;
+  const sw = Number(qi.largura ?? qi.width ?? 0);
+  const sh = Number(qi.altura ?? qi.height ?? 0);
+  const ex = Number(vo.x) || 0;
+  const ey = Number(vo.y) || 0;
+  const ew = Number(vo.largura ?? vo.width ?? 0);
+  const eh = Number(vo.altura ?? vo.height ?? 0);
+  const x0 = sx + sw / 2;
+  const y0 = sy + sh / 2;
+  const x1 = ex + ew / 2;
+  const y1 = ey + eh / 2;
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const comprimento = Math.hypot(dx, dy);
+  if (!(comprimento > 1)) return null;
+  return {
+    x0,
+    y0,
+    x1,
+    y1,
+    dx,
+    dy,
+    comprimento,
+    mx: (x0 + x1) / 2,
+    my: (y0 + y1) / 2
+  };
+}
+
+function grausParaRotacaoPdf(gra) {
+  if (typeof PDFLib !== "undefined" && typeof PDFLib.degrees === "function") {
+    return PDFLib.degrees(gra);
+  }
+  return (gra * Math.PI) / 180;
+}
+
+function desenharMarcaDaguaNaoOptanteValeTransporte(page, font, camposRaiz) {
+  const seg = obterSegmentoDiagonalNaoOptanteVt(camposRaiz);
+  if (!page || !font || !seg) return;
+  const texto = "NÃO OPTANTE";
+  const angRad = Math.atan2(seg.dy, seg.dx);
+  const rotDeg = (angRad * 180) / Math.PI;
+  const size = Math.min(38, Math.max(18, seg.comprimento / 6.8));
+  const tw = font.widthOfTextAtSize(texto, size);
+  const cos = Math.cos(angRad);
+  const sin = Math.sin(angRad);
+  const k = size * 0.32;
+  const x = seg.mx - (tw / 2) * cos + k * sin;
+  const y = seg.my - (tw / 2) * sin - k * cos;
+  const opc = typeof PDFLib !== "undefined" && PDFLib.rgb
+    ? { color: PDFLib.rgb(0.4, 0.4, 0.4), opacity: 0.09 }
+    : { opacity: 0.09 };
+  page.drawText(texto, {
+    x,
+    y,
+    size,
+    font,
+    rotate: grausParaRotacaoPdf(rotDeg),
+    ...opc
+  });
+}
+
+// ── TOGGLE ──
+function togglePIS(el){
+  // PIS é sempre visível e obrigatório, tanto para SIM quanto para NÃO.
+  const pisField = document.getElementById('pisField');
+  const pisEl = document.getElementById('pis');
+  if (pisField) pisField.style.display = "";
+  if (pisEl) pisEl.required = true;
+}
+function toggleDef(el){
+  document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
+}
+const TIPOS_CONTA_BRADESCO = ['bradesco', 'conta_corrente', 'poupanca_bradesco'];
+const TIPOS_CONTA_SANTANDER = ['santander_corrente', 'santander_salario'];
+const TIPOS_CONTA_NEXT = ['next_digital'];
+const TIPOS_CONTA_VALIDOS = [...TIPOS_CONTA_BRADESCO, ...TIPOS_CONTA_SANTANDER, ...TIPOS_CONTA_NEXT];
+function tipoContaEhBradesco(tipo){
+  return TIPOS_CONTA_BRADESCO.includes(tipo);
+}
+function tipoContaEhSantander(tipo){
+  return TIPOS_CONTA_SANTANDER.includes(tipo);
+}
+function tipoContaEhNext(tipo){
+  return TIPOS_CONTA_NEXT.includes(tipo);
+}
+function tipoContaRequerAgenciaConta(tipo){
+  return TIPOS_CONTA_VALIDOS.includes(tipo);
+}
+function tipoContaRequerCpfTitularPdf(tipo){
+  return TIPOS_CONTA_VALIDOS.includes(tipo);
+}
+function idsAgenciaContaAtivos(tipo){
+  if (tipoContaEhBradesco(tipo)) return { agencia: 'agenciaBradesco', conta: 'contaBradesco' };
+  if (tipoContaEhSantander(tipo)) return { agencia: 'agenciaSantander', conta: 'contaSantander' };
+  if (tipoContaEhNext(tipo)) return { agencia: 'agenciaNext', conta: 'contaNext' };
+  return null;
+}
+function lerAgenciaContaFormulario(tipo){
+  const ids = idsAgenciaContaAtivos(tipo);
+  if (!ids) return { agencia: '', conta: '' };
+  return { agencia: v(ids.agencia), conta: v(ids.conta) };
+}
+/** No PDF, agência/conta NEXT recebem sufixo " - NEXT" (formulário mantém só os dígitos). */
+function valorAgenciaContaPdf(tipoConta, valor) {
+  const texto = String(valor || "").trim();
+  if (!texto || !tipoContaEhNext(tipoConta)) return texto;
+  return `${texto} - NEXT`;
+}
+function rotuloTipoConta(tipo){
+  const rotulos = {
+    bradesco: 'Conta Salário Bradesco',
+    conta_corrente: 'Conta Corrente Bradesco',
+    poupanca_bradesco: 'Conta Poupança Bradesco',
+    santander_corrente: 'Conta Corrente Santander',
+    santander_salario: 'Conta Salário Santander',
+    next_digital: 'Conta Corrente Digital Next'
+  };
+  return rotulos[tipo] || 'Tipo de Conta';
+}
+function bancoPrincipalDeTipoConta(tipo){
+  if (tipoContaEhBradesco(tipo)) return 'bradesco';
+  if (tipoContaEhSantander(tipo)) return 'santander';
+  if (tipoContaEhNext(tipo)) return 'next';
+  return null;
+}
+function definirVisibilidadeDetalheBanco(elDetalhes, visivel, ids){
+  if (!elDetalhes) return;
+  if (visivel) elDetalhes.removeAttribute('hidden');
+  else elDetalhes.setAttribute('hidden', '');
+  if (!ids) return;
+  const agenciaEl = document.getElementById(ids.agencia);
+  const contaEl = document.getElementById(ids.conta);
+  if (agenciaEl) {
+    agenciaEl.required = visivel;
+    if (!visivel) agenciaEl.classList.remove('invalid');
+  }
+  if (contaEl) {
+    contaEl.required = visivel;
+    if (!visivel) contaEl.classList.remove('invalid');
+  }
+}
+function selecionarBancoPrincipal(el){
+  syncRadioActive('bancoPrincipal');
+  document.getElementById('grupoBancoPrincipal')?.classList.remove('group-invalid');
+  // Limpa seleção de tipo de conta incompatível com o novo banco
+  const bancoPrincipal = el?.value;
+  const tipoAtual = radio('tipoConta');
+  const bancoDoTipoAtual = bancoPrincipalDeTipoConta(tipoAtual);
+  if (tipoAtual && bancoDoTipoAtual !== bancoPrincipal) {
+    document.querySelectorAll('input[name="tipoConta"]').forEach(r => { r.checked = false; });
+    document.querySelectorAll('.banco-col .radio-label').forEach(l => l.classList.remove('active'));
+    // Esconde todos os detalhes
+    ['bradescoDetalhes','nextDetalhes','santanderDetalhes'].forEach(id => {
+      document.getElementById(id)?.setAttribute('hidden','');
+    });
+    ['agenciaBradesco','contaBradesco','agenciaNext','contaNext','agenciaSantander','contaSantander'].forEach(id => {
+      const el2 = document.getElementById(id);
+      if (el2) { el2.required = false; el2.classList.remove('invalid'); }
+    });
+    document.getElementById('cartaBradescoField')?.setAttribute('hidden','');
+  }
+  updateProgress();
+  agendarSalvarRascunho();
+}
+function toggleBanco(el){
+  const tipo = el?.value || radio('tipoConta');
+  const bradescoAtivo = tipoContaEhBradesco(tipo);
+  const santanderAtivo = tipoContaEhSantander(tipo);
+  const nextAtivo = tipoContaEhNext(tipo);
+  const isSalarioBradesco = tipo === 'bradesco';
+  definirVisibilidadeDetalheBanco(
+    document.getElementById('bradescoDetalhes'),
+    bradescoAtivo,
+    { agencia: 'agenciaBradesco', conta: 'contaBradesco' }
+  );
+  definirVisibilidadeDetalheBanco(
+    document.getElementById('santanderDetalhes'),
+    santanderAtivo,
+    { agencia: 'agenciaSantander', conta: 'contaSantander' }
+  );
+  definirVisibilidadeDetalheBanco(
+    document.getElementById('nextDetalhes'),
+    nextAtivo,
+    { agencia: 'agenciaNext', conta: 'contaNext' }
+  );
+  const cartaBradescoField = document.getElementById('cartaBradescoField');
+  if (cartaBradescoField) {
+    if (isSalarioBradesco) cartaBradescoField.removeAttribute('hidden');
+    else cartaBradescoField.setAttribute('hidden', '');
+  }
+  if (!bradescoAtivo) {
+    marcarCampoInvalido('agenciaBradesco', false);
+    marcarCampoInvalido('contaBradesco', false);
+  }
+  if (!santanderAtivo) {
+    marcarCampoInvalido('agenciaSantander', false);
+    marcarCampoInvalido('contaSantander', false);
+  }
+  if (!nextAtivo) {
+    marcarCampoInvalido('agenciaNext', false);
+    marcarCampoInvalido('contaNext', false);
+  }
+  if (el?.name) syncRadioActive(el.name);
+}
+const MAX_DEPENDENTES = 5;
+/** Fluxo progressivo: null | 'sim' | 'nao' */
+let dependentesInclusao = null;
+let etapasDesbloqueadasAnterior = {};
+
+function etapaDependentesResolvida(pcts) {
+  if (dependentesInclusao === "nao") return true;
+  if (dependentesInclusao === "sim" && pcts.dependentes >= 100) return true;
+  return false;
+}
+
+function atualizarUiDependentes() {
+  const conteudo = document.getElementById("dependentesConteudo");
+  if (conteudo) {
+    if (dependentesInclusao === "sim") conteudo.removeAttribute("hidden");
+    else conteudo.setAttribute("hidden", "");
+  }
+  const btnSim = document.getElementById("btnDependentesSim");
+  const btnNao = document.getElementById("btnDependentesNao");
+  btnSim?.classList.toggle("btn-gate--selecionado", dependentesInclusao === "sim");
+  btnNao?.classList.toggle("btn-gate--selecionado", dependentesInclusao === "nao");
+}
+
+function definirEtapaVisivel(id, visivel) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (visivel) el.removeAttribute("hidden");
+  else el.setAttribute("hidden", "");
+}
+
+function rolarParaEtapa(id) {
+  const el = document.getElementById(id);
+  if (!el || el.hasAttribute("hidden")) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function responderDependentesSim() {
+  dependentesInclusao = "sim";
+  atualizarUiDependentes();
+  agendarSalvarRascunho();
+  updateProgress();
+  setTimeout(() => document.getElementById("dep1Nome")?.focus(), 0);
+}
+
+function responderDependentesNao() {
+  dependentesInclusao = "nao";
+  atualizarUiDependentes();
+  const tbody = document.getElementById("dependentesBody");
+  if (tbody) {
+    tbody.innerHTML = "";
+    tbody.appendChild(criarLinhaDependente(1));
+    atualizarEstadoBotaoDependente();
+  }
+  agendarSalvarRascunho();
+  updateProgress();
+  rolarParaEtapa("etapaEndereco");
+}
+
+function calcularPercentuaisSecoes() {
+  const hasValue = (id) => v(id).length > 0;
+  const hasMoney = (id) => moedaParaPdf(v(id)) !== "0,00";
+  const calcPct = (checks) => {
+    if (!checks.length) return 0;
+    const preenchidos = checks.filter((fn) => fn()).length;
+    return Math.round((preenchidos / checks.length) * 100);
+  };
+
+  const pessoal = calcPct([
+    () => hasValue("nomeCompleto"),
+    () => hasValue("cpf"),
+    () => hasValue("celular"),
+    () => hasValue("email"),
+    () => hasValue("estadoCivil"),
+    () => !!radio("primeiroEmprego"),
+    () => hasValue("pis"),
+    () => !!radio("deficiencia")
+  ]);
+
+  const endereco = calcPct([
+    () => hasValue("cep"),
+    () => hasValue("endereco"),
+    () => hasValue("bairro"),
+    () => hasValue("cidade")
+  ]);
+
+  const bancario = calcPct([
+    () => TIPOS_CONTA_VALIDOS.includes(radio("tipoConta")),
+    () => {
+      const tipo = radio("tipoConta");
+      const ids = idsAgenciaContaAtivos(tipo);
+      return ids ? hasValue(ids.agencia) : true;
+    },
+    () => {
+      const tipo = radio("tipoConta");
+      const ids = idsAgenciaContaAtivos(tipo);
+      return ids ? hasValue(ids.conta) : true;
+    }
+  ]);
+
+  const dependentesChecks = lerDependentesFormulario().flatMap((dep) => [
+    () => dep.nome.length > 0,
+    () => dep.nascimento.length > 0,
+    () => dep.cpf.length > 0
+  ]);
+  const dependentes = dependentesInclusao === "nao"
+    ? 100
+    : dependentesInclusao === "sim"
+      ? calcPct(dependentesChecks)
+      : 0;
+
+  const transporte = etapaTransporteResolvida()
+    ? 100
+    : calcPct(
+        VT_LINHAS.flatMap(({ qtd, val }) => [
+          () => hasValue(qtd),
+          () => hasMoney(val)
+        ])
+      );
+
+  const refeicao = calcPct([
+    () => ["va", "vr", "flex"].includes(radio("valeRef"))
+  ]);
+
+  const declaracao = calcPct([
+    () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida()
+  ]);
+
+  return { pessoal, endereco, bancario, dependentes, transporte, refeicao, declaracao };
+}
+
+function atualizarVisibilidadeEtapas(pcts) {
+  const pessoalOk = pcts.pessoal >= 100;
+  const depOk = etapaDependentesResolvida(pcts);
+  const enderecoOk = pcts.endereco >= 100;
+  const bancarioOk = pcts.bancario >= 100;
+  const transporteOk = etapaTransporteResolvida();
+  const refeicaoOk = pcts.refeicao >= 100;
+  const declaracaoOk = pcts.declaracao >= 100;
+
+  atualizarUiDependentes();
+
+  const mapa = {
+    etapaPessoal: true,
+    etapaDependentes: pessoalOk,
+    etapaEndereco: pessoalOk && depOk,
+    etapaBancario: pessoalOk && depOk && enderecoOk,
+    etapaTransporte: pessoalOk && depOk && enderecoOk && bancarioOk,
+    etapaRefeicao: pessoalOk && depOk && enderecoOk && bancarioOk && transporteOk,
+    etapaDeclaracao: pessoalOk && depOk && enderecoOk && bancarioOk && transporteOk && refeicaoOk,
+    etapaAcoes: pessoalOk && depOk && enderecoOk && bancarioOk && transporteOk && refeicaoOk && declaracaoOk
+  };
+
+  const suprimirScroll = !!etapasDesbloqueadasAnterior.__suprimirScroll;
+  Object.entries(mapa).forEach(([id, visivel]) => {
+    if (
+      !suprimirScroll &&
+      visivel &&
+      !etapasDesbloqueadasAnterior[id] &&
+      id !== "etapaPessoal"
+    ) {
+      setTimeout(() => rolarParaEtapa(id), 150);
+    }
+    definirEtapaVisivel(id, visivel);
+    etapasDesbloqueadasAnterior[id] = !!visivel;
+  });
+}
+
+function resetarFluxoEtapas() {
+  dependentesInclusao = null;
+  etapasDesbloqueadasAnterior = {};
+  atualizarUiDependentes();
+  updateProgress();
+}
+function listarLinhasDependentes(){
+  return [...document.querySelectorAll('#dependentesBody tr')];
+}
+function lerDependentesFormulario(){
+  return listarLinhasDependentes().map((row) => {
+    const nomeEl = row.querySelector('input[id$="Nome"]');
+    const nascEl = row.querySelector('input[id$="Nasc"]');
+    const cpfEl = row.querySelector('input[id$="CPF"]');
+    return {
+      nome: (nomeEl?.value || "").trim(),
+      nascimento: (nascEl?.value || "").trim(),
+      cpf: (cpfEl?.value || "").trim()
+    };
+  });
+}
+function atualizarEstadoBotaoDependente(){
+  const btn = document.getElementById('btnAddDependente');
+  if (!btn) return;
+  const atingiuLimite = listarLinhasDependentes().length >= MAX_DEPENDENTES;
+  btn.disabled = atingiuLimite;
+  btn.textContent = atingiuLimite ? `Limite de ${MAX_DEPENDENTES} dependentes` : "+ Adicionar dependente";
+}
+function criarLinhaDependente(indice){
+  const tr = document.createElement('tr');
+  tr.dataset.dependenteIndex = String(indice);
+  tr.innerHTML = `
+    <td><input type="text" id="dep${indice}Nome" placeholder="Nome completo"></td>
+    <td><input type="date" id="dep${indice}Nasc" autocomplete="off"></td>
+    <td><input type="text" id="dep${indice}CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
+  `;
+  return tr;
+}
+function adicionarDependente(){
+  const tbody = document.getElementById('dependentesBody');
+  if (!tbody) return;
+  const totalAtual = listarLinhasDependentes().length;
+  if (totalAtual >= MAX_DEPENDENTES) {
+    showToast(`Limite de ${MAX_DEPENDENTES} dependentes por ficha.`, false);
+    atualizarEstadoBotaoDependente();
+    return;
+  }
+  const novoIndice = totalAtual + 1;
+  const novaLinha = criarLinhaDependente(novoIndice);
+  tbody.appendChild(novaLinha);
+  atualizarEstadoBotaoDependente();
+  updateProgress();
+  agendarSalvarRascunho();
+  novaLinha.querySelector('input')?.focus();
+}
+
+// ── Cópia para Assistência Médica (modal após PDF; consome em assistencia_medica.html) ──
+/** Payload montado após o PDF (cópia para Assistência Médica — modal ou redirecionamento). */
+let payloadPosPdfAssistenciaPendente = null;
+
+/** Envia para assistencia_medica o mesmo padrão da ficha: "CIDADE - UF" (import aceita também "CIDADE / UF"). */
+function montarCidadeUfParaCopiaAssistencia() {
+  const c = (id) => (document.getElementById(id)?.value || "").trim();
+  const cidade = c("cidade");
+  if (!cidade) return "";
+  if (/\s\/\s*[A-Z]{2}$/i.test(cidade) || /\s-\s[A-Z]{2}$/i.test(cidade)) {
+    return cidade.toLocaleUpperCase("pt-BR");
+  }
+  const cep = c("cep").replace(/\D/g, "").slice(0, 8);
+  if (cep.length === 8) {
+    const cached = cepCache.get(cep);
+    if (cached && cached.uf) {
+      return `${cidade} - ${String(cached.uf).trim()}`.toLocaleUpperCase("pt-BR");
+    }
+  }
+  return cidade;
+}
+
+function dataAssinaturaIsoAtual() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function assinaturaNomeLegivelPdf() {
+  return (document.getElementById("nomeCompleto")?.value || "").trim();
+}
+function assinaturaDataPdfFormatada() {
+  const [y, m, day] = dataAssinaturaIsoAtual().split("-");
+  return `${day}/${m}/${y}`;
+}
+
+function construirPayloadCopiaParaAssistencia() {
+  const c = (id) => (document.getElementById(id)?.value || "").trim();
+  const nascEmPartes = (iso) => {
+    const s = (iso || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}/.test(s)) return { d: "", m: "", y: "" };
+    const p = s.split("T")[0].split("-");
+    return { y: p[0] || "", m: p[1] || "", d: p[2] || "" };
+  };
+  const out = {
+    v: 1,
+    t: Date.now(),
+    campos: {
+      funcionario: c("nomeCompleto"),
+      cpf: c("cpf"),
+      cep: c("cep"),
+      rua: c("endereco"),
+      numero: c("endNum"),
+      complemento: c("complemento"),
+      bairro: c("bairro"),
+      cidadeuf: montarCidadeUfParaCopiaAssistencia(),
+      assinaturaName: c("nomeCompleto")
+    },
+    dataAssinatura: dataAssinaturaIsoAtual()
+  };
+  const cel = c("celular");
+  const tel = c("telefone");
+  out.telefoneDigitos = (cel || tel).replace(/\D/g, "").slice(0, 11);
+  const deps = lerDependentesFormulario();
+  out.dependentesFilhos = deps
+    .filter((d) => d.nome)
+    .slice(0, 4)
+    .map((d) => {
+      const p = nascEmPartes(d.nascimento);
+      return { nome: d.nome, cpf: d.cpf, d: p.d, m: p.m, y: p.y };
+    });
+  let assinaturaCanvasPng = null;
+  try {
+    const canvasAss = document.getElementById("assinaturaCanvas");
+    if (canvasAss && (assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida())) {
+      assinaturaCanvasPng = canvasAss.toDataURL("image/png", 0.88);
+    }
+  } catch (_) {
+    assinaturaCanvasPng = null;
+  }
+  out.assinaturaCanvasPng = assinaturaCanvasPng;
+  out.naoAssinarManualmente = isNaoAssinarManualmente();
+  return out;
+}
+function abrirModalCopiaAssistencia() {
+  const m = document.getElementById("modalCopiaAssistencia");
+  if (!m) return;
+  setModalOverlayVisible(m, true);
+  sincronizarBodyModalOpenFicha();
+}
+function fecharModalCopiaAssistencia() {
+  const m = document.getElementById("modalCopiaAssistencia");
+  if (m) setModalOverlayVisible(m, false);
+  sincronizarBodyModalOpenFicha();
+}
+
+function salvarPayloadCopiaAssistenciaNoStorage(payload) {
+  try {
+    appStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+/**
+ * Chama após o PDF com sucesso. Se o utilizador desmarcou o aviso, grava a cópia e segue;
+ * senão, abre o modal e redireciona se confirmar.
+ */
+function oferecerIrParaAssistenciaAposPdf(payload) {
+  if (appStorage.getItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST) === "1") {
+    salvarPayloadCopiaAssistenciaNoStorage(payload);
+    showToast("Dados da ficha prontos para a Assistência Médica. Abra o formulário no menu principal.", true);
+    payloadPosPdfAssistenciaPendente = null;
+    return;
+  }
+  payloadPosPdfAssistenciaPendente = payload;
+  setTimeout(() => {
+    if (document.getElementById("lgpdModal")?.classList.contains("show")) return;
+    abrirModalCopiaAssistencia();
+  }, 0);
+}
+
+// ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
+const RASCUNHO_IDS = [
+  "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
+  "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
+  "cpf", "agenciaBradesco", "contaBradesco", "agenciaSantander", "contaSantander",
+  "agenciaNext", "contaNext",
+  "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
+];
+let rascunhoSalvarTimer = null;
+let ignorarSalvarRascunho = false;
+
+function limparRascunhoLocal() {
+  try {
+    lsRemoveDual(RASCUNHO_STORAGE_KEY, LS_LEGACY.fichaRascunho);
+  } catch (_) {
+    /* storage indisponível */
+  }
+}
+
+function coletarEstadoRascunho() {
+  const campos = {};
+  RASCUNHO_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) campos[id] = el.value;
+  });
+  let assinaturaCanvasPng = null;
+  try {
+    const c = document.getElementById("assinaturaCanvas");
+    if (c && (assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida())) {
+      assinaturaCanvasPng = c.toDataURL("image/png", 0.88);
+    }
+  } catch (_) {
+    assinaturaCanvasPng = null;
+  }
+  return {
+    v: 3,
+    t: Date.now(),
+    campos,
+    assinaturaCanvasPng,
+    naoAssinarManualmente: isNaoAssinarManualmente(),
+    vtNaoOptante: document.getElementById("vtNaoOptante")?.checked === true,
+    radios: {
+      primeiroEmprego: radio("primeiroEmprego"),
+      deficiencia: radio("deficiencia"),
+      tipoConta: radio("tipoConta"),
+      bancoPrincipal: radio("bancoPrincipal"),
+      valeRef: radio("valeRef")
+    },
+    tipoDeficiencia: checks("tipoDeficiencia"),
+    dependentes: lerDependentesFormulario(),
+    dependentesInclusao
+  };
+}
+
+function marcarRadioRestaurar(name, value) {
+  if (!value) return;
+  const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+  if (!el) return;
+  el.checked = true;
+  if (name === "primeiroEmprego") {
+    togglePIS(el);
+    syncRadioActive(name);
+  } else if (name === "deficiencia") {
+    toggleDef(el);
+    syncRadioActive(name);
+  } else if (name === "tipoConta") toggleBanco(el);
+  else syncRadioActive(name);
+}
+
+function aplicarTipoDeficienciaSalvos(valores) {
+  document.querySelectorAll('input[name="tipoDeficiencia"]').forEach((inp) => {
+    inp.checked = false;
+    inp.closest(".check-label")?.classList.remove("active");
+  });
+  const lista = Array.isArray(valores) ? valores : [];
+  lista.forEach((val) => {
+    const inp = [...document.querySelectorAll('input[name="tipoDeficiencia"]')].find((i) => i.value === val);
+    if (inp) {
+      inp.checked = true;
+      inp.closest(".check-label")?.classList.add("active");
+    }
+  });
+}
+
+function aplicarEstadoRascunho(obj) {
+  const c = obj.campos || {};
+  if (c.agencia !== undefined && c.agenciaBradesco === undefined) {
+    c.agenciaBradesco = c.agencia;
+    c.agenciaSantander = c.agencia;
+  }
+  if (c.conta !== undefined && c.contaBradesco === undefined) {
+    c.contaBradesco = c.conta;
+    c.contaSantander = c.conta;
+  }
+  RASCUNHO_IDS.forEach((id) => {
+    if (c[id] === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.value = c[id];
+  });
+  ["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && el.value) maskMoeda(el);
+  });
+  const pisRestaurado = document.getElementById("pis");
+  if (pisRestaurado && pisRestaurado.value) maskPIS(pisRestaurado);
+
+  const rad = obj.radios || {};
+  marcarRadioRestaurar("primeiroEmprego", rad.primeiroEmprego);
+  marcarRadioRestaurar("deficiencia", rad.deficiencia);
+  // Restaurar banco principal primeiro, antes do tipo de conta
+  if (rad.bancoPrincipal) {
+    const bpEl = document.querySelector(`input[name="bancoPrincipal"][value="${rad.bancoPrincipal}"]`);
+    if (bpEl) { bpEl.checked = true; syncRadioActive("bancoPrincipal"); }
+  }
+  marcarRadioRestaurar("tipoConta", rad.tipoConta === "mentore" ? "conta_corrente" : rad.tipoConta);
+  marcarRadioRestaurar("valeRef", rad.valeRef);
+
+  aplicarTipoDeficienciaSalvos(obj.tipoDeficiencia);
+
+  const vtCb = document.getElementById("vtNaoOptante");
+  if (vtCb) {
+    vtCb.checked = obj.vtNaoOptante === true;
+    sincronizarCheckLabelVtNaoOptante();
+  }
+  atualizarUiValeTransporteNaoOptante();
+
+  const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+  if (naoAssinarCb) {
+    naoAssinarCb.checked = obj.naoAssinarManualmente === true;
+    sincronizarCheckLabelNaoAssinarManualmente();
+  }
+  atualizarUiNaoAssinarManualmente();
+
+  const deps = Array.isArray(obj.dependentes) && obj.dependentes.length ? obj.dependentes : [{ nome: "", nascimento: "", cpf: "" }];
+  const n = Math.min(deps.length, MAX_DEPENDENTES);
+  const tbody = document.getElementById("dependentesBody");
+  if (tbody) {
+    tbody.innerHTML = "";
+    for (let i = 0; i < n; i += 1) {
+      const idx = i + 1;
+      const tr = criarLinhaDependente(idx);
+      tbody.appendChild(tr);
+      const d = deps[i] || {};
+      const nomeEl = tr.querySelector(`#dep${idx}Nome`);
+      const nascEl = tr.querySelector(`#dep${idx}Nasc`);
+      const cpfEl = tr.querySelector(`#dep${idx}CPF`);
+      if (nomeEl) nomeEl.value = d.nome || "";
+      if (nascEl) nascEl.value = d.nascimento || "";
+      if (cpfEl) cpfEl.value = d.cpf || "";
+    }
+    atualizarEstadoBotaoDependente();
+  }
+  if (obj.assinaturaCanvasPng) {
+    const c = document.getElementById("assinaturaCanvas");
+    const ctx = c && (assinaturaCanvasCtx || c.getContext("2d"));
+    if (c && ctx) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        assinaturaCanvasCtx = ctx;
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        assinaturaCanvasTemTraço = true;
+        updateProgress();
+      };
+      img.onerror = () => {
+        assinaturaCanvasTemTraço = false;
+      };
+      img.src = obj.assinaturaCanvasPng;
+    }
+  } else {
+    limparAssinaturaCanvas();
+  }
+
+  if (obj.dependentesInclusao === "sim" || obj.dependentesInclusao === "nao") {
+    dependentesInclusao = obj.dependentesInclusao;
+  } else {
+    const temDepPreenchido = deps.some((d) => (d.nome || d.nascimento || d.cpf));
+    if (temDepPreenchido) {
+      dependentesInclusao = "sim";
+    } else if (v("endereco") || v("cidade")) {
+      dependentesInclusao = "nao";
+    }
+  }
+  etapasDesbloqueadasAnterior = { __suprimirScroll: true };
+  updateProgress();
+  delete etapasDesbloqueadasAnterior.__suprimirScroll;
+}
+
+const RASCUNHO_DEBOUNCE_MS = 250;
+
+function agendarSalvarRascunho() {
+  if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = setTimeout(() => {
+    rascunhoSalvarTimer = null;
+    salvarRascunhoLocalSincrono();
+  }, RASCUNHO_DEBOUNCE_MS);
+}
+
+function salvarRascunhoLocalSincrono() {
+  if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = null;
+  try {
+    appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+  } catch (e) {
+    console.warn("Rascunho não salvo:", e);
+  }
+}
+
+function tentarRestaurarRascunho() {
+  try {
+    const raw = appStorage.getItem(RASCUNHO_STORAGE_KEY);
+    if (!raw) return false;
+    const obj = JSON.parse(raw);
+    if (!obj || (obj.v !== 1 && obj.v !== 2 && obj.v !== 3) || !obj.campos) return false;
+    ignorarSalvarRascunho = true;
+    aplicarEstadoRascunho(obj);
+    ignorarSalvarRascunho = false;
+    updateProgress();
+    showToast("Rascunho recuperado. Você pode continuar o preenchimento.", true);
+    return true;
+  } catch (e) {
+    console.warn(e);
+    ignorarSalvarRascunho = false;
+    return false;
+  }
+}
+
+// ── PROGRESS ──
+document.querySelectorAll('input,select').forEach(el=>{
+  el.addEventListener('input', updateProgress);
+  el.addEventListener('change', updateProgress);
+  el.addEventListener('input', agendarSalvarRascunho);
+  /* `change` grava de imediato: no mobile o debounce perde o último estado com frequência. */
+  el.addEventListener('change', salvarRascunhoLocalSincrono);
+});
+function updateProgress(){
+  const pcts = calcularPercentuaisSecoes();
+  const setProgress = (id, pct) => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = `${pct}%`;
+  };
+
+  setProgress("progressPessoal", pcts.pessoal);
+  setProgress("progressEndereco", pcts.endereco);
+  setProgress("progressBancario", pcts.bancario);
+  setProgress("progressDependentes", pcts.dependentes);
+  setProgress("progressTransporte", pcts.transporte);
+  setProgress("progressRefeicao", pcts.refeicao);
+  setProgress("progressDeclaracao", pcts.declaracao);
+  atualizarVisibilidadeEtapas(pcts);
+}
+
+// ── CHECKBOX ACTIVE STATE ──
+document.querySelectorAll('.check-label input, .radio-label input').forEach(input=>{
+  input.addEventListener('change',()=>{
+    if(input.type==='radio'){
+      document.querySelectorAll(`input[name="${input.name}"]`).forEach(r=>{
+        r.closest('.radio-label')?.classList.remove('active');
+        r.closest('.check-label')?.classList.remove('active');
+      });
+    }
+    if(input.checked){
+      input.closest('.radio-label')?.classList.add('active');
+      input.closest('.check-label')?.classList.add('active');
+    } else {
+      input.closest('.check-label')?.classList.remove('active');
+    }
+    if (input.type === 'radio') {
+      if (input.name === 'primeiroEmprego') document.getElementById('grupoPrimeiroEmprego')?.classList.remove('group-invalid');
+      if (input.name === 'deficiencia') document.getElementById('grupoDeficiencia')?.classList.remove('group-invalid');
+      if (input.name === 'valeRef') document.getElementById('grupoValeRef')?.classList.remove('group-invalid');
+      if (input.name === 'tipoConta') document.getElementById('grupoTipoConta')?.classList.remove('group-invalid');
+    }
+  });
+});
+function syncRadioActive(name){
+  document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
+    r.closest('.radio-label')?.classList.toggle('active', r.checked);
+    r.closest('.check-label')?.classList.toggle('active', r.checked);
+  });
+}
+// Garante estado visual correto para opções já marcadas.
+document.querySelectorAll('.check-label input:checked, .radio-label input:checked').forEach((input) => {
+  input.closest('.radio-label')?.classList.add('active');
+  input.closest('.check-label')?.classList.add('active');
+});
+
+// ── FORMAT DATE ──
+function formatDate(d){ if(!d)return''; const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+function formatarTelefoneBR(valor){
+  const digitos = String(valor || '').replace(/\D/g, '');
+  if (digitos.length === 11) return `(${digitos.slice(0,2)}) ${digitos.slice(2,7)}-${digitos.slice(7)}`;
+  if (digitos.length === 10) return `(${digitos.slice(0,2)}) ${digitos.slice(2,6)}-${digitos.slice(6)}`;
+  return String(valor || '').trim();
+}
+
+// ── GET VALUE ──
+function v(id){ return (document.getElementById(id)?.value||'').trim(); }
+function radio(name){ return document.querySelector(`input[name="${name}"]:checked`)?.value||''; }
+function checks(name){ return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(c=>c.value); }
+function marcarCampoInvalido(id, invalido){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('invalid', !!invalido);
+}
+function validarContaBancariaObrigatoria(){
+  const tipoConta = radio('tipoConta');
+  const ids = idsAgenciaContaAtivos(tipoConta);
+  if (!ids) return true;
+
+  const agencia = v(ids.agencia);
+  const conta = v(ids.conta);
+  const agenciaOk = agencia.length > 0;
+  const contaOk = conta.length > 0;
+  marcarCampoInvalido(ids.agencia, !agenciaOk);
+  marcarCampoInvalido(ids.conta, !contaOk);
+
+  if (!agenciaOk || !contaOk) {
+    const rotulo = rotuloTipoConta(tipoConta);
+    showToast(`Para ${rotulo}, preencha Agência e Conta/Dígito.`, false);
+    if (!agenciaOk) document.getElementById(ids.agencia)?.focus();
+    else document.getElementById(ids.conta)?.focus();
+    return false;
+  }
+  return true;
+}
+function validarCamposObrigatorios(){
+  const obrigatoriosBase = [
+    { id: 'nomeCompleto', nome: 'Nome Completo' },
+    { id: 'celular', nome: 'Celular' },
+    { id: 'email', nome: 'E-mail' },
+    { id: 'estadoCivil', nome: 'Estado Civil' },
+    { id: 'endereco', nome: 'Endereço' },
+    { id: 'cidade', nome: 'Cidade - UF' },
+    { id: 'cpf', nome: 'CPF' }
+  ];
+  const faltantes = [];
+  const validarCampo = ({ id, nome }) => {
+    const vazio = v(id).length === 0;
+    marcarCampoInvalido(id, vazio);
+    if (vazio) faltantes.push({ id, nome });
+  };
+
+  obrigatoriosBase.forEach(validarCampo);
+
+  const gruposRadioObrigatorios = [
+    { name: 'primeiroEmprego', label: 'Primeiro Emprego', elId: 'grupoPrimeiroEmprego' },
+    { name: 'deficiencia', label: 'Possui Deficiência', elId: 'grupoDeficiencia' },
+    { name: 'bancoPrincipal', label: 'Banco', elId: 'grupoBancoPrincipal' },
+    { name: 'tipoConta', label: 'Tipo de Conta', elId: 'grupoTipoConta' },
+    { name: 'valeRef', label: 'Vale Refeição / Alimentação', elId: 'grupoValeRef' }
+  ];
+  gruposRadioObrigatorios.forEach(({ name, label, elId }) => {
+    const gr = document.getElementById(elId);
+    if (!radio(name)) {
+      faltantes.push({ id: `__radio_${name}__`, nome: label });
+      gr?.classList.add('group-invalid');
+    } else {
+      gr?.classList.remove('group-invalid');
+    }
+  });
+
+  const pisEl = document.getElementById('pis');
+  if (pisEl) pisEl.required = true;
+  validarCampo({ id: 'pis', nome: 'PIS' });
+
+  const idsBanco = idsAgenciaContaAtivos(radio('tipoConta'));
+  if (idsBanco) {
+    validarCampo({ id: idsBanco.agencia, nome: 'Agência' });
+    validarCampo({ id: idsBanco.conta, nome: 'Conta / Dígito' });
+  } else {
+    ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) =>
+      marcarCampoInvalido(id, false)
+    );
+  }
+
+  if (faltantes.length > 0) {
+    const listaCampos = faltantes.map((campo) => campo.nome).join(', ');
+    showToast(`Preencha os campos obrigatórios: ${listaCampos}.`, false);
+    const first = faltantes[0];
+    const m = /^__radio_(\w+)__$/.exec(first.id);
+    if (m) document.querySelector(`input[name="${m[1]}"]`)?.focus();
+    else document.getElementById(first.id)?.focus();
+    return false;
+  }
+  if (!isNaoAssinarManualmente() && !isAssinaturaManuscritaPreenchida()) {
+    showToast("Desenhe sua assinatura manuscrita na área indicada.", false);
+    marcarAssinaturaInvalidaCanvas(true);
+    document.getElementById("assinaturaCanvas")?.focus();
+    return false;
+  }
+  marcarAssinaturaInvalidaCanvas(false);
+  return true;
+}
+
+// ── TOAST ──
+function showToast(msg,ok=true){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-dot').style.background=ok?'#4caf7d':'#e05c3a';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+let lgpdResolver = null;
+function abrirModalLGPD(){
+  const modal = document.getElementById('lgpdModal');
+  if (!modal) return Promise.resolve(false);
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenFicha();
+  setTimeout(() => document.getElementById('lgpdContinuarBtn')?.focus(), 0);
+  return new Promise((resolve) => {
+    lgpdResolver = resolve;
+  });
+}
+function sincronizarBodyModalOpenFicha() {
+  if (document.querySelector(".modal-overlay.show")) document.body.classList.add("modal-open");
+  else document.body.classList.remove("modal-open");
+}
+function fecharModalLGPD(decisao){
+  const modal = document.getElementById('lgpdModal');
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpenFicha();
+  if (lgpdResolver) {
+    const resolve = lgpdResolver;
+    lgpdResolver = null;
+    resolve(decisao);
+  }
+}
+async function confirmarPoliticaLGPD(){
+  return abrirModalLGPD();
+}
+function limparDadosFormulario(){
+  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"]').forEach((el) => {
+    el.value = '';
+  });
+  const dependentesBody = document.getElementById('dependentesBody');
+  if (dependentesBody) {
+    dependentesBody.innerHTML = '';
+    dependentesBody.appendChild(criarLinhaDependente(1));
+  }
+  ["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
+    const campo = document.getElementById(id);
+    if (campo) campo.value = "R$ 0,00";
+  });
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((el) => {
+    el.checked = false;
+  });
+  document.querySelectorAll('.radio-label.active, .check-label.active').forEach((el) => {
+    el.classList.remove('active');
+  });
+
+  const defGroup = document.getElementById('defGroup');
+  const cartaBradescoField = document.getElementById('cartaBradescoField');
+  if (defGroup) defGroup.style.display = 'none';
+  if (cartaBradescoField) cartaBradescoField.setAttribute('hidden', '');
+  definirVisibilidadeDetalheBanco(document.getElementById('bradescoDetalhes'), false, null);
+  definirVisibilidadeDetalheBanco(document.getElementById('santanderDetalhes'), false, null);
+  definirVisibilidadeDetalheBanco(document.getElementById('nextDetalhes'), false, null);
+  ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.required = false;
+    el.classList.remove('invalid');
+  });
+  const pisEl = document.getElementById('pis');
+  if (pisEl) pisEl.classList.remove('invalid');
+  document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
+    el.classList.remove('invalid');
+  });
+  document.querySelectorAll('#grupoPrimeiroEmprego, #grupoDeficiencia, #grupoTipoConta, #grupoValeRef').forEach((el) =>
+    el.classList.remove('group-invalid')
+  );
+  limparAssinaturaCanvas();
+  sincronizarCheckLabelNaoAssinarManualmente();
+  atualizarUiNaoAssinarManualmente();
+  atualizarEstadoBotaoDependente();
+  sincronizarCheckLabelVtNaoOptante();
+  atualizarUiValeTransporteNaoOptante();
+  resetarFluxoEtapas();
+}
+
+function descartarRascunhoEFormulario() {
+  limparRascunhoLocal();
+  limparDadosFormulario();
+  showToast("Rascunho descartado.", true);
+}
+
+function abrirModalConfirmarDescartarRascunhoFicha() {
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpenFicha();
+  setTimeout(() => document.getElementById("btnModalDescartarRascunhoConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarDescartarRascunhoFicha() {
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpenFicha();
+}
+
+function abrirModalConfirmarLimparAssinaturaFicha() {
+  const el = document.getElementById("modalConfirmarLimparAssinatura");
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpenFicha();
+  setTimeout(() => document.getElementById("btnModalLimparAssinaturaConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarLimparAssinaturaFicha() {
+  const el = document.getElementById("modalConfirmarLimparAssinatura");
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpenFicha();
+}
+function confirmarLimparAssinaturaFichaExecutar() {
+  fecharModalConfirmarLimparAssinaturaFicha();
+  limparAssinaturaCanvas();
+  agendarSalvarRascunho();
+  updateProgress();
+}
+
+function normalizarChavePdf(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function chaveTipoDeficienciaDoForm(valor) {
+  const k = normalizarChavePdf(valor).toLowerCase();
+  const mapa = {
+    fisica: "fisica",
+    auditiva: "auditiva",
+    visual: "visual",
+    intelectual: "intelectual",
+    multipla: "multipla"
+  };
+  return mapa[k] || null;
+}
+
+async function carregarCamposSchema() {
+  if (camposSchema) return true;
+  try {
+    const res = await fetch(CAMPOS_JSON_FETCH_PATH, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    camposSchema = await res.json();
+    if (!camposSchema?.campos) throw new Error("Estrutura inválida");
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
+    return false;
+  }
+}
+
+async function carregarTemplateInicial() {
+  try {
+    const [tplRes, schemaOk] = await Promise.all([
+      fetch(TEMPLATE_EMBARCADO_PATH, { cache: "no-store" }),
+      carregarCamposSchema()
+    ]);
+    if (!tplRes.ok) throw new Error("template.json não encontrado (" + tplRes.status + ")");
+    if (!schemaOk) throw new Error("schema de campos não carregou");
+    const template = await tplRes.json();
+    const val = EmbeddedDocs.validarTemplate(template, camposSchema.campos);
+    if (!val.ok) throw new Error("template embarcado inválido: " + val.erros.join(" | "));
+    // TTFs em paralelo, apenas as declaradas (imagens seguem no campo separado,
+    // baixadas só quando a geração acontece — a engine exige os BYTES, não a URL).
+    const dir = TEMPLATE_EMBARCADO_DIR + "/";
+    const fontesReq = Object.values(template.fontes || {})
+      .filter((f) => f && f.arquivo)
+      .map((f) => f.arquivo);
+    if (template.fonteCheckbox && template.fonteCheckbox.arquivo) fontesReq.push(template.fonteCheckbox.arquivo);
+    const imagensReq = (template.images || []).map((i) => i.file);
+    const [fontesBytes, imagensBytes] = await Promise.all([
+      Promise.all(fontesReq.map(async (a) => [a, new Uint8Array(await (await fetch(dir + encodeURI(a), { cache: "no-store" })).arrayBuffer())])),
+      Promise.all(imagensReq.map(async (a) => [a, new Uint8Array(await (await fetch(dir + encodeURI(a), { cache: "no-store" })).arrayBuffer())]))
+    ]);
+    templateEmbarcado = {
+      template,
+      fontes: Object.fromEntries(fontesBytes),
+      imagens: Object.fromEntries(imagensBytes)
+    };
+  } catch (error) {
+    console.error(error);
+    templateEmbarcado = null;
+    showToast(`Template embarcado não carregado. Verifique ${TEMPLATE_EMBARCADO_PATH}`, false);
+  }
+}
+
+/** Mapa FLAT path → valor nos paths EXATOS do schema — a linguagem da engine.
+ *  Regras de negócio do app preservadas: Next → "Conta Corrente" (Bradesco) no
+ *  PDF; Santander usa colunas próprias; linhas de VT zeradas não são escritas.
+ */
+async function montarDadosFicha() {
+  const v = (id) => (document.getElementById(id)?.value || "").trim();
+  const C = camposSchema.campos;
+  const tipoContaSelecionada = radio("tipoConta");
+  const dadosBanco = lerAgenciaContaFormulario(tipoContaSelecionada);
+  const tipoContaPdf = tipoContaEhNext(tipoContaSelecionada) ? "conta_corrente" : tipoContaSelecionada;
+  const dados = {};
+  const dt = dadosDataAssinaturaIso();
+  const P = "dados_pessoais.campos.", E = "endereco.campos.", CB = "conta_bancaria.campos.";
+  dados[P + "nome"] = v("nomeCompleto");
+  dados[P + "craxá"] = v("nomeSocial");
+  dados[P + "fone"] = formatarTelefoneBR(v("telefone"));
+  dados[P + "celular"] = formatarTelefoneBR(v("celular"));
+  dados[P + "email"] = v("email");
+  dados[P + "estadocivil"] = v("estadoCivil");
+  dados[P + "primeiro_emprego.opcoes.sim"] = radio("primeiroEmprego") === "sim";
+  dados[P + "primeiro_emprego.opcoes.nao"] = radio("primeiroEmprego") === "nao";
+  dados[P + "informarpis"] = v("pis");
+  dados[E + "rua"] = v("endereco");
+  dados[E + "numero"] = v("endNum");
+  dados[E + "complemento"] = v("complemento").slice(0, 35);
+  dados[E + "cep"] = v("cep");
+  dados[E + "bairro"] = v("bairro");
+  dados[E + "cidadeuf"] = v("cidade");
+  const defSim = radio("deficiencia") === "sim";
+  dados["deficiencia.campos.possui_deficiencia.opcoes.sim"] = defSim;
+  dados["deficiencia.campos.possui_deficiencia.opcoes.nao"] = radio("deficiencia") === "nao";
+  if (defSim) {
+    checks("tipoDeficiencia").forEach((label) => {
+      const k = chaveTipoDeficienciaDoForm(label);
+      if (k) dados["deficiencia.campos.tipo_deficiencia.opcoes." + k] = true;
+    });
+  }
+  if (tipoContaPdf && C.conta_bancaria.campos.tipo_conta.opcoes[tipoContaPdf]) {
+    dados[CB + "tipo_conta.opcoes." + tipoContaPdf] = true;
+  }
+  if (tipoContaRequerAgenciaConta(tipoContaSelecionada)) {
+    const ag = tipoContaEhSantander(tipoContaSelecionada) ? "santander_agencia" : "bradesco_agencia";
+    const cc = tipoContaEhSantander(tipoContaSelecionada) ? "santander_conta_digito" : "bradesco_conta_digito";
+    dados[CB + ag] = valorAgenciaContaPdf(tipoContaSelecionada, dadosBanco.agencia);
+    dados[CB + cc] = valorAgenciaContaPdf(tipoContaSelecionada, dadosBanco.conta);
+  }
+  if (tipoContaRequerCpfTitularPdf(tipoContaSelecionada)) dados[CB + "cpf_titular"] = v("cpf");
+  const itensDep = C.dependentes.itens || [];
+  lerDependentesFormulario().slice(0, itensDep.length).forEach((dep, idx) => {
+    const d = "dependentes." + idx + ".campos.";
+    dados[d + "nome"] = dep.nome;
+    dados[d + "dtnasc"] = formatDate(dep.nascimento);
+    dados[d + "cpf"] = dep.cpf;
+  });
+  const vtNaoOptante = document.getElementById("vtNaoOptante")?.checked === true;
+  if (!vtNaoOptante) {
+    const vt = C.vale_transporte.itens;
+    const linhas = [["onibus", v("vtOnibusQtd"), moedaParaPdf(v("vtOnibusVal"))], ["metro_trem", v("vtMetroQtd"), moedaParaPdf(v("vtMetroVal"))], ["intermunicipal", v("vtInterQtd"), moedaParaPdf(v("vtInterVal"))], ["integracao", v("vtIntegracaoQtd"), moedaParaPdf(v("vtIntegracaoVal"))]];
+    linhas.forEach(([item, qtd, val]) => {
+      if (vt[item] && !valeTransporteLinhaTodaZero(qtd, val)) {
+        dados["vale_transporte.itens." + item + ".quantidade"] = qtd;
+        dados["vale_transporte.itens." + item + ".valor_unitario"] = val;
+      }
+    });
+  }
+  const valeSel = radio("valeRef");
+  if (valeSel === "va") dados["vale_alimentacao_refeicao.opcoes.alimentacao"] = true;
+  if (valeSel === "vr") dados["vale_alimentacao_refeicao.opcoes.refeicao"] = true;
+  if (valeSel === "flex") dados["vale_alimentacao_refeicao.opcoes.flex"] = true;
+  const semRubricaManual = isNaoAssinarManualmente();
+  dados["assinatura.campos." + (semRubricaManual && C.assinatura.campos.nome_legivel_sem_rubrica ? "nome_legivel_sem_rubrica" : "nome_legivel")] = assinaturaNomeLegivelPdf();
+  dados["assinatura.campos.data.segmentos.dia"] = dt.dia;
+  dados["assinatura.campos.data.segmentos.mes"] = dt.mes;
+  dados["assinatura.campos.data.segmentos.ano"] = dt.ano;
+  // Evidência técnica no rodapé (schema marca o campo com rodape: true; a
+  // engine quebra as linhas no mesmo desenho do app): mesmo parágrafo de antes.
+  const agora = new Date();
+  const docId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc-${agora.getTime()}`;
+  const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+  const dataHoraBr = new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, dateStyle: "short", timeStyle: "medium" }).format(agora);
+  const ipRef = await obterIpPublicoEvidencia();
+  dados["assinatura.campos.evidencia"] =
+    (semRubricaManual ? "Assinatura por nome legível (sem rubrica manual). " : "Assinatura manuscrita no navegador. ") +
+    "Doc. " + docId + ". Reg.: " + dataHoraBr + " (fuso " + fuso + "). IP: " + (ipRef || "n/d") + ".";
+  return { dados, semRubricaManual, vtNaoOptante };
+}
+
+/** Dia/mês/ano da assinatura no fuso local (a engine escreve cada segmento). */
+function dadosDataAssinaturaIso() {
+  const p = dataAssinaturaIsoAtual().split("-");
+  return { ano: p[0], mes: (p[1] || "").padStart(2, "0"), dia: (p[2] || "").padStart(2, "0") };
+}
+
+// ── GERAR PDF (engine embarcada — mesma do painel) ──
+async function gerarPDF(){
+  try {
+    if (!validarCamposObrigatorios()) return;
+    if (!(await confirmarPoliticaLGPD())) return;
+    if (!templateEmbarcado) await carregarTemplateInicial();
+    if (!templateEmbarcado) return;
+
+    const { dados, semRubricaManual, vtNaoOptante } = await montarDadosFicha();
+
+    const gerado = await EmbeddedDocs.gerarPdf(
+      templateEmbarcado.template,
+      camposSchema.campos,
+      dados,
+      PDFLib,
+      { fontkit, imagens: templateEmbarcado.imagens, fontes: templateEmbarcado.fontes },
+      { autor: "ficha_cadastral.html" }
+    );
+    const ignoradosReais = gerado.ignorados.filter((i) => i.motivo !== "sem valor informado");
+    if (ignoradosReais.length) {
+      console.warn("[ficha] campos ignorados pela engine:", ignoradosReais);
+    }
+
+    // Pós-processamento exclusivo do app público (a engine não conhece):
+    // rubrica manuscrita (PNG do canvas) e marca d'água de não optante do VT.
+    const pdfDoc = await PDFLib.PDFDocument.load(gerado.bytes.slice(0));
+    const page = pdfDoc.getPages()[0];
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const C = camposSchema.campos;
+    let bufPng = null;
+    if (!semRubricaManual) {
+      bufPng = await canvasAssinaturaParaPngArrayBuffer();
+      if (bufPng) {
+        const rubrica = C.assinatura.campos.rubrica;
+        if (rubrica?.coordenadas) {
+          const png = await pdfDoc.embedPng(bufPng);
+          desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
+        }
+      }
+    }
+    if (vtNaoOptante) {
+      desenharMarcaDaguaNaoOptanteValeTransporte(page, font, C);
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    baixarPdfFicha(pdfBytes, dados);
+    const payloadCopiaAssistencia = construirPayloadCopiaParaAssistencia();
+    salvarRascunhoLocalSincrono();
+    showToast("PDF gerado com sucesso!");
+    oferecerIrParaAssistenciaAposPdf(payloadCopiaAssistencia);
+  } catch (error) {
+    console.error(error);
+    showToast("Falha ao gerar PDF. Verifique o console.", false);
+  }
+}
+
+/** Download com o mesmo nome de arquivo de antes (título + primeiro nome). */
+function baixarPdfFicha(pdfBytes, dados) {
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Ficha Cadastral para Admissão");
+  const primeiroNome = primeiroNomeUsuarioParaArquivo(dados["dados_pessoais.campos.nome"] || "");
+  link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function baixarFichaVazia(){
+  try {
+    if (!templateEmbarcado) await carregarTemplateInicial();
+    if (!templateEmbarcado) return;
+    const gerado = await EmbeddedDocs.gerarPdf(
+      templateEmbarcado.template,
+      camposSchema.campos,
+      {},
+      PDFLib,
+      { fontkit, imagens: templateEmbarcado.imagens, fontes: templateEmbarcado.fontes },
+      { autor: "ficha_cadastral.html" }
+    );
+    const blob = new Blob([gerado.bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Ficha_Cadastral_vazia.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Download da ficha vazia iniciado.");
+  } catch (error) {
+    console.error(error);
+    showToast("Não foi possível baixar a ficha vazia.", false);
+  }
+}
+/** Abre o formulário dedicado que preenche e gera a carta (carta_bradesco.html),
+ *  copiando os dados pessoais e o endereço já preenchidos nesta ficha. */
+function baixarCartaAberturaConta(){
+  const c = (id) => (document.getElementById(id)?.value || "").trim();
+  const prefill = {
+    nomeCompleto: c("nomeCompleto"),
+    cpf: c("cpf"),
+    cep: c("cep"),
+    endereco: c("endereco"),
+    endNum: c("endNum"),
+    complemento: c("complemento"),
+    bairro: c("bairro"),
+    municipio: c("cidade")
+  };
+  appStorage.setItem(LS_NS + "carta_bradesco_prefill_v1", JSON.stringify(prefill));
+  window.location.assign("carta_bradesco.html");
+}
+
+initAssinaturaCanvas();
+document.getElementById("vtNaoOptante")?.addEventListener("change", () => {
+  atualizarUiValeTransporteNaoOptante();
+  updateProgress();
+});
+document.getElementById("naoAssinarManualmente")?.addEventListener("change", () => {
+  sincronizarCheckLabelNaoAssinarManualmente();
+  atualizarUiNaoAssinarManualmente();
+  agendarSalvarRascunho();
+});
+tentarRestaurarRascunho();
+["telefone", "celular"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("input", () => maskTelefone(el));
+  }
+});
+document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((el) => {
+  if (["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal", "pis"].includes(el.id)) return;
+  el.addEventListener("input", () => aplicarMaiusculas(el));
+});
+initPisMask();
+["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("focus", () => posicionarCursorNoFim(el));
+    el.addEventListener("click", () => posicionarCursorNoFim(el));
+    el.addEventListener("input", () => maskMoeda(el));
+    el.addEventListener("blur", () => maskMoeda(el));
+    if (!el.value.trim()) {
+      el.value = "R$ 0,00";
+    } else {
+      maskMoeda(el);
+    }
+  }
+});
+const dependentesBody = document.getElementById('dependentesBody');
+if (dependentesBody) {
+  dependentesBody.addEventListener('input', (event) => {
+    const el = event.target;
+    if (!(el instanceof HTMLInputElement)) return;
+    if (el.id.endsWith('Nome')) aplicarMaiusculas(el);
+    if (el.id.endsWith('CPF')) maskCPFInput(el);
+    updateProgress();
+    agendarSalvarRascunho();
+  });
+  dependentesBody.addEventListener('change', () => {
+    updateProgress();
+    agendarSalvarRascunho();
+  });
+}
+atualizarEstadoBotaoDependente();
+atualizarUiValeTransporteNaoOptante();
+const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
+if (bancoSelecionado) {
+  toggleBanco(bancoSelecionado);
+}
+const primeiroEmpregoSelecionado = document.querySelector('input[name="primeiroEmprego"]:checked');
+if (primeiroEmpregoSelecionado) {
+  togglePIS(primeiroEmpregoSelecionado);
+}
+['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => marcarCampoInvalido(id, false));
+  el.addEventListener('change', () => marcarCampoInvalido(id, false));
+});
+document.getElementById('lgpdCancelarBtn')?.addEventListener('click', () => fecharModalLGPD(false));
+document.getElementById('lgpdContinuarBtn')?.addEventListener('click', () => fecharModalLGPD(true));
+document.getElementById('lgpdModal')?.addEventListener('click', (event) => {
+  if (event.target.id === 'lgpdModal') {
+    fecharModalLGPD(false);
+  }
+});
+document.getElementById("btnCopiaAssistSim")?.addEventListener("click", () => {
+  if (payloadPosPdfAssistenciaPendente) {
+    salvarPayloadCopiaAssistenciaNoStorage(payloadPosPdfAssistenciaPendente);
+  }
+  if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
+    try {
+      appStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
+    } catch (_e) {}
+  }
+  payloadPosPdfAssistenciaPendente = null;
+  fecharModalCopiaAssistencia();
+  window.location.assign("assistencia_medica.html");
+});
+function fecharModalCopiaAssistRecusandoRedirecionamento() {
+  if (payloadPosPdfAssistenciaPendente) {
+    salvarPayloadCopiaAssistenciaNoStorage(payloadPosPdfAssistenciaPendente);
+  }
+  if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
+    try {
+      appStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
+    } catch (_e) {}
+  }
+  payloadPosPdfAssistenciaPendente = null;
+  fecharModalCopiaAssistencia();
+  showToast("Quando abrir a Assistência Médica, os campos equivalentes serão sugeridos.", true);
+}
+
+document.getElementById("btnCopiaAssistNao")?.addEventListener("click", () => {
+  fecharModalCopiaAssistRecusandoRedirecionamento();
+});
+document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalCopiaAssistencia") {
+    fecharModalCopiaAssistRecusandoRedirecionamento();
+  }
+});
+document.getElementById("btnDependentesSim")?.addEventListener("click", responderDependentesSim);
+document.getElementById("btnDependentesNao")?.addEventListener("click", responderDependentesNao);
+
+document.getElementById("btnModalDescartarRascunhoCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoFicha);
+document.getElementById("btnModalDescartarRascunhoConfirmar")?.addEventListener("click", () => {
+  fecharModalConfirmarDescartarRascunhoFicha();
+  descartarRascunhoEFormulario();
+});
+document.getElementById("modalConfirmarDescartarRascunho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarDescartarRascunho") fecharModalConfirmarDescartarRascunhoFicha();
+});
+document.getElementById("btnModalLimparAssinaturaCancelar")?.addEventListener("click", fecharModalConfirmarLimparAssinaturaFicha);
+document.getElementById("btnModalLimparAssinaturaConfirmar")?.addEventListener("click", confirmarLimparAssinaturaFichaExecutar);
+document.getElementById("modalConfirmarLimparAssinatura")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarLimparAssinatura") fecharModalConfirmarLimparAssinaturaFicha();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== "Escape") return;
+  if (document.getElementById("modalConfirmarDescartarRascunho")?.classList.contains("show")) {
+    event.preventDefault();
+    fecharModalConfirmarDescartarRascunhoFicha();
+    return;
+  }
+  if (document.getElementById("modalConfirmarLimparAssinatura")?.classList.contains("show")) {
+    event.preventDefault();
+    fecharModalConfirmarLimparAssinaturaFicha();
+    return;
+  }
+  if (document.getElementById('lgpdModal')?.classList.contains('show')) {
+    fecharModalLGPD(false);
+  }
+  if (document.getElementById("modalCopiaAssistencia")?.classList.contains("show")) {
+    fecharModalCopiaAssistRecusandoRedirecionamento();
+  }
+});
+function salvarRascunhoAoSair() {
+  salvarRascunhoLocalSincrono();
+}
+window.addEventListener("pagehide", salvarRascunhoAoSair);
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") salvarRascunhoAoSair();
+});
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", abrirModalConfirmarDescartarRascunhoFicha);
+(function initHeaderNav() {
+  const btn = document.getElementById("headerMenuBtn");
+  const backdrop = document.getElementById("headerNavBackdrop");
+  const panel = document.getElementById("headerNavPanel");
+  if (!btn || !backdrop || !panel) return;
+  const body = document.body;
+
+  function setOpen(open) {
+    if (open) {
+      body.classList.add("header-nav-open");
+      btn.setAttribute("aria-expanded", "true");
+      backdrop.setAttribute("aria-hidden", "false");
+      panel.setAttribute("aria-hidden", "false");
+      body.style.overflow = "hidden";
+    } else {
+      body.classList.remove("header-nav-open");
+      btn.setAttribute("aria-expanded", "false");
+      backdrop.setAttribute("aria-hidden", "true");
+      panel.setAttribute("aria-hidden", "true");
+      body.style.overflow = "";
+    }
+  }
+
+  function closeMenu() {
+    setOpen(false);
+  }
+
+  function toggleMenu() {
+    setOpen(!body.classList.contains("header-nav-open"));
+  }
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+  backdrop.addEventListener("click", closeMenu);
+  document.getElementById("headerNavCloseBtn")?.addEventListener("click", closeMenu);
+
+  panel.querySelectorAll('a[href]').forEach((a) => {
+    a.addEventListener("click", closeMenu);
+  });
+  document.getElementById("btnDescartarRascunho")?.addEventListener("click", closeMenu);
+  panel.querySelector(".header-nav-download")?.addEventListener("click", closeMenu);
+
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape") return;
+      if (!body.classList.contains("header-nav-open")) return;
+      e.preventDefault();
+      closeMenu();
+      btn.focus();
+    },
+    true
+  );
+})();
+updateProgress();
+carregarCamposSchema();
+carregarTemplateInicial();
+
+(function initPageHeaderScrollMobile() {
+  const MQ_HEADER_MOBILE =
+    "(max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none))";
+  const mq = window.matchMedia(MQ_HEADER_MOBILE);
+  const header = document.querySelector(".page-header");
+  if (!header) return;
+  const body = document.body;
+  const THRESH = 8;
+  let ro = null;
+
+  function scrollY() {
+    return window.pageYOffset != null
+      ? window.pageYOffset
+      : Math.max(
+          document.documentElement.scrollTop || 0,
+          document.body ? document.body.scrollTop || 0 : 0
+        );
+  }
+
+  function setHeaderH() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    const h = Math.round(header.getBoundingClientRect().height);
+    document.documentElement.style.setProperty("--page-header-h", h + "px");
+  }
+
+  function onScroll() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    if (scrollY() > THRESH) body.classList.add("page-header--away");
+    else body.classList.remove("page-header--away");
+  }
+
+  function applyMode() {
+    if (mq.matches) {
+      body.classList.add("page-header-mobile");
+      setHeaderH();
+      onScroll();
+      if (!ro) {
+        ro = new ResizeObserver(() => setHeaderH());
+        ro.observe(header);
+      }
+    } else {
+      body.classList.remove("page-header-mobile", "page-header--away");
+      document.documentElement.style.removeProperty("--page-header-h");
+      if (ro) {
+        ro.disconnect();
+        ro = null;
+      }
+    }
+  }
+
+  function onLayoutChanged() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    setHeaderH();
+    onScroll();
+  }
+
+  applyMode();
+  if (typeof mq.addEventListener === "function") mq.addEventListener("change", applyMode);
+  else if (typeof mq.addListener === "function") mq.addListener(applyMode);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("load", setHeaderH);
+  window.addEventListener("resize", onLayoutChanged, { passive: true });
+  window.addEventListener("orientationchange", () => {
+    setTimeout(onLayoutChanged, 150);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", onLayoutChanged, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

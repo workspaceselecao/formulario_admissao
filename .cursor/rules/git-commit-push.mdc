@@ -1,0 +1,10 @@
+---
+description: Após alterar ficheiros do projeto, fazer commit e push para origin.
+alwaysApply: true
+---
+
+# Git: commit e push
+
+- Sempre que concluir alterações neste repositório (código, PDFs, JSON, configuração), executar **`git add`**, **`git commit`** com mensagem clara em português ou inglês coerente com o projeto, e **`git push`** para `origin` no branch atual (normalmente `main`).
+- Não deixar trabalho concluído apenas no working tree sem commit, salvo se o utilizador pedir explicitamente o contrário.
+- Incluir no commit todos os ficheiros novos relevantes ao pedido (evitar deixar assets órfãos não versionados quando fazem parte do fluxo do formulário).

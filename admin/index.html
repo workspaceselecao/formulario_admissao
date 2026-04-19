@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo — Formulários de Admissão</title>
+<link rel="icon" type="image/png" href="/icone.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/panel.css">
+<script src="/admin-guard.js"></script>
+</head>
+<body>
+  <!-- Proteção: admin-guard.js oculta o conteúdo até validar e-mail @atento.com -->
+  <header class="admin-header">
+    <img src="/logomarca.png" alt="Logomarca">
+    <div class="admin-header-main">
+      <h1>Painel Administrativo</h1>
+      <div class="subtitle">Gerenciamento de formulários, templates, campos e cidades</div>
+    </div>
+    <div class="cmdk-hint" id="cmdkHint" role="status" aria-live="polite" hidden></div>
+    <span class="admin-user" id="adminUserEmail" title="Sessão administrativa"></span>
+    <button type="button" class="admin-logout" onclick="atentoAdminEndSession()">Sair</button>
+  </header>
+
+  <div class="admin-shell">
+    <aside class="admin-side" aria-label="Seções do painel">
+      <!-- Organização por ENTIDADES (§6): formulários, templates, cidades,
+           configurações — não por arquivos internos. Coordenadas/Assistência/
+           Dados/Regras/Segurança/Sistema permanecem acessíveis via sub-menu. -->
+      <button type="button" data-section="dashboard" class="active">▦ Visão Geral</button>
+      <button type="button" data-section="formularios">✎ Formulários</button>
+      <button type="button" data-section="pdfs">▤ Templates</button>
+      <button type="button" data-section="documentos">▣ Documentos Embarcados</button>
+      <button type="button" data-section="coordenadas">✥ Editor Visual</button>
+      <button type="button" data-section="cidades">◐ Cidades &amp; Regionais</button>
+      <button type="button" data-section="configuracoes">⚙ Configurações</button>
+      <button type="button" data-section="validacao">✓ Validação</button>
+      <button type="button" data-section="historico">⏱ Histórico</button>
+      <button type="button" data-section="seguranca">⛨ Segurança</button>
+      <div class="side-sub">
+        <button type="button" data-submenu-toggle aria-expanded="false" aria-controls="adminSubmenu">▸ Mais ferramentas</button>
+        <div id="adminSubmenu" class="side-sub-list" hidden>
+          <button type="button" data-section="assistencia">✚ Assistência</button>
+          <button type="button" data-section="dados">⌗ Dados &amp; Backups</button>
+          <button type="button" data-section="regras">§ Regras</button>
+          <button type="button" data-section="sistema">ℹ Sistema</button>
+        </div>
+      </div>
+      <div class="side-note">
+        Alterações de configuração são registradas no Histórico.
+        Proteção client-side — mesma natureza do guard.js (ver
+        <strong>Segurança</strong>).
+      </div>
+    </aside>
+
+    <main class="admin-main">
+
+      <!-- ══════════ DASHBOARD ══════════ -->
+      <section id="sec-dashboard" class="admin-section active">
+        <h2>Dashboard</h2>
+        <p class="section-desc">Visão geral das configurações carregadas dos JSONs do repositório.</p>
+        <div id="admAvisoManutencao"></div>
+        <div id="admExportNote"></div>
+        <!-- Tarefa 0: Saúde do Sistema — verificação automática ao abrir, com links diretos aos problemas -->
+        <div class="panel">
+          <h3>Saúde do Sistema</h3>
+          <div id="dashSaude" class="section-desc" aria-live="polite">Verificando integridade…</div>
+        </div>
+        <div class="cards-grid" id="dashCards"></div>
+        <!-- §23 — Alterações Pendentes: rascunho → publicar/descartar -->
+        <div class="panel" id="pendentesPanel">
+          <h3>Alterações Pendentes</h3>
+          <p class="section-desc">Edições salvas no overlay administrativo que ainda não foram publicadas (modo exportação: efetivar via JSON versionado).</p>
+          <div id="dashPendentes"></div>
+        </div>
+        <div class="panel">
+          <h3>Status das configurações</h3>
+          <div id="dashStatus"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ PDFs ══════════ -->
+      <section id="sec-pdfs" class="admin-section">
+        <h2>Templates PDF</h2>
+        <p class="section-desc">
+          Templates em uso pela aplicação. A lista carrega os arquivos reais do repositório;
+          uploads de novos PDFs dependem do modo API (ver Sistema).
+        </p>
+        <div class="legend-selos">
+          <span class="badge editable">✎ Editável</span> tipo/formulário do template (overlay) ·
+          <span class="badge readonly">🔒 Somente leitura — código</span> o arquivo físico só é trocado pelo fluxo de upload/substituição
+        </div>
+        <div class="toolbar">
+          <input type="search" id="pdfSearch" placeholder="Pesquisar template…" style="flex:1;min-width:180px">
+          <button type="button" class="btn secondary" id="btnUploadPdf">+ Adicionar PDF</button>
+          <input type="file" id="pdfUploadInput" accept="application/pdf,.pdf" hidden>
+        </div>
+        <!-- §18 — versões por template (uploads versionados, modo API) -->
+        <div id="versoesContainer"></div>
+        <div class="panel table-wrap" style="padding:0">
+          <table class="data" id="pdfTable">
+            <thead><tr>
+              <th>Arquivo</th><th>Tipo</th><th>Formulário</th><th class="num">Páginas</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>Substituir template</h3>
+          <p class="section-desc" style="margin-bottom:10px">
+            Seleciona o template e envia um novo arquivo. A substituição exige confirmação,
+            preserva a versão anterior como backup (modo API) e avisa que as coordenadas
+            podem precisar de revisão.
+          </p>
+          <div class="form-grid">
+            <div><label for="substTemplate">Template</label>
+              <select id="substTemplate"></select></div>
+            <div><label for="substFile">Novo PDF</label>
+              <input type="file" id="substFile" accept="application/pdf,.pdf"></div>
+          </div>
+          <button type="button" class="btn" id="btnSubstPdf">Enviar substituição</button>
+          <div id="substMsg" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ DOCUMENTOS EMBARCADOS (geração 100% embarcada) ══════════
+           O PDF é gerado pela própria aplicação a partir do template declarativo
+           (template.json + assets PNG, extraídos do documento oficial) + os campos
+           do schema de coordenadas — NENHUM PDF externo é carregado nem enviado.
+           Engine: /embedded-docs.js · POC: /ficha-cadastral-embutido. -->
+      <section id="sec-documentos" class="admin-section">
+        <h2>Documentos Embarcados</h2>
+        <p class="section-desc">
+          O formulário oficial é <strong>recriado pela aplicação</strong> a partir do template declarativo
+          (<code>template.json</code> + <code>assets/*.png</code>) e os dados do candidato entram nas coordenadas
+          dos campos do schema — sem carregar PDF pronto. X vem da esquerda, Y do <strong>topo</strong>, unidade em
+          <strong>pt</strong>. O que você vê no preview é o PDF de verdade, gerado agora pela engine
+          (<code>embedded-docs.js</code>). Ajustes de coordenada são feitos no <strong>Editor Visual</strong>
+          (os dois leem o mesmo overlay) e versionados no repositório.
+        </p>
+        <div class="tabs" role="tablist" aria-label="Áreas de documentos embarcados">
+          <button type="button" role="tab" data-dntab="templates" aria-selected="true" class="active">Templates Embarcados</button>
+          <button type="button" role="tab" data-dntab="comparacao" aria-selected="false">Comparação</button>
+          <button type="button" role="tab" data-dntab="logs" aria-selected="false">Logs</button>
+        </div>
+
+        <!-- ── Templates Embarcados: preview do PDF real + localizador de campos ── -->
+        <div class="panel tab-pane active" id="dnPane-templates">
+          <div class="toolbar">
+            <select id="dnDoc" style="min-width:280px" aria-label="Documento embarcado"></select>
+            <select id="dnPage" style="min-width:130px" aria-label="Página do documento"></select>
+            <label for="dnZoom" class="sr-only">Zoom</label>
+            <select id="dnZoom" style="min-width:100px" title="Zoom visual — não altera a escala real do documento">
+              <option value="50">Zoom 50%</option>
+              <option value="75">Zoom 75%</option>
+              <option value="100" selected>Zoom 100%</option>
+              <option value="150">Zoom 150%</option>
+              <option value="200">Zoom 200%</option>
+            </select>
+            <button type="button" class="btn" id="btnDnGerarPdf">▶ Gerar PDF de teste</button>
+          </div>
+          <div id="dnResumo" class="section-desc"></div>
+          <div class="editor-layout">
+            <div class="pdf-viewport">
+              <div class="pdf-page-stack" id="dnPageStack">
+                <canvas id="dnCanvas"></canvas>
+              </div>
+            </div>
+            <div class="panel editor-form">
+              <div class="field-search">
+                <label for="dnBuscaElemento">Campos do documento</label>
+                <input type="search" id="dnBuscaElemento" placeholder="Buscar por chave, rótulo ou coordenada…" autocomplete="off">
+                <div class="field-list-count" id="dnListaContagem"></div>
+                <div class="field-list" id="dnLista" role="listbox" aria-label="Campos do documento"></div>
+              </div>
+              <hr class="editor-sep">
+              <h3 id="dnElTitulo">Campo selecionado</h3>
+              <div id="dnElInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo na lista para ver a coordenada e abrir no Editor Visual.</div>
+              <div class="form-grid">
+                <div><label for="dnX">X (pt)</label><input type="text" id="dnX" disabled></div>
+                <div><label for="dnY">Y (pt, base)</label><input type="text" id="dnY" disabled></div>
+                <div><label for="dnW">Largura</label><input type="text" id="dnW" disabled></div>
+                <div><label for="dnH">Altura</label><input type="text" id="dnH" disabled></div>
+                <div><label for="dnPagina">Página</label><input type="text" id="dnPagina" disabled></div>
+                <div><label for="dnRotacao">Pendência</label><input type="text" id="dnRotacao" disabled></div>
+              </div>
+              <div class="editor-actions" style="flex-wrap:wrap;gap:6px">
+                <button type="button" class="btn small" id="dnIrEditor" disabled>✥ Ajustar no Editor Visual</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Comparação: original × embarcado, com diff e deslocamento ── -->
+        <div class="panel tab-pane" id="dnPane-comparacao">
+          <h3>Comparação visual — template oficial × PDF embarcado</h3>
+          <p class="section-desc">
+            Renderiza as duas páginas na mesma escala e compara pixel a pixel. O deslocamento
+            estimado e o percentual divergente são medidos com a tolerância configurada — é o teste
+            de regressão visual do template embarcado.
+          </p>
+          <div class="toolbar">
+            <label class="chk-inline" for="dnCmpOverlay"><input type="checkbox" id="dnCmpOverlay"> Sobrepor (transparência)</label>
+            <label for="dnCmpOpacidade" class="sr-only">Opacidade do embarcado</label>
+            <input type="range" id="dnCmpOpacidade" min="0" max="100" value="50" style="width:140px">
+            <label for="dnCmpTolerancia" class="sr-only">Tolerância visual (pt)</label>
+            <input type="number" id="dnCmpTolerancia" step="0.5" min="0" value="1" style="width:90px" title="Tolerância visual (pt)">
+            <button type="button" class="btn" id="btnDnComparar">Comparar</button>
+            <button type="button" class="btn secondary" id="btnDnCompararAbrir" disabled>Abrir os dois PDFs</button>
+          </div>
+          <div id="dnCmpResultado" class="section-desc"></div>
+          <div class="cmp-grid" id="dnCmpPalco">
+            <div><div class="cmp-rotulo">Template oficial</div><canvas id="dnCmpOriginal" class="cmp-canvas"></canvas></div>
+            <div><div class="cmp-rotulo">PDF embarcado (gerado agora)</div><canvas id="dnCmpNativo" class="cmp-canvas"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ── Logs: alterações do documento (a trilha administrativa fica no Histórico) ── -->
+        <div class="panel tab-pane" id="dnPane-logs">
+          <h3>Log de alterações do documento</h3>
+          <p class="section-desc">Documento · autor · data · alteração (o Histórico geral do painel continua registrando os eventos administrativos; o template embarcado é versionado no repositório).</p>
+          <div id="dnLogs"></div>
+        </div>
+      </section>
+
+
+      <!-- ══════════ COORDENADAS ══════════ -->
+      <section id="sec-coordenadas" class="admin-section">
+        <h2>Editor Visual</h2>
+        <p class="section-desc">
+          O documento é montado <strong>100% embarcado</strong>: um <code>template.json</code> descreve os textos fixos,
+          as imagens, as réguas e as caixinhas de marcação, e o schema de campos diz onde entram os DADOS do candidato.
+          Aqui os dois lados são editáveis: arraste os campos sobre a página e use a aba
+          <strong>Campos do documento</strong> para listar e reescrever <em>todos</em> os campos que compõem o arquivo —
+          inclusive os textos fixos (Código/Revisão, Data da publicação, Vigência, rótulos e opções de BANCO).
+          Coordenadas em pontos (pt), origem no canto <strong>inferior esquerdo</strong>, Y cresce para cima — o mesmo
+          sistema do pdf-lib.
+        </p>
+        <div class="toolbar">
+          <select id="edDoc" style="min-width:280px">
+            <option value="ficha_cadastral">Ficha Cadastral (F-075) — ficha_cadastral_campos.json</option>
+            <option value="declaracao_plano_saude">Declaração Plano de Saúde — declaracao_plano_saude_campos.json</option>
+          </select>
+          <select id="edPage" style="min-width:120px" aria-label="Página"></select>
+          <label class="chk-inline" for="edSnap"><input type="checkbox" id="edSnap" checked> Snap to grid</label>
+          <select id="edSnapGrid" style="min-width:110px" aria-label="Grade de encaixe">
+            <option value="1">1 pt</option>
+            <option value="5" selected>5 pts</option>
+            <option value="10">10 pts</option>
+          </select>
+          <label class="chk-inline" for="edVerEngine"><input type="checkbox" id="edVerEngine" checked> Ver o PDF gerado</label>
+          <button type="button" class="btn secondary" id="edTestPreview">Ver PDF oficial</button>
+          <button type="button" class="btn secondary" id="edGerarTeste">Gerar PDF (engine)</button>
+          <button type="button" class="btn secondary" id="edGoCampos">Ver tabela de campos</button>
+        </div>
+        <div class="legend-selos">
+          <span class="badge muted">Atalhos</span> setas = mover (1 pt) · Shift+setas = 5 pts · Alt+setas = ajuste fino (0,5 pt) · Ctrl/Cmd+clique = seleção múltipla · L = alinhar · Shift+L = distribuir · R = restaurar
+          <span class="badge muted">Lateral</span> laranja = campo de dado (schema) · azul = texto fixo do template · verde = caixinha de marcação
+        </div>
+        <div class="editor-layout">
+          <div class="ed-dual">
+            <div class="pdf-viewport">
+              <div class="pdf-page-stack" id="edPageStack">
+                <canvas id="edCanvas"></canvas>
+                <div id="edBoxes" class="field-layer"></div>
+              </div>
+              <div class="ed-titulo">Oficial — <code id="edNomePdf">F-075</code></div>
+            </div>
+            <div class="pdf-viewport" id="edEngineWrap">
+              <div class="pdf-page-stack" id="edInnerEngine">
+                <canvas id="edCanvasEngine"></canvas>
+                <div id="edBoxesEngine" class="field-layer"></div>
+              </div>
+              <div class="ed-titulo">Gerado — <code>embedded-docs.js</code> <span id="edEngineNota" class="muted"></span></div>
+            </div>
+          </div>
+          <div class="panel editor-form">
+            <div class="tabs" id="edTabs" role="tablist">
+              <button class="tab active" type="button" role="tab" data-edtab="campos" aria-selected="true">Campos de dado</button>
+              <button class="tab" type="button" role="tab" data-edtab="conteudo" aria-selected="false">Campos do documento</button>
+            </div>
+            <div class="tab-pane active" data-edpane="campos">
+              <!-- Tarefa 4: busca de campos + lista lateral (clicar seleciona no canvas) -->
+              <div class="field-search">
+                <label for="edBuscaCampo">Localizar campo de dado</label>
+                <input type="search" id="edBuscaCampo" placeholder="Buscar por label, seção ou chave…" autocomplete="off">
+                <div class="field-list-count" id="edListaContagem"></div>
+                <div class="field-list" id="edListaCampos" role="listbox" aria-label="Campos de dado"></div>
+              </div>
+            </div>
+            <div class="tab-pane" data-edpane="conteudo">
+              <div class="field-search">
+                <label for="edBuscaConteudo">Campos que compõem o documento</label>
+                <input type="search" id="edBuscaConteudo" placeholder="Buscar em tudo: nome, valor, seção…" autocomplete="off">
+                <div class="field-list-count" id="edConteudoResumo"></div>
+                <div class="field-list tall" id="edFormulario" role="listbox" aria-label="Campos do documento"></div>
+              </div>
+            </div>
+            <hr class="editor-sep">
+            <h3 id="edFieldTitle">Campo</h3>
+            <div id="edFieldInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo no PDF ou na lista.</div>
+            <div id="edBlocoConteudo" hidden>
+              <div class="form-grid" style="margin-bottom:8px">
+                <div style="grid-column:1/-1"><label for="edValor">Texto do campo</label>
+                  <textarea id="edValor" rows="2" spellcheck="false" placeholder="Texto exibido no documento"></textarea>
+                  <div class="muted" id="edValorNota" style="font-size:10.5px;margin-top:4px"></div>
+                </div>
+                <div><label for="edSize" id="edLSize">Corpo (pt)</label><input type="number" id="edSize" step="0.25" min="1" max="40"></div>
+                <div><label class="chk-inline" for="edVisivel"><input type="checkbox" id="edVisivel"> Visível</label></div>
+                <div style="grid-column:1/-1"><label for="edNomeCampo">Nome do campo (aparece na lista e no app)</label>
+                  <input type="text" id="edNomeCampo" placeholder="ex.: Banco — Bradesco — Corrente">
+                </div>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div><label for="edX">X (pt)</label><input type="number" id="edX" step="0.5" disabled></div>
+              <div><label for="edY">Y (pt)</label><input type="number" id="edY" step="0.5" disabled></div>
+              <div><label for="edL" id="edLLabel">Largura</label><input type="number" id="edL" step="0.5" disabled></div>
+              <div><label for="edA">Altura</label><input type="number" id="edA" step="0.5" disabled></div>
+              <div><label for="edPg">Página</label><input type="number" id="edPg" min="1" step="1" disabled></div>
+              <div><label for="edT">Tamanho da fonte</label><input type="number" id="edT" step="0.5" disabled></div>
+              <div style="grid-column:1/-1"><label for="edObs">Observação</label><input type="text" id="edObs" readonly title="Esta configuração depende de lógica implementada no código."></div>
+            </div>
+            <div class="notice info" id="edFontNote" style="display:none">
+              Este JSON não define fonte/tamanho/alinhamento por campo — o estilo é fixado no
+              código de geração (implementação atual). Edite apenas posição e dimensões.
+            </div>
+            <div class="editor-actions">
+              <button type="button" class="btn" id="edSave" disabled>Salvar alterações</button>
+              <button type="button" class="btn secondary" id="edCancel" disabled>Cancelar</button>
+              <button type="button" class="btn secondary" id="edRestore" disabled title="Reverte apenas este campo ao valor salvo no overlay (ou ao original), preservando as demais edições pendentes">↩ Restaurar este campo</button>
+            </div>
+            <div class="editor-actions" id="edAcoesConteudo" hidden style="margin-top:8px">
+              <button type="button" class="btn secondary" id="edExportarTextos" title="Baixa o textos.json com as edições de conteúdo (texto/visibilidade/corpo) para versionar no repositório">Exportar textos.json</button>
+            </div>
+            <div id="edPending" style="margin-top:12px"></div>
+            <!-- §11 — seleção múltipla: alinhar/distribuir/restaurar -->
+            <div class="bulk-bar" id="edMultiBar" hidden style="margin-top:12px">
+              <span id="edMultiInfo">0 selecionado(s)</span>
+              <label for="edMultiEixo" class="sr-only">Eixo</label>
+              <select id="edMultiEixo"><option value="x">Horizontal (X)</option><option value="y">Vertical (Y)</option></select>
+              <button type="button" class="btn small" id="edMultiAlinhar">Alinhar</button>
+              <button type="button" class="btn small" id="edMultiDistribuir">Distribuir</button>
+              <button type="button" class="btn small secondary" id="edMultiRestaurar">↩ Restaurar</button>
+              <button type="button" class="btn small secondary" id="edMultiLimpar">Limpar seleção</button>
+            </div>
+            <!-- §10 — Field Builder: criação de campo a partir do editor visual -->
+            <div class="editor-actions" style="margin-top:12px">
+              <button type="button" class="btn secondary" id="edNovoCampo" title="§10 — Field Builder: cria um campo novo com ID estável e abre o editor na seção criada">＋ Novo campo (Field Builder)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ CIDADES ══════════ -->
+      <section id="sec-cidades" class="admin-section">
+        <h2>Cidades</h2>
+        <p class="section-desc">
+          Mapeamento cidade → ficha regional (fluxo Outros Planos). Fonte ativa:
+          <span id="cidFonte">—</span>. Normalização idêntica à da aplicação
+          (sem acentos, maiúsculas, espaços colapsados); correção histórica
+          FICHA REEBOLSO → FICHA REEMBOLSO preservada.
+        </p>
+        <div class="toolbar">
+          <input type="search" id="cidSearch" placeholder="Pesquisar cidade…" style="flex:1;min-width:180px">
+          <select id="cidUfFilter" style="min-width:90px"><option value="">UF: todas</option></select>
+          <select id="cidFichaFilter" style="min-width:160px"><option value="">Ficha: todas</option></select>
+          <button type="button" class="btn secondary" id="btnNovaCidade">+ Nova cidade</button>
+          <button type="button" class="btn secondary" id="btnImportCidades">⬆ Importar CSV/JSON</button>
+          <input type="file" id="cidImportFile" accept=".csv,.json,text/csv,application/json" hidden>
+          <button type="button" class="btn secondary" id="btnExportCidades">⬇ Exportar</button>
+          <div class="export-menu" id="cidExportMenu" hidden>
+            <button type="button" data-export="json">JSON</button>
+            <button type="button" data-export="csv">CSV</button>
+          </div>
+        </div>
+        <div class="legend-selos">
+          <span class="badge editable">✎ Editável</span> toda a tabela é editável pelo painel (overlay) — os JSONs de origem nunca são alterados
+        </div>
+        <div class="chip-filtro" id="cidFiltroEsp" hidden></div>
+        <div class="bulk-bar" id="cidBulkBar" hidden>
+          <span id="cidBulkInfo">0 selecionada(s)</span>
+          <label for="cidBulkFicha" class="sr-only">Trocar ficha para</label>
+          <select id="cidBulkFicha"></select>
+          <button type="button" class="btn small" id="btnBulkAplicar">Aplicar</button>
+          <button type="button" class="btn small secondary" id="btnBulkLimpar">Limpar seleção</button>
+        </div>
+        <div class="panel table-wrap" style="padding:0">
+          <table class="data" id="cidTable">
+            <thead><tr>
+              <th class="chk"><input type="checkbox" id="cidSelTodos" aria-label="Selecionar todas as cidades da página"></th>
+              <th>Cidade</th><th>UF</th><th>Regional</th><th>Ficha a utilizar</th><th>Template PDF</th><th>Ações</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="cidPaginacao" aria-label="Paginação de cidades"></div>
+        <div class="table-count" id="cidCount"></div>
+        <div class="panel" id="cidImportPanel" hidden>
+          <h3>Importar cidades (CSV ou JSON)</h3>
+          <p class="section-desc">
+            CSV com cabeçalho <code>cidade;uf;regional;ficha</code> (separador vírgula ou ponto-e-vírgula)
+            ou JSON (array de objetos). O preview mostra exatamente o que será aplicado antes de confirmar:
+            válidos entram no overlay; duplicados e inválidos são listados para revisão. XLSX não é suportado
+            (exigiria biblioteca nova fora do build atual).
+          </p>
+          <div id="cidImportPreview"></div>
+        </div>
+        <div class="panel" id="cidFormPanel" hidden>
+          <h3 id="cidFormTitle">Nova cidade</h3>
+          <div class="form-grid">
+            <div><label for="cidNome">Cidade (como no IBGE)</label><input type="text" id="cidNome" placeholder="Ex.: São Paulo"></div>
+            <div><label for="cidUf">UF</label><input type="text" id="cidUf" maxlength="2" placeholder="SP" style="text-transform:uppercase"></div>
+            <div><label for="cidRegional">Regional</label><input type="text" id="cidRegional" maxlength="4" placeholder="Ex.: SP" style="text-transform:uppercase"></div>
+            <div><label for="cidFicha">Ficha a utilizar</label>
+              <select id="cidFicha">
+                <option>FICHA BH</option><option>FICHA FSA</option><option>FICHA GNDI</option>
+                <option>FICHA GOIANIA</option><option>FICHA REEMBOLSO</option><option>FICHA SAFO</option>
+                <option>FICHA SJC</option>
+              </select></div>
+          </div>
+          <div class="editor-actions">
+            <button type="button" class="btn" id="cidSalvar">Adicionar cidade</button>
+            <button type="button" class="btn secondary" id="cidCancelar">Cancelar</button>
+          </div>
+          <div id="cidMsg" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ VALIDAÇÃO (§24) ══════════ -->
+      <section id="sec-validacao" class="admin-section">
+        <h2>Validação</h2>
+        <p class="section-desc">
+          Verificação de integridade da configuração: campos, cidades e templates.
+          Erros críticos <strong>bloqueiam a publicação</strong>; avisos exigem confirmação (§24).
+        </p>
+        <div class="panel">
+          <h3>Relatório de integridade</h3>
+          <div id="validacaoLista">Abra esta seção para verificar.</div>
+        </div>
+      </section>
+
+      <!-- ══════════ CONFIGURAÇÕES (§22) ══════════ -->
+      <section id="sec-configuracoes" class="admin-section">
+        <h2>Configurações</h2>
+        <p class="section-desc">
+          Parâmetros administrativos por categoria (Geral, Formulários, PDFs, Cidades, Segurança).
+          Alterações são salvas no overlay administrativo e registradas no Histórico.
+        </p>
+        <div class="panel">
+          <div id="configLista">Carregando…</div>
+        </div>
+      </section>
+
+      <!-- ══════════ ASSISTÊNCIA ══════════ -->
+      <section id="sec-assistencia" class="admin-section">
+        <h2>Assistência Médica</h2>
+        <p class="section-desc">Mapa de associação do fluxo F-089: tipo de plano → cidade → template → coordenadas.</p>
+        <div class="panel">
+          <h3>Fluxo Plano de Benefícios (regra fixa)</h3>
+          <pre style="background:#f4f1ed;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto">Plano de Benefícios → DECLARACAO PLANO DE SAUDE.pdf
+                     → assistencia_medica_campos.json (layout comum) + declaracao_plano_saude_campos.json (página 2)
+                     → assinatura na página 2</pre>
+          <p class="section-desc" style="margin-top:8px">Regra implementada no código (<code>ehPlanoBeneficios()</code>) — somente leitura.</p>
+        </div>
+        <div class="panel">
+          <h3>Fluxo Outros Planos (por cidade)</h3>
+          <pre id="assocMap" style="background:#f4f1ed;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;max-height:420px"></pre>
+        </div>
+        <div class="panel">
+          <h3>Ações rápidas</h3>
+          <div class="row-actions">
+            <a class="btn secondary" href="#sec-cidades" onclick="AdminPanel.showSection('cidades')">Gerenciar cidades</a>
+            <a class="btn secondary" href="#sec-coordenadas" onclick="AdminPanel.showSection('coordenadas')">Editar coordenadas</a>
+            <a class="btn secondary" href="#sec-pdfs" onclick="AdminPanel.showSection('pdfs')">Gerenciar PDFs</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ FORMULÁRIOS (§8–9: entidade central) ══════════ -->
+      <section id="sec-formularios" class="admin-section">
+        <div id="formListView">
+          <h2>Formulários</h2>
+          <p class="section-desc">Fluxos efetivamente presentes no código, com template, quantidade de campos e cidades associadas. Estrutura/rotas são definidas no código (somente leitura); template e status de publicação são gerenciáveis.</p>
+          <div class="legend-selos">
+            <span class="badge readonly">🔒 Estrutura — código</span> rotas/arquivos definidos no código ·
+            <span class="badge editable">✎ Editável</span> template e metadados via painel
+          </div>
+          <div class="toolbar">
+            <input type="search" id="formSearch" placeholder="Pesquisar formulário…" style="flex:1;min-width:180px">
+          </div>
+          <div class="panel table-wrap" style="padding:0">
+            <table class="data" id="formTable">
+              <thead><tr><th>Formulário</th><th>Código</th><th>Rota</th><th>Template</th><th class="num">Campos</th><th class="num">Cidades</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- §9 — área dedicada do formulário (abas) -->
+        <div id="formDetail" hidden>
+          <div class="detail-header">
+            <button type="button" class="btn small secondary" id="fdVoltar">← Formulários</button>
+            <div class="detail-title">
+              <h2 id="fdNome">—</h2>
+              <div class="section-desc" id="fdMeta">—</div>
+            </div>
+            <div class="detail-actions">
+              <button type="button" class="btn small secondary" id="fdEditar">✎ Editar</button>
+              <button type="button" class="btn small secondary" id="fdTestar">▶ Testar</button>
+              <button type="button" class="btn small" id="fdDuplicar">⧉ Duplicar</button>
+            </div>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Áreas do formulário">
+            <button type="button" role="tab" data-tab="geral" aria-selected="true" class="active">Geral</button>
+            <button type="button" role="tab" data-tab="campos" aria-selected="false">Campos</button>
+            <button type="button" role="tab" data-tab="template" aria-selected="false">Template</button>
+            <button type="button" role="tab" data-tab="regras" aria-selected="false">Regras</button>
+            <button type="button" role="tab" data-tab="cidades" aria-selected="false">Cidades</button>
+            <button type="button" role="tab" data-tab="historico" aria-selected="false">Histórico</button>
+          </div>
+          <div class="panel tab-pane active" id="fdPane-geral" role="tabpanel" aria-label="Geral">
+            <div class="form-grid" id="fdGeral"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-campos" role="tabpanel" aria-label="Campos">
+            <p class="section-desc">Campos com coordenadas deste formulário. Clique em <strong>Editar layout</strong> para abrir o editor visual com a lista sincronizada.</p>
+            <div class="toolbar">
+              <button type="button" class="btn secondary" id="fdIrLayout">✥ Editar layout</button>
+              <button type="button" class="btn" id="fdNovoCampo" title="§10 — Field Builder: cria um campo novo com ID estável (o ID nunca muda em renomeações)">＋ Campo</button>
+            </div>
+            <div id="fdCamposTabela"></div>
+            <div id="fdCamposBuilder"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-template" role="tabpanel" aria-label="Template">
+            <div id="fdTemplate"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-regras" role="tabpanel" aria-label="Regras">
+            <div id="fdRegras"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-cidades" role="tabpanel" aria-label="Cidades">
+            <div id="fdCidades"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-historico" role="tabpanel" aria-label="Histórico">
+            <div id="fdHistorico"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ REGRAS ══════════ -->
+      <section id="sec-regras" class="admin-section">
+        <h2>Regras de negócio</h2>
+        <p class="section-desc">
+          Regras identificadas no código e no PRD reverso. Classificação:
+          <span class="badge readonly">🔒 Somente leitura — código</span> (implementada no código),
+          <span class="badge editable">✎ Editável</span> (configurável pelo painel via overlay).
+          Nem toda regra deve virar configuração.
+        </p>
+        <div class="panel" id="regrasPainel"></div>
+      </section>
+
+      <!-- ══════════ DADOS ══════════ -->
+      <section id="sec-dados" class="admin-section">
+        <h2>Dados</h2>
+        <p class="section-desc">Importação/exportação da configuração administrativa e backup. Nunca há substituição silenciosa: o painel mostra o que será alterado antes de aplicar.</p>
+        <div id="dadosModo" class="notice info"></div>
+        <div class="panel">
+          <h3>Exportar configuração</h3>
+          <p class="section-desc">Gera um JSON com o overlay administrativo completo (campos alterados, cidades, associações).</p>
+          <button type="button" class="btn" id="btnExport">Exportar JSON</button>
+        </div>
+        <div class="panel" id="repoExportPanel">
+          <h3>Exportar arquivos do repositório (efetivos)</h3>
+          <p class="section-desc">
+            Gera o arquivo <strong>como a aplicação pública o lê</strong>: JSON base + campos do Field Builder +
+            coordenadas do Editor Visual + cidades do overlay. Baixe, substitua o arquivo de mesmo nome na
+            <strong>raiz do repositório</strong>, comite e faça o deploy. Sem esse passo, uma coordenada ajustada aqui
+            não chega ao PDF do candidato — <strong>a aplicação pública não lê o <code>admin-config.json</code></strong>.
+          </p>
+          <div id="repoExportResumo" class="section-desc"></div>
+          <div class="editor-actions" style="flex-wrap:wrap;gap:8px">
+            <button type="button" class="btn" id="btnExpSchemaFicha">⬇ ficha_cadastral_campos.json</button>
+            <button type="button" class="btn" id="btnExpSchemaDecl">⬇ declaracao_plano_saude_campos.json</button>
+            <button type="button" class="btn secondary" id="btnExpCidadesBrasil">⬇ cidades_brasil.json</button>
+            <button type="button" class="btn secondary" id="btnExpCidadesInfinity">⬇ cidades_infinity.json</button>
+            <button type="button" class="btn secondary" id="btnExpTemplateEmbarcado">⬇ template do documento embarcado (template.json)</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Importar configuração</h3>
+          <p class="section-desc">Lê um JSON exportado, valida a estrutura e apresenta o resumo antes de aplicar.</p>
+          <input type="file" id="importFile" accept="application/json,.json">
+          <div id="importPreview" style="margin-top:12px"></div>
+        </div>
+        <div class="panel" id="backupPanel">
+          <h3>Backups (modo API)</h3>
+          <div id="backupLista" class="section-desc">Carregando…</div>
+        </div>
+      </section>
+
+      <!-- ══════════ SEGURANÇA ══════════ -->
+      <section id="sec-seguranca" class="admin-section">
+        <h2>Segurança</h2>
+        <div class="notice warn">
+          <strong>Proteção client-side.</strong> A verificação de e-mail deste painel segue o
+          mesmo princípio do guard.js das rotas públicas: barreira no navegador, não
+          autenticação server-side. Não deve ser tratada como controle de acesso forte.
+          Evolução recomendada para operações destrutivas: autenticação server-side.
+        </div>
+        <div class="panel">
+          <h3>Controles aplicados</h3>
+          <div id="segLista"></div>
+        </div>
+        <div class="panel">
+          <h3>Verificar integridade</h3>
+          <p class="section-desc">Confere existência/acessibilidade dos templates, validade das coordenadas e consistência das associações cidade → template.</p>
+          <button type="button" class="btn" id="btnIntegridade">Executar verificação</button>
+          <div id="integridadeResultado" style="margin-top:14px"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ HISTÓRICO ══════════ -->
+      <section id="sec-historico" class="admin-section">
+        <h2>Histórico / Auditoria</h2>
+        <p class="section-desc">Eventos administrativos (login, alterações, importações, exportações). No modo API são gravados no servidor; no modo exportação ficam na sessão atual.</p>
+        <div class="panel" id="histPanel">
+          <!-- Tarefa 6: filtros aplicados antes do corte de 200 itens -->
+          <div class="toolbar">
+            <input type="search" id="histBusca" placeholder="Buscar por entidade ou alteração…" style="flex:1;min-width:200px">
+            <select id="histAcao" style="min-width:190px"><option value="">Ação: todas</option></select>
+            <select id="histUsuario" style="min-width:190px"><option value="">Usuário: todos</option></select>
+          </div>
+          <div class="table-count" id="histContagem"></div>
+          <div id="histLista">Carregando…</div>
+        </div>
+      </section>
+
+      <!-- ══════════ SISTEMA ══════════ -->
+      <section id="sec-sistema" class="admin-section">
+        <h2>Sistema</h2>
+        <div class="panel">
+          <h3>Modo de persistência</h3>
+          <div id="sisModo" class="section-desc"></div>
+        </div>
+        <div class="panel">
+          <h3>Sobre</h3>
+          <div class="section-desc" id="sisSobre"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal de confirmação -->
+  <div class="modal-overlay" id="confirmOverlay" role="presentation" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h3 id="confirmTitle">Confirmar</h3>
+      <div class="modal-body" id="confirmBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="confirmCancel">Cancelar</button>
+        <button type="button" class="btn danger" id="confirmOk">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de formulário (formModal — Tarefa 1). Estrutura duplicada do confirmOverlay
+       de propósito: confirmModal continua mínimo (título/corpo/ok), enquanto este tem
+       campos dinâmicos com validação inline. Acoplar os dois complicaria ambos. -->
+  <div class="modal-overlay" id="formOverlay" role="presentation" aria-hidden="true">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <h3 id="formModalTitle">Editar</h3>
+      <form id="formModalForm" novalidate>
+        <div class="modal-body" id="formModalFields"></div>
+        <div class="notice err" id="formModalError" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="formModalCancel">Cancelar</button>
+          <button type="submit" class="btn" id="formModalOk">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- §28 — Command Palette (Ctrl+K) -->
+  <div class="cmdk-overlay" id="cmdkOverlay" role="presentation" aria-hidden="true">
+    <div class="cmdk" role="dialog" aria-modal="true" aria-label="Busca global">
+      <input type="text" id="cmdkInput" placeholder="Buscar formulários, cidades, templates, campos…" autocomplete="off" aria-label="Buscar no painel">
+      <div class="cmdk-results" id="cmdkResults" role="listbox" aria-label="Resultados"></div>
+      <div class="cmdk-footer">Esc fecha · Enter abre o primeiro resultado</div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- fontkit: necessário para embutir as TTF declaradas em template.fontes
+       (Arial/Arial Narrow). Sem ele a engine usa a fonte padrão do `fallback`. -->
+  <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="/embedded-docs.js"></script>
+  <script src="/admin/persistence.js"></script>
+  <script src="/admin/panel.js"></script>
+</body>
+</html>

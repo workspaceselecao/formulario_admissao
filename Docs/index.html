@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacidade e segurança | Hub de Recrutamento & Seleção</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  }
+  html {
+    scroll-padding-top: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+  .doc-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 24px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .doc-header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .doc-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+  .doc-back:hover { text-decoration: underline; color: var(--accent-dark); }
+  .doc-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 8px;
+  }
+  .doc-header p {
+    font-size: 14px;
+    color: var(--text-mid);
+  }
+  .doc-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 56px;
+  }
+  .doc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .doc-list li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: border-color 0.18s;
+  }
+  .doc-list li:hover { border-color: var(--accent); }
+  .doc-list a {
+    display: block;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .doc-list a:focus-visible {
+    outline: 3px solid rgba(1, 66, 106, 0.35);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+  .doc-list .doc-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .doc-list .doc-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+  }
+  .doc-revisao-index {
+    margin-top: 28px;
+    padding: 16px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--accent-soft);
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.55;
+  }
+  .doc-revisao-index p { margin: 0 0 10px; }
+  .doc-revisao-index p:last-child { margin-bottom: 0; }
+  .doc-revisao-git-hint {
+    font-size: 12px;
+    color: var(--text-light);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+  <header class="doc-header">
+    <div class="doc-header-inner">
+      <a class="doc-back" href="/index.html">← Voltar aos formulários</a>
+      <h1>Privacidade e segurança</h1>
+      <p>Nesta página você encontra os principais textos sobre como tratamos seus dados, como usar os formulários com segurança e como isso se encaixa na Lei Geral de Proteção de Dados (LGPD). Escolha um tópico abaixo para ler o documento completo.</p>
+      <p style="margin-top:12px;padding:12px 16px;background:var(--accent-soft);border:1px solid rgba(1,66,106,0.2);border-radius:10px;font-size:13px;color:var(--text-mid)"><strong>Novidade:</strong> Páginas formulário possuem controle de acesso por chave derivada (SHA-256 + sessão local). Consulte as seções relevantes em cada documento.</p>
+    </div>
+  </header>
+  <main class="doc-main">
+    <ul class="doc-list">
+      <li id="politica-privacidade">
+        <a href="/Docs/privacy-policy.html">
+          <div class="doc-title">Política de Privacidade</div>
+          <div class="doc-desc">Explica como seus dados são usados ao preencher os formulários e quais são seus direitos.</div>
+        </a>
+      </li>
+      <li id="termos-uso">
+        <a href="/Docs/terms-of-use.html">
+          <div class="doc-title">Termos de Uso</div>
+          <div class="doc-desc">Condições de uso da ferramenta e o que esperamos de quem gera os PDFs.</div>
+        </a>
+      </li>
+      <li id="fluxo-dados">
+        <a href="/Docs/data-flow.html">
+          <div class="doc-title">Fluxo de dados</div>
+          <div class="doc-desc">Resumo do que acontece com as informações no seu navegador até o arquivo PDF.</div>
+        </a>
+      </li>
+      <li id="impacto-privacidade-ripd">
+        <a href="/Docs/ripd.html">
+          <div class="doc-title">Impacto na privacidade (RIPD)</div>
+          <div class="doc-desc">Como avaliamos os riscos para seus dados neste tipo de ferramenta.</div>
+        </a>
+      </li>
+      <li id="seguranca-plataforma">
+        <a href="/Docs/security-baseline.html">
+          <div class="doc-title">Segurança da plataforma</div>
+          <div class="doc-desc">Medidas que ajudam a manter o serviço dos formulários fiável e protegido.</div>
+        </a>
+      </li>
+      <li id="resposta-incidentes">
+        <a href="/Docs/incident-response.html">
+          <div class="doc-title">Resposta a incidentes</div>
+          <div class="doc-desc">O que fazemos se algo correr mal com a segurança ou a disponibilidade do serviço.</div>
+        </a>
+      </li>
+      <li id="bases-legais-lgpd">
+        <a href="/Docs/legal-basis.html">
+          <div class="doc-title">Bases legais (LGPD)</div>
+          <div class="doc-desc">Enquadramento legal que permite tratar os dados neste contexto.</div>
+        </a>
+      </li>
+      <li id="governanca">
+        <a href="/Docs/governance.html">
+          <div class="doc-title">Governança</div>
+          <div class="doc-desc">Como a empresa organiza e atualiza estas políticas ao longo do tempo.</div>
+        </a>
+      </li>
+    </ul>
+    <section class="doc-revisao-index" aria-label="Revisão jurídica">
+      <p><strong>Revisão:</strong> validado periodicamente com Jurídico e Privacidade sempre que há mudança de versão da aplicação ou o fluxo de dados.</p>
+      <p>
+        <strong>Última validação em:</strong>
+        <span id="docRevisaoUltimaValidacao">—</span>
+        <span class="doc-revisao-git-hint">(data/hora do último commit/push no repositório Git)</span>
+      </p>
+    </section>
+  </main>
+  <script src="/Docs/doc-revision.js" defer></script>
+</body>
+</html>

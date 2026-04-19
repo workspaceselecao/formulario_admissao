@@ -1,0 +1,3638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistência Médica – Hub de Recrutamento & Seleção</title>
+<link rel="icon" type="image/png" href="icone.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-header-nav.css">
+<style>
+  /* ── TOKENS (página) ─────────────────── */
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf9f7;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --border-strong: #9e9890;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --label: #5a554e;
+    --input-focus-border: #efa27f;
+    --accent-border-subtle: rgba(1, 66, 106, 0.2);
+    --accent-border-medium: rgba(1, 66, 106, 0.28);
+    --accent-shadow-subtle: rgba(12, 40, 68, 0.06);
+    --accent-shadow-medium: rgba(1, 66, 106, 0.14);
+    --overlay-bg: rgba(10, 10, 10, 0.45);
+    --destructive: #a33;
+    --destructive-bg: rgba(180, 60, 50, 0.08);
+    --separator-subtle: rgba(0, 0, 0, 0.06);
+    --separator-medium: rgba(0, 0, 0, 0.1);
+    --accent-tap-hover: rgba(1, 66, 106, 0.07);
+    --accent-tap-focus: rgba(1, 66, 106, 0.09);
+    --accent-focus-ring: rgba(1, 66, 106, 0.28);
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── LAYOUT BASE ─────────────────────── */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  /* ── LAYOUT (igual à Ficha Cadastral — coluna central, não largura total) ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  /* ── CARDS E SEÇÕES DO FORMULÁRIO ───── */
+  .section-card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card:hover { box-shadow: var(--shadow-lg); }
+  #secaoDependentes.sec-dependentes--off,
+  #secaoDependentes[hidden] {
+    display: none !important;
+  }
+  body.fluxo-plano-beneficios #fluxoOutrosPlanos {
+    display: none !important;
+  }
+  body:not(.fluxo-plano-beneficios) .assinatura-hint--beneficios {
+    display: none;
+  }
+  body.fluxo-plano-beneficios .assinatura-hint--outros {
+    display: none;
+  }
+  body.fluxo-plano-beneficios #blocoTipoMovimentacao {
+    display: none !important;
+  }
+  body:not(.fluxo-outros-planos) #blocoPlanoOutrosVariante,
+  html:not(:has(input[name="tipoAdesao"]:checked)) #blocoPlanoOutrosVariante {
+    display: none !important;
+  }
+  /* Oculta os campos adicionais em Outros Planos até que o setor seja selecionado */
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) #fluxoOutrosPlanos,
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) #secaoAssinatura,
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) #avisoExportarBottom,
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) .form-actions-bottom {
+    display: none !important;
+  }
+  .plano-adesao-bloco + .plano-adesao-bloco {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  /* Não optante (cancelamento): esconde o card de dependentes. Declarativo; não depende de script. */
+  html:has(#tipoAdesaoNaooptante:checked) #secaoDependentes {
+    display: none !important;
+  }
+  .section-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .section-body { padding: 28px 28px 20px; }
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+
+  /* ── GRELHA 12 COL (igual à Ficha Cadastral) ── */
+  .address-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .address-grid:last-child {
+    margin-bottom: 0;
+  }
+  .address-cep { grid-column: span 2; }
+  .address-endereco { grid-column: span 5; }
+  .address-numero { grid-column: span 1; }
+  .address-complemento { grid-column: span 4; }
+  .address-bairro { grid-column: span 4; }
+  .address-cidade { grid-column: span 6; }
+  .address-cidade-uf { grid-column: span 4; }
+  /* Dados do funcionário — alinhamento vertical entre linhas */
+  .dados-func-uf { grid-column: span 2; }
+  .dados-func-cidade { grid-column: span 6; }
+  .dados-func-matricula { grid-column: span 4; }
+  .dados-func-nome { grid-column: span 6; }
+  .dados-func-nomemae { grid-column: span 6; }
+  .dados-func-sus { grid-column: span 4; }
+  .dados-func-rg { grid-column: span 4; }
+  .dados-func-cpf { grid-column: span 4; }
+  .dados-func-dnasc { grid-column: span 6; }
+  .dados-func-dadm { grid-column: span 6; }
+  .dados-func-cargo { grid-column: span 4; }
+  .dados-func-site { grid-column: span 4; }
+  .dados-func-tel { grid-column: span 4; }
+  .address-grid > .field {
+    min-width: 0;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+  .field input, .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, background 0.18s;
+    width: 100%;
+    min-width: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--input-focus-border);
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input.invalid,
+  .field select.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field select { cursor: pointer; }
+  .signature-pad-wrap { margin-bottom: 20px; }
+  .signature-pad-wrap > label { font-size: 11px; font-weight: 600; color: var(--label); letter-spacing: 0.6px; text-transform: uppercase; font-family: "Poppins", sans-serif; display: block; margin-bottom: 8px; }
+  .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
+  .signature-canvas-outer { position: relative; border: 1.5px solid var(--border); border-radius: 8px; background: #fff; max-width: 100%; }
+  .signature-canvas-outer.desativada {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .signature-pad-wrap.desativada .btn-signature-clear {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: none; }
+  #assinaturaCanvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280; max-height: 200px; touch-action: none; cursor: crosshair; position: relative; z-index: 1; }
+  #assinaturaGuide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+  .signature-pad-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .signature-pad-tools .nao-assinar-manual-label {
+    margin: 0 0 0 auto;
+    padding: 7px 10px;
+  }
+  /* Botão e checkbox sempre na mesma linha, com a mesma altura (alinhamento consistente) */
+  .signature-pad-tools .btn-signature-clear,
+  .signature-pad-tools .nao-assinar-manual-label {
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .signature-pad-tools .btn-signature-clear {
+    justify-content: center;
+  }
+  .btn-signature-clear { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
+  .field input[type="date"] {
+    width: 100%;
+    min-height: 42px;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+
+  .radio-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  /* Duas opções com a mesma largura (ex.: tipo de movimentação) */
+  .radio-inline.radio-inline--fill {
+    flex-wrap: nowrap;
+    width: 100%;
+    align-items: stretch;
+  }
+  .radio-inline.radio-inline--fill .radio-label {
+    flex: 1 1 0;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
+  }
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-label:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .radio-label input {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+  }
+  .radio-label.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(1, 66, 106, 0.28);
+  }
+  .radio-label.active input {
+    accent-color: #fff;
+  }
+  .check-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+  }
+  .check-label input { accent-color: var(--accent); }
+  .check-label.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+  .plano-tip-link {
+    color: var(--accent-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .plano-tip-link:hover { color: var(--accent); }
+  .aviso-box {
+    background: #fffbf5;
+    border: 1.5px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #6b5a3a;
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+  .aviso-box strong { color: #8a4a10; }
+  .subsection-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    color: var(--label);
+    margin-bottom: 12px;
+  }
+  .subsection-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .subsection-title-row .subsection-title {
+    margin-bottom: 0;
+  }
+  .dep-block {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    background: var(--surface);
+  }
+  .filhos-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .btn-excluir-filho {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1.5px solid rgba(198, 40, 40, 0.35);
+    background: rgba(198, 40, 40, 0.06);
+    color: #b71c1c;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+  }
+  .btn-excluir-filho:hover {
+    border-color: #c62828;
+    background: #ffebee;
+    color: #c62828;
+  }
+  .btn-add-filho {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1.5px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-add-filho:hover:not(:disabled) {
+    background: #fff;
+    border-color: var(--accent-dark);
+    color: var(--accent-dark);
+  }
+  .btn-add-filho:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .form-actions-bottom {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .btn-export {
+    --btn-fill-a: #3b2447;
+    --btn-fill-b: #efa27f;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(to top right, var(--btn-fill-a), var(--btn-fill-b));
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.2s, transform 0.12s;
+    text-shadow: 0 1px 2px rgba(30, 14, 38, 0.35);
+    animation: btn-export-spark-glow 2.5s ease-in-out infinite;
+    box-shadow:
+      0 2px 14px rgba(59, 36, 71, 0.38),
+      0 0 22px rgba(239, 162, 127, 0.28);
+  }
+  .btn-export::before {
+    content: "";
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -75%;
+    width: 58%;
+    background: linear-gradient(
+      88deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.06) 62%,
+      transparent 100%
+    );
+    transform: skewX(-16deg);
+    animation: btn-export-spark-sweep 2.75s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .btn-export:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 22px rgba(59, 36, 71, 0.42),
+      0 0 32px rgba(239, 162, 127, 0.48),
+      0 0 46px rgba(255, 228, 210, 0.35);
+  }
+  .btn-export:active { transform: translateY(0); filter: brightness(0.98); }
+  .btn-export svg { width: 16px; height: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+  @keyframes btn-export-spark-glow {
+    0%, 100% {
+      box-shadow:
+        0 2px 14px rgba(59, 36, 71, 0.38),
+        0 0 20px rgba(239, 162, 127, 0.26),
+        0 0 36px rgba(239, 162, 127, 0.12);
+    }
+    50% {
+      box-shadow:
+        0 3px 18px rgba(59, 36, 71, 0.46),
+        0 0 34px rgba(239, 162, 127, 0.52),
+        0 0 52px rgba(255, 235, 220, 0.42);
+    }
+  }
+  @keyframes btn-export-spark-sweep {
+    0% { transform: skewX(-16deg) translateX(-8%); opacity: 0; }
+    8% { opacity: 1; }
+    42% { transform: skewX(-16deg) translateX(320%); opacity: 1; }
+    43%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-export { animation: none; box-shadow: 0 2px 14px rgba(59, 36, 71, 0.38); }
+    .btn-export::before { animation: none; opacity: 0; }
+  }
+  .btn-download-empty {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-download-empty:hover { background: var(--accent-soft); }
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--text);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.20);
+  }
+  #toast.show { display: flex; }
+  #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; }
+  body.modal-open { overflow: hidden; }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.58);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(620px, 100%);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .modal-head.modal-head--atencao {
+    background: #8a4510;
+    color: #fff;
+  }
+  .modal-head {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .modal-body {
+    padding: 18px;
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px 18px;
+  }
+  .btn-modal {
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-modal.cancel { background: #fff; color: var(--text-mid); }
+  .btn-modal.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
+  /* Telas muito estreitas: compacta o botão para o par continuar na mesma linha */
+  @media (max-width: 360px) {
+    .signature-pad-tools .btn-signature-clear {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
+    .page-header {
+      padding: 20px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+    body.page-header-mobile .page-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateZ(0);
+      transition: transform 0.22s ease;
+    }
+    body.page-header-mobile {
+      padding-top: var(--page-header-h, 160px);
+      transition: padding-top 0.22s ease;
+    }
+    body.page-header-mobile.page-header--away {
+      padding-top: 0;
+    }
+    body.page-header-mobile.page-header--away .page-header {
+      transform: translateY(-100%);
+    }
+    .container { padding: 24px 16px 60px; }
+    .section-body { padding: 20px 16px 16px; }
+    .address-grid {
+      grid-template-columns: 1fr;
+    }
+    .address-cep,
+    .address-endereco,
+    .address-numero,
+    .address-complemento,
+    .address-bairro,
+    .address-cidade,
+    .address-cidade-uf,
+    .dados-func-uf,
+    .dados-func-cidade,
+    .dados-func-matricula,
+    .dados-func-nome,
+    .dados-func-nomemae,
+    .dados-func-sus,
+    .dados-func-rg,
+    .dados-func-cpf,
+    .dados-func-dnasc,
+    .dados-func-dadm,
+    .dados-func-cargo,
+    .dados-func-site,
+    .dados-func-tel {
+      grid-column: span 1;
+    }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3 { grid-column: span 1; }
+    .radio-inline.radio-inline--fill {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+    .radio-inline.radio-inline--fill .radio-label {
+      flex: none;
+      width: 100%;
+    }
+    .form-actions-bottom { flex-direction: column; width: 100%; }
+    .btn-export { width: 100%; justify-content: center; }
+    /* 16px evita zoom automático do iOS ao focar; estabiliza o picker de UF/cidade. */
+    .field--uf select,
+    .field--cidade select,
+    #uf,
+    #cidade {
+      font-size: 16px;
+    }
+  }
+</style>
+<style>html[data-guard-hidden] body{display:none!important}</style>
+<script src="guard.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <button type="button" class="header-menu-btn" id="headerMenuBtn" aria-expanded="false" aria-controls="headerNavPanel" aria-label="Abrir menu">
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+  </button>
+  <div class="page-header-main">
+    <div class="brand">
+      <img src="icone.png" alt="Logo" class="brand-logo">
+      <span>Assistência Médica</span>
+    </div>
+  </div>
+</header>
+
+<div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
+<nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-labelledby="headerNavTitle" aria-hidden="true">
+  <div class="header-nav-panel-inner">
+    <div class="header-nav-panel-head">
+      <h2 class="header-nav-panel-title" id="headerNavTitle">Assistência Médica</h2>
+      <button type="button" class="header-nav-close-btn" id="headerNavCloseBtn" aria-label="Fechar menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <ul class="header-nav-links" role="list">
+      <li>
+        <a href="index.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Início
+        </a>
+      </li>
+      <li>
+        <a href="ficha_cadastral.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Ficha Cadastral
+        </a>
+      </li>
+      <li>
+        <a href="carta_bradesco.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Carta Conta Salário (Bradesco)
+        </a>
+      </li>
+      <li>
+        <span class="header-nav-link header-nav-link--disabled" aria-disabled="true" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Termos de Aceite
+        </span>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-link--destructive rascunho-descartar" id="btnDescartarRascunho">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          Descartar rascunho
+        </button>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-download" onclick="abrirModalAtencaoDownloadModelo()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Baixar modelo da Ficha em branco (PDF)
+        </button>
+      </li>
+      <li>
+        <a href="/admin" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Configurações
+        </a>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-link--destructive" onclick="atentoEndSession()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          Encerrar acesso
+        </button>
+      </li>
+    </ul>
+    <ul class="header-nav-links header-nav-links--legal" role="list" aria-label="Privacidade e documentação">
+      <li>
+        <a href="/politica-de-privacidade" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Política de Privacidade
+        </a>
+      </li>
+      <li>
+        <a href="/termos-de-uso" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Termos de Uso
+        </a>
+      </li>
+      <li>
+        <a href="/privacidade-e-seguranca" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Privacidade e segurança
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="section-card" id="secaoTipoPlano">
+    <div class="section-header"><div class="dot"></div>Plano e adesão</div>
+    <div class="section-body">
+      <div class="plano-adesao-bloco">
+        <div class="subsection-title">Tipo de plano</div>
+        <div class="radio-inline radio-inline--fill" id="tipoPlanoGroup" style="margin-top:8px">
+          <label class="radio-label"><input type="radio" name="tipoPlano" value="plano_beneficios" checked onchange="toggleTipoPlano(this)"> Plano de Benefícios</label>
+          <label class="radio-label"><input type="radio" name="tipoPlano" value="outros_planos" onchange="toggleTipoPlano(this)"> Outros Planos</label>
+        </div>
+        <p class="signature-pad-hint" style="margin-top:12px;font-size:12px;color:var(--text-mid);line-height:1.5">
+          <strong>Plano de Benefícios:</strong> Disponibilização de TELEMEDICINA em parceria com o
+          <a
+            class="plano-tip-link"
+            href="./DECLARACAO%20PLANO%20DE%20SAUDE.pdf"
+            download="DECLARACAO PLANO DE SAUDE.pdf"
+          >Programa Saúde Família +</a>.<br>
+          <strong>Outros Planos:</strong> Disponível para cargos específicos e orientados em processo seletivo.
+        </p>
+      </div>
+      <div class="plano-adesao-bloco" id="blocoTipoMovimentacao">
+        <div class="subsection-title">Tipo de movimentação</div>
+        <div class="radio-inline radio-inline--fill" id="tipoAdesaoGroup" style="margin-top:8px">
+          <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR</label>
+          <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante">NÃO QUERO ADERIR</label>
+        </div>
+      </div>
+      <div class="plano-adesao-bloco" id="blocoPlanoOutrosVariante" hidden>
+        <div class="subsection-title">SELECIONE O SETOR</div>
+        <div class="check-group" id="planoOutrosVarianteGroup" style="margin-top:8px">
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="ms_i"> MS I</label>
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="ms_ii"> MS II</label>
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="global"> GLOBAL</label>
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="infinity"> INFINITY</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fluxoOutrosPlanos">
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
+    <div class="section-body">
+      <div class="address-grid">
+        <div class="field field--uf dados-func-uf">
+          <label>Estado <span class="req">*</span></label>
+          <select id="uf">
+            <option value="">—</option>
+            <option value="AC">AC – Acre</option>
+            <option value="AL">AL – Alagoas</option>
+            <option value="AM">AM – Amazonas</option>
+            <option value="AP">AP – Amapá</option>
+            <option value="BA">BA – Bahia</option>
+            <option value="CE">CE – Ceará</option>
+            <option value="DF">DF – Distrito Federal</option>
+            <option value="ES">ES – Espírito Santo</option>
+            <option value="GO">GO – Goiás</option>
+            <option value="MA">MA – Maranhão</option>
+            <option value="MG">MG – Minas Gerais</option>
+            <option value="MS">MS – Mato Grosso do Sul</option>
+            <option value="MT">MT – Mato Grosso</option>
+            <option value="PA">PA – Pará</option>
+            <option value="PB">PB – Paraíba</option>
+            <option value="PE">PE – Pernambuco</option>
+            <option value="PI">PI – Piauí</option>
+            <option value="PR">PR – Paraná</option>
+            <option value="RJ">RJ – Rio de Janeiro</option>
+            <option value="RN">RN – Rio Grande do Norte</option>
+            <option value="RO">RO – Rondônia</option>
+            <option value="RR">RR – Roraima</option>
+            <option value="RS">RS – Rio Grande do Sul</option>
+            <option value="SC">SC – Santa Catarina</option>
+            <option value="SE">SE – Sergipe</option>
+            <option value="SP">SP – São Paulo</option>
+            <option value="TO">TO – Tocantins</option>
+          </select>
+        </div>
+        <div class="field field--cidade dados-func-cidade">
+          <label>Cidade <span class="req">*</span></label>
+          <select id="cidade" disabled>
+            <option value="">— Selecione o estado —</option>
+          </select>
+        </div>
+        <div class="field field--matricula dados-func-matricula">
+          <label>Matrícula</label>
+          <input type="text" id="matricula" placeholder="">
+        </div>
+        <div class="field dados-func-nome">
+          <label>Nome do Funcionário <span class="req">*</span></label>
+          <input type="text" id="funcionario" placeholder="Nome completo">
+        </div>
+        <div class="field dados-func-nomemae">
+          <label>Nome da Mãe</label>
+          <input type="text" id="nomemae" placeholder="">
+        </div>
+        <div class="field field--sus dados-func-sus">
+          <label>Nº do Cartão SUS</label>
+          <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
+        </div>
+        <div class="field field--rg dados-func-rg">
+          <label>RG</label>
+          <input type="text" id="rg" placeholder="">
+        </div>
+        <div class="field field--cpf dados-func-cpf">
+          <label>CPF <span class="req">*</span></label>
+          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field dados-func-dnasc">
+          <label>Data de Nascimento</label>
+          <input type="date" id="dataNascimentoFunc" autocomplete="off">
+        </div>
+        <div class="field dados-func-dadm">
+          <label>Data de Admissão</label>
+          <input type="date" id="dataAdmissaoFunc" autocomplete="off">
+        </div>
+        <div class="field dados-func-cargo">
+          <label>Cargo</label>
+          <input type="text" id="cargo" placeholder="">
+        </div>
+        <div class="field dados-func-site">
+          <label>Site / Unidade</label>
+          <input type="text" id="site" placeholder="">
+        </div>
+        <div class="field dados-func-tel">
+          <label>Telefone</label>
+          <input type="text" id="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="16" spellcheck="false" autocomplete="tel">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Endereço residencial</div>
+    <div class="section-body">
+      <div class="address-grid">
+        <div class="field address-cep">
+          <label>CEP</label>
+          <input type="text" id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code" spellcheck="false">
+        </div>
+        <div class="field address-endereco">
+          <label>Endereço (Rua/Av)</label>
+          <input type="text" id="rua" placeholder="">
+        </div>
+        <div class="field address-numero">
+          <label>Número</label>
+          <input type="text" id="numero" placeholder="">
+        </div>
+        <div class="field address-complemento">
+          <label>Complemento</label>
+          <input type="text" id="complemento" placeholder="">
+        </div>
+        <div class="field address-bairro">
+          <label>Bairro</label>
+          <input type="text" id="bairro" placeholder="">
+        </div>
+        <div class="field address-cidade-uf">
+          <label>Cidade/UF</label>
+          <input type="text" id="cidadeuf" placeholder="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card" id="secaoDependentes">
+    <div class="section-header"><div class="dot"></div>Dependentes</div>
+    <div class="section-body">
+      <div class="aviso-box" style="margin-bottom:18px">
+        Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do <strong>Pessoas Online</strong>, após sua admissão.
+      </div>
+
+      <div class="dep-block">
+        <div class="subsection-title">Cônjuge</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="conjIncluirLabel">
+            <input type="checkbox" id="conj_incluir" onchange="toggleDepConjuge()"> Incluir cônjuge no plano
+          </label>
+        </div>
+        <div id="conjCampos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Cônjuge <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_nome" class="conj-field">
+            </div>
+            <div class="field">
+              <label>CPF do Cônjuge <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_cpf" class="conj-field" maxlength="14" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req conj-req">*</span></label>
+              <input type="date" id="conj_nasc" class="conj-field" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_sus" class="conj-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field col-span-2">
+              <label>Nome da Mãe do(a) Cônjuge <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_nomemae" class="conj-field">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="filBloco1" class="dep-block">
+        <div class="subsection-title">Filho(a)</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil1IncluirLabel">
+            <input type="checkbox" id="fil1_incluir" onchange="toggleDepFilho(1)"> Incluir filho(a) no plano
+          </label>
+        </div>
+        <div id="fil1Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_nome" class="fil1-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_cpf" class="fil1-field" maxlength="14" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil1-req">*</span></label>
+              <input type="date" id="fil1_nasc" class="fil1-field" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_sus" class="fil1-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_nomemae" class="fil1-field">
+            </div>
+            <div class="field col-span-2" id="fil1_wrapDnv" hidden>
+              <label>Nº Declaração de Nascido Vivo <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_nascvivo" class="fil1-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filhos-acoes" id="filhosAcoesBar">
+        <button type="button" class="btn-add-filho" id="btnAddFilho" onclick="adicionarFilhoExtra()">+ Adicionar filho</button>
+      </div>
+
+      <div id="filBloco2" class="dep-block" style="display:none">
+        <div class="subsection-title-row">
+          <div class="subsection-title">Filho(a) 2</div>
+          <button type="button" class="btn-excluir-filho" onclick="solicitarConfirmacaoExcluirFilhoModulo(2)" aria-label="Excluir módulo filho 2">✕ Excluir</button>
+        </div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil2IncluirLabel">
+            <input type="checkbox" id="fil2_incluir" onchange="toggleDepFilho(2)"> Incluir filho(a) 2 no plano
+          </label>
+        </div>
+        <div id="fil2Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_nome" class="fil2-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_cpf" class="fil2-field" maxlength="14" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil2-req">*</span></label>
+              <input type="date" id="fil2_nasc" class="fil2-field" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_sus" class="fil2-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_nomemae" class="fil2-field">
+            </div>
+            <div class="field col-span-2" id="fil2_wrapDnv" hidden>
+              <label>Nº Declaração de Nascido Vivo <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_nascvivo" class="fil2-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="filBloco3" class="dep-block" style="display:none">
+        <div class="subsection-title-row">
+          <div class="subsection-title">Filho(a) 3</div>
+          <button type="button" class="btn-excluir-filho" onclick="solicitarConfirmacaoExcluirFilhoModulo(3)" aria-label="Excluir módulo filho 3">✕ Excluir</button>
+        </div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil3IncluirLabel">
+            <input type="checkbox" id="fil3_incluir" onchange="toggleDepFilho(3)"> Incluir filho(a) 3 no plano
+          </label>
+        </div>
+        <div id="fil3Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_nome" class="fil3-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_cpf" class="fil3-field" maxlength="14" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil3-req">*</span></label>
+              <input type="date" id="fil3_nasc" class="fil3-field" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_sus" class="fil3-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_nomemae" class="fil3-field">
+            </div>
+            <div class="field col-span-2" id="fil3_wrapDnv" hidden>
+              <label>Nº Declaração de Nascido Vivo <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_nascvivo" class="fil3-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="filBloco4" class="dep-block" style="display:none">
+        <div class="subsection-title-row">
+          <div class="subsection-title">Filho(a) 4</div>
+          <button type="button" class="btn-excluir-filho" onclick="solicitarConfirmacaoExcluirFilhoModulo(4)" aria-label="Excluir módulo filho 4">✕ Excluir</button>
+        </div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil4IncluirLabel">
+            <input type="checkbox" id="fil4_incluir" onchange="toggleDepFilho(4)"> Incluir filho(a) 4 no plano
+          </label>
+        </div>
+        <div id="fil4Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_nome" class="fil4-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_cpf" class="fil4-field" maxlength="14" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil4-req">*</span></label>
+              <input type="date" id="fil4_nasc" class="fil4-field" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_sus" class="fil4-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_nomemae" class="fil4-field">
+            </div>
+            <div class="field col-span-2" id="fil4_wrapDnv" hidden>
+              <label>Nº Declaração de Nascido Vivo <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_nascvivo" class="fil4-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /fluxoOutrosPlanos -->
+
+  <div class="section-card" id="secaoAssinatura">
+    <div class="section-header"><div class="dot"></div>Assinatura</div>
+    <div class="section-body">
+      <div class="signature-pad-wrap" id="signaturePadWrap">
+        <label>Assinatura manuscrita <span class="req" id="reqAssinaturaManuscrita">*</span></label>
+        <p class="signature-pad-hint assinatura-hint--beneficios" id="hintAssinaturaBeneficios">Desenhe com o mouse ou o dedo. A assinatura, o nome por extenso e a data serão incluídos na <strong>página 2</strong> da Declaração Plano de Saúde.</p>
+        <p class="signature-pad-hint assinatura-hint--outros" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF.</p>
+        <div class="signature-canvas-outer" id="signatureCanvasOuter">
+          <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
+          <canvas id="assinaturaGuide" width="1000" height="280"></canvas>
+        </div>
+        <div class="signature-pad-tools">
+          <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
+          <label class="check-label nao-assinar-manual-label">
+            <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off" aria-label="Não assinar">
+            Não assinar
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Assinatura (nome por extenso) <span class="req">*</span></label>
+          <input type="text" id="assinaturaName" placeholder="Igual ao documento de identificação">
+        </div>
+        <div class="field">
+          <label>Data <span class="req">*</span></label>
+          <input type="date" id="dataAssinatura" autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aviso-box" id="avisoExportarBottom" style="margin:20px 0 14px">
+    <strong>ATENÇÃO:</strong> Salve e baixe o arquivo PDF gerado, clicando no botão abaixo e encaminhe o arquivo PDF salvo no seu Portal do Candidato, na área de Ficha de Assistência Médica.
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn-export" type="button" onclick="gerarPDF()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Salvar e Baixar Ficha preenchida (PDF)
+    </button>
+  </div>
+</div>
+
+<div id="toast" role="status"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head" id="lgpdTitulo">Privacidade e dados pessoais</div>
+    <div class="modal-body">
+      O preenchimento pode ser guardado como rascunho neste aparelho (navegador) para você retomar depois.<br>
+      Após gerar o PDF, os dados continuam no formulário e no rascunho local; para apagá-los de vez, use <strong>Descartar rascunho</strong> no menu.<br>
+      A <strong>empresa</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
+      <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
+      Deseja continuar com a geração do PDF?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="lgpdCancelarBtn" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="lgpdContinuarBtn" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalDocsDependentes" class="modal-overlay" role="dialog" aria-labelledby="modalDocsDepTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head" id="modalDocsDepTitulo">Documentação de dependentes</div>
+    <div class="modal-body">
+      <p id="modalDocsDepP1" style="margin:0"></p>
+      <p id="modalDocsDepP2" style="margin:12px 0 0"></p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="modalDocsDepOkBtn" class="btn-modal confirm">Entendi</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalAtencaoDownloadModelo" class="modal-overlay" role="dialog" aria-labelledby="modalAtencaoDownloadTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalAtencaoDownloadTitulo">ATENÇÃO</div>
+    <div class="modal-body">
+      Antes de baixar o <strong>modelo em branco</strong>, defina neste formulário o <strong>Estado (UF)</strong> e a <strong>cidade</strong> dos campos correspondentes — o arquivo PDF adequado é escolhido conforme essa localidade.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="modalAtencaoDownloadFecharBtn" class="btn-modal cancel">Fechar</button>
+      <button type="button" id="modalAtencaoDownloadContinuarBtn" class="btn-modal confirm">Prosseguir com o download</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-labelledby="modalDescartarAssistTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalDescartarAssistTitulo">Descartar rascunho</div>
+    <div class="modal-body">
+      O rascunho guardado neste navegador e os dados atualmente no formulário serão apagados. Esta ação não pode ser desfeita.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDescartarAssistCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalDescartarAssistConfirmar" class="btn-modal confirm">Sim, descartar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarLimparAssinatura" class="modal-overlay" role="dialog" aria-labelledby="modalLimparAssinAssistTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalLimparAssinAssistTitulo">Limpar assinatura</div>
+    <div class="modal-body">
+      O traço da assinatura manuscrita será apagado da área de desenho. Deseja continuar?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalLimparAssinAssistCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalLimparAssinAssistConfirmar" class="btn-modal confirm">Sim, limpar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarExcluirFilho" class="modal-overlay" role="dialog" aria-labelledby="modalExcluirFilhoTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalExcluirFilhoTitulo">Excluir dependente</div>
+    <div class="modal-body" id="modalConfirmarExcluirFilhoTexto"></div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalExcluirFilhoCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalExcluirFilhoConfirmar" class="btn-modal confirm">Sim, excluir</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
+<script>
+const LS_NS = "atento.forms:v1:";
+const LS_LEGACY_CROSS_COPY = "cross_copy_ficha_para_assistencia_v1";
+const LS_LEGACY_RASCUNHO_ASSIST = "assistencia_medica_rascunho_v5";
+const appStorage = {
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.getItem:", key, e);
+      }
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.setItem:", key, e);
+      }
+      return false;
+    }
+  },
+  removeItem(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.removeItem:", key, e);
+      }
+    }
+  }
+};
+function lsMigrateLegacy(newKey, legacyKey) {
+  if (appStorage.getItem(newKey) != null) return;
+  const old = appStorage.getItem(legacyKey);
+  if (old == null) return;
+  if (!appStorage.setItem(newKey, old)) return;
+  appStorage.removeItem(legacyKey);
+}
+function lsRemoveDual(newKey, legacyKey) {
+  appStorage.removeItem(newKey);
+  appStorage.removeItem(legacyKey);
+}
+function setModalOverlayVisible(overlayEl, visible) {
+  if (!overlayEl) return;
+  if (visible) {
+    overlayEl.removeAttribute("hidden");
+    overlayEl.classList.add("show");
+    overlayEl.setAttribute("aria-hidden", "false");
+    overlayEl.setAttribute("aria-modal", "true");
+  } else {
+    overlayEl.setAttribute("hidden", "");
+    overlayEl.classList.remove("show");
+    overlayEl.setAttribute("aria-hidden", "true");
+    overlayEl.removeAttribute("aria-modal");
+  }
+}
+const CROSS_COPY_FICHA_ASSISTENCIA_KEY = LS_NS + "cross_copy_ficha_para_assistencia";
+lsMigrateLegacy(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
+const RASCUNHO_STORAGE_KEY = LS_NS + "assistencia_medica_rascunho_v5";
+lsMigrateLegacy(RASCUNHO_STORAGE_KEY, LS_LEGACY_RASCUNHO_ASSIST);
+
+/* Caminhos a partir da raiz do sítio; evitam 404 com rotas do tipo /assistencia_medica (sem e sem barra). */
+const CAMPOS_JSON_PATH = "/assistencia_medica_campos.json";
+const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const CAMPOS_PLANO_BENEFICIOS_JSON_PATH = "/declaracao_plano_saude_campos.json";
+const CAMPOS_PLANO_BENEFICIOS_FETCH_PATH = encodeURI(CAMPOS_PLANO_BENEFICIOS_JSON_PATH);
+const CIDADES_BRASIL_JSON_PATH = "/cidades_brasil.json";
+const CIDADES_INFINITY_JSON_PATH = "/cidades_infinity.json";
+/** Lista oficial de municípios por UF (CORS aberto, cache no CDN). */
+const CIDADES_KSTR_API_BASE = "https://api.kstrtech.com.br/cidades/";
+/** Declaração — fluxo Plano de Benefícios. */
+const TEMPLATE_DECLARACAO_PLANO_SAUDE_PDF = "DECLARACAO PLANO DE SAUDE.pdf";
+/** Tipo em cidades_brasil.json → PDF regional (fluxo Outros Planos). */
+const FICHA_UTILIZAR_PARA_ARQUIVO = {
+  "FICHA GOIANIA": "FICHA GOIANIA.pdf",
+  "FICHA REEMBOLSO": "FICHA REEMBOLSO.pdf",
+  "FICHA GNDI": "FICHA GNDI.pdf",
+  "FICHA FSA": "FICHA FSA.pdf",
+  "FICHA SAFO": "FICHA SA_FO.pdf",
+  "FICHA BH": "FICHA BH.pdf",
+  "FICHA SJC": "FICHA SJC.pdf"
+};
+let mapaCidadePadrao = null;
+let mapaCidadeInfinity = null;
+let camposSchemaCacheKey = null;
+
+function radioTipoPlano() {
+  return document.querySelector('input[name="tipoPlano"]:checked')?.value || "";
+}
+function ehPlanoBeneficios() {
+  return radioTipoPlano() === "plano_beneficios";
+}
+function ehOutrosPlanos() {
+  return radioTipoPlano() === "outros_planos";
+}
+function planoOutrosVariante() {
+  return document.querySelector('input[name="planoOutrosVariante"]:checked')?.value || "";
+}
+function usaListaInfinity() {
+  return ehOutrosPlanos() && planoOutrosVariante() === "infinity";
+}
+function obterMapaCidadesAtivo() {
+  return usaListaInfinity() ? mapaCidadeInfinity : mapaCidadePadrao;
+}
+function nomeArquivoListaCidadesAtiva() {
+  return usaListaInfinity() ? CIDADES_INFINITY_JSON_PATH : CIDADES_BRASIL_JSON_PATH;
+}
+
+function normalizarChaveCidade(s) {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleUpperCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function carregarMapaCidadesDeJson(path) {
+  const res = await fetch(encodeURI(path), { cache: "no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const arr = await res.json();
+  if (!Array.isArray(arr)) throw new Error("formato");
+  const m = new Map();
+  for (const row of arr) {
+    const k = normalizarChaveCidade(row.CIDADE);
+    if (!k) continue;
+    let tipo = String(row["FICHA A UTILIZAR"] || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, " ");
+    if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
+    m.set(k, tipo);
+  }
+  return m;
+}
+
+async function garantirMapaCidadesBrasil() {
+  try {
+    if (usaListaInfinity()) {
+      if (!mapaCidadeInfinity) {
+        mapaCidadeInfinity = await carregarMapaCidadesDeJson(CIDADES_INFINITY_JSON_PATH);
+      }
+    } else if (!mapaCidadePadrao) {
+      mapaCidadePadrao = await carregarMapaCidadesDeJson(CIDADES_BRASIL_JSON_PATH);
+    }
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${nomeArquivoListaCidadesAtiva()}`, false);
+    return false;
+  }
+}
+
+function resolverTipoFichaPorCidadeNome(nomeIbge) {
+  const mapa = obterMapaCidadesAtivo();
+  if (!nomeIbge || !mapa) return null;
+  return mapa.get(normalizarChaveCidade(nomeIbge)) || null;
+}
+
+function resolverArquivoPdfPorCidadeNome(nomeIbge) {
+  const tipo = resolverTipoFichaPorCidadeNome(nomeIbge);
+  if (!tipo) return null;
+  return FICHA_UTILIZAR_PARA_ARQUIVO[tipo] || null;
+}
+
+function toggleTipoPlano(el) {
+  camposSchema = null;
+  camposSchemaCacheKey = null;
+  document.body.classList.toggle("fluxo-plano-beneficios", ehPlanoBeneficios());
+  document.body.classList.toggle("fluxo-outros-planos", ehOutrosPlanos());
+  document.getElementById("tipoPlanoGroup")?.classList.remove("group-invalid");
+  if (el?.name) syncRadioActive(el.name);
+  atualizarVisibilidadePlanoOutrosVariante();
+  agendarSalvarRascunho();
+}
+
+function atualizarVisibilidadePlanoOutrosVariante() {
+  const bloco = document.getElementById("blocoPlanoOutrosVariante");
+  if (!bloco) return;
+  const mostrar = ehOutrosPlanos() && (radio("tipoAdesao") === "optante" || radio("tipoAdesao") === "naooptante");
+  if (mostrar) bloco.removeAttribute("hidden");
+  else bloco.setAttribute("hidden", "");
+}
+
+async function aoMudarPlanoOutrosVariante() {
+  syncRadioActive("planoOutrosVariante");
+  document.getElementById("planoOutrosVarianteGroup")?.classList.remove("group-invalid");
+  const cidadeAntes = v("cidade");
+  const uf = v("uf");
+  if (uf) {
+    await carregarMunicipiosIBGE(uf);
+    const sel = document.getElementById("cidade");
+    if (cidadeAntes && sel && ![...sel.options].some((o) => o.value === cidadeAntes)) {
+      showToast("A cidade selecionada não está disponível neste plano. Escolha outra.", false);
+      sel.value = "";
+      marcarCampoInvalido("cidade", true);
+    }
+  }
+  agendarSalvarRascunho();
+}
+
+/** Primeiro token do nome (campo funcionário), seguro para nome de arquivo. */
+function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
+  const token = String(nomeCompleto || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)[0];
+  const raw = token || "funcionario";
+  return raw.replace(/[\\/:*?"<>|]/g, "").trim() || "funcionario";
+}
+
+function sanitizarSegmentoNomeArquivo(s) {
+  return String(s || "")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** PDF na raiz do site (evita 404 em rotas cleanUrls como /assistencia_medica). */
+function pdfAssetFetchPath(nomeArquivo) {
+  const name = String(nomeArquivo || "").replace(/^\/+/, "");
+  return encodeURI("/" + name);
+}
+
+async function carregarTemplatePdf(nomeArquivo) {
+  if (!nomeArquivo) return null;
+  if (templateBytesCache[nomeArquivo]) return templateBytesCache[nomeArquivo];
+  try {
+    const res = await fetch(pdfAssetFetchPath(nomeArquivo));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const bytes = await res.arrayBuffer();
+    templateBytesCache[nomeArquivo] = clonarArrayBuffer(bytes);
+    return templateBytesCache[nomeArquivo];
+  } catch (_e) {
+    showToast(`Não foi possível carregar o arquivo ${nomeArquivo}.`, false);
+    return null;
+  }
+}
+
+async function carregarTemplateDeclaracaoPlanoSaude() {
+  return carregarTemplatePdf(TEMPLATE_DECLARACAO_PLANO_SAUDE_PDF);
+}
+
+async function carregarTemplateParaCidadeSelecionada() {
+  if (ehPlanoBeneficios()) {
+    marcarCampoInvalido("cidade", false);
+    return carregarTemplateDeclaracaoPlanoSaude();
+  }
+  if (!(await garantirMapaCidadesBrasil())) return null;
+  const nome = v("cidade");
+  const arq = resolverArquivoPdfPorCidadeNome(nome);
+  if (!arq) {
+    if (nome) showToast("Não há PDF configurado para esta cidade na lista do plano selecionado.", false);
+    marcarCampoInvalido("cidade", !!nome);
+    return null;
+  }
+  marcarCampoInvalido("cidade", false);
+  return carregarTemplatePdf(arq);
+}
+const NUM_FILHOS = 4;
+let filhosVisiveis = 1;
+let excluirFilhoModuloNumeroPendente = null;
+const PDF_FONT_TEXTO = 7;
+const PDF_FONT_EVIDENCIA = 5.5;
+const RODAPE_EVIDENCIA_MARGEM_Y_PT = 12;
+const LIMITE_Y_SEM_OFFSET_TEXTO_PT = 120;
+let assinaturaCanvasCtx = null;
+let assinaturaCanvasTemTraço = false;
+let assinaturaDesenhando = false;
+let assinaturaUltPos = null;
+/** Neonato: até 28 dias de vida (inclusive). Acima disso, DNV não se aplica. */
+const NEONATO_ATE_DIAS_VIDA = 28;
+
+/**
+ * Diferença em dias (calendário local) entre a data de nascimento e hoje, ou `null` se a data for inválida.
+ */
+function idadeFilhoEmDiasAteHoje(n) {
+  const iso = v(`fil${n}_nasc`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const [ys, ms, ds] = iso.split("-");
+  const yi = parseInt(ys, 10);
+  const mi = parseInt(ms, 10);
+  const di = parseInt(ds, 10);
+  if (Number.isNaN(di) || Number.isNaN(mi) || Number.isNaN(yi)) return null;
+  const birth = new Date(yi, mi - 1, di);
+  if (birth.getFullYear() !== yi || birth.getMonth() !== mi - 1 || birth.getDate() !== di) return null;
+  const today = new Date();
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const b0 = new Date(birth.getFullYear(), birth.getMonth(), birth.getDate());
+  return Math.floor((t0 - b0) / 86400000);
+}
+
+/** DNV: obrigatório só para filho(a) no plano, com data válida, idade em dias entre 0 e 28 (neonato). */
+function filhoDeveExibirCampoDnv(n) {
+  if (!document.getElementById(`fil${n}_incluir`)?.checked) return false;
+  const dias = idadeFilhoEmDiasAteHoje(n);
+  if (dias == null) return false;
+  return dias >= 0 && dias <= NEONATO_ATE_DIAS_VIDA;
+}
+
+function atualizarVisibilidadeDnvFilho(n) {
+  const wrap = document.getElementById(`fil${n}_wrapDnv`);
+  if (!wrap) return;
+  const exibir = filhoDeveExibirCampoDnv(n);
+  if (exibir) {
+    wrap.removeAttribute("hidden");
+  } else {
+    wrap.setAttribute("hidden", "");
+    const nv = document.getElementById(`fil${n}_nascvivo`);
+    if (nv) {
+      nv.value = "";
+      marcarCampoInvalido(`fil${n}_nascvivo`, false);
+    }
+  }
+}
+
+function atualizarTodosDnvFilhos() {
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    atualizarVisibilidadeDnvFilho(fn);
+  }
+}
+
+function idsCamposFilho(n) {
+  return [
+    `fil${n}_nome`,
+    `fil${n}_cpf`,
+    `fil${n}_nasc`,
+    `fil${n}_sus`,
+    `fil${n}_nomemae`,
+    `fil${n}_nascvivo`
+  ];
+}
+/** Copia checkbox e campos do filho `de` para o slot `para` (mesmos ids, reordenação ao excluir um bloco do meio). */
+function copiarCamposFilhoDePara(de, para) {
+  const chDe = document.getElementById(`fil${de}_incluir`);
+  const chPara = document.getElementById(`fil${para}_incluir`);
+  if (chPara) chPara.checked = !!chDe?.checked;
+  idsCamposFilho(de).forEach((idDe, idx) => {
+    const idPara = idsCamposFilho(para)[idx];
+    const elDe = document.getElementById(idDe);
+    const elPa = document.getElementById(idPara);
+    if (elPa && elDe) elPa.value = elDe.value;
+    if (elPa) marcarCampoInvalido(idPara, false);
+  });
+  toggleDepFilho(para);
+}
+/** Remove o módulo do filho `n` (2–4): oculta o último slot visível e, se necessário, desloca os dados dos blocos seguintes. */
+function excluirFilhoModulo(n) {
+  if (n < 2 || n > filhosVisiveis) return;
+  if (n === filhosVisiveis) {
+    removerUltimoFilho();
+    return;
+  }
+  for (let i = n; i < filhosVisiveis; i++) {
+    copiarCamposFilhoDePara(i + 1, i);
+  }
+  limparCamposFilho(filhosVisiveis);
+  const bl = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (bl) bl.style.display = "none";
+  filhosVisiveis -= 1;
+  atualizarBotoesFilhos();
+  atualizarTodosDnvFilhos();
+  agendarSalvarRascunho();
+}
+
+function solicitarConfirmacaoExcluirFilhoModulo(n) {
+  if (n < 2 || n > filhosVisiveis) return;
+  excluirFilhoModuloNumeroPendente = n;
+  const el = document.getElementById("modalConfirmarExcluirFilhoTexto");
+  if (el) {
+    let msg = `Os dados informados para o filho(a) ${n} serão removidos. Esta ação não pode ser desfeita automaticamente no formulário.`;
+    if (n < filhosVisiveis) {
+      msg += " Os dados dos dependentes seguintes nesta lista serão reorganizados.";
+    }
+    el.textContent = msg;
+  }
+  const modalExcluir = document.getElementById("modalConfirmarExcluirFilho");
+  if (modalExcluir) setModalOverlayVisible(modalExcluir, true);
+  sincronizarBodyModalOpenAssistencia();
+  setTimeout(() => document.getElementById("btnModalExcluirFilhoConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarExcluirFilhoAssistencia() {
+  const m = document.getElementById("modalConfirmarExcluirFilho");
+  if (m) setModalOverlayVisible(m, false);
+  sincronizarBodyModalOpenAssistencia();
+}
+function cancelarModalExcluirFilhoAssistencia() {
+  excluirFilhoModuloNumeroPendente = null;
+  fecharModalConfirmarExcluirFilhoAssistencia();
+}
+function confirmarExcluirFilhoModuloAssistencia() {
+  const n = excluirFilhoModuloNumeroPendente;
+  excluirFilhoModuloNumeroPendente = null;
+  fecharModalConfirmarExcluirFilhoAssistencia();
+  if (n != null && n >= 2 && n <= filhosVisiveis) excluirFilhoModulo(n);
+}
+function adicionarFilhoExtra() {
+  if (filhosVisiveis >= NUM_FILHOS) return;
+  filhosVisiveis += 1;
+  const bl = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (bl) bl.style.display = "";
+  atualizarBotoesFilhos();
+  agendarSalvarRascunho();
+}
+function removerUltimoFilho() {
+  if (filhosVisiveis <= 1) return;
+  limparCamposFilho(filhosVisiveis);
+  const bl = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (bl) bl.style.display = "none";
+  filhosVisiveis -= 1;
+  atualizarBotoesFilhos();
+  atualizarTodosDnvFilhos();
+  agendarSalvarRascunho();
+}
+function limparCamposFilho(n) {
+  const ch = document.getElementById(`fil${n}_incluir`);
+  if (ch) ch.checked = false;
+  toggleDepFilho(n);
+  idsCamposFilho(n).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+}
+function atualizarBotoesFilhos() {
+  const acoes = document.getElementById("filhosAcoesBar");
+  const alvo = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (acoes && alvo) {
+    alvo.insertAdjacentElement("afterend", acoes);
+  }
+  const add = document.getElementById("btnAddFilho");
+  if (add) {
+    add.disabled = filhosVisiveis >= NUM_FILHOS;
+  }
+}
+const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
+const templateBytesCache = {};
+let camposSchema = null;
+
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g, "").slice(0, 11);
+  if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+  el.value = v;
+}
+function maskSUS(el) {
+  let d = el.value.replace(/\D/g, "").slice(0, 15);
+  const p = [];
+  if (d.length >= 1) p.push(d.slice(0, 3));
+  if (d.length > 3) p.push(d.slice(3, 7));
+  if (d.length > 7) p.push(d.slice(7, 11));
+  if (d.length > 11) p.push(d.slice(11, 15));
+  el.value = p.join(" ");
+}
+function maskTelefone(el) {
+  const d = el.value.replace(/\D/g, "").slice(0, 11);
+  if (!d) {
+    el.value = "";
+    return;
+  }
+  if (d.length <= 2) {
+    el.value = d;
+    return;
+  }
+  const ddd = d.slice(0, 2);
+  const n = d.slice(2);
+  if (n.length <= 4) {
+    el.value = `(${ddd}) ${n}`;
+    return;
+  }
+  if (d.length <= 10) {
+    el.value = `(${ddd}) ${n.slice(0, 4)}-${n.slice(4, 8)}`;
+    return;
+  }
+  el.value = `(${ddd}) ${n.slice(0, 5)}-${n.slice(5, 9)}`;
+}
+function telefoneSeparadoParaPdf() {
+  const d = (v("telefone") || "").replace(/\D/g, "").slice(0, 11);
+  if (d.length < 10) return { ddd: "", num: "" };
+  return { ddd: d.slice(0, 2), num: d.slice(2) };
+}
+let ultimoCepPreenchido = "";
+let cepBuscaTimer = null;
+let ibgeMunicipiosCargaGen = 0;
+let ibgeMunicipiosAbort = null;
+
+/**
+ * Municípios por UF via api.kstrtech.com.br (JSON array de strings; CORS *).
+ * O select lista todos os municípios retornados pela API para a UF escolhida.
+ */
+async function buscarMunicipiosPorUf(sigla, ctrl, cargaId) {
+  const genOk = () => cargaId === ibgeMunicipiosCargaGen;
+  if (!genOk() || ctrl.signal.aborted) return null;
+  const res = await fetch(
+    `${CIDADES_KSTR_API_BASE}${encodeURIComponent(sigla)}`,
+    { method: "GET", cache: "default", signal: ctrl.signal }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const j = await res.json();
+  if (!Array.isArray(j)) throw new Error("formato");
+  if (!genOk() || ctrl.signal.aborted) return null;
+  return j
+    .map((n) => ({ nome: String(n).trim() }))
+    .filter((m) => m.nome);
+}
+
+/** Preenche o select de cidade (id cidade) com municípios da API kstr (Outros Planos: filtrado por cidades_brasil). */
+async function carregarMunicipiosIBGE(uf) {
+  if (ehPlanoBeneficios()) return;
+  if (!(await garantirMapaCidadesBrasil())) return;
+
+  const sigla = String(uf || "").toUpperCase().trim();
+  const sel = document.getElementById("cidade");
+  if (!sel) {
+    return;
+  }
+
+  ibgeMunicipiosAbort?.abort();
+  const ctrl = new AbortController();
+  ibgeMunicipiosAbort = ctrl;
+  const cargaId = ++ibgeMunicipiosCargaGen;
+  sel.innerHTML = sigla
+    ? '<option value="">— Selecione —</option>'
+    : '<option value="">— Selecione o estado —</option>';
+  sel.disabled = !sigla;
+  marcarCampoInvalido("cidade", false);
+  if (!sigla) {
+    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
+    return;
+  }
+  try {
+    const listaFull = await buscarMunicipiosPorUf(sigla, ctrl, cargaId);
+    if (listaFull == null) return;
+    if (cargaId !== ibgeMunicipiosCargaGen) return;
+    if (!Array.isArray(listaFull)) throw new Error("formato");
+    const ufAinda = String(document.getElementById("uf")?.value || "")
+      .toUpperCase()
+      .trim();
+    if (ufAinda !== sigla) return;
+    const mapa = obterMapaCidadesAtivo();
+    const lista = listaFull.filter((m) =>
+      mapa?.has(normalizarChaveCidade(m.nome))
+    );
+    lista.sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
+    if (cargaId !== ibgeMunicipiosCargaGen) return;
+    if (!lista.length) {
+      showToast(
+        `Nenhuma cidade deste estado consta em ${nomeArquivoListaCidadesAtiva()}. Verifique com o suporte.`,
+        false
+      );
+    }
+    for (const m of lista) {
+      const opt = document.createElement("option");
+      opt.value = m.nome;
+      opt.textContent = m.nome;
+      sel.appendChild(opt);
+    }
+  } catch (e) {
+    if (e && e.name === "AbortError") return;
+    if (cargaId === ibgeMunicipiosCargaGen) {
+      showToast("Não foi possível carregar as cidades. Verifique a conexão e tente de novo.", false);
+    }
+  } finally {
+    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
+  }
+}
+
+function atualizarCidadeufApartirDosCamposLocalidade() {
+  const uf = v("uf");
+  const cid = v("cidade");
+  const el = document.getElementById("cidadeuf");
+  if (!el || !cid || !uf) return;
+  el.value = `${cid} / ${uf}`.toLocaleUpperCase("pt-BR");
+}
+
+function tentarSincronizarSelectCidadeComTexto(localidade, ufCep) {
+  const ufForm = v("uf");
+  const sel = document.getElementById("cidade");
+  if (!sel || sel.disabled || !localidade) return;
+  const loc = String(localidade).trim();
+  const uCep = String(ufCep || "").toUpperCase().trim();
+  if (uCep && ufForm && uCep !== ufForm) return;
+  const match = [...sel.options].find(
+    (o) => o.value && o.value.localeCompare(loc, "pt-BR", { sensitivity: "accent" }) === 0
+  );
+  if (match) {
+    sel.value = match.value;
+    atualizarCidadeufApartirDosCamposLocalidade();
+  }
+}
+
+function maskCep(el) {
+  const d = el.value.replace(/\D/g, "").slice(0, 8);
+  el.value = d.length > 5 ? d.replace(/(\d{5})(\d{0,3})/, "$1-$2") : d;
+}
+function agendarBuscaCep() {
+  clearTimeout(cepBuscaTimer);
+  cepBuscaTimer = setTimeout(() => void buscarEnderecoPorCep(), 450);
+}
+async function buscarEnderecoPorCep() {
+  const el = document.getElementById("cep");
+  if (!el) return;
+  const raw = el.value.replace(/\D/g, "");
+  if (raw.length !== 8) return;
+  if (raw === ultimoCepPreenchido) return;
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`, { method: "GET" });
+    if (!res.ok) throw new Error("http");
+    const data = await res.json();
+    if (data.erro) {
+      showToast("CEP não encontrado na base dos Correios.", false);
+      return;
+    }
+    const up = (s) => (s || "").toLocaleUpperCase("pt-BR");
+    const rua = document.getElementById("rua");
+    const bairro = document.getElementById("bairro");
+    const cidadeuf = document.getElementById("cidadeuf");
+    if (data.logradouro && rua) rua.value = up(String(data.logradouro).trim());
+    if (data.bairro && bairro) bairro.value = up(String(data.bairro).trim());
+    if (data.localidade && data.uf && cidadeuf) {
+      cidadeuf.value = up(`${String(data.localidade).trim()} / ${String(data.uf).trim()}`);
+    } else if (data.localidade && cidadeuf) {
+      cidadeuf.value = up(String(data.localidade).trim());
+    } else if (data.uf && cidadeuf) {
+      cidadeuf.value = up(String(data.uf).trim());
+    }
+    tentarSincronizarSelectCidadeComTexto(data.localidade, data.uf);
+    ultimoCepPreenchido = raw;
+    showToast("Endereço preenchido a partir do CEP.", true);
+    agendarSalvarRascunho();
+  } catch (_e) {
+    showToast("Não foi possível consultar o CEP. Verifique a conexão e tente de novo.", false);
+  }
+}
+function aplicarMaiusculas(el) {
+  const o = el.value;
+  const u = o.toLocaleUpperCase("pt-BR");
+  if (o !== u) {
+    const s = el.selectionStart;
+    const e = el.selectionEnd;
+    el.value = u;
+    if (s != null && e != null) el.setSelectionRange(s, e);
+  }
+}
+function clonarArrayBuffer(buffer) {
+  return buffer.slice(0);
+}
+function obterPontoNoCanvasAss(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+  return { x: ((clientX - r.left) * canvas.width) / r.width, y: ((clientY - r.top) * canvas.height) / r.height };
+}
+function marcarAssinaturaInvalidaCanvas(mostrar) {
+  document.getElementById("signatureCanvasOuter")?.classList.toggle("invalid", !!mostrar);
+}
+function isNaoAssinarManualmente() {
+  return document.getElementById("naoAssinarManualmente")?.checked === true;
+}
+function sincronizarCheckLabelNaoAssinarManualmente() {
+  const cb = document.getElementById("naoAssinarManualmente");
+  if (!cb) return;
+  cb.closest(".check-label")?.classList.toggle("active", cb.checked);
+}
+function atualizarUiNaoAssinarManualmente() {
+  const ativo = isNaoAssinarManualmente();
+  const wrap = document.getElementById("signaturePadWrap");
+  const outer = document.getElementById("signatureCanvasOuter");
+  const req = document.getElementById("reqAssinaturaManuscrita");
+  const hint = document.getElementById("hintAssinaturaManuscrita");
+  wrap?.classList.toggle("desativada", ativo);
+  outer?.classList.toggle("desativada", ativo);
+  if (req) req.style.display = ativo ? "none" : "";
+  if (hint) {
+    hint.textContent = ativo
+      ? "Com esta opção, o nome por extenso será impresso no PDF no lugar da rubrica manual."
+      : "Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF.";
+  }
+  if (ativo) marcarAssinaturaInvalidaCanvas(false);
+}
+function initAssinaturaCanvas() {
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas) return;
+  assinaturaCanvasCtx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
+  const ctx = assinaturaCanvasCtx;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineWidth = 2.8;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#1a1a1a";
+  desenharLinhaGuiaAssinatura();
+  const início = (e) => {
+    if (e.button === 2) return;
+    assinaturaDesenhando = true;
+    e.preventDefault();
+    marcarAssinaturaInvalidaCanvas(false);
+    assinaturaUltPos = obterPontoNoCanvasAss(e, canvas);
+  };
+  const fim = () => {
+    assinaturaDesenhando = false;
+    assinaturaUltPos = null;
+    if (isAssinaturaManuscritaPreenchida()) assinaturaCanvasTemTraço = true;
+    agendarSalvarRascunho();
+  };
+  const mover = (e) => {
+    if (!assinaturaDesenhando || !assinaturaCanvasCtx) return;
+    e.preventDefault();
+    const p = obterPontoNoCanvasAss(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(assinaturaUltPos.x, assinaturaUltPos.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    assinaturaUltPos = p;
+    assinaturaCanvasTemTraço = true;
+    agendarSalvarRascunho();
+  };
+  canvas.addEventListener("pointerdown", início);
+  canvas.addEventListener("pointermove", mover);
+  canvas.addEventListener("pointerup", fim);
+  canvas.addEventListener("pointercancel", fim);
+  canvas.addEventListener("pointerleave", fim);
+  document.getElementById("btnLimparAssinatura")?.addEventListener("click", () => {
+    const temAlgo = assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida();
+    if (!temAlgo) {
+      showToast("Não há assinatura para limpar.", true);
+      return;
+    }
+    const mLimpar = document.getElementById("modalConfirmarLimparAssinatura");
+    if (mLimpar) setModalOverlayVisible(mLimpar, true);
+    sincronizarBodyModalOpenAssistencia();
+    setTimeout(() => document.getElementById("btnModalLimparAssinAssistConfirmar")?.focus(), 0);
+  });
+}
+function desenharLinhaGuiaAssinatura() {
+  const guideCanvas = document.getElementById("assinaturaGuide");
+  if (!guideCanvas) return;
+  const gCtx = guideCanvas.getContext("2d");
+  gCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+  gCtx.save();
+  gCtx.strokeStyle = "#b0b0b0";
+  gCtx.lineWidth = 1;
+  gCtx.setLineDash([8, 4]);
+  const y = guideCanvas.height * 0.88;
+  gCtx.beginPath();
+  gCtx.moveTo(80, y);
+  gCtx.lineTo(guideCanvas.width - 80, y);
+  gCtx.stroke();
+  gCtx.restore();
+}
+function limparAssinaturaCanvas() {
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas || !assinaturaCanvasCtx) return;
+  assinaturaCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  assinaturaCanvasTemTraço = false;
+  marcarAssinaturaInvalidaCanvas(false);
+  desenharLinhaGuiaAssinatura();
+}
+
+/** Restaura o traço da assinatura manuscrita a partir de data URL PNG (ex.: cópia da Ficha Cadastral). */
+function aplicarAssinaturaManuscritaDePng(dataUrl) {
+  if (!dataUrl || !String(dataUrl).startsWith("data:")) {
+    limparAssinaturaCanvas();
+    return;
+  }
+  const canvas = document.getElementById("assinaturaCanvas");
+  const ctx = canvas && (assinaturaCanvasCtx || canvas.getContext("2d", { alpha: true, willReadFrequently: true }));
+  if (!canvas || !ctx) return;
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    assinaturaCanvasCtx = ctx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    assinaturaCanvasTemTraço = true;
+    marcarAssinaturaInvalidaCanvas(false);
+    atualizarUiNaoAssinarManualmente();
+    agendarSalvarRascunho();
+  };
+  img.onerror = () => {
+    assinaturaCanvasTemTraço = false;
+  };
+  img.src = dataUrl;
+}
+function isAssinaturaManuscritaPreenchida() {
+  if (assinaturaCanvasTemTraço) return true;
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas) return false;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  const { width: W, height: H } = canvas;
+  const d = ctx.getImageData(0, 0, W, H).data;
+  const passo = 8;
+  for (let y = 0; y < H; y += passo) {
+    for (let x = 0; x < W; x += passo) {
+      const i = (y * W + x) * 4;
+      if (d[i + 3] < 24) continue;
+      if (d[i] < 252 || d[i + 1] < 252 || d[i + 2] < 252) return true;
+    }
+  }
+  return false;
+}
+function canvasAssinaturaParaPngArrayBuffer() {
+  return new Promise((resolve, reject) => {
+    const canvas = document.getElementById("assinaturaCanvas");
+    if (!canvas) {
+      resolve(null);
+      return;
+    }
+    canvas.toBlob(
+      (blob) => (blob ? blob.arrayBuffer().then(resolve).catch(reject) : resolve(null)),
+      "image/png",
+      0.95
+    );
+  });
+}
+function desenharPngAjustadoNoCampo(page, png, box) {
+  if (!box || !png) return;
+  const x = Number(box.x) || 0;
+  const yBottom = Number(box.y) || 0;
+  const wMax = Number(box.largura) || 200;
+  const hMax = Number(box.altura) || 30;
+  const wImg = png.width;
+  const hImg = png.height;
+  if (!wImg || !hImg) return;
+  const base = Math.min(wMax / wImg, hMax / hImg);
+  let scale = base * 1.4;
+  let w = wImg * scale;
+  let h = hImg * scale;
+  if (w > wMax || h > hMax) {
+    scale = base;
+    w = wImg * scale;
+    h = hImg * scale;
+  }
+  page.drawImage(png, { x, y: yBottom, width: w, height: h });
+}
+async function obterIpPublicoEvidencia() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3500);
+  try {
+    const r = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal, cache: "no-store" });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return typeof j.ip === "string" ? j.ip.trim() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+function quebrarTextoEvidencia(font, texto, tamanho, larguraMax) {
+  const palavras = String(texto).split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let linha = "";
+  for (const p of palavras) {
+    const teste = linha ? linha + " " + p : p;
+    if (font.widthOfTextAtSize(teste, tamanho) <= larguraMax) {
+      linha = teste;
+    } else {
+      if (linha) linhas.push(linha);
+      linha = p;
+    }
+  }
+  if (linha) linhas.push(linha);
+  return linhas;
+}
+function caixaRodapeEvidenciaPdf(page, overrides = {}) {
+  const { width: pageW } = page.getSize();
+  const margemX = Number(overrides.x) || 21;
+  const margemInferior = Number(overrides.y) || RODAPE_EVIDENCIA_MARGEM_Y_PT;
+  const largura =
+    Number(overrides.largura) || Math.max(200, pageW - margemX * 2);
+  return {
+    x: margemX,
+    y: margemInferior,
+    largura,
+    altura: Number(overrides.altura) || 10
+  };
+}
+
+function desenharEvidenciaAssinatura(page, font, box, linhas) {
+  if (!box || !linhas?.length) return;
+  const x = (Number(box.x) || 0) + 0.5;
+  const yRodape = Number(box.y) || 0;
+  const tamanho = PDF_FONT_EVIDENCIA;
+  const lineH = tamanho * 1.18;
+  const maxW = (Number(box.largura) || 500) - 1;
+  for (let i = 0; i < linhas.length; i++) {
+    page.drawText(linhas[i], {
+      x,
+      y: yRodape + 4 + i * lineH,
+      size: tamanho,
+      font,
+      maxWidth: maxW
+    });
+  }
+}
+
+function montarTextoEvidenciaAssinatura(semRubricaManual, ipRef) {
+  const agora = new Date();
+  const docId =
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `doc-${agora.getTime()}`;
+  const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+  const dataHoraBr = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: fuso,
+    dateStyle: "short",
+    timeStyle: "medium"
+  }).format(agora);
+  return (
+    (semRubricaManual
+      ? "Assinatura por nome legível (sem rubrica manual). "
+      : "Assinatura manuscrita no navegador. ") +
+    "Doc. " +
+    docId +
+    ". Reg.: " +
+    dataHoraBr +
+    " (fuso " +
+    fuso +
+    "). IP: " +
+    (ipRef || "n/d") +
+    "."
+  );
+}
+
+function carimbarEvidenciaRodapePagina(page, font, overridesCoords, semRubricaManual, ipRef) {
+  const parEvid = montarTextoEvidenciaAssinatura(semRubricaManual, ipRef);
+  const caixaRodape = caixaRodapeEvidenciaPdf(page, overridesCoords);
+  const wEv = Math.max(120, (Number(caixaRodape.largura) || 550) - 2);
+  const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
+  desenharEvidenciaAssinatura(page, font, caixaRodape, linhasE);
+}
+function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
+  let t = String(texto || "").trim();
+  if (!t) return "";
+  if (font.widthOfTextAtSize(t, tamanhoFonte) <= larguraMax) return t;
+  const elipsis = "...";
+  let baixo = 0;
+  let alto = t.length;
+  while (baixo < alto) {
+    const meio = Math.ceil((baixo + alto) / 2);
+    const teste = t.slice(0, meio) + elipsis;
+    if (font.widthOfTextAtSize(teste, tamanhoFonte) <= larguraMax) baixo = meio;
+    else alto = meio - 1;
+  }
+  return t.slice(0, alto) + elipsis;
+}
+function baselineYNoCampo(box, tamanhoFonte) {
+  const yBottom = Number(box.y) || 0;
+  const h = Number(box.altura ?? box.height) || 12;
+  return yBottom + Math.min(h * 0.78, tamanhoFonte * 1.12);
+}
+function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
+  if (!coord) return false;
+  const c = coord;
+  const w = Number(c.largura ?? c.width) || 200;
+  const size = options.size ?? PDF_FONT_TEXTO;
+  const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
+  if (!str) return false;
+  const yBottom = Number(c.y) || 0;
+  const offsetLinha = options.semOffsetLinha
+    ? 0
+    : yBottom > LIMITE_Y_SEM_OFFSET_TEXTO_PT
+      ? OFFSET_Y_TEXTO_UMA_LINHA_PT
+      : 0;
+  const y = baselineYNoCampo(c, size) - offsetLinha + (options.offsetY ?? 0);
+  const x = Number(c.x) || 0;
+  page.drawText(str, {
+    x: x + (options.offsetX ?? 0.5),
+    y,
+    size,
+    font,
+    maxWidth: w - 2
+  });
+  return true;
+}
+function marcarCheckboxCoord(page, font, coord, ativo, options = {}) {
+  if (!ativo || !coord) return false;
+  const x = Number(coord.x) || 0;
+  const yBottom = Number(coord.y) || 0;
+  const w = Number(coord.largura ?? coord.width) || 7;
+  const h = Number(coord.altura ?? coord.height) || 7;
+  const size = options.size ?? PDF_FONT_TEXTO;
+  const sym = options.simbolo ?? "X";
+  const tw = font.widthOfTextAtSize(sym, size);
+  const cx = x + (w - tw) / 2;
+  const cy = yBottom + (h - size * 0.72) / 2;
+  page.drawText(sym, { x: cx, y: cy, size, font });
+  return true;
+}
+function marcarRadioJsonOpcao(page, font, grupoCampo, chaveOpcao) {
+  if (!grupoCampo?.opcoes || !chaveOpcao) return false;
+  const alvo = grupoCampo.opcoes[chaveOpcao];
+  const coord = alvo?.coordenadas;
+  return marcarCheckboxCoord(page, font, coord, true);
+}
+function preencherDataSegmentada(page, font, campoSchema, dia, mes, ano) {
+  if (!campoSchema?.segmentos) return;
+  const s = campoSchema.segmentos;
+  const d = String(dia || "").replace(/\D/g, "").slice(0, 2);
+  const m = String(mes || "").replace(/\D/g, "").slice(0, 2);
+  const y = String(ano || "").replace(/\D/g, "").slice(0, 4);
+  if (d) escreverTextoCampoCoord(page, font, s.dia.coordenadas, d.padStart(2, "0"));
+  if (m) escreverTextoCampoCoord(page, font, s.mes.coordenadas, m.padStart(2, "0"));
+  if (y) escreverTextoCampoCoord(page, font, s.ano.coordenadas, y);
+}
+
+/** DD/MM/AAAA legados → yyyy-mm-dd para `<input type="date">` */
+function isoDesdeSegmentado(dia, mes, ano) {
+  const dd = String(dia ?? "").replace(/\D/g, "").padStart(2, "0").slice(0, 2);
+  const mm = String(mes ?? "").replace(/\D/g, "").padStart(2, "0").slice(0, 2);
+  const yy = String(ano ?? "").replace(/\D/g, "").slice(0, 4);
+  if (dd.length !== 2 || mm.length !== 2 || yy.length !== 4) return "";
+  const di = parseInt(dd, 10);
+  const mi = parseInt(mm, 10);
+  const yi = parseInt(yy, 10);
+  if (Number.isNaN(di) || Number.isNaN(mi) || Number.isNaN(yi)) return "";
+  if (mi < 1 || mi > 12 || di < 1 || di > 31) return "";
+  const test = new Date(yi, mi - 1, di);
+  if (test.getFullYear() !== yi || test.getMonth() !== mi - 1 || test.getDate() !== di) return "";
+  return `${yy}-${mm}-${dd}`;
+}
+
+/** yyyy-mm-dd → dia/mês/ano para preencherDataSegmentada (PDF) */
+function isoParaPartesPdf(isoStr) {
+  const s = String(isoStr || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return { dia: "", mes: "", ano: "" };
+  const [y, m, d] = s.split("-");
+  return { dia: d, mes: m, ano: y };
+}
+
+/** Migra rascunhos v4 (dia/mês/ano separados) para os ids únicos */
+function migrarCamposDataIsoAntigos(c) {
+  if (!c || typeof c !== "object") return;
+  const mig = (isoId, dk, mk, ak) => {
+    if (c[isoId]) return;
+    if (c[dk] == null && c[mk] == null && c[ak] == null) return;
+    const iso = isoDesdeSegmentado(c[dk], c[mk], c[ak]);
+    if (iso) c[isoId] = iso;
+  };
+  mig("dataNascimentoFunc", "dn_dia", "dn_mes", "dn_ano");
+  mig("dataAdmissaoFunc", "adm_dia", "adm_mes", "adm_ano");
+  mig("conj_nasc", "conj_d", "conj_m", "conj_y");
+  for (let n = 1; n <= 4; n += 1) mig(`fil${n}_nasc`, `fil${n}_d`, `fil${n}_m`, `fil${n}_y`);
+}
+
+function v(id) {
+  return (document.getElementById(id)?.value || "").trim();
+}
+function radio(name) {
+  const list = document.querySelectorAll(`input[name="${name}"]`);
+  for (const r of list) {
+    if (r.checked) return String(r.value || "").trim();
+  }
+  return "";
+}
+function toggleDepConjuge() {
+  const on = document.getElementById("conj_incluir")?.checked;
+  const box = document.getElementById("conjCampos");
+  if (box) box.style.display = on ? "block" : "none";
+  document.getElementById("conjIncluirLabel")?.classList.toggle("active", !!on);
+}
+function toggleDepFilho(n) {
+  const on = document.getElementById(`fil${n}_incluir`)?.checked;
+  const box = document.getElementById(`fil${n}Campos`);
+  if (box) box.style.display = on ? "block" : "none";
+  document.getElementById(`fil${n}IncluirLabel`)?.classList.toggle("active", !!on);
+  if (!on) {
+    const wrap = document.getElementById(`fil${n}_wrapDnv`);
+    if (wrap) wrap.setAttribute("hidden", "");
+    const nv = document.getElementById(`fil${n}_nascvivo`);
+    if (nv) {
+      nv.value = "";
+      marcarCampoInvalido(`fil${n}_nascvivo`, false);
+    }
+  } else {
+    atualizarVisibilidadeDnvFilho(n);
+  }
+}
+function syncRadioActive(name) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
+    r.closest(".radio-label")?.classList.toggle("active", r.checked);
+    r.closest(".check-label")?.classList.toggle("active", r.checked);
+  });
+}
+/** Oculta cônjuge e filhos quando a opção é cancelamento (não aderir ao plano). */
+function atualizarVisibilidadeModuloDependentes() {
+  const sec = document.getElementById("secaoDependentes");
+  if (!sec) return;
+  const ro = document.getElementById("tipoAdesaoNaooptante");
+  const naoAderir = ro ? ro.checked : radio("tipoAdesao") === "naooptante";
+  sec.classList.toggle("sec-dependentes--off", naoAderir);
+  if (naoAderir) {
+    sec.setAttribute("hidden", "");
+    sec.style.setProperty("display", "none", "important");
+  } else {
+    sec.removeAttribute("hidden");
+    sec.style.removeProperty("display");
+  }
+}
+(function initTipoAdesaoDependentes() {
+  const aplicar = () => {
+    syncRadioActive("tipoAdesao");
+    atualizarVisibilidadeModuloDependentes();
+    atualizarVisibilidadePlanoOutrosVariante();
+  };
+  document.getElementById("tipoAdesaoGroup")?.addEventListener("click", () => setTimeout(aplicar, 0));
+  document.querySelectorAll('input[name="tipoAdesao"]').forEach((inp) => {
+    inp.addEventListener("change", aplicar);
+    inp.addEventListener("input", aplicar);
+  });
+})();
+
+(function initPlanoOutrosVariante() {
+  document.getElementById("planoOutrosVarianteGroup")?.addEventListener("click", () => {
+    setTimeout(() => void aoMudarPlanoOutrosVariante(), 0);
+  });
+  document.querySelectorAll('input[name="planoOutrosVariante"]').forEach((inp) => {
+    inp.addEventListener("change", () => void aoMudarPlanoOutrosVariante());
+  });
+})();
+
+function formatDate(d) {
+  if (!d) return "";
+  const [y, m, day] = d.split("-");
+  return `${day}/${m}/${y}`;
+}
+function marcarCampoInvalido(id, invalido) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle("invalid", !!invalido);
+}
+function digitosCount(str) {
+  return String(str || "").replace(/\D/g, "").length;
+}
+/** Aviso quando dependente está no plano mas CPF não foi informado (ou está incompleto). */
+const MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE =
+  "Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do Pessoas Online, após sua admissão.\n\nPor favor, remova o dependente que ainda não possui CPF.";
+function validarCamposPlanoBeneficios() {
+  const faltantes = [];
+  const nome = (v("assinaturaName") || "").trim();
+  marcarCampoInvalido("assinaturaName", !nome);
+  if (!nome) faltantes.push({ id: "assinaturaName", nome: "Assinatura (nome por extenso)" });
+  if (!(v("dataAssinatura") || "").trim()) {
+    marcarCampoInvalido("dataAssinatura", true);
+    faltantes.push({ id: "dataAssinatura", nome: "Data da assinatura" });
+  } else {
+    marcarCampoInvalido("dataAssinatura", false);
+  }
+  if (!isNaoAssinarManualmente() && !isAssinaturaManuscritaPreenchida()) {
+    showToast("Desenhe a assinatura manuscrita na área indicada.", false);
+    marcarAssinaturaInvalidaCanvas(true);
+    return false;
+  }
+  marcarAssinaturaInvalidaCanvas(false);
+  if (faltantes.length) {
+    showToast(`Preencha: ${faltantes.map((x) => x.nome).join(", ")}.`, false);
+    document.getElementById(faltantes[0].id)?.focus();
+    return false;
+  }
+  return true;
+}
+
+async function validarCamposObrigatorios() {
+  if (!radioTipoPlano()) {
+    showToast("Selecione Plano de Benefícios ou Outros Planos.", false);
+    document.getElementById("tipoPlanoGroup")?.classList.add("group-invalid");
+    document.getElementById("tipoPlanoGroup")?.querySelector("input")?.focus();
+    return false;
+  }
+  document.getElementById("tipoPlanoGroup")?.classList.remove("group-invalid");
+  if (ehPlanoBeneficios()) return validarCamposPlanoBeneficios();
+
+  const faltantes = [];
+  const add = (id, nome) => {
+    const el = document.getElementById(id);
+    const vazio = !el || (el.value || "").trim().length === 0;
+    marcarCampoInvalido(id, vazio);
+    if (vazio) faltantes.push({ id, nome });
+  };
+
+  ["conj_nome", "conj_cpf", "conj_nasc", "conj_sus", "conj_nomemae"].forEach((id) => marcarCampoInvalido(id, false));
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    [
+      `fil${fn}_nome`,
+      `fil${fn}_cpf`,
+      `fil${fn}_d`,
+      `fil${fn}_m`,
+      `fil${fn}_y`,
+      `fil${fn}_sus`,
+      `fil${fn}_nomemae`,
+      `fil${fn}_nascvivo`
+    ].forEach((id) => marcarCampoInvalido(id, false));
+  }
+
+  if (!radio("tipoAdesao")) {
+    showToast("Selecione QUERO ADERIR ou NÃO QUERO ADERIR.", false);
+    document.getElementById("tipoAdesaoGroup")?.querySelector("input")?.focus();
+    return false;
+  }
+
+  if (ehOutrosPlanos() && !planoOutrosVariante()) {
+    showToast("Selecione o setor.", false);
+    document.getElementById("planoOutrosVarianteGroup")?.classList.add("group-invalid");
+    document.getElementById("planoOutrosVarianteGroup")?.querySelector("input")?.focus();
+    return false;
+  }
+  document.getElementById("planoOutrosVarianteGroup")?.classList.remove("group-invalid");
+
+  if (!v("uf")) {
+    showToast("Selecione o estado.", false);
+    marcarCampoInvalido("uf", true);
+    document.getElementById("uf")?.focus();
+    return false;
+  }
+  marcarCampoInvalido("uf", false);
+
+  add("cidade", "Cidade");
+  if (v("cidade")) {
+    if (!(await garantirMapaCidadesBrasil())) {
+      marcarCampoInvalido("cidade", true);
+      document.getElementById("cidade")?.focus();
+      return false;
+    }
+    if (!resolverArquivoPdfPorCidadeNome(v("cidade"))) {
+      marcarCampoInvalido("cidade", true);
+      faltantes.push({ id: "cidade", nome: "Cidade (sem ficha configurada)" });
+    }
+  }
+
+  add("funcionario", "Nome do Funcionário");
+  add("cpf", "CPF");
+
+  if (v("cpf") && digitosCount(v("cpf")) !== 11) {
+    marcarCampoInvalido("cpf", true);
+    faltantes.push({ id: "cpf", nome: "CPF (11 dígitos)" });
+  }
+
+  if (radio("tipoAdesao") !== "naooptante") {
+    if (document.getElementById("conj_incluir")?.checked) {
+      add("conj_nome", "Nome do cônjuge");
+      add("conj_cpf", "CPF do cônjuge");
+      const dnCOk = !!v("conj_nasc");
+      marcarCampoInvalido("conj_nasc", !dnCOk);
+      if (!dnCOk) faltantes.push({ id: "conj_nasc", nome: "Data de nascimento do cônjuge" });
+      add("conj_sus", "SUS do cônjuge");
+      add("conj_nomemae", "Nome da mãe do cônjuge");
+      if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
+        marcarCampoInvalido("conj_sus", true);
+        faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos)" });
+      }
+      if (v("conj_cpf") && digitosCount(v("conj_cpf")) !== 11) {
+        marcarCampoInvalido("conj_cpf", true);
+        faltantes.push({ id: "conj_cpf", nome: "CPF do cônjuge (11 dígitos)" });
+      }
+    }
+
+    for (let fn = 1; fn <= filhosVisiveis; fn++) {
+      if (!document.getElementById(`fil${fn}_incluir`)?.checked) continue;
+      const rot = `filho(a) ${fn}`;
+      add(`fil${fn}_nome`, `Nome (${rot})`);
+      add(`fil${fn}_cpf`, `CPF (${rot})`);
+      const dnFOk = !!v(`fil${fn}_nasc`);
+      marcarCampoInvalido(`fil${fn}_nasc`, !dnFOk);
+      if (!dnFOk) faltantes.push({ id: `fil${fn}_nasc`, nome: `Data de nascimento (${rot})` });
+      add(`fil${fn}_sus`, `SUS (${rot})`);
+      add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
+      if (filhoDeveExibirCampoDnv(fn)) {
+        add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
+      }
+      if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
+        marcarCampoInvalido(`fil${fn}_sus`, true);
+        faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
+      }
+      if (v(`fil${fn}_cpf`) && digitosCount(v(`fil${fn}_cpf`)) !== 11) {
+        marcarCampoInvalido(`fil${fn}_cpf`, true);
+        faltantes.push({ id: `fil${fn}_cpf`, nome: `CPF (${rot}, 11 dígitos)` });
+      }
+    }
+  }
+
+  add("assinaturaName", "Assinatura (nome por extenso)");
+  if (!(v("dataAssinatura") || "").trim()) {
+    marcarCampoInvalido("dataAssinatura", true);
+    faltantes.push({ id: "dataAssinatura", nome: "Data da assinatura" });
+  } else {
+    marcarCampoInvalido("dataAssinatura", false);
+  }
+  if (!isNaoAssinarManualmente() && !isAssinaturaManuscritaPreenchida()) {
+    showToast("Desenhe a assinatura manuscrita na área indicada.", false);
+    marcarAssinaturaInvalidaCanvas(true);
+    return false;
+  }
+  marcarAssinaturaInvalidaCanvas(false);
+
+  const vistos = new Set();
+  const unicos = faltantes.filter((item) => {
+    const k = `${item.id}:${item.nome}`;
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  });
+
+  if (unicos.length) {
+    const falhaCpfFilhoIncluido = unicos.some((x) => /^fil[1-4]_cpf$/.test(x.id));
+    if (falhaCpfFilhoIncluido) {
+      await abrirModalDocsDependentes();
+    }
+    showToast(`Preencha ou corrija: ${unicos.map((x) => x.nome).join(", ")}.`, false);
+    document.getElementById(unicos[0].id)?.focus();
+    return false;
+  }
+  return true;
+}
+
+function showToast(msg, ok = true) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.querySelector(".toast-dot").style.background = ok ? "#4caf7d" : "#e05c3a";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+function sincronizarBodyModalOpenAssistencia() {
+  if (document.querySelector(".modal-overlay.show")) document.body.classList.add("modal-open");
+  else document.body.classList.remove("modal-open");
+}
+let lgpdResolver = null;
+function abrirModalLGPD() {
+  const modal = document.getElementById("lgpdModal");
+  if (!modal) return Promise.resolve(false);
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenAssistencia();
+  setTimeout(() => document.getElementById("lgpdContinuarBtn")?.focus(), 0);
+  return new Promise((resolve) => {
+    lgpdResolver = resolve;
+  });
+}
+function fecharModalLGPD(decisao) {
+  const modal = document.getElementById("lgpdModal");
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpenAssistencia();
+  const fn = lgpdResolver;
+  lgpdResolver = null;
+  if (fn) fn(!!decisao);
+}
+document.getElementById("lgpdContinuarBtn")?.addEventListener("click", () => fecharModalLGPD(true));
+document.getElementById("lgpdCancelarBtn")?.addEventListener("click", () => fecharModalLGPD(false));
+
+let docsDepResolver = null;
+function abrirModalDocsDependentes() {
+  const modal = document.getElementById("modalDocsDependentes");
+  if (!modal) return Promise.resolve();
+  const p1 = document.getElementById("modalDocsDepP1");
+  const p2 = document.getElementById("modalDocsDepP2");
+  const parts = MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE.split("\n\n");
+  if (p1) p1.textContent = (parts[0] || "").trim();
+  if (p2) p2.textContent = (parts[1] || "").trim();
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenAssistencia();
+  setTimeout(() => document.getElementById("modalDocsDepOkBtn")?.focus(), 0);
+  return new Promise((resolve) => {
+    docsDepResolver = resolve;
+  });
+}
+function fecharModalDocsDependentes() {
+  const modal = document.getElementById("modalDocsDependentes");
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpenAssistencia();
+  const fn = docsDepResolver;
+  docsDepResolver = null;
+  if (fn) fn();
+}
+document.getElementById("modalDocsDepOkBtn")?.addEventListener("click", fecharModalDocsDependentes);
+
+async function confirmarPoliticaLGPD() {
+  const ok = await abrirModalLGPD();
+  return ok;
+}
+
+async function carregarCamposSchema() {
+  const key = ehPlanoBeneficios() ? "beneficios" : "outros";
+  if (camposSchema && camposSchemaCacheKey === key) return true;
+  const fetchPath = key === "beneficios" ? CAMPOS_PLANO_BENEFICIOS_FETCH_PATH : CAMPOS_JSON_FETCH_PATH;
+  const labelPath = key === "beneficios" ? CAMPOS_PLANO_BENEFICIOS_JSON_PATH : CAMPOS_JSON_PATH;
+  try {
+    const res = await fetch(fetchPath, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    camposSchema = await res.json();
+    if (!camposSchema?.campos) throw new Error("Estrutura inválida");
+    camposSchemaCacheKey = key;
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${labelPath}`, false);
+    return false;
+  }
+}
+
+function obterPaginaPdf(pdfDoc, numeroPagina) {
+  const pages = pdfDoc.getPages();
+  const idx = Math.max(0, (Number(numeroPagina) || 1) - 1);
+  if (idx >= pages.length) return null;
+  return pages[idx];
+}
+
+function limparDadosFormulario() {
+  document.querySelectorAll('input[type="text"], input[type="date"]').forEach((el) => {
+    if (el.id === "dataAssinatura") return;
+    el.value = "";
+  });
+  const elUF = document.getElementById("uf");
+  if (elUF) elUF.value = "";
+  const elCidade = document.getElementById("cidade");
+  if (elCidade) {
+    elCidade.innerHTML = '<option value="">— Selecione o estado —</option>';
+    elCidade.value = "";
+    elCidade.disabled = true;
+  }
+  document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
+    r.checked = false;
+  });
+  syncRadioActive("tipoAdesao");
+  document.querySelectorAll('input[name="planoOutrosVariante"]').forEach((r) => {
+    r.checked = false;
+  });
+  syncRadioActive("planoOutrosVariante");
+  atualizarVisibilidadePlanoOutrosVariante();
+  document.getElementById("conj_incluir").checked = false;
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    const ch = document.getElementById(`fil${fn}_incluir`);
+    if (ch) ch.checked = false;
+    toggleDepFilho(fn);
+  }
+  filhosVisiveis = 1;
+  for (let n = 2; n <= NUM_FILHOS; n++) {
+    const bl = document.getElementById(`filBloco${n}`);
+    if (bl) bl.style.display = "none";
+  }
+  atualizarBotoesFilhos();
+  toggleDepConjuge();
+  atualizarVisibilidadeModuloDependentes();
+  atualizarTodosDnvFilhos();
+  document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
+  const elData = document.getElementById("dataAssinatura");
+  if (elData) elData.valueAsDate = new Date();
+  ultimoCepPreenchido = "";
+  clearTimeout(cepBuscaTimer);
+  limparAssinaturaCanvas();
+  const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+  if (naoAssinarCb) naoAssinarCb.checked = false;
+  sincronizarCheckLabelNaoAssinarManualmente();
+  atualizarUiNaoAssinarManualmente();
+}
+
+// ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
+const RASCUNHO_IDS = [
+  "uf", "cidade", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
+  "dataNascimentoFunc", "dataAdmissaoFunc",
+  "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
+  "telefone",
+  "conj_nome", "conj_cpf", "conj_nasc", "conj_sus", "conj_nomemae",
+  "fil1_nome", "fil1_cpf", "fil1_nasc", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
+  "fil2_nome", "fil2_cpf", "fil2_nasc", "fil2_sus", "fil2_nomemae", "fil2_nascvivo",
+  "fil3_nome", "fil3_cpf", "fil3_nasc", "fil3_sus", "fil3_nomemae", "fil3_nascvivo",
+  "fil4_nome", "fil4_cpf", "fil4_nasc", "fil4_sus", "fil4_nomemae", "fil4_nascvivo",
+  "assinaturaName", "dataAssinatura"
+];
+let rascunhoSalvarTimer = null;
+let ignorarSalvarRascunho = false;
+
+function limparRascunhoLocal() {
+  try {
+    lsRemoveDual(RASCUNHO_STORAGE_KEY, LS_LEGACY_RASCUNHO_ASSIST);
+  } catch (_) {}
+}
+
+function coletarEstadoRascunho() {
+  const campos = {};
+  RASCUNHO_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) campos[id] = el.value;
+  });
+  let assinaturaCanvasPng = null;
+  try {
+    const c = document.getElementById("assinaturaCanvas");
+    if (c && (assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida())) {
+      assinaturaCanvasPng = c.toDataURL("image/png", 0.88);
+    }
+  } catch (_) {
+    assinaturaCanvasPng = null;
+  }
+  return {
+    v: 7,
+    t: Date.now(),
+    campos,
+    assinaturaCanvasPng,
+    naoAssinarManualmente: isNaoAssinarManualmente(),
+    tipoPlano: radioTipoPlano(),
+    tipoAdesao: radio("tipoAdesao"),
+    planoOutrosVariante: planoOutrosVariante(),
+    conj_incluir: !!document.getElementById("conj_incluir")?.checked,
+    filhosVisiveis,
+    fil1_incluir: !!document.getElementById("fil1_incluir")?.checked,
+    fil2_incluir: !!document.getElementById("fil2_incluir")?.checked,
+    fil3_incluir: !!document.getElementById("fil3_incluir")?.checked,
+    fil4_incluir: !!document.getElementById("fil4_incluir")?.checked
+  };
+}
+
+function aplicarEstadoRascunho(obj) {
+  const src = obj.campos || {};
+  const c = { ...src };
+  migrarCamposDataIsoAntigos(c);
+  RASCUNHO_IDS.forEach((id) => {
+    if (c[id] === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.value = c[id];
+  });
+  const elTelefone = document.getElementById("telefone");
+  if (elTelefone && !String(elTelefone.value).trim() && (c.tel_ddd != null || c.tel_numero != null)) {
+    const a = String(c.tel_ddd ?? "").replace(/\D/g, "");
+    const b = String(c.tel_numero ?? "").replace(/\D/g, "");
+    if (a.length >= 2 && b.length >= 8) {
+      elTelefone.value = a.slice(0, 2) + b;
+      maskTelefone(elTelefone);
+    }
+  }
+  const tp = obj.tipoPlano;
+  if (tp) {
+    const inpPlano = document.querySelector(`input[name="tipoPlano"][value="${tp}"]`);
+    if (inpPlano) {
+      inpPlano.checked = true;
+      toggleTipoPlano(inpPlano);
+    }
+  }
+  const ta = obj.tipoAdesao;
+  if (ta) {
+    const inp = document.querySelector(`input[name="tipoAdesao"][value="${ta}"]`);
+    if (inp) inp.checked = true;
+  }
+  syncRadioActive("tipoAdesao");
+  const pv = obj.planoOutrosVariante;
+  if (pv) {
+    const inpV = document.querySelector(`input[name="planoOutrosVariante"][value="${pv}"]`);
+    if (inpV) inpV.checked = true;
+  }
+  syncRadioActive("planoOutrosVariante");
+  atualizarVisibilidadePlanoOutrosVariante();
+  const ci = document.getElementById("conj_incluir");
+  if (ci) ci.checked = !!obj.conj_incluir;
+  let vis = 1;
+  if (typeof obj.filhosVisiveis === "number" && obj.filhosVisiveis >= 1 && obj.filhosVisiveis <= NUM_FILHOS) {
+    vis = obj.filhosVisiveis;
+  }
+  filhosVisiveis = vis;
+  for (let n = 2; n <= NUM_FILHOS; n++) {
+    const bl = document.getElementById(`filBloco${n}`);
+    if (bl) bl.style.display = n <= filhosVisiveis ? "" : "none";
+  }
+  atualizarBotoesFilhos();
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    const fi = document.getElementById(`fil${fn}_incluir`);
+    const key = `fil${fn}_incluir`;
+    if (fi) fi.checked = !!obj[key];
+    toggleDepFilho(fn);
+  }
+  toggleDepConjuge();
+  atualizarVisibilidadeModuloDependentes();
+  atualizarTodosDnvFilhos();
+  const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+  if (naoAssinarCb) {
+    naoAssinarCb.checked = obj.naoAssinarManualmente === true;
+    sincronizarCheckLabelNaoAssinarManualmente();
+  }
+  atualizarUiNaoAssinarManualmente();
+  if (obj.naoAssinarManualmente === true) {
+    limparAssinaturaCanvas();
+  } else if (obj.assinaturaCanvasPng) {
+    aplicarAssinaturaManuscritaDePng(obj.assinaturaCanvasPng);
+  } else {
+    limparAssinaturaCanvas();
+  }
+}
+
+function tentarAplicarCopiaFichaCadastral() {
+  let raw;
+  try {
+    raw = appStorage.getItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+  } catch (_e) {
+    return;
+  }
+  if (!raw) return;
+  let obj;
+  try {
+    obj = JSON.parse(raw);
+  } catch (_e) {
+    try {
+      lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
+    } catch (e2) {}
+    return;
+  }
+  if (!obj || !obj.campos) {
+    try {
+      lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
+    } catch (e2) {}
+    return;
+  }
+  const c = obj.campos;
+  const temAlgumDadoUtil =
+    String(c.funcionario || "").trim() ||
+    String(c.cpf || "").trim() ||
+    String(c.cep || "").trim() ||
+    String(c.rua || "").trim() ||
+    (obj.telefoneDigitos && String(obj.telefoneDigitos).replace(/\D/g, "").length >= 8) ||
+    (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.some((d) => d && String(d.nome || "").trim())) ||
+    (obj.assinaturaCanvasPng && String(obj.assinaturaCanvasPng).startsWith("data:"));
+  if (!temAlgumDadoUtil) {
+    try {
+      lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
+    } catch (e2) {}
+    return;
+  }
+  const up = (s) => String(s || "").trim().toLocaleUpperCase("pt-BR");
+  const setIf = (id, val) => {
+    if (val == null || String(val).trim() === "") return;
+    const el = document.getElementById(id);
+    if (el) el.value = String(val);
+  };
+  ignorarSalvarRascunho = true;
+  try {
+    if (c.funcionario) setIf("funcionario", up(c.funcionario));
+    if (c.cpf) {
+      const elc = document.getElementById("cpf");
+      if (elc) {
+        elc.value = c.cpf;
+        maskCPF(elc);
+      }
+    }
+    if (c.cep) {
+      const ce = document.getElementById("cep");
+      if (ce) {
+        ce.value = String(c.cep).replace(/\D/g, "").slice(0, 8);
+        maskCep(ce);
+        ultimoCepPreenchido = String(c.cep).replace(/\D/g, "").slice(0, 8);
+      }
+    }
+    if (c.rua) setIf("rua", up(c.rua));
+    if (c.numero) setIf("numero", up(c.numero));
+    if (c.complemento) setIf("complemento", up(c.complemento));
+    if (c.bairro) setIf("bairro", up(c.bairro));
+    if (c.cidadeuf) setIf("cidadeuf", up(c.cidadeuf));
+    if (obj.telefoneDigitos) {
+      const te = document.getElementById("telefone");
+      if (te) {
+        te.value = String(obj.telefoneDigitos).replace(/\D/g, "").slice(0, 11);
+        maskTelefone(te);
+      }
+    }
+    if (c.assinaturaName) setIf("assinaturaName", up(c.assinaturaName));
+    if (obj.dataAssinatura) {
+      const d = document.getElementById("dataAssinatura");
+      if (d) d.value = obj.dataAssinatura;
+    }
+    const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+    if (naoAssinarCb) {
+      naoAssinarCb.checked = obj.naoAssinarManualmente === true;
+      sincronizarCheckLabelNaoAssinarManualmente();
+    }
+    atualizarUiNaoAssinarManualmente();
+    if (obj.naoAssinarManualmente === true) {
+      limparAssinaturaCanvas();
+    } else if (obj.assinaturaCanvasPng) {
+      aplicarAssinaturaManuscritaDePng(obj.assinaturaCanvasPng);
+    }
+    if (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.length) {
+      const n = Math.min(NUM_FILHOS, obj.dependentesFilhos.length);
+      filhosVisiveis = Math.max(1, n);
+      for (let k = 2; k <= filhosVisiveis; k++) {
+        const bl = document.getElementById(`filBloco${k}`);
+        if (bl) bl.style.display = "";
+      }
+      for (let k = filhosVisiveis + 1; k <= NUM_FILHOS; k++) {
+        const bl = document.getElementById(`filBloco${k}`);
+        if (bl) bl.style.display = "none";
+      }
+      atualizarBotoesFilhos();
+      obj.dependentesFilhos.forEach((dep, i) => {
+        const fn = i + 1;
+        if (fn > NUM_FILHOS) return;
+        if (!dep || !String(dep.nome || "").trim()) return;
+        const ch = document.getElementById(`fil${fn}_incluir`);
+        if (ch) ch.checked = true;
+        toggleDepFilho(fn);
+        setIf(`fil${fn}_nome`, up(dep.nome));
+        if (dep.cpf) {
+          const cfp = document.getElementById(`fil${fn}_cpf`);
+          if (cfp) {
+            cfp.value = dep.cpf;
+            maskCPF(cfp);
+          }
+        }
+        const isoFil = isoDesdeSegmentado(dep.d, dep.m, dep.y);
+        if (isoFil) setIf(`fil${fn}_nasc`, isoFil);
+      });
+    }
+    atualizarTodosDnvFilhos();
+  } finally {
+    ignorarSalvarRascunho = false;
+  }
+  const cu = c.cidadeuf ? String(c.cidadeuf).trim().toLocaleUpperCase("pt-BR") : "";
+  const parsedCu =
+    cu.match(/^(.+?)\s*\/\s*([A-Z]{2})$/) || cu.match(/^(.+?)\s+-\s+([A-Z]{2})$/);
+  if (parsedCu && ehOutrosPlanos()) {
+    void (async () => {
+      ignorarSalvarRascunho = true;
+      try {
+        const nomeCid = parsedCu[1].trim();
+        const ufImp = parsedCu[2];
+        const selUf = document.getElementById("uf");
+        if (selUf && ufImp.length === 2) {
+          selUf.value = ufImp;
+          await carregarMunicipiosIBGE(ufImp);
+          const selC = document.getElementById("cidade");
+          if (selC) {
+            const hit = [...selC.options].find(
+              (o) => o.value && o.value.localeCompare(nomeCid, "pt-BR", { sensitivity: "accent" }) === 0
+            );
+            if (hit) selC.value = hit.value;
+          }
+          await carregarTemplateParaCidadeSelecionada();
+        }
+      } finally {
+        ignorarSalvarRascunho = false;
+        agendarSalvarRascunho();
+      }
+    })();
+  }
+  try {
+    lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
+  } catch (e2) {}
+  agendarSalvarRascunho();
+  showToast("Dados importados da Ficha Cadastral. Revise os campos antes de concluir.", true);
+}
+
+const RASCUNHO_DEBOUNCE_MS = 250;
+
+function agendarSalvarRascunho() {
+  if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = setTimeout(() => {
+    rascunhoSalvarTimer = null;
+    salvarRascunhoLocalSincrono();
+  }, RASCUNHO_DEBOUNCE_MS);
+}
+
+function salvarRascunhoLocalSincrono() {
+  if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = null;
+  try {
+    appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+  } catch (_) {}
+}
+
+function tentarRestaurarRascunho() {
+  try {
+    const raw = appStorage.getItem(RASCUNHO_STORAGE_KEY);
+    if (!raw) return false;
+    const obj = JSON.parse(raw);
+    if (!obj || ![1, 2, 3, 4, 5, 6, 7].includes(obj.v) || !obj.campos) return false;
+    ignorarSalvarRascunho = true;
+    aplicarEstadoRascunho(obj);
+    ignorarSalvarRascunho = false;
+    const savedCidade = obj.campos?.cidade;
+    void (async () => {
+      if (!v("uf")) return;
+      await carregarMunicipiosIBGE(v("uf"));
+      const sel = document.getElementById("cidade");
+      if (!sel || !savedCidade) return;
+      if ([...sel.options].some((o) => o.value === savedCidade)) {
+        sel.value = savedCidade;
+      } else {
+        const hit = [...sel.options].find(
+          (o) =>
+            o.value &&
+            o.value.localeCompare(String(savedCidade), "pt-BR", { sensitivity: "accent" }) === 0
+        );
+        if (hit) sel.value = hit.value;
+      }
+      await carregarTemplateParaCidadeSelecionada();
+    })();
+    showToast("Rascunho recuperado. Você pode continuar o preenchimento.", true);
+    return true;
+  } catch (e) {
+    console.warn(e);
+    ignorarSalvarRascunho = false;
+    return false;
+  }
+}
+
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", abrirModalConfirmarDescartarRascunhoAssistencia);
+
+(function initHeaderNav() {
+  const btn = document.getElementById("headerMenuBtn");
+  const backdrop = document.getElementById("headerNavBackdrop");
+  const panel = document.getElementById("headerNavPanel");
+  if (!btn || !backdrop || !panel) return;
+  const body = document.body;
+
+  function setOpen(open) {
+    if (open) {
+      body.classList.add("header-nav-open");
+      btn.setAttribute("aria-expanded", "true");
+      backdrop.setAttribute("aria-hidden", "false");
+      panel.setAttribute("aria-hidden", "false");
+      body.style.overflow = "hidden";
+    } else {
+      body.classList.remove("header-nav-open");
+      btn.setAttribute("aria-expanded", "false");
+      backdrop.setAttribute("aria-hidden", "true");
+      panel.setAttribute("aria-hidden", "true");
+      body.style.overflow = "";
+    }
+  }
+
+  function closeMenu() {
+    setOpen(false);
+  }
+
+  function toggleMenu() {
+    setOpen(!body.classList.contains("header-nav-open"));
+  }
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+  backdrop.addEventListener("click", closeMenu);
+  document.getElementById("headerNavCloseBtn")?.addEventListener("click", closeMenu);
+
+  panel.querySelectorAll('a[href]').forEach((a) => {
+    a.addEventListener("click", closeMenu);
+  });
+  document.getElementById("btnDescartarRascunho")?.addEventListener("click", closeMenu);
+  panel.querySelector(".header-nav-download")?.addEventListener("click", closeMenu);
+
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape") return;
+      if (!body.classList.contains("header-nav-open")) return;
+      e.preventDefault();
+      closeMenu();
+      btn.focus();
+    },
+    true
+  );
+})();
+
+document.querySelectorAll("input, select").forEach((el) => {
+  el.addEventListener("input", agendarSalvarRascunho);
+  /* `change` grava de imediato: no mobile o debounce costuma perder o último estado
+     ( Safari/iOS: pagehide instável, utilizador muda de app com timer pendente ). */
+  el.addEventListener("change", salvarRascunhoLocalSincrono);
+});
+
+async function gerarPDF() {
+  try {
+    if (!(await validarCamposObrigatorios())) return;
+    if (!(await confirmarPoliticaLGPD())) return;
+    if (!(await carregarCamposSchema())) return;
+    const templateBytes = await carregarTemplateParaCidadeSelecionada();
+    if (!templateBytes) return;
+
+    const C = camposSchema.campos;
+
+    const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    if (ehPlanoBeneficios()) {
+      const ass = C.assinatura.campos;
+      const pageAss = obterPaginaPdf(pdfDoc, ass.rubrica?.pagina || 2);
+      if (!pageAss) {
+        showToast("O PDF da declaração não possui a página de assinatura esperada.", false);
+        return;
+      }
+      const semRubrica = isNaoAssinarManualmente();
+      const [bufPng, ipRef] = await Promise.all([
+        semRubrica ? Promise.resolve(null) : canvasAssinaturaParaPngArrayBuffer(),
+        obterIpPublicoEvidencia()
+      ]);
+      if (bufPng && ass.rubrica?.coordenadas) {
+        const png = await pdfDoc.embedPng(bufPng);
+        desenharPngAjustadoNoCampo(pageAss, png, ass.rubrica.coordenadas);
+      }
+      const coordsNome = semRubrica
+        ? (ass.nome_legivel_sem_rubrica?.coordenadas || ass.nome_legivel?.coordenadas)
+        : ass.nome_legivel?.coordenadas;
+      const optsAssinaturaPdf = { semOffsetLinha: true };
+      if (coordsNome) {
+        escreverTextoCampoCoord(
+          pageAss,
+          font,
+          coordsNome,
+          v("assinaturaName"),
+          optsAssinaturaPdf
+        );
+      }
+      if (ass.data?.coordenadas) {
+        escreverTextoCampoCoord(
+          pageAss,
+          font,
+          ass.data.coordenadas,
+          formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"),
+          optsAssinaturaPdf
+        );
+      }
+      carimbarEvidenciaRodapePagina(
+        pageAss,
+        font,
+        ass.evidencia?.coordenadas,
+        semRubrica,
+        ipRef
+      );
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const primeiroNome = primeiroNomeUsuarioParaArquivo(v("assinaturaName"));
+      link.download = `Declaracao_Plano_Saude ${primeiroNome}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+      salvarRascunhoLocalSincrono();
+      showToast("PDF gerado com sucesso!");
+      return;
+    }
+
+    const tipo = radio("tipoAdesao");
+    const page = pdfDoc.getPages()[0];
+
+    marcarRadioJsonOpcao(page, font, C.tipo_adesao, tipo);
+
+    const df = C.dados_funcionario.campos;
+    escreverTextoCampoCoord(page, font, df.funcionario.coordenadas, v("funcionario"));
+    escreverTextoCampoCoord(page, font, df.matricula.coordenadas, v("matricula"));
+    escreverTextoCampoCoord(page, font, df.nomemae.coordenadas, v("nomemae"));
+    escreverTextoCampoCoord(page, font, df.sus.coordenadas, v("sus"));
+    escreverTextoCampoCoord(page, font, df.rg.coordenadas, v("rg"));
+    escreverTextoCampoCoord(page, font, df.cpf.coordenadas, v("cpf"));
+    const partesDn = isoParaPartesPdf(v("dataNascimentoFunc"));
+    preencherDataSegmentada(page, font, df.datanasc, partesDn.dia, partesDn.mes, partesDn.ano);
+    const partesAdm = isoParaPartesPdf(v("dataAdmissaoFunc"));
+    preencherDataSegmentada(page, font, df.dataadm, partesAdm.dia, partesAdm.mes, partesAdm.ano);
+    escreverTextoCampoCoord(page, font, df.cargo.coordenadas, v("cargo"));
+    escreverTextoCampoCoord(page, font, df.site.coordenadas, v("site"));
+
+    const en = C.endereco.campos;
+    escreverTextoCampoCoord(page, font, en.rua.coordenadas, v("rua"));
+    escreverTextoCampoCoord(page, font, en.numero.coordenadas, v("numero"));
+    escreverTextoCampoCoord(page, font, en.complemento.coordenadas, v("complemento"));
+    escreverTextoCampoCoord(page, font, en.bairro.coordenadas, v("bairro"));
+    escreverTextoCampoCoord(page, font, en.cidadeuf.coordenadas, v("cidadeuf"));
+    const telPartes = telefoneSeparadoParaPdf();
+    escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, telPartes.ddd);
+    escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, telPartes.num);
+
+    if (tipo !== "naooptante") {
+      const conj = C.dependentes.conjuge.campos;
+      const incluirConj = document.getElementById("conj_incluir")?.checked;
+      marcarCheckboxCoord(page, font, conj.incluir.coordenadas, incluirConj);
+      if (incluirConj) {
+        escreverTextoCampoCoord(page, font, conj.nome.coordenadas, v("conj_nome"));
+        escreverTextoCampoCoord(page, font, conj.cpf.coordenadas, v("conj_cpf"));
+        const pc = isoParaPartesPdf(v("conj_nasc"));
+        preencherDataSegmentada(page, font, conj.dtnasc, pc.dia, pc.mes, pc.ano);
+        escreverTextoCampoCoord(page, font, conj.sus.coordenadas, v("conj_sus"));
+        escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
+      }
+
+      const filhosSchema = C.dependentes.filhos || [];
+      filhosSchema.forEach((filSchema, idx) => {
+        const n = idx + 1;
+        if (n > filhosVisiveis) return;
+        const fil = filSchema.campos;
+        const incluirFil = document.getElementById(`fil${n}_incluir`)?.checked;
+        marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
+        if (!incluirFil) return;
+        escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v(`fil${n}_nome`));
+        escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v(`fil${n}_cpf`));
+        const pfn = isoParaPartesPdf(v(`fil${n}_nasc`));
+        preencherDataSegmentada(page, font, fil.dtnasc, pfn.dia, pfn.mes, pfn.ano);
+        escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
+        escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
+        const dnvTexto = filhoDeveExibirCampoDnv(n) ? v(`fil${n}_nascvivo`) : "";
+        escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, dnvTexto);
+      });
+    }
+
+    const ass = C.assinatura.campos;
+    const semRubricaManual = isNaoAssinarManualmente();
+    const [bufPng, ipRef] = await Promise.all([
+      semRubricaManual ? Promise.resolve(null) : canvasAssinaturaParaPngArrayBuffer(),
+      obterIpPublicoEvidencia()
+    ]);
+    if (bufPng) {
+      const rubrica = ass.rubrica;
+      if (rubrica?.coordenadas) {
+        const png = await pdfDoc.embedPng(bufPng);
+        desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
+      }
+    }
+    const coordsNomeLegivel = semRubricaManual
+      ? (ass.nome_legivel_sem_rubrica?.coordenadas || ass.nome_legivel?.coordenadas)
+      : ass.nome_legivel?.coordenadas;
+    if (coordsNomeLegivel) {
+      escreverTextoCampoCoord(
+        page,
+        font,
+        coordsNomeLegivel,
+        v("assinaturaName") || v("funcionario")
+      );
+    }
+    escreverTextoCampoCoord(page, font, ass.data.coordenadas, formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"));
+    carimbarEvidenciaRodapePagina(
+      page,
+      font,
+      ass.evidencia?.coordenadas,
+      semRubricaManual,
+      ipRef
+    );
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Ficha de Assistencia Medica");
+    const primeiroNome = primeiroNomeUsuarioParaArquivo(v("funcionario"));
+    link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+    salvarRascunhoLocalSincrono();
+    showToast("PDF gerado com sucesso!");
+  } catch (error) {
+    console.error(error);
+    showToast("Falha ao gerar PDF. Verifique o console.", false);
+  }
+}
+
+function fecharModalAtencaoDownloadModelo() {
+  const modal = document.getElementById("modalAtencaoDownloadModelo");
+  if (!modal?.classList.contains("show")) return;
+  setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpenAssistencia();
+}
+
+function abrirModalAtencaoDownloadModelo() {
+  const modal = document.getElementById("modalAtencaoDownloadModelo");
+  if (!modal) return;
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenAssistencia();
+  setTimeout(() => document.getElementById("modalAtencaoDownloadContinuarBtn")?.focus(), 0);
+}
+
+async function baixarPdfVazioExecucao() {
+  try {
+    if (!radioTipoPlano()) {
+      showToast("Selecione Plano de Benefícios ou Outros Planos.", false);
+      document.getElementById("tipoPlanoGroup")?.classList.add("group-invalid");
+      return;
+    }
+    if (ehOutrosPlanos()) {
+      if (!planoOutrosVariante()) {
+        showToast("Selecione o setor para baixar o modelo correto.", false);
+        document.getElementById("planoOutrosVarianteGroup")?.classList.add("group-invalid");
+        return;
+      }
+      if (!v("uf")) {
+        showToast("Selecione o estado e a cidade para baixar o modelo correto.", false);
+        marcarCampoInvalido("uf", true);
+        document.getElementById("uf")?.focus();
+        return;
+      }
+      if (!v("cidade")) {
+        showToast("Selecione a cidade para baixar o modelo correto.", false);
+        marcarCampoInvalido("cidade", true);
+        document.getElementById("cidade")?.focus();
+        return;
+      }
+    }
+    const bytes = await carregarTemplateParaCidadeSelecionada();
+    if (!bytes) return;
+    const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = ehPlanoBeneficios()
+      ? "DECLARACAO_PLANO_DE_SAUDE.pdf"
+      : (resolverArquivoPdfPorCidadeNome(v("cidade")) || "assistencia_medica.pdf");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Download do PDF vazio iniciado.", true);
+  } catch (e) {
+    console.error(e);
+    showToast("Não foi possível baixar o PDF vazio.", false);
+  }
+}
+
+document.getElementById("modalAtencaoDownloadFecharBtn")?.addEventListener("click", fecharModalAtencaoDownloadModelo);
+document.getElementById("modalAtencaoDownloadContinuarBtn")?.addEventListener("click", async () => {
+  fecharModalAtencaoDownloadModelo();
+  await baixarPdfVazioExecucao();
+});
+document.getElementById("modalAtencaoDownloadModelo")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalAtencaoDownloadModelo") fecharModalAtencaoDownloadModelo();
+});
+
+function fecharModalConfirmarDescartarRascunhoAssistencia() {
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpenAssistencia();
+}
+function abrirModalConfirmarDescartarRascunhoAssistencia() {
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpenAssistencia();
+  setTimeout(() => document.getElementById("btnModalDescartarAssistConfirmar")?.focus(), 0);
+}
+function confirmarDescartarRascunhoAssistencia() {
+  fecharModalConfirmarDescartarRascunhoAssistencia();
+  limparRascunhoLocal();
+  limparDadosFormulario();
+  showToast("Rascunho descartado.", true);
+}
+
+function fecharModalConfirmarLimparAssinaturaAssistencia() {
+  const el = document.getElementById("modalConfirmarLimparAssinatura");
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpenAssistencia();
+}
+function confirmarLimparAssinaturaAssistenciaExecutar() {
+  fecharModalConfirmarLimparAssinaturaAssistencia();
+  limparAssinaturaCanvas();
+  agendarSalvarRascunho();
+}
+
+document.getElementById("btnModalDescartarAssistCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoAssistencia);
+document.getElementById("btnModalDescartarAssistConfirmar")?.addEventListener("click", confirmarDescartarRascunhoAssistencia);
+document.getElementById("modalConfirmarDescartarRascunho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarDescartarRascunho") fecharModalConfirmarDescartarRascunhoAssistencia();
+});
+
+document.getElementById("btnModalLimparAssinAssistCancelar")?.addEventListener("click", fecharModalConfirmarLimparAssinaturaAssistencia);
+document.getElementById("btnModalLimparAssinAssistConfirmar")?.addEventListener("click", confirmarLimparAssinaturaAssistenciaExecutar);
+document.getElementById("modalConfirmarLimparAssinatura")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarLimparAssinatura") fecharModalConfirmarLimparAssinaturaAssistencia();
+});
+
+document.getElementById("btnModalExcluirFilhoCancelar")?.addEventListener("click", cancelarModalExcluirFilhoAssistencia);
+document.getElementById("btnModalExcluirFilhoConfirmar")?.addEventListener("click", confirmarExcluirFilhoModuloAssistencia);
+document.getElementById("modalConfirmarExcluirFilho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarExcluirFilho") cancelarModalExcluirFilhoAssistencia();
+});
+
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key !== "Escape") return;
+    if (document.getElementById("modalConfirmarDescartarRascunho")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalConfirmarDescartarRascunhoAssistencia();
+      return;
+    }
+    if (document.getElementById("modalConfirmarLimparAssinatura")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalConfirmarLimparAssinaturaAssistencia();
+      return;
+    }
+    if (document.getElementById("modalConfirmarExcluirFilho")?.classList.contains("show")) {
+      e.preventDefault();
+      cancelarModalExcluirFilhoAssistencia();
+      return;
+    }
+    if (document.getElementById("modalAtencaoDownloadModelo")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalAtencaoDownloadModelo();
+      return;
+    }
+    if (document.getElementById("lgpdModal")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalLGPD(false);
+      return;
+    }
+    if (document.getElementById("modalDocsDependentes")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalDocsDependentes();
+    }
+  },
+  true
+);
+
+["cpf", "conj_cpf", "fil1_cpf", "fil2_cpf", "fil3_cpf", "fil4_cpf"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", () => maskCPF(el));
+});
+["sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", () => maskSUS(el));
+});
+document.getElementById("telefone")?.addEventListener("input", function () {
+  maskTelefone(this);
+});
+const elCep = document.getElementById("cep");
+if (elCep) {
+  elCep.addEventListener("input", function () {
+    maskCep(this);
+    const raw = this.value.replace(/\D/g, "");
+    if (raw.length < 8) ultimoCepPreenchido = "";
+    if (raw.length === 8) agendarBuscaCep();
+  });
+  elCep.addEventListener("blur", function () {
+    clearTimeout(cepBuscaTimer);
+    void buscarEnderecoPorCep();
+  });
+}
+document.querySelectorAll('input[type="text"]').forEach((el) => {
+  if (
+    [
+      "telefone", "cep",
+      "sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus",
+      "cpf", "conj_cpf", "fil1_cpf", "fil2_cpf", "fil3_cpf", "fil4_cpf"
+    ].includes(el.id)
+  ) {
+    return;
+  }
+  el.addEventListener("input", () => aplicarMaiusculas(el));
+});
+
+initAssinaturaCanvas();
+document.getElementById("naoAssinarManualmente")?.addEventListener("change", () => {
+  sincronizarCheckLabelNaoAssinarManualmente();
+  atualizarUiNaoAssinarManualmente();
+  agendarSalvarRascunho();
+});
+if (!tentarRestaurarRascunho()) {
+  const elData = document.getElementById("dataAssinatura");
+  if (elData) elData.valueAsDate = new Date();
+}
+let tipoPlanoInicial = document.querySelector('input[name="tipoPlano"]:checked');
+if (!tipoPlanoInicial) {
+  tipoPlanoInicial = document.querySelector('input[name="tipoPlano"][value="plano_beneficios"]');
+  if (tipoPlanoInicial) tipoPlanoInicial.checked = true;
+}
+if (tipoPlanoInicial) toggleTipoPlano(tipoPlanoInicial);
+tentarAplicarCopiaFichaCadastral();
+atualizarBotoesFilhos();
+atualizarVisibilidadeModuloDependentes();
+atualizarTodosDnvFilhos();
+
+["fil1_nasc", "fil2_nasc", "fil3_nasc", "fil4_nasc"].forEach((id, idx) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const n = idx + 1;
+  const run = () => atualizarVisibilidadeDnvFilho(n);
+  el.addEventListener("input", run);
+  el.addEventListener("change", run);
+});
+
+const elUfSelect = document.getElementById("uf");
+function onUfAlteradoAssistencia() {
+  marcarCampoInvalido("uf", false);
+  void carregarMunicipiosIBGE(elUfSelect ? elUfSelect.value : "");
+}
+if (elUfSelect) {
+  elUfSelect.addEventListener("change", onUfAlteradoAssistencia);
+  /* WebKit móvel (iOS) nem sempre dispara "change" ao fechar o picker; "input" cobre. */
+  elUfSelect.addEventListener("input", onUfAlteradoAssistencia);
+}
+const elCidadeSelect = document.getElementById("cidade");
+function onCidadeAlteradaAssistencia() {
+  marcarCampoInvalido("cidade", false);
+  atualizarCidadeufApartirDosCamposLocalidade();
+  void carregarTemplateParaCidadeSelecionada();
+}
+if (elCidadeSelect) {
+  elCidadeSelect.addEventListener("change", onCidadeAlteradaAssistencia);
+  elCidadeSelect.addEventListener("input", onCidadeAlteradaAssistencia);
+}
+function salvarRascunhoAoSair() {
+  salvarRascunhoLocalSincrono();
+}
+window.addEventListener("pagehide", salvarRascunhoAoSair);
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") salvarRascunhoAoSair();
+});
+
+(function initPageHeaderScrollMobile() {
+  const MQ_HEADER_MOBILE =
+    "(max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none))";
+  const mq = window.matchMedia(MQ_HEADER_MOBILE);
+  const header = document.querySelector(".page-header");
+  if (!header) return;
+  const body = document.body;
+  const THRESH = 8;
+  let ro = null;
+
+  function scrollY() {
+    return window.pageYOffset != null
+      ? window.pageYOffset
+      : Math.max(
+          document.documentElement.scrollTop || 0,
+          document.body ? document.body.scrollTop || 0 : 0
+        );
+  }
+
+  function setHeaderH() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    const h = Math.round(header.getBoundingClientRect().height);
+    document.documentElement.style.setProperty("--page-header-h", h + "px");
+  }
+
+  function onScroll() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    if (scrollY() > THRESH) body.classList.add("page-header--away");
+    else body.classList.remove("page-header--away");
+  }
+
+  function applyMode() {
+    if (mq.matches) {
+      body.classList.add("page-header-mobile");
+      setHeaderH();
+      onScroll();
+      if (!ro) {
+        ro = new ResizeObserver(() => setHeaderH());
+        ro.observe(header);
+      }
+    } else {
+      body.classList.remove("page-header-mobile", "page-header--away");
+      document.documentElement.style.removeProperty("--page-header-h");
+      if (ro) {
+        ro.disconnect();
+        ro = null;
+      }
+    }
+  }
+
+  function onLayoutChanged() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    setHeaderH();
+    onScroll();
+  }
+
+  applyMode();
+  if (typeof mq.addEventListener === "function") mq.addEventListener("change", applyMode);
+  else if (typeof mq.addListener === "function") mq.addListener(applyMode);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("load", setHeaderH);
+  window.addEventListener("resize", onLayoutChanged, { passive: true });
+  window.addEventListener("orientationchange", () => {
+    setTimeout(onLayoutChanged, 150);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", onLayoutChanged, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

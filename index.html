@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub de Recrutamento & Seleção</title>
+<link rel="icon" type="image/png" href="icone.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .hero {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 36px 24px 40px;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .hero-inner { max-width: 640px; margin: 0 auto; }
+  .hero-logo {
+    height: 90px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 20px 64px;
+  }
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+  @media (max-width: 720px) {
+    .home-grid { grid-template-columns: 1fr; }
+  }
+  .home-card {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform 0.18s, box-shadow 0.2s, border-color 0.18s;
+  }
+  .home-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+  .home-card:focus-visible {
+    outline: 3px solid rgba(1, 66, 106, 0.35);
+    outline-offset: 2px;
+  }
+  .home-card.is-disabled {
+    opacity: 0.55;
+    pointer-events: none;
+    cursor: default;
+  }
+  .home-card.is-disabled:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+    border-color: var(--border);
+  }
+  .home-grid > .home-card:nth-child(n+3) {
+    padding: 18px 26px;
+  }
+  .home-card-badge {
+    display: inline-block;
+    background: #e07a5f;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+  .home-card-tag {
+    font-family: 'Poppins', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .home-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .home-card p {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.55;
+    margin-bottom: 0;
+  }
+  .home-footer {
+    margin-top: 8px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .home-footer-inner {
+    text-align: center;
+  }
+  .home-footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    font-size: 13px;
+  }
+  .home-footer-nav a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .home-footer-nav a:hover {
+    text-decoration: underline;
+    color: var(--accent-dark);
+  }
+  .home-footer-sep {
+    color: var(--text-light);
+    user-select: none;
+  }
+  body.instr-modal-open {
+    overflow: hidden;
+  }
+  .instr-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(26, 23, 20, 0.55);
+    backdrop-filter: blur(3px);
+  }
+  .instr-modal-overlay[aria-hidden="true"] {
+    display: none;
+  }
+  .instr-modal-overlay[aria-hidden="false"] {
+    display: flex;
+  }
+  .instr-modal {
+    width: min(560px, 100%);
+    max-height: min(90vh, 720px);
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .instr-modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--accent-soft), var(--card));
+  }
+  .instr-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .instr-modal-sub {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 14px;
+  }
+  .instr-modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.58;
+    color: var(--text-mid);
+  }
+  .instr-modal-body ol {
+    margin: 14px 0 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .instr-modal-body ol li::marker {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .instr-modal-body a {
+    color: var(--accent);
+    word-break: break-all;
+    font-weight: 600;
+  }
+  .instr-modal-footer {
+    padding: 16px 24px 22px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .instr-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .instr-checkbox-label input {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .instr-modal-btn {
+    align-self: flex-end;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.18s, opacity 0.18s;
+  }
+  .instr-modal-btn.primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .instr-modal-btn.primary:hover:not(:disabled) {
+    background: var(--accent-dark);
+  }
+  .instr-modal-btn.primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .instr-modal-btn:focus-visible {
+    outline: 3px solid rgba(1, 66, 106, 0.35);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <img src="logomarca.png" alt="Logomarca" class="hero-logo">
+      <h1>Formulários de Recrutamento & Seleção</h1>
+      <p>Escolha o formulário abaixo para preencher e gerar o PDF no seu navegador.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="home-grid">
+      <a class="home-card" href="ficha_cadastral.html">
+        <div class="home-card-tag">F-075 · PR-011</div>
+        <h2>Ficha Cadastral</h2>
+        <p>Dados pessoais, endereço, conta bancária, dependentes, benefícios e declaração para admissão operacional e administrativo.</p>
+      </a>
+      <a class="home-card" href="assistencia_medica.html">
+        <div class="home-card-tag">F-089 · PR-090</div>
+        <h2>Assistência Médica</h2>
+        <p>Proposta de adesão à assistência médica: dados do funcionário, dependentes e assinatura.</p>
+      </a>
+      <a class="home-card" href="carta_bradesco.html">
+        <div class="home-card-tag">Bradesco · Conta Salário</div>
+        <h2>Carta Conta Salário</h2>
+        <p>Carta de apresentação para abertura de Conta Salário: dados do funcionário, cargo e salário, com data preenchida automaticamente.</p>
+      </a>
+      <a class="home-card" href="/admin">
+        <div class="home-card-tag">Painel Administrativo</div>
+        <h2>Configurações</h2>
+        <p>Administração dos formulários: templates PDF, coordenadas dos campos, cidades e fichas regionais, com histórico de alterações.</p>
+        <span class="home-card-badge">Acesso restrito</span>
+      </a>
+    </div>
+    <footer class="home-footer">
+      <div class="home-footer-inner">
+        <nav class="home-footer-nav" aria-label="Informações legais e documentação">
+          <a href="/politica-de-privacidade">Política de Privacidade</a>
+          <span class="home-footer-sep" aria-hidden="true">·</span>
+          <a href="/termos-de-uso">Termos de Uso</a>
+          <span class="home-footer-sep" aria-hidden="true">·</span>
+          <a href="/privacidade-e-seguranca">Privacidade e segurança</a>
+        </nav>
+      </div>
+    </footer>
+  </main>
+
+  <div
+    id="instr-modal-overlay"
+    class="instr-modal-overlay"
+    role="presentation"
+    aria-hidden="true"
+  >
+    <div
+      class="instr-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="instr-modal-heading"
+      aria-describedby="instr-modal-intro"
+      tabindex="-1"
+    >
+      <div class="instr-modal-header">
+        <p id="instr-modal-heading" class="instr-modal-title">Instruções ao candidato</p>
+        <p id="instr-modal-intro" class="instr-modal-sub">
+          Atenção: este formulário serve apenas para preencher o arquivo PDF das fichas solicitadas pela empresa e <span style="color: #e07a5f; font-weight: bold;">NENHUMA INFORMAÇÃO FORNECIDA NESTE FORMULÁRIO SERÁ RETIDA APÓS A UTILIZAÇÃO.</span>
+        </p>
+      </div>
+      <div class="instr-modal-body">
+        <p><strong>O que você deve fazer:</strong></p>
+        <ol>
+          <li>Preencha <strong>todos os campos</strong>. Leia com atenção o que é solicitado;</li>
+          <li>
+            <strong>Assine</strong> as fichas usando o dedo (celular) ou o mouse (computador), no campo disponível no final do
+            formulário;
+          </li>
+          <li>Se informar <strong>dependentes</strong>, deve apresentar a documentação deles conforme for solicitado;</li>
+          <li>
+            Salve e baixe o arquivo PDF gerado, clicando no botão no final da página;
+          </li>
+          <li>
+            Encaminhe o arquivo PDF salvo no seu Portal do Candidato, na área de Ficha Única Cadastral e Ficha de Assistência Médica;
+          </li>
+          <li>Aguarde a aprovação das informações feita pela área de Recrutamento &amp; Seleção da empresa.</li>
+        </ol>
+      </div>
+      <div class="instr-modal-footer">
+        <label class="instr-checkbox-label">
+          <input type="checkbox" id="instr-modal-check" autocomplete="off" />
+          <span>LI E ENTENDI AS INSTRUÇÕES DE USO E PREENCHIMENTO DAS FICHAS.</span>
+        </label>
+        <button type="button" class="instr-modal-btn primary" id="instr-modal-continue" disabled>
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var overlay = document.getElementById("instr-modal-overlay");
+      var dialogEl = overlay && overlay.querySelector(".instr-modal");
+      var check = document.getElementById("instr-modal-check");
+      var btn = document.getElementById("instr-modal-continue");
+      if (!overlay || !check || !btn) return;
+
+      function openModal() {
+        check.checked = false;
+        btn.disabled = true;
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.classList.add("instr-modal-open");
+        if (dialogEl) {
+          dialogEl.focus();
+        }
+      }
+
+      function closeModal() {
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("instr-modal-open");
+      }
+
+      openModal();
+
+      check.addEventListener("change", function () {
+        btn.disabled = !check.checked;
+      });
+
+      btn.addEventListener("click", function () {
+        if (!check.checked) return;
+        closeModal();
+      });
+    })();
+  </script>
+</body>
+</html>

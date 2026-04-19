@@ -1,0 +1,911 @@
+{
+  "documento": {
+    "id": "F-075_PR-011_37",
+    "titulo": "Ficha Cadastral de Admissão – Operacional e Administrativo",
+    "versao": "37",
+    "paginas": 1
+  },
+  "campos": {
+    "dados_pessoais": {
+      "descricao": "Informações pessoais do candidato",
+      "campos": {
+        "nome": {
+          "label": "Nome Completo",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 18.4,
+            "y": 694.48,
+            "largura": 474.7,
+            "altura": 12.3
+          },
+          "obrigatorio": true,
+          "observacao": "Preencher conforme Certidão de Nascimento ou Casamento"
+        },
+        "craxá": {
+          "label": "Nome Social (Crachá)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 18.4,
+            "y": 671.68,
+            "largura": 474.7,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "observacao": "Nome para inclusão no crachá"
+        },
+        "fone": {
+          "label": "Telefone",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 18.4,
+            "y": 649.18,
+            "largura": 231.35,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "mascara": "(99) 9999-9999"
+        },
+        "celular": {
+          "label": "Celular (WhatsApp)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 261.8,
+            "y": 649.38,
+            "largura": 231.35,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "mascara": "(99) 99999-9999"
+        },
+        "email": {
+          "label": "E-mail",
+          "tipo": "email",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 18.4,
+            "y": 626.48,
+            "largura": 297.75,
+            "altura": 12.3
+          },
+          "obrigatorio": false
+        },
+        "estadocivil": {
+          "label": "Estado Civil",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 18.4,
+            "y": 603.68,
+            "largura": 297.75,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "opcoes": [
+            "SOLTEIRO(A)",
+            "CASADO(A)",
+            "DIVORCIADO(A)",
+            "VIÚVO(A)",
+            "UNIÃO ESTÁVEL",
+            "SEPARADO(A)"
+          ]
+        },
+        "primeiro_emprego": {
+          "label": "Primeiro Emprego",
+          "tipo": "grupo_radio",
+          "pagina": 1,
+          "opcoes": {
+            "sim": {
+              "label": "Sim",
+              "coordenadas": {
+                "x": 94.8,
+                "y": 592.28,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "nao": {
+              "label": "Não",
+              "coordenadas": {
+                "x": 94.8,
+                "y": 581.23,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            }
+          }
+        },
+        "informarpis": {
+          "label": "PIS (informar se não for primeiro emprego)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 184.5,
+            "y": 580.93,
+            "largura": 130.65,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "mascara": "999.99999.99-9",
+          "dependencia": {
+            "campo": "primeiro_emprego",
+            "valor": "nao"
+          }
+        }
+      }
+    },
+    "endereco": {
+      "descricao": "Endereço residencial do candidato",
+      "campos": {
+        "rua": {
+          "label": "Endereço (Rua/Av)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 19.5,
+            "y": 558.03,
+            "largura": 297.75,
+            "altura": 12.3
+          },
+          "obrigatorio": false
+        },
+        "numero": {
+          "label": "Número",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 329.25,
+            "y": 558.03,
+            "largura": 45.35,
+            "altura": 12.3
+          },
+          "obrigatorio": false
+        },
+        "complemento": {
+          "label": "Complemento",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 384.35,
+            "y": 558.38,
+            "largura": 187.5,
+            "altura": 12.3
+          },
+          "obrigatorio": false
+        },
+        "cep": {
+          "label": "CEP",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 19.05,
+            "y": 535.48,
+            "largura": 106.75,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "mascara": "99999-999"
+        },
+        "bairro": {
+          "label": "Bairro",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 135.05,
+            "y": 535.38,
+            "largura": 196.85,
+            "altura": 12.3
+          },
+          "obrigatorio": false
+        },
+        "cidadeuf": {
+          "label": "Cidade/UF",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 339.35,
+            "y": 535.53,
+            "largura": 234.75,
+            "altura": 12.3
+          },
+          "obrigatorio": false
+        }
+      }
+    },
+    "deficiencia": {
+      "descricao": "Informações sobre deficiência",
+      "campos": {
+        "possui_deficiencia": {
+          "label": "Possui Deficiência?",
+          "tipo": "grupo_radio",
+          "pagina": 1,
+          "opcoes": {
+            "sim": {
+              "label": "Sim",
+              "coordenadas": {
+                "x": 104.55,
+                "y": 520.41,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "nao": {
+              "label": "Não",
+              "coordenadas": {
+                "x": 133.05,
+                "y": 520.26,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            }
+          }
+        },
+        "tipo_deficiencia": {
+          "label": "Tipo de Deficiência",
+          "tipo": "grupo_checkbox",
+          "pagina": 1,
+          "dependencia": {
+            "campo": "possui_deficiencia",
+            "valor": "sim"
+          },
+          "opcoes": {
+            "fisica": {
+              "label": "Física",
+              "coordenadas": {
+                "x": 262.2,
+                "y": 514.38,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "auditiva": {
+              "label": "Auditiva",
+              "coordenadas": {
+                "x": 319.5,
+                "y": 514.33,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "visual": {
+              "label": "Visual",
+              "coordenadas": {
+                "x": 393.8,
+                "y": 514.28,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "intelectual": {
+              "label": "Intelectual",
+              "coordenadas": {
+                "x": 442.7,
+                "y": 514.48,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "multipla": {
+              "label": "Múltipla",
+              "coordenadas": {
+                "x": 514.15,
+                "y": 514.43,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            }
+          }
+        }
+      }
+    },
+    "conta_bancaria": {
+      "descricao": "Dados bancários para pagamento de salário",
+      "campos": {
+        "tipo_conta": {
+          "label": "Tipo de Conta",
+          "tipo": "grupo_radio",
+          "pagina": 1,
+          "opcoes": {
+            "conta_corrente": {
+              "label": "Conta Corrente Bradesco",
+              "coordenadas": {
+                "x": 128.8,
+                "y": 493.32,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "bradesco": {
+              "label": "Conta Salário Bradesco",
+              "coordenadas": {
+                "x": 171.9,
+                "y": 493.22,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "poupanca_bradesco": {
+              "label": "Conta Poupança Bradesco",
+              "coordenadas": {
+                "x": 232.35,
+                "y": 493.13,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "santander_corrente": {
+              "label": "Conta Corrente Santander",
+              "coordenadas": {
+                "x": 130.1,
+                "y": 473.92,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            },
+            "santander_salario": {
+              "label": "Conta Salário Santander",
+              "coordenadas": {
+                "x": 174.55,
+                "y": 474.57,
+                "largura": 9.75,
+                "altura": 8.85
+              }
+            }
+          }
+        },
+        "bradesco_agencia": {
+          "label": "Agência (Bradesco)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 297.35,
+            "y": 490.93,
+            "largura": 111.6,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "dependencia": {
+            "campo": "tipo_conta",
+            "valor": [
+              "bradesco",
+              "conta_corrente",
+              "poupanca_bradesco"
+            ]
+          }
+        },
+        "bradesco_conta_digito": {
+          "label": "Conta/Dígito (Bradesco)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 417.2,
+            "y": 490.93,
+            "largura": 139.55,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "dependencia": {
+            "campo": "tipo_conta",
+            "valor": [
+              "bradesco",
+              "conta_corrente",
+              "poupanca_bradesco"
+            ]
+          }
+        },
+        "santander_agencia": {
+          "label": "Agência (Santander)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 297.35,
+            "y": 490.93,
+            "largura": 111.6,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "dependencia": {
+            "campo": "tipo_conta",
+            "valor": [
+              "santander_corrente",
+              "santander_salario"
+            ]
+          },
+          "observacao": "Mesma caixa da agência Bradesco: o PDF traz uma única caixa de Agência/Conta para os dois bancos"
+        },
+        "santander_conta_digito": {
+          "label": "Conta/Dígito (Santander)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 417.2,
+            "y": 490.93,
+            "largura": 139.55,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "dependencia": {
+            "campo": "tipo_conta",
+            "valor": [
+              "santander_corrente",
+              "santander_salario"
+            ]
+          },
+          "observacao": "Mesma caixa da conta Bradesco: o PDF traz uma única caixa de Agência/Conta para os dois bancos"
+        },
+        "cpf_titular": {
+          "label": "CPF do titular",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 297.5,
+            "y": 466.85,
+            "largura": 186.45,
+            "altura": 12.3
+          },
+          "obrigatorio": false,
+          "mascara": "999.999.999-99",
+          "observacao": "Preenchido para qualquer tipo de conta (Bradesco ou Santander)"
+        }
+      }
+    },
+    "dependentes": {
+      "descricao": "Dados dos dependentes para plano de saúde e salário família",
+      "observacao": "Necessário certidão de casamento/nascimento, cartão SUS e CPF de todos os dependentes. Filhos menores de 14 anos: certidão de nascimento. Menores de 7 anos: carteira de vacinação.",
+      "itens": [
+        {
+          "id": "dependente_1",
+          "campos": {
+            "nome": {
+              "label": "Nome do Dependente 1",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 47.6,
+                "y": 419.9,
+                "largura": 253.15,
+                "altura": 12.3
+              },
+              "obrigatorio": false
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento",
+              "tipo": "data",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 308.45,
+                "y": 420.1,
+                "largura": 112.25,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "99/99/9999"
+            },
+            "cpf": {
+              "label": "CPF do Dependente",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 430.6,
+                "y": 420.1,
+                "largura": 134.4,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "999.999.999-99"
+            }
+          }
+        },
+        {
+          "id": "dependente_2",
+          "campos": {
+            "nome": {
+              "label": "Nome do Dependente 2",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 47.6,
+                "y": 398.8,
+                "largura": 253.15,
+                "altura": 12.3
+              },
+              "obrigatorio": false
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento",
+              "tipo": "data",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 308.45,
+                "y": 399.0,
+                "largura": 112.25,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "99/99/9999"
+            },
+            "cpf": {
+              "label": "CPF do Dependente",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 430.6,
+                "y": 399.0,
+                "largura": 134.4,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "999.999.999-99"
+            }
+          }
+        },
+        {
+          "id": "dependente_3",
+          "campos": {
+            "nome": {
+              "label": "Nome do Dependente 3",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 47.6,
+                "y": 377.35,
+                "largura": 253.15,
+                "altura": 12.3
+              },
+              "obrigatorio": false
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento",
+              "tipo": "data",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 308.45,
+                "y": 377.55,
+                "largura": 112.25,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "99/99/9999"
+            },
+            "cpf": {
+              "label": "CPF do Dependente",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 430.6,
+                "y": 377.55,
+                "largura": 134.4,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "999.999.999-99"
+            }
+          }
+        },
+        {
+          "id": "dependente_4",
+          "campos": {
+            "nome": {
+              "label": "Nome do Dependente 4",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 47.6,
+                "y": 356.25,
+                "largura": 253.15,
+                "altura": 12.3
+              },
+              "obrigatorio": false
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento",
+              "tipo": "data",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 308.45,
+                "y": 356.45,
+                "largura": 112.25,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "99/99/9999"
+            },
+            "cpf": {
+              "label": "CPF do Dependente",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 430.6,
+                "y": 356.45,
+                "largura": 134.4,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "999.999.999-99"
+            }
+          }
+        },
+        {
+          "id": "dependente_5",
+          "campos": {
+            "nome": {
+              "label": "Nome do Dependente 5",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 47.6,
+                "y": 334.5,
+                "largura": 253.15,
+                "altura": 12.3
+              },
+              "obrigatorio": false
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento",
+              "tipo": "data",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 308.45,
+                "y": 334.7,
+                "largura": 112.25,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "99/99/9999"
+            },
+            "cpf": {
+              "label": "CPF do Dependente",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": {
+                "x": 430.6,
+                "y": 334.7,
+                "largura": 134.4,
+                "altura": 12.3
+              },
+              "obrigatorio": false,
+              "mascara": "999.999.999-99"
+            }
+          }
+        }
+      ]
+    },
+    "vale_transporte": {
+      "descricao": "Benefício de Vale Transporte",
+      "itens": {
+        "onibus": {
+          "label": "Ônibus",
+          "quantidade": {
+            "tipo": "numero",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 266.3,
+              "y": 273.37,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          },
+          "valor_unitario": {
+            "tipo": "moeda",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 453.65,
+              "y": 273.9,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          }
+        },
+        "metro_trem": {
+          "label": "Metrô/Trem",
+          "quantidade": {
+            "tipo": "numero",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 266.5,
+              "y": 252.52,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          },
+          "valor_unitario": {
+            "tipo": "moeda",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 453.85,
+              "y": 253.07,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          }
+        },
+        "intermunicipal": {
+          "label": "Intermunicipal",
+          "quantidade": {
+            "tipo": "numero",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 266.6,
+              "y": 233.65,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          },
+          "valor_unitario": {
+            "tipo": "moeda",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 453.95,
+              "y": 234.2,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          }
+        },
+        "integracao": {
+          "label": "Integração",
+          "quantidade": {
+            "tipo": "numero",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 266.35,
+              "y": 213.6,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          },
+          "valor_unitario": {
+            "tipo": "moeda",
+            "pagina": 1,
+            "coordenadas": {
+              "x": 453.7,
+              "y": 214.15,
+              "largura": 60.55,
+              "altura": 12.3
+            }
+          }
+        }
+      }
+    },
+    "vale_alimentacao_refeicao": {
+      "descricao": "Escolha do tipo de benefício alimentação",
+      "tipo": "grupo_radio",
+      "pagina": 1,
+      "opcoes": {
+        "alimentacao": {
+          "label": "100% Vale Alimentação",
+          "coordenadas": {
+            "x": 57.75,
+            "y": 170.02,
+            "largura": 9.75,
+            "altura": 8.85
+          }
+        },
+        "refeicao": {
+          "label": "100% Vale Refeição",
+          "coordenadas": {
+            "x": 248.7,
+            "y": 170.35,
+            "largura": 9.75,
+            "altura": 8.85
+          }
+        },
+        "flex": {
+          "label": "Flexibilizado (50% VR e 50% VA)",
+          "coordenadas": {
+            "x": 412.2,
+            "y": 170.12,
+            "largura": 9.75,
+            "altura": 8.85
+          }
+        }
+      }
+    },
+    "assinatura": {
+      "descricao": "Assinatura e data do candidato",
+      "campos": {
+        "rubrica": {
+          "label": "Assinatura manuscrita (imagem; substitui o nome no PDF na área do modelo)",
+          "tipo": "imagem",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 60.0,
+            "y": 72.5,
+            "largura": 232.85,
+            "altura": 44.25
+          },
+          "alinhamento": "centro",
+          "obrigatorio": true
+        },
+        "nome_legivel": {
+          "label": "Assinatura digitada (nome legível no PDF)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 60.3,
+            "y": 49.36,
+            "largura": 232.85,
+            "altura": 12.75
+          },
+          "alinhamento": "centro",
+          "obrigatorio": true,
+          "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
+        },
+        "nome_legivel_sem_rubrica": {
+          "label": "Assinatura digitada (sem rubrica manual)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 60.3,
+            "y": 49.36,
+            "largura": 232.85,
+            "altura": 12.75
+          },
+          "alinhamento": "centro",
+          "obrigatorio": false,
+          "observacao": "Usado somente quando o candidato marca 'Não assinar'"
+        },
+        "data": {
+          "label": "Data",
+          "tipo": "data_segmentada",
+          "pagina": 1,
+          "obrigatorio": true,
+          "segmentos": {
+            "dia": {
+              "coordenadas": {
+                "x": 437.45,
+                "y": 73.35,
+                "largura": 26.9,
+                "altura": 12.75
+              },
+              "mascara": "99"
+            },
+            "mes": {
+              "coordenadas": {
+                "x": 478.05,
+                "y": 73.35,
+                "largura": 27.6,
+                "altura": 12.75
+              },
+              "mascara": "99"
+            },
+            "ano": {
+              "coordenadas": {
+                "x": 519.35,
+                "y": 73.35,
+                "largura": 28.25,
+                "altura": 12.75
+              },
+              "mascara": "9999"
+            }
+          }
+        },
+        "evidencia": {
+          "label": "Rodapé: evidência da assinatura eletrônica (texto informativo)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 20.0,
+            "y": 3.51,
+            "largura": 556.75,
+            "altura": 12.75
+          },
+          "obrigatorio": false,
+          "observacao": "x/y/largura são margens do rodapé; y é recalculado na geração do PDF com base na altura da página (carimbo automático).",
+          "rodape": true
+        }
+      }
+    }
+  },
+  "metadados": {
+    "sistema_coordenadas": "PDF points (pt)",
+    "origem": "canto_inferior_esquerdo",
+    "nota": "As coordenadas y crescem de baixo para cima. Para conversão em bibliotecas onde y cresce para baixo (ex: reportlab/PyMuPDF), use: y_convertido = altura_pagina - y - altura_campo",
+    "largura_pagina_pt": 596,
+    "altura_pagina_pt": 842,
+    "versao_json": "1.0"
+  }
+}

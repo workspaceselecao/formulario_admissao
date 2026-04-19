@@ -1,0 +1,108 @@
+{
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "X-Permitted-Cross-Domain-Policies",
+          "value": "none"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://viacep.com.br https://brasilapi.com.br https://api.ipify.org https://api.kstrtech.com.br; object-src 'none'; upgrade-insecure-requests"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/politica-de-privacidade",
+      "destination": "/Docs/privacy-policy.html",
+      "permanent": true
+    },
+    {
+      "source": "/termos-de-uso",
+      "destination": "/Docs/terms-of-use.html",
+      "permanent": true
+    },
+    {
+      "source": "/privacidade-e-seguranca",
+      "destination": "/Docs/index.html",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy.md",
+      "destination": "/Docs/privacy-policy.html",
+      "permanent": true
+    },
+    {
+      "source": "/terms-of-use.md",
+      "destination": "/Docs/terms-of-use.html",
+      "permanent": true
+    },
+    {
+      "source": "/Forms/:path*",
+      "destination": "/Docs/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index"
+    },
+    {
+      "source": "/f075",
+      "destination": "/ficha_cadastral"
+    },
+    {
+      "source": "/f089",
+      "destination": "/assistencia_medica"
+    },
+    {
+      "source": "/bradesco",
+      "destination": "/carta_bradesco"
+    },
+    {
+      "source": "/termos",
+      "destination": "/termos_aceite"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/"
+    }
+  ]
+}

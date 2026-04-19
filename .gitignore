@@ -1,0 +1,41 @@
+# Sensitive scripts (contain real keys for detection)
+scripts/verify-no-leaked-keys.mjs
+scripts/pre-commit-check.mjs
+scripts/generate-verifiers.mjs
+
+# Chaves/códigos reais (geração de verificadores e suíte de testes)
+keys*.txt
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.cursor/
+.vscode/
+.idea/
+
+# Vercel
+.vercel/
+
+# POC ficha-cadastral-embutido: template.json e assets/*.png são FONTE (versionados,
+# o painel os busca via HTTP no deploy estático); apenas o output.pdf é artefato.
+ficha-cadastral-embutido/output.pdf
+
+# Ferramentas temporárias de perícia/depuração da POC (deps locais e renders de comparação)
+ficha-cadastral-embutido/.tmp_deps/
+ficha-cadastral-embutido/.tmp_render/
+
+# Renders de comparação na raiz (gerar-ficha-preenchida.js) e bytecode Python dos
+# scripts de verificação — artefatos locais, nunca versionados
+.tmp_render/
+scripts/__pycache__/
+
+# Painel administrativo (modo API — dados locais do test-server)
+data/
