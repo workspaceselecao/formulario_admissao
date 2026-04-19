@@ -242,6 +242,15 @@
   }
   .radio-label:hover { border-color: var(--accent); background: var(--accent-soft); }
   .radio-label input { accent-color: var(--accent); width: 14px; height: 14px; }
+  .radio-label.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(200,53,26,0.28);
+  }
+  .radio-label.active input {
+    accent-color: #fff;
+  }
 
   .field-inline-row {
     display: flex;
@@ -726,6 +735,11 @@ document.querySelectorAll('.check-label input, .radio-label input').forEach(inpu
       input.closest('.check-label')?.classList.remove('active');
     }
   });
+});
+// Garante estado visual correto para opções já marcadas.
+document.querySelectorAll('.check-label input:checked, .radio-label input:checked').forEach((input) => {
+  input.closest('.radio-label')?.classList.add('active');
+  input.closest('.check-label')?.classList.add('active');
 });
 
 // ── FORMAT DATE ──
