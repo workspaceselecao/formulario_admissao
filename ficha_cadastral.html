@@ -182,6 +182,11 @@
     background: #fff;
     box-shadow: 0 0 0 3px rgba(200,53,26,0.12);
   }
+  .field input.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
+  }
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
 
@@ -714,6 +719,14 @@ function toggleBanco(el){
   const b = el.value==='bradesco';
   document.getElementById('agenciaField').style.display = b?'block':'none';
   document.getElementById('contaField').style.display = b?'block':'none';
+  const agenciaEl = document.getElementById('agencia');
+  const contaEl = document.getElementById('conta');
+  agenciaEl.required = b;
+  contaEl.required = b;
+  if (!b) {
+    agenciaEl.classList.remove('invalid');
+    contaEl.classList.remove('invalid');
+  }
   syncRadioActive(el.name);
 }
 
@@ -770,6 +783,33 @@ function formatarTelefoneBR(valor){
 function v(id){ return (document.getElementById(id)?.value||'').trim(); }
 function radio(name){ return document.querySelector(`input[name="${name}"]:checked`)?.value||''; }
 function checks(name){ return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(c=>c.value); }
+function marcarCampoInvalido(id, invalido){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('invalid', !!invalido);
+}
+function validarContaBradescoObrigatoria(){
+  const tipoConta = radio('tipoConta');
+  if (tipoConta !== 'bradesco') return true;
+
+  const agencia = v('agencia');
+  const conta = v('conta');
+  const agenciaOk = agencia.length > 0;
+  const contaOk = conta.length > 0;
+  marcarCampoInvalido('agencia', !agenciaOk);
+  marcarCampoInvalido('conta', !contaOk);
+
+  if (!agenciaOk || !contaOk) {
+    showToast('Para Conta Salário Bradesco, preencha Agência e Conta/Dígito.', false);
+    if (!agenciaOk) {
+      document.getElementById('agencia')?.focus();
+    } else {
+      document.getElementById('conta')?.focus();
+    }
+    return false;
+  }
+  return true;
+}
 
 // ── TOAST ──
 function showToast(msg,ok=true){
@@ -996,6 +1036,7 @@ async function carregarTemplateInicial(){
 // ── GERAR PDF ──
 async function gerarPDF(){
   try {
+    if (!validarContaBradescoObrigatoria()) return;
     if (!templateBytes || !textLines) await carregarTemplateInicial();
     if (!templateBytes || !textLines) return;
 
@@ -1189,6 +1230,11 @@ const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked
 if (bancoSelecionado) {
   toggleBanco(bancoSelecionado);
 }
+['agencia', 'conta'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => marcarCampoInvalido(id, false));
+});
 updateProgress();
 carregarTemplateInicial();
 </script>
