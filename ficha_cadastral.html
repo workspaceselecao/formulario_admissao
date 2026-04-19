@@ -567,37 +567,6 @@
         </div>
       </div>
 
-      <div class="grid grid-4" style="margin-bottom:18px">
-        <div class="field col-span-2">
-          <label>Endereço <span class="req">*</span></label>
-          <input type="text" id="endereco" placeholder="Rua / Av.">
-        </div>
-        <div class="field">
-          <label>Número</label>
-          <input type="text" id="endNum" placeholder="Nº">
-        </div>
-        <div class="field">
-          <label>Complemento</label>
-          <input type="text" id="complemento" placeholder="Apto, Bloco...">
-        </div>
-        <div class="field">
-          <label>CEP</label>
-          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="onCepInput(this)" onblur="buscarCepEPreencher(true)">
-        </div>
-        <div class="field">
-          <label>Bairro</label>
-          <input type="text" id="bairro" placeholder="Bairro">
-        </div>
-        <div class="field">
-          <label>Cidade <span class="req">*</span></label>
-          <input type="text" id="cidade" placeholder="Cidade">
-        </div>
-        <div class="field">
-          <label>UF <span class="req">*</span></label>
-          <input type="text" id="uf" placeholder="BA" maxlength="2">
-        </div>
-      </div>
-
       <div>
         <div class="field-inline-row" style="margin-bottom:10px">
           <span class="field-label-text">Possui Deficiência?</span>
@@ -617,6 +586,46 @@
       </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressPessoal"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENDEREÇO -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Endereço</div>
+    <div class="section-body">
+      <div class="grid grid-4" style="margin-bottom:18px">
+        <div class="field">
+          <label>CEP</label>
+          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="onCepInput(this)" onblur="buscarCepEPreencher(true)">
+        </div>
+        <div class="field col-span-2">
+          <label>Endereço <span class="req">*</span></label>
+          <input type="text" id="endereco" placeholder="Rua / Av.">
+        </div>
+        <div class="field">
+          <label>Número</label>
+          <input type="text" id="endNum" placeholder="Nº">
+        </div>
+        <div class="field">
+          <label>Complemento</label>
+          <input type="text" id="complemento" placeholder="Apto, Bloco...">
+        </div>
+        <div class="field">
+          <label>Bairro</label>
+          <input type="text" id="bairro" placeholder="Bairro">
+        </div>
+        <div class="field">
+          <label>Cidade <span class="req">*</span></label>
+          <input type="text" id="cidade" placeholder="Cidade">
+        </div>
+        <div class="field">
+          <label>UF <span class="req">*</span></label>
+          <input type="text" id="uf" placeholder="BA" maxlength="2">
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressEndereco"></div></div>
       </div>
     </div>
   </div>
@@ -994,14 +1003,19 @@ function updateProgress(){
     () => hasValue('celular'),
     () => hasValue('email'),
     () => hasValue('estadoCivil'),
-    () => hasValue('endereco'),
-    () => hasValue('cidade'),
-    () => hasValue('uf'),
     () => {
       const pe = radio('primeiroEmprego');
       if (!pe) return false;
       return pe === 'nao' ? hasValue('pis') : true;
     }
+  ]);
+
+  const enderecoPct = calcPct([
+    () => hasValue('cep'),
+    () => hasValue('endereco'),
+    () => hasValue('bairro'),
+    () => hasValue('cidade'),
+    () => hasValue('uf')
   ]);
 
   const bancarioPct = calcPct([
@@ -1034,6 +1048,7 @@ function updateProgress(){
   ]);
 
   setProgress('progressPessoal', pessoalPct);
+  setProgress('progressEndereco', enderecoPct);
   setProgress('progressBancario', bancarioPct);
   setProgress('progressDependentes', dependentesPct);
   setProgress('progressTransporte', transportePct);
