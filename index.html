@@ -865,7 +865,7 @@
           textLines,
           data.nomeCompleto,
           "NOME COMPLETO DO CANDIDATO",
-          { maxWidth: 330, offsetY: 12 }
+          { maxWidth: 330, offsetY: 22 }
         );
         if (!assinaturaNomeOk) {
           escreverNoMarcador(page, font, textLines, data.nomeCompleto, {
@@ -876,13 +876,23 @@
             offsetY: 2
           });
         }
-        escreverNoMarcador(page, font, textLines, new Date().toLocaleDateString("pt-BR"), {
-          contextoLinha: "NOME COMPLETO DO CANDIDATO",
-          ancora: "DATA",
-          maxWidth: 90,
-          offsetX: 8,
-          offsetY: 2
-        });
+        const assinaturaDataOk = escreverAcimaDoRotulo(
+          page,
+          font,
+          textLines,
+          new Date().toLocaleDateString("pt-BR"),
+          "DATA",
+          { maxWidth: 90, offsetY: 22 }
+        );
+        if (!assinaturaDataOk) {
+          escreverNoMarcador(page, font, textLines, new Date().toLocaleDateString("pt-BR"), {
+            contextoLinha: "NOME COMPLETO DO CANDIDATO",
+            ancora: "DATA",
+            maxWidth: 90,
+            offsetX: 8,
+            offsetY: 2
+          });
+        }
 
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
