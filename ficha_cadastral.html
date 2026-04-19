@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha Cadastral de Admissão – Atento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf9f7;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --border-strong: #9e9890;
+    --accent: #c8351a;
+    --accent-dark: #a02b14;
+    --accent-soft: #f5ede9;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --label: #5a554e;
+    --success: #2d7a4a;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    background: var(--text);
+    color: #fff;
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  }
+  .page-header .brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .page-header .brand span { color: var(--accent); }
+  .page-header .subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .btn-export {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(200,53,26,0.28);
+  }
+  .btn-export:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,53,26,0.36); }
+  .btn-export:active { transform: translateY(0); }
+  .btn-export svg { width: 16px; height: 16px; }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 100px;
+    height: 4px;
+    margin-bottom: 36px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── SECTION CARDS ── */
+  .section-card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card:hover { box-shadow: var(--shadow-lg); }
+
+  .section-header {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-body {
+    padding: 28px 28px 20px;
+  }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .col-span-4 { grid-column: span 4; }
+
+  /* ── FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+
+  .field input,
+  .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(200,53,26,0.12);
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field select { cursor: pointer; }
+
+  /* ── CHECKBOXES ── */
+  .check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+    user-select: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .check-label:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .check-label input[type="checkbox"],
+  .check-label input[type="radio"] {
+    width: 15px; height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .check-label.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+
+  /* ── RADIO GROUP ── */
+  .radio-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-label:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .radio-label input { accent-color: var(--accent); width: 14px; height: 14px; }
+
+  .field-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .field-inline-row .field-label-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+
+  /* ── DEPENDENTES TABLE ── */
+  .dep-table { width: 100%; border-collapse: collapse; }
+  .dep-table th {
+    background: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+  .dep-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  .dep-table tr:last-child td { border-bottom: none; }
+  .dep-table input {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .dep-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,53,26,0.10); }
+  .dep-table input::placeholder { color: var(--text-light); }
+
+  /* ── VT TABLE ── */
+  .vt-table { width: 100%; border-collapse: collapse; }
+  .vt-table th {
+    background: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    border-bottom: 1px solid var(--border);
+  }
+  .vt-table th:not(:first-child) { text-align: center; }
+  .vt-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+  }
+  .vt-table tr:last-child td { border-bottom: none; }
+  .vt-table td:not(:first-child) { text-align: center; }
+  .vt-table input {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    width: 80px;
+    text-align: center;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .vt-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,53,26,0.10); }
+  .vt-table input::placeholder { color: var(--text-light); }
+
+  /* ── AVISO ── */
+  .aviso-box {
+    background: #fffbf5;
+    border: 1.5px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #6b5a3a;
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+  .aviso-box strong { color: #8a4a10; }
+
+  /* ── INFO BADGE ── */
+  .info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-light);
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--text);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.20);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  #toast.show { display: flex; }
+  #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .page-header { padding: 20px 20px; flex-direction: column; gap: 14px; align-items: flex-start; }
+    .container { padding: 24px 16px 60px; }
+    .section-body { padding: 20px 16px 16px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
+    .dep-table, .vt-table { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div>
+    <div class="brand">ATENTO <span>·</span> Ficha Cadastral</div>
+    <div class="subtitle">F-075 (PR-011) 33 · Admissão Operacional e Administrativo</div>
+  </div>
+  <button class="btn-export" onclick="gerarPDF()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Exportar PDF
+  </button>
+</header>
+
+<div class="container">
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+
+  <div class="info-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Preencha conforme Certidão de Nascimento ou Casamento · Decreto eSocial 8373/2014
+  </div>
+
+  <!-- DADOS PESSOAIS -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados Pessoais</div>
+    <div class="section-body">
+      <div class="grid grid-2" style="margin-bottom:18px">
+        <div class="field col-span-2">
+          <label>Nome Completo <span class="req">*</span></label>
+          <input type="text" id="nomeCompleto" placeholder="Conforme Certidão de Nascimento ou Casamento">
+        </div>
+        <div class="field col-span-2">
+          <label>Nome Social <span style="font-weight:400;color:var(--text-light)">(Inclusão no crachá)</span></label>
+          <input type="text" id="nomeSocial" placeholder="Nome social (opcional)">
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input type="tel" id="telefone" placeholder="(00) 0000-0000">
+        </div>
+        <div class="field">
+          <label>Celular <span class="req">*</span></label>
+          <input type="tel" id="celular" placeholder="(00) 00000-0000">
+        </div>
+        <div class="field col-span-2">
+          <label>E-mail <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="seu@email.com">
+        </div>
+        <div class="field">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="estadoCivil">
+            <option value="">Selecione...</option>
+            <option>Solteiro(a)</option>
+            <option>Casado(a)</option>
+            <option>Divorciado(a)</option>
+            <option>Viúvo(a)</option>
+            <option>União Estável</option>
+            <option>Separado(a)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Primeiro Emprego?</label>
+          <div class="radio-inline" style="margin-top:4px">
+            <label class="radio-label"><input type="radio" name="primeiroEmprego" value="sim" onchange="togglePIS(this)"> Sim</label>
+            <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
+          </div>
+        </div>
+        <div class="field" id="pisField" style="display:none">
+          <label>PIS <span class="req">*</span></label>
+          <input type="text" id="pis" placeholder="000.00000.00-0">
+        </div>
+      </div>
+
+      <div class="grid grid-4" style="margin-bottom:18px">
+        <div class="field col-span-2">
+          <label>Endereço <span class="req">*</span></label>
+          <input type="text" id="endereco" placeholder="Rua / Av.">
+        </div>
+        <div class="field">
+          <label>Número</label>
+          <input type="text" id="endNum" placeholder="Nº">
+        </div>
+        <div class="field">
+          <label>Complemento</label>
+          <input type="text" id="complemento" placeholder="Apto, Bloco...">
+        </div>
+        <div class="field">
+          <label>CEP</label>
+          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)">
+        </div>
+        <div class="field">
+          <label>Bairro</label>
+          <input type="text" id="bairro" placeholder="Bairro">
+        </div>
+        <div class="field col-span-2">
+          <label>Cidade <span class="req">*</span></label>
+          <input type="text" id="cidade" placeholder="Cidade">
+        </div>
+      </div>
+
+      <div>
+        <div class="field-inline-row" style="margin-bottom:10px">
+          <span class="field-label-text">Possui Deficiência?</span>
+          <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
+          <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
+        </div>
+        <div id="defGroup" style="display:none">
+          <div class="field-label-text" style="margin-bottom:8px;font-size:11px;color:var(--label);font-family:'DM Mono',monospace;letter-spacing:0.5px;text-transform:uppercase">Tipo de Deficiência</div>
+          <div class="check-group">
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Física"> Física</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Auditiva"> Auditiva</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Visual"> Visual</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Intelectual"> Intelectual</label>
+            <label class="check-label"><input type="checkbox" name="tipoDeficiencia" value="Múltipla"> Múltipla</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DADOS BANCÁRIOS -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados Conta Bancária</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field col-span-2">
+          <label>Tipo de Conta</label>
+          <div class="radio-inline" style="margin-top:4px">
+            <label class="radio-label"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>CPF <span class="req">*</span></label>
+          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
+        </div>
+        <div class="field" id="agenciaField" style="display:none">
+          <label>Agência</label>
+          <input type="text" id="agencia" placeholder="0000">
+        </div>
+        <div class="field" id="contaField" style="display:none">
+          <label>Conta / Dígito</label>
+          <input type="text" id="conta" placeholder="00000-0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPENDENTES -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dependentes</div>
+    <div class="section-body">
+      <div class="aviso-box" style="margin-bottom:18px">
+        <strong>Atenção:</strong> A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes no plano de saúde. É imprescindível o CPF de todos os dependentes.
+      </div>
+      <table class="dep-table">
+        <thead>
+          <tr>
+            <th style="width:40%">Nome</th>
+            <th style="width:25%">Data de Nascimento</th>
+            <th style="width:35%">CPF do Dependente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
+            <td><input type="date" id="dep1Nasc"></td>
+            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
+          </tr>
+          <tr>
+            <td><input type="text" id="dep2Nome" placeholder="Nome completo"></td>
+            <td><input type="date" id="dep2Nasc"></td>
+            <td><input type="text" id="dep2CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
+          </tr>
+          <tr>
+            <td><input type="text" id="dep3Nome" placeholder="Nome completo"></td>
+            <td><input type="date" id="dep3Nasc"></td>
+            <td><input type="text" id="dep3CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
+          </tr>
+          <tr>
+            <td><input type="text" id="dep4Nome" placeholder="Nome completo"></td>
+            <td><input type="date" id="dep4Nasc"></td>
+            <td><input type="text" id="dep4CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VALE TRANSPORTE -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Benefícios – Vale Transporte</div>
+    <div class="section-body">
+      <table class="vt-table">
+        <thead>
+          <tr>
+            <th>Vale Transporte</th>
+            <th>Quantidade</th>
+            <th>Valor Unitário (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ônibus</td>
+            <td><input type="number" id="vtOnibusQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtOnibusVal" placeholder="0,00"></td>
+          </tr>
+          <tr>
+            <td>Metrô / Trem</td>
+            <td><input type="number" id="vtMetroQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtMetroVal" placeholder="0,00"></td>
+          </tr>
+          <tr>
+            <td>Intermunicipal</td>
+            <td><input type="number" id="vtInterQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtInterVal" placeholder="0,00"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VALE REFEIÇÃO/ALIMENTAÇÃO -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Vale Refeição / Alimentação</div>
+    <div class="section-body">
+      <div class="check-group">
+        <label class="radio-label"><input type="radio" name="valeRef" value="va"> 100% Vale Alimentação</label>
+        <label class="radio-label"><input type="radio" name="valeRef" value="vr"> 100% Vale Refeição</label>
+        <label class="radio-label"><input type="radio" name="valeRef" value="flex"> Flexibilizado (50% VR e 50% VA)</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSINATURA -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Declaração do Candidato</div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:18px;line-height:1.6">
+        Declaro que as informações prestadas nesta ficha são verdadeiras e que estou ciente das responsabilidades assumidas ao assinar este documento.
+      </p>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Nome Completo do Candidato</label>
+          <input type="text" id="assinaturaName" placeholder="Nome legível">
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input type="date" id="dataAssinatura">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const TEMPLATE_PATH = "./Ficha_Cadastral_exemplo.pdf";
+let templateBytes = null;
+let textLines = null;
+
+// ── MASKS ──
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if(v.length>3) v=v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  el.value=v;
+}
+function maskCPFInput(el){ maskCPF(el); }
+function maskCep(el){
+  let v=el.value.replace(/\D/g,'').slice(0,8);
+  if(v.length>5) v=v.replace(/(\d{5})(\d{0,3})/,'$1-$2');
+  el.value=v;
+}
+function maskTelefone(el){
+  let v = el.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 10) {
+    v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  } else if (v.length > 6) {
+    v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+  } else if (v.length > 2) {
+    v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+  } else if (v.length > 0) {
+    v = `(${v}`;
+  }
+  el.value = v;
+}
+
+// ── TOGGLE ──
+function togglePIS(el){
+  document.getElementById('pisField').style.display = el.value==='nao'?'block':'none';
+}
+function toggleDef(el){
+  document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
+}
+function toggleBanco(el){
+  const b = el.value==='bradesco';
+  document.getElementById('agenciaField').style.display = b?'block':'none';
+  document.getElementById('contaField').style.display = b?'block':'none';
+}
+
+// ── PROGRESS ──
+document.querySelectorAll('input,select').forEach(el=>{
+  el.addEventListener('input', updateProgress);
+  el.addEventListener('change', updateProgress);
+});
+function updateProgress(){
+  const required = ['nomeCompleto','celular','email','estadoCivil','cpf'];
+  const filled = required.filter(id=>document.getElementById(id)?.value?.trim()).length;
+  document.getElementById('progressBar').style.width = (filled/required.length*100)+'%';
+}
+
+// ── CHECKBOX ACTIVE STATE ──
+document.querySelectorAll('.check-label input, .radio-label input').forEach(input=>{
+  input.addEventListener('change',()=>{
+    if(input.type==='radio'){
+      document.querySelectorAll(`input[name="${input.name}"]`).forEach(r=>{
+        r.closest('.radio-label')?.classList.remove('active');
+        r.closest('.check-label')?.classList.remove('active');
+      });
+    }
+    if(input.checked){
+      input.closest('.radio-label')?.classList.add('active');
+      input.closest('.check-label')?.classList.add('active');
+    } else {
+      input.closest('.check-label')?.classList.remove('active');
+    }
+  });
+});
+
+// ── FORMAT DATE ──
+function formatDate(d){ if(!d)return''; const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+function formatarTelefoneBR(valor){
+  const digitos = String(valor || '').replace(/\D/g, '');
+  if (digitos.length === 11) return `(${digitos.slice(0,2)}) ${digitos.slice(2,7)}-${digitos.slice(7)}`;
+  if (digitos.length === 10) return `(${digitos.slice(0,2)}) ${digitos.slice(2,6)}-${digitos.slice(6)}`;
+  return String(valor || '').trim();
+}
+
+// ── GET VALUE ──
+function v(id){ return (document.getElementById(id)?.value||'').trim(); }
+function radio(name){ return document.querySelector(`input[name="${name}"]:checked`)?.value||''; }
+function checks(name){ return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(c=>c.value); }
+
+// ── TOAST ──
+function showToast(msg,ok=true){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-dot').style.background=ok?'#4caf7d':'#e05c3a';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function clonarArrayBuffer(buffer){
+  return buffer.slice(0);
+}
+function normalizarTexto(valor){
+  return (valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function paraArray(valor){
+  return Array.isArray(valor) ? valor : [valor];
+}
+async function construirLinhasTexto(pdfBytes){
+  const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
+  const pdf = await loadingTask.promise;
+  const page = await pdf.getPage(1);
+  const textContent = await page.getTextContent();
+
+  const itens = textContent.items
+    .map((item) => ({
+      str: item.str || "",
+      norm: normalizarTexto(item.str),
+      x: item.transform[4],
+      y: item.transform[5],
+      width: item.width || 0
+    }))
+    .filter((item) => item.norm.length > 0);
+
+  const mapa = new Map();
+  for (const item of itens) {
+    const chave = String(Math.round(item.y));
+    if (!mapa.has(chave)) mapa.set(chave, []);
+    mapa.get(chave).push(item);
+  }
+
+  return Array.from(mapa.values())
+    .map((items) => {
+      const ordenados = items.sort((a, b) => a.x - b.x);
+      return { items: ordenados, texto: ordenados.map((x) => x.norm).join(" ") };
+    })
+    .sort((a, b) => b.items[0].y - a.items[0].y);
+}
+function encontrarLinhaPorContexto(linhas, contexto, ocorrencia = 0){
+  const opcoes = paraArray(contexto).map(normalizarTexto);
+  let total = 0;
+  for (const linha of linhas) {
+    if (opcoes.some((texto) => linha.texto.includes(texto))) {
+      if (total === ocorrencia) return linha;
+      total += 1;
+    }
+  }
+  return null;
+}
+function encontrarFrase(linhas, frase, ocorrencia = 0){
+  const alvos = paraArray(frase).map(normalizarTexto);
+  let count = 0;
+  for (const alvo of alvos) {
+    for (const linha of linhas) {
+      const items = linha.items;
+      for (let i = 0; i < items.length; i += 1) {
+        let construido = "";
+        for (let j = i; j < items.length; j += 1) {
+          construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
+          if (construido === alvo) {
+            if (count === ocorrencia) {
+              return {
+                linha,
+                inicio: items[i],
+                fim: items[j],
+                x: items[i].x,
+                y: items[i].y,
+                right: items[j].x + items[j].width
+              };
+            }
+            count += 1;
+          }
+          if (!alvo.startsWith(construido)) break;
+        }
+      }
+    }
+  }
+  return null;
+}
+function encontrarFraseNaLinha(linha, frase, ocorrencia = 0){
+  const alvos = paraArray(frase).map(normalizarTexto);
+  const items = linha.items;
+  let count = 0;
+  for (const alvo of alvos) {
+    for (let i = 0; i < items.length; i += 1) {
+      let construido = "";
+      for (let j = i; j < items.length; j += 1) {
+        construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
+        if (construido === alvo) {
+          if (count === ocorrencia) {
+            return { inicio: items[i], fim: items[j], right: items[j].x + items[j].width };
+          }
+          count += 1;
+        }
+        if (!alvo.startsWith(construido)) break;
+      }
+    }
+  }
+  return null;
+}
+function escreverNoMarcador(page, font, linhas, valor, options = {}){
+  const texto = String(valor || "").trim();
+  if (!texto) return;
+
+  let linha = encontrarLinhaPorContexto(
+    linhas,
+    options.contextoLinha || options.ancoraLinha || options.ancora,
+    options.ocorrenciaLinha || 0
+  );
+  if (!linha) return;
+
+  let anchor = options.ancora
+    ? encontrarFraseNaLinha(linha, options.ancora, options.ocorrenciaAncora || 0)
+    : null;
+
+  if (!anchor && options.ancora) {
+    const anchorGlobal = encontrarFrase(linhas, options.ancora, options.ocorrenciaAncora || 0);
+    if (anchorGlobal) {
+      linha = anchorGlobal.linha;
+      anchor = { inicio: anchorGlobal.inicio, fim: anchorGlobal.fim, right: anchorGlobal.right };
+    }
+  }
+
+  const linhaAbaixo = options.linhaAbaixo === true;
+  const gapY = options.gapY ?? 13;
+  const xPadrao = linhaAbaixo ? 4 : 8;
+  const xBase = options.x ?? (
+    anchor
+      ? (linhaAbaixo ? anchor.inicio.x + (options.offsetX ?? xPadrao) : anchor.right + (options.offsetX ?? xPadrao))
+      : linha.items[0].x + (options.offsetX ?? 0)
+  );
+  const yBase = linha.items[0].y + (options.offsetY ?? 0) - (linhaAbaixo ? gapY : 0);
+
+  page.drawText(texto, {
+    x: xBase,
+    y: yBase,
+    size: options.size ?? 9,
+    font,
+    maxWidth: options.maxWidth ?? 220
+  });
+}
+function escreverNaLinha(page, font, linhas, contextoLinha, valor, options = {}){
+  const texto = String(valor || "").trim();
+  if (!texto) return;
+  const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
+  if (!linha) return;
+  page.drawText(texto, {
+    x: options.x ?? (linha.items[0].x + 260),
+    y: linha.items[0].y + (options.offsetY ?? 0),
+    size: options.size ?? 9,
+    font,
+    maxWidth: options.maxWidth ?? 200
+  });
+}
+function marcarCheckbox(page, font, linhas, contextoLinha, palavra, ativo, options = {}){
+  if (!ativo) return;
+  const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
+  if (!linha) return;
+  const alvo = normalizarTexto(palavra);
+  const candidatos = linha.items.filter((item) => item.norm === alvo);
+  const item = candidatos[options.ocorrenciaPalavra || 0];
+  if (!item) return;
+  page.drawText("X", {
+    x: item.x + (options.offsetX ?? -10),
+    y: item.y + (options.offsetY ?? 0),
+    size: options.size ?? 10,
+    font
+  });
+}
+async function carregarTemplateInicial(){
+  try {
+    const res = await fetch(TEMPLATE_PATH);
+    if (!res.ok) throw new Error("Template não encontrado");
+    const fetchedBytes = await res.arrayBuffer();
+    templateBytes = clonarArrayBuffer(fetchedBytes);
+    textLines = await construirLinhasTexto(clonarArrayBuffer(fetchedBytes));
+  } catch (_error) {
+    showToast("Template PDF não carregado. Verifique Ficha_Cadastral_exemplo.pdf", false);
+  }
+}
+
+// ── GERAR PDF ──
+async function gerarPDF(){
+  try {
+    if (!templateBytes || !textLines) await carregarTemplateInicial();
+    if (!templateBytes || !textLines) return;
+
+    const data = {
+      nomeCompleto: v("nomeCompleto"),
+      nomeSocial: v("nomeSocial"),
+      telefone: formatarTelefoneBR(v("telefone")),
+      celular: formatarTelefoneBR(v("celular")),
+      email: v("email"),
+      estadoCivil: v("estadoCivil"),
+      primeiroEmprego: radio("primeiroEmprego") === "sim" ? "SIM" : "NÃO",
+      pis: v("pis"),
+      endereco: v("endereco"),
+      numero: v("endNum"),
+      complemento: v("complemento"),
+      cep: v("cep"),
+      bairro: v("bairro"),
+      cidade: v("cidade"),
+      possuiDeficiencia: radio("deficiencia") === "sim" ? "SIM" : "NÃO",
+      tiposDeficiencia: checks("tipoDeficiencia").map((item) => item.toUpperCase()),
+      contaMentore: radio("tipoConta") === "mentore",
+      contaSalarioBradesco: radio("tipoConta") === "bradesco",
+      cpfConta: v("cpf"),
+      agencia: v("agencia"),
+      contaDigito: v("conta"),
+      dependentes: [1, 2, 3, 4].map((idx) => ({
+        nome: v(`dep${idx}Nome`),
+        nascimento: formatDate(v(`dep${idx}Nasc`)),
+        cpf: v(`dep${idx}CPF`)
+      })),
+      onibusQtd: v("vtOnibusQtd"),
+      onibusValor: v("vtOnibusVal"),
+      metroQtd: v("vtMetroQtd"),
+      metroValor: v("vtMetroVal"),
+      interQtd: v("vtInterQtd"),
+      interValor: v("vtInterVal"),
+      valeTipo: radio("valeRef") === "va" ? "100_VA" : radio("valeRef") === "vr" ? "100_VR" : "FLEX",
+      assinaturaNome: v("assinaturaName") || v("nomeCompleto"),
+      assinaturaData: formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
+    };
+
+    const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
+    const page = pdfDoc.getPages()[0];
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    escreverNoMarcador(page, font, textLines, data.nomeCompleto, { contextoLinha: "Nome Completo:", ancora: "Nome Completo:", linhaAbaixo: true, maxWidth: 350 });
+    escreverNoMarcador(page, font, textLines, data.nomeSocial, { contextoLinha: "Nome Social:", ancora: "Nome Social:", linhaAbaixo: true, maxWidth: 280 });
+    escreverNoMarcador(page, font, textLines, data.telefone, { contextoLinha: ["Telefone:", "Celular:"], ancora: ["Telefone:", "Telefone"], linhaAbaixo: true, gapY: 10, maxWidth: 110 });
+    escreverNoMarcador(page, font, textLines, data.celular, { contextoLinha: ["Telefone:", "Celular:"], ancora: ["Celular:", "Celular"], linhaAbaixo: true, gapY: 10, maxWidth: 110 });
+    escreverNoMarcador(page, font, textLines, data.email, { contextoLinha: ["E-mail:", "Email:"], ancora: ["E-mail:", "Email:"], linhaAbaixo: true, gapY: 10, maxWidth: 240 });
+    escreverNoMarcador(page, font, textLines, data.estadoCivil, { contextoLinha: "Estado Civil:", ancora: "Estado Civil:", linhaAbaixo: true, maxWidth: 140 });
+
+    marcarCheckbox(page, font, textLines, "Primeiro emprego:", "SIM", data.primeiroEmprego === "SIM");
+    marcarCheckbox(page, font, textLines, "Primeiro emprego:", "NÃO", data.primeiroEmprego === "NÃO");
+    escreverNoMarcador(page, font, textLines, data.pis, { contextoLinha: "Primeiro emprego:", ancora: "Informar PIS:", maxWidth: 180 });
+
+    escreverNoMarcador(page, font, textLines, data.endereco, { contextoLinha: "Endereço:", ancora: "Endereço:", linhaAbaixo: true, maxWidth: 170 });
+    escreverNoMarcador(page, font, textLines, data.numero, { contextoLinha: "Endereço:", ancora: ["Nº", "N°", "No"], linhaAbaixo: true, maxWidth: 60 });
+    escreverNoMarcador(page, font, textLines, data.complemento, { contextoLinha: "Endereço:", ancora: "Complemento:", linhaAbaixo: true, maxWidth: 100 });
+    escreverNoMarcador(page, font, textLines, data.cep, { contextoLinha: "CEP:", ancora: "CEP:", linhaAbaixo: true, maxWidth: 80 });
+    escreverNoMarcador(page, font, textLines, data.bairro, { contextoLinha: "CEP:", ancora: "Bairro:", linhaAbaixo: true, maxWidth: 90 });
+    escreverNoMarcador(page, font, textLines, data.cidade, { contextoLinha: "CEP:", ancora: "Cidade:", linhaAbaixo: true, maxWidth: 140 });
+
+    marcarCheckbox(page, font, textLines, "Possui Deficiência?", "SIM", data.possuiDeficiencia === "SIM");
+    marcarCheckbox(page, font, textLines, "Possui Deficiência?", "NÃO", data.possuiDeficiencia === "NÃO");
+    marcarCheckbox(page, font, textLines, "FÍSICA", "FÍSICA", data.tiposDeficiencia.includes("FÍSICA"));
+    marcarCheckbox(page, font, textLines, "FÍSICA", "AUDITIVA", data.tiposDeficiencia.includes("AUDITIVA"));
+    marcarCheckbox(page, font, textLines, "FÍSICA", "VISUAL", data.tiposDeficiencia.includes("VISUAL"));
+    marcarCheckbox(page, font, textLines, "FÍSICA", "INTELECTUAL", data.tiposDeficiencia.includes("INTELECTUAL"));
+    marcarCheckbox(page, font, textLines, "FÍSICA", "MÚLTIPLA", data.tiposDeficiencia.includes("MÚLTIPLA"));
+
+    marcarCheckbox(page, font, textLines, ["Conta Mêntore", "Conta Mentore"], "Conta", data.contaMentore);
+    marcarCheckbox(page, font, textLines, "Conta Salário Bradesco", "Conta", data.contaSalarioBradesco);
+    escreverNoMarcador(page, font, textLines, data.cpfConta, { contextoLinha: "Número do CPF:", ancora: "Número do CPF:", linhaAbaixo: true, maxWidth: 140 });
+    escreverNoMarcador(page, font, textLines, data.agencia, { contextoLinha: "Conta Salário Bradesco", ancora: "Agência:", linhaAbaixo: true, maxWidth: 70 });
+    escreverNoMarcador(page, font, textLines, data.contaDigito, { contextoLinha: "Conta Salário Bradesco", ancora: "Conta/Dígito:", linhaAbaixo: true, maxWidth: 80 });
+
+    data.dependentes.forEach((dep, idx) => {
+      escreverNoMarcador(page, font, textLines, dep.nome, { contextoLinha: "CPF (do dependente):", ocorrenciaLinha: idx, ancora: "Nome:", linhaAbaixo: true, maxWidth: 170 });
+      escreverNoMarcador(page, font, textLines, dep.nascimento, { contextoLinha: "CPF (do dependente):", ocorrenciaLinha: idx, ancora: "Data de nascimento:", linhaAbaixo: true, maxWidth: 90 });
+      escreverNoMarcador(page, font, textLines, dep.cpf, { contextoLinha: "CPF (do dependente):", ocorrenciaLinha: idx, ancora: "CPF (do dependente):", linhaAbaixo: true, maxWidth: 110 });
+    });
+
+    const colunaQtd = encontrarFrase(textLines, "QUANTIDADE");
+    const colunaValor = encontrarFrase(textLines, ["VALOR UNITÁRIO", "VALOR UNITARIO"]);
+    const qtdX = colunaQtd ? colunaQtd.x + 4 : 330;
+    const valorX = colunaValor ? colunaValor.x + 4 : 430;
+    escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: qtdX, maxWidth: 60 });
+    escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: valorX, maxWidth: 80 });
+    escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: qtdX, maxWidth: 60 });
+    escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80 });
+    escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
+    escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
+
+    marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VA", { ocorrenciaPalavra: 0 });
+    marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VR", { ocorrenciaPalavra: 1 });
+    marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "Flexibilizado", data.valeTipo === "FLEX");
+
+    escreverNoMarcador(page, font, textLines, data.assinaturaNome, {
+      contextoLinha: "NOME COMPLETO DO CANDIDATO",
+      ancora: "NOME COMPLETO DO CANDIDATO",
+      maxWidth: 330,
+      offsetX: 6,
+      offsetY: 2
+    });
+    escreverNoMarcador(page, font, textLines, data.assinaturaData, {
+      contextoLinha: "NOME COMPLETO DO CANDIDATO",
+      ancora: "DATA",
+      maxWidth: 90,
+      offsetX: 8,
+      offsetY: 2
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const nome = data.nomeCompleto || "candidato";
+    link.download = `Ficha_Cadastral_${nome.replace(/\s+/g, "_")}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("PDF gerado com sucesso!");
+  } catch (error) {
+    console.error(error);
+    showToast("Falha ao gerar PDF. Verifique o console.", false);
+  }
+}
+
+// Set today's date as default
+document.getElementById('dataAssinatura').valueAsDate = new Date();
+["telefone", "celular"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("input", () => maskTelefone(el));
+  }
+});
+updateProgress();
+carregarTemplateInicial();
+</script>
+</body>
+</html>
