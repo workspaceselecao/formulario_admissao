@@ -552,9 +552,13 @@
           <label>Bairro</label>
           <input type="text" id="bairro" placeholder="Bairro">
         </div>
-        <div class="field col-span-2">
+        <div class="field">
           <label>Cidade <span class="req">*</span></label>
           <input type="text" id="cidade" placeholder="Cidade">
+        </div>
+        <div class="field">
+          <label>UF <span class="req">*</span></label>
+          <input type="text" id="uf" placeholder="BA" maxlength="2">
         </div>
       </div>
 
@@ -862,6 +866,7 @@ function updateProgress(){
     () => hasValue('estadoCivil'),
     () => hasValue('endereco'),
     () => hasValue('cidade'),
+    () => hasValue('uf'),
     () => {
       const pe = radio('primeiroEmprego');
       if (!pe) return false;
@@ -1301,6 +1306,7 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
+      uf: v("uf"),
       possuiDeficiencia: radio("deficiencia") === "sim" ? "SIM" : "NÃO",
       tiposDeficiencia: checks("tipoDeficiencia").map((item) => item.toUpperCase()),
       contaMentore: radio("tipoConta") === "mentore",
@@ -1363,7 +1369,8 @@ async function gerarPDF(){
     escreverNoMarcador(page, font, textLines, data.complemento, { contextoLinha: "Endereço:", ancora: "Complemento:", linhaAbaixo: true, maxWidth: 100 });
     escreverNoMarcador(page, font, textLines, data.cep, { contextoLinha: "CEP:", ancora: "CEP:", linhaAbaixo: true, maxWidth: 80 });
     escreverNoMarcador(page, font, textLines, data.bairro, { contextoLinha: "CEP:", ancora: "Bairro:", linhaAbaixo: true, maxWidth: 90 });
-    escreverNoMarcador(page, font, textLines, data.cidade, { contextoLinha: "CEP:", ancora: "Cidade:", linhaAbaixo: true, maxWidth: 140 });
+    const cidadeUf = data.uf ? `${data.cidade} - ${data.uf}` : data.cidade;
+    escreverNoMarcador(page, font, textLines, cidadeUf, { contextoLinha: "CEP:", ancora: "Cidade:", linhaAbaixo: true, maxWidth: 160 });
 
     marcarCheckbox(page, font, textLines, "Possui Deficiência?", "SIM", data.possuiDeficiencia === "SIM");
     marcarCheckbox(page, font, textLines, "Possui Deficiência?", "NÃO", data.possuiDeficiencia === "NÃO");
