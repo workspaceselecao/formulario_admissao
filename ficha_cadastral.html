@@ -663,17 +663,17 @@
           <tr>
             <td>Ônibus</td>
             <td><input type="number" id="vtOnibusQtd" placeholder="0" min="0"></td>
-            <td><input type="text" id="vtOnibusVal" placeholder="0,00"></td>
+            <td><input type="text" id="vtOnibusVal" placeholder="R$ 0,00"></td>
           </tr>
           <tr>
             <td>Metrô / Trem</td>
             <td><input type="number" id="vtMetroQtd" placeholder="0" min="0"></td>
-            <td><input type="text" id="vtMetroVal" placeholder="0,00"></td>
+            <td><input type="text" id="vtMetroVal" placeholder="R$ 0,00"></td>
           </tr>
           <tr>
             <td>Intermunicipal</td>
             <td><input type="number" id="vtInterQtd" placeholder="0" min="0"></td>
-            <td><input type="text" id="vtInterVal" placeholder="0,00"></td>
+            <td><input type="text" id="vtInterVal" placeholder="R$ 0,00"></td>
           </tr>
         </tbody>
       </table>
@@ -768,18 +768,15 @@ function maskTelefone(el){
   el.value = v;
 }
 function maskMoeda(el){
-  let digitos = el.value.replace(/\D/g, "");
-  if (!digitos) {
-    el.value = "";
-    return;
-  }
-  if (digitos.length === 1) {
-    digitos = `0${digitos}`;
-  }
-  const inteiro = digitos.slice(0, -2) || "0";
-  const decimal = digitos.slice(-2);
-  const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  el.value = `${inteiroFormatado},${decimal}`;
+  const digitos = el.value.replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  const valor = Number.isNaN(cents) ? 0 : cents / 100;
+  el.value = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(valor);
 }
 function aplicarMaiusculas(el){
   const original = el.value;
@@ -792,6 +789,12 @@ function aplicarMaiusculas(el){
       el.setSelectionRange(start, end);
     }
   }
+}
+function moedaParaPdf(valor){
+  return String(valor || "")
+    .replace(/\s+/g, "")
+    .replace(/^R\$/, "")
+    .trim();
 }
 
 // ── TOGGLE ──
@@ -932,6 +935,10 @@ async function confirmarPoliticaLGPD(){
 function limparDadosFormulario(){
   document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"]').forEach((el) => {
     el.value = '';
+  });
+  ["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
+    const campo = document.getElementById(id);
+    if (campo) campo.value = "R$ 0,00";
   });
   document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((el) => {
     el.checked = false;
@@ -1231,11 +1238,11 @@ async function gerarPDF(){
         cpf: v(`dep${idx}CPF`)
       })),
       onibusQtd: v("vtOnibusQtd"),
-      onibusValor: v("vtOnibusVal"),
+      onibusValor: moedaParaPdf(v("vtOnibusVal")),
       metroQtd: v("vtMetroQtd"),
-      metroValor: v("vtMetroVal"),
+      metroValor: moedaParaPdf(v("vtMetroVal")),
       interQtd: v("vtInterQtd"),
-      interValor: v("vtInterVal"),
+      interValor: moedaParaPdf(v("vtInterVal")),
       valeTipo: radio("valeRef") === "va" ? "100_VA" : radio("valeRef") === "vr" ? "100_VR" : "FLEX",
       assinaturaNome: v("assinaturaName") || v("nomeCompleto"),
       assinaturaData: formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
@@ -1411,12 +1418,19 @@ document.getElementById('dataAssinatura').valueAsDate = new Date();
   }
 });
 document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((el) => {
+  if (["vtOnibusVal", "vtMetroVal", "vtInterVal"].includes(el.id)) return;
   el.addEventListener("input", () => aplicarMaiusculas(el));
 });
 ["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {
     el.addEventListener("input", () => maskMoeda(el));
+    el.addEventListener("blur", () => maskMoeda(el));
+    if (!el.value.trim()) {
+      el.value = "R$ 0,00";
+    } else {
+      maskMoeda(el);
+    }
   }
 });
 const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
