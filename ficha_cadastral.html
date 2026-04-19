@@ -386,6 +386,79 @@
   @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   #toast.show { display: flex; }
   #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; flex-shrink: 0; }
+  body.modal-open { overflow: hidden; }
+
+  /* ── MODAL LGPD ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.58);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(620px, 100%);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+  }
+  .modal-head {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .modal-body {
+    padding: 18px;
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-body strong { color: var(--text); }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px 18px;
+  }
+  .btn-modal {
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-modal.cancel {
+    background: #fff;
+    color: var(--text-mid);
+  }
+  .btn-modal.cancel:hover {
+    border-color: var(--text-mid);
+    color: var(--text);
+  }
+  .btn-modal.confirm {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-modal.confirm:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+  }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 640px) {
@@ -650,6 +723,21 @@
 </div>
 
 <div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lgpdTitle">
+  <div class="modal-card">
+    <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
+    <div class="modal-body">
+      Os dados informados serão apagados automaticamente após a geração do PDF.<br>
+      A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
+      <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
+      Deseja continuar com a geração do PDF?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="lgpdCancelarBtn" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="lgpdContinuarBtn" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -799,13 +887,29 @@ function showToast(msg,ok=true){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3200);
 }
-function confirmarPoliticaLGPD(){
-  return window.confirm(
-    "Decisão LGPD (Lei nº 13.709/2018):\n\n" +
-    "Ao gerar o PDF, os dados informados neste formulário serão apagados automaticamente. " +
-    "A ATENTO não coleta ou mantém dados avulsos neste fluxo.\n\n" +
-    "Deseja continuar com a geração do PDF?"
-  );
+let lgpdResolver = null;
+function abrirModalLGPD(){
+  const modal = document.getElementById('lgpdModal');
+  if (!modal) return Promise.resolve(false);
+  modal.classList.add('show');
+  document.body.classList.add('modal-open');
+  setTimeout(() => document.getElementById('lgpdContinuarBtn')?.focus(), 0);
+  return new Promise((resolve) => {
+    lgpdResolver = resolve;
+  });
+}
+function fecharModalLGPD(decisao){
+  const modal = document.getElementById('lgpdModal');
+  if (modal) modal.classList.remove('show');
+  document.body.classList.remove('modal-open');
+  if (lgpdResolver) {
+    const resolve = lgpdResolver;
+    lgpdResolver = null;
+    resolve(decisao);
+  }
+}
+async function confirmarPoliticaLGPD(){
+  return abrirModalLGPD();
 }
 function limparDadosFormulario(){
   document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"]').forEach((el) => {
@@ -1057,7 +1161,7 @@ async function carregarTemplateInicial(){
 // ── GERAR PDF ──
 async function gerarPDF(){
   try {
-    if (!confirmarPoliticaLGPD()) return;
+    if (!(await confirmarPoliticaLGPD())) return;
     if (!validarContaBradescoObrigatoria()) return;
     if (!templateBytes || !textLines) await carregarTemplateInicial();
     if (!templateBytes || !textLines) return;
@@ -1257,6 +1361,18 @@ if (bancoSelecionado) {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', () => marcarCampoInvalido(id, false));
+});
+document.getElementById('lgpdCancelarBtn')?.addEventListener('click', () => fecharModalLGPD(false));
+document.getElementById('lgpdContinuarBtn')?.addEventListener('click', () => fecharModalLGPD(true));
+document.getElementById('lgpdModal')?.addEventListener('click', (event) => {
+  if (event.target.id === 'lgpdModal') {
+    fecharModalLGPD(false);
+  }
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.getElementById('lgpdModal')?.classList.contains('show')) {
+    fecharModalLGPD(false);
+  }
 });
 updateProgress();
 carregarTemplateInicial();
