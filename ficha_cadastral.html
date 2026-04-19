@@ -546,7 +546,7 @@
         </div>
         <div class="field">
           <label>CEP</label>
-          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)">
+          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="onCepInput(this)" onblur="buscarCepEPreencher(true)">
         </div>
         <div class="field">
           <label>Bairro</label>
@@ -761,6 +761,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 const TEMPLATE_PATH = "./Ficha_Cadastral_exemplo.pdf";
 let templateBytes = null;
 let textLines = null;
+const cepCache = new Map();
+let cepBuscaEmAndamento = false;
+let ultimoCepBuscado = "";
 
 // ── MASKS ──
 function maskCPF(el) {
@@ -775,6 +778,97 @@ function maskCep(el){
   let v=el.value.replace(/\D/g,'').slice(0,8);
   if(v.length>5) v=v.replace(/(\d{5})(\d{0,3})/,'$1-$2');
   el.value=v;
+}
+function normalizarTextoEndereco(valor){
+  return String(valor || "").trim().toLocaleUpperCase("pt-BR");
+}
+function preencherEnderecoPorCep(dados){
+  const enderecoEl = document.getElementById("endereco");
+  const bairroEl = document.getElementById("bairro");
+  const cidadeEl = document.getElementById("cidade");
+  const ufEl = document.getElementById("uf");
+  if (enderecoEl && dados.logradouro) enderecoEl.value = normalizarTextoEndereco(dados.logradouro);
+  if (bairroEl && dados.bairro) bairroEl.value = normalizarTextoEndereco(dados.bairro);
+  if (cidadeEl && dados.cidade) cidadeEl.value = normalizarTextoEndereco(dados.cidade);
+  if (ufEl && dados.uf) ufEl.value = normalizarTextoEndereco(dados.uf).slice(0, 2);
+}
+async function consultarCep(cep){
+  if (cepCache.has(cep)) return cepCache.get(cep);
+
+  const viaCepResp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+  if (viaCepResp.ok) {
+    const viaCepData = await viaCepResp.json();
+    if (!viaCepData.erro) {
+      const normalizadoViaCep = {
+        logradouro: viaCepData.logradouro || "",
+        bairro: viaCepData.bairro || "",
+        cidade: viaCepData.localidade || "",
+        uf: viaCepData.uf || "",
+        fonte: "ViaCEP"
+      };
+      cepCache.set(cep, normalizadoViaCep);
+      return normalizadoViaCep;
+    }
+  }
+
+  const brasilApiResp = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+  if (brasilApiResp.ok) {
+    const brasilApiData = await brasilApiResp.json();
+    const normalizadoBrasilApi = {
+      logradouro: brasilApiData.street || "",
+      bairro: brasilApiData.neighborhood || "",
+      cidade: brasilApiData.city || "",
+      uf: brasilApiData.state || "",
+      fonte: "BrasilAPI"
+    };
+    cepCache.set(cep, normalizadoBrasilApi);
+    return normalizadoBrasilApi;
+  }
+
+  return null;
+}
+async function buscarCepEPreencher(exibirMensagemErro = false){
+  const cepEl = document.getElementById("cep");
+  if (!cepEl) return;
+
+  const cepNumerico = cepEl.value.replace(/\D/g, "");
+  if (cepNumerico.length === 0) return;
+  if (cepNumerico.length !== 8) {
+    if (exibirMensagemErro) showToast("Informe um CEP válido com 8 dígitos.", false);
+    return;
+  }
+  if (cepBuscaEmAndamento && ultimoCepBuscado === cepNumerico) return;
+
+  try {
+    cepBuscaEmAndamento = true;
+    ultimoCepBuscado = cepNumerico;
+    const placeholderOriginal = cepEl.dataset.placeholderOriginal || cepEl.placeholder;
+    cepEl.dataset.placeholderOriginal = placeholderOriginal;
+    cepEl.placeholder = "BUSCANDO CEP...";
+
+    const dadosCep = await consultarCep(cepNumerico);
+    if (!dadosCep) {
+      showToast("CEP não encontrado.", false);
+      return;
+    }
+
+    preencherEnderecoPorCep(dadosCep);
+    updateProgress();
+  } catch (error) {
+    console.error("Falha ao buscar CEP:", error);
+    if (exibirMensagemErro) showToast("Não foi possível consultar o CEP agora.", false);
+  } finally {
+    cepBuscaEmAndamento = false;
+    const placeholderOriginal = cepEl.dataset.placeholderOriginal || "00000-000";
+    cepEl.placeholder = placeholderOriginal;
+  }
+}
+function onCepInput(el){
+  maskCep(el);
+  const cepNumerico = el.value.replace(/\D/g, "");
+  if (cepNumerico.length === 8) {
+    buscarCepEPreencher(false);
+  }
 }
 function maskTelefone(el){
   let v = el.value.replace(/\D/g, '').slice(0, 11);
