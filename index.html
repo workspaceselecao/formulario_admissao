@@ -305,6 +305,11 @@
         .trim();
     }
 
+    function normalizarComparacao(valor) {
+      return normalizarTexto(valor)
+        .replace(/\s*([:;%/()\-])\s*/g, "$1");
+    }
+
     async function construirLinhasTexto(pdfBytes) {
       const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
       const pdf = await loadingTask.promise;
@@ -366,13 +371,15 @@
       let count = 0;
 
       for (const alvo of alvos) {
+        const alvoComparavel = normalizarComparacao(alvo);
         for (const linha of linhas) {
           const items = linha.items;
           for (let i = 0; i < items.length; i += 1) {
             let construido = "";
             for (let j = i; j < items.length; j += 1) {
               construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
-              if (construido === alvo) {
+              const construidoComparavel = normalizarComparacao(construido);
+              if (construidoComparavel === alvoComparavel) {
                 if (count === ocorrencia) {
                   return {
                     linha,
@@ -385,7 +392,7 @@
                 }
                 count += 1;
               }
-              if (!alvo.startsWith(construido)) {
+              if (!alvoComparavel.startsWith(construidoComparavel)) {
                 break;
               }
             }
@@ -401,11 +408,13 @@
       let count = 0;
 
       for (const alvo of alvos) {
+        const alvoComparavel = normalizarComparacao(alvo);
         for (let i = 0; i < items.length; i += 1) {
           let construido = "";
           for (let j = i; j < items.length; j += 1) {
             construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
-            if (construido === alvo) {
+            const construidoComparavel = normalizarComparacao(construido);
+            if (construidoComparavel === alvoComparavel) {
               if (count === ocorrencia) {
                 return {
                   inicio: items[i],
@@ -415,7 +424,7 @@
               }
               count += 1;
             }
-            if (!alvo.startsWith(construido)) {
+            if (!alvoComparavel.startsWith(construidoComparavel)) {
               break;
             }
           }
@@ -456,14 +465,14 @@
 
     function escreverNoMarcador(page, font, linhas, valor, options = {}) {
       const texto = String(valor || "").trim();
-      if (!texto) return;
+      if (!texto) return false;
 
       let linha = encontrarLinhaPorContexto(
         linhas,
         options.contextoLinha || options.ancoraLinha || options.ancora,
         options.ocorrenciaLinha || 0
       );
-      if (!linha) return;
+      if (!linha) return false;
 
       let anchor = options.ancora
         ? encontrarFraseNaLinha(linha, options.ancora, options.ocorrenciaAncora || 0)
@@ -496,6 +505,7 @@
         font,
         maxWidth: options.maxWidth ?? 220
       });
+      return true;
     }
 
     function formatarTelefoneBR(valor) {
@@ -510,14 +520,18 @@
     }
 
     function marcarCheckbox(page, font, linhas, contextoLinha, palavra, ativo, options = {}) {
-      if (!ativo) return;
+      if (!ativo) return false;
       const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
-      if (!linha) return;
+      if (!linha) return false;
 
-      const alvo = normalizarTexto(palavra);
-      const candidatos = linha.items.filter((item) => item.norm === alvo);
-      const item = candidatos[options.ocorrenciaPalavra || 0];
-      if (!item) return;
+      const alvos = paraArray(palavra).map(normalizarTexto);
+      const candidatos = linha.items.filter((item) => alvos.includes(item.norm));
+      let item = candidatos[options.ocorrenciaPalavra || 0];
+      if (!item) {
+        const frase = encontrarFraseNaLinha(linha, palavra, options.ocorrenciaPalavra || 0);
+        item = frase ? frase.inicio : null;
+      }
+      if (!item) return false;
 
       page.drawText("X", {
         x: item.x + (options.offsetX ?? -10),
@@ -525,6 +539,20 @@
         size: options.size ?? 10,
         font
       });
+      return true;
+    }
+
+    function marcarCheckboxPorFrase(page, font, linhas, frases, ativo, options = {}) {
+      if (!ativo) return false;
+      const anchor = encontrarFrase(linhas, frases, options.ocorrencia || 0);
+      if (!anchor) return false;
+      page.drawText("X", {
+        x: anchor.inicio.x + (options.offsetX ?? -10),
+        y: anchor.y + (options.offsetY ?? 0),
+        size: options.size ?? 10,
+        font
+      });
+      return true;
     }
 
     function dadosDoFormulario() {
@@ -639,13 +667,25 @@
           gapY: 10,
           maxWidth: 100
         });
-        escreverNoMarcador(page, font, textLines, data.email, {
-          contextoLinha: ["E-mail:", "Email:"],
-          ancora: ["E-mail:", "Email:"],
+        const emailOk = escreverNoMarcador(page, font, textLines, data.email, {
+          contextoLinha: ["E-mail:", "E-mail", "Email:", "Email"],
+          ancora: ["E-mail:", "E-mail", "Email:", "Email"],
           linhaAbaixo: true,
           gapY: 10,
           maxWidth: 240
         });
+        if (!emailOk) {
+          const linhaEstadoCivil = encontrarLinhaPorContexto(textLines, "Estado Civil:");
+          if (linhaEstadoCivil && data.email) {
+            page.drawText(data.email, {
+              x: linhaEstadoCivil.items[0].x + 8,
+              y: linhaEstadoCivil.items[0].y + 13,
+              size: 9,
+              font,
+              maxWidth: 240
+            });
+          }
+        }
         escreverNoMarcador(page, font, textLines, data.estadoCivil, {
           contextoLinha: "Estado Civil:",
           ancora: "Estado Civil:",
@@ -763,9 +803,41 @@
         escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
         escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
 
-        marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VA", { ocorrenciaPalavra: 0 });
-        marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VR", { ocorrenciaPalavra: 1 });
-        marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "Flexibilizado", data.valeTipo === "FLEX");
+        const valeVaOk = marcarCheckbox(
+          page,
+          font,
+          textLines,
+          ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
+          ["100%", "100 %"],
+          data.valeTipo === "100_VA",
+          { ocorrenciaPalavra: 0 }
+        );
+        const valeVrOk = marcarCheckbox(
+          page,
+          font,
+          textLines,
+          ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
+          ["100%", "100 %"],
+          data.valeTipo === "100_VR",
+          { ocorrenciaPalavra: 1 }
+        );
+        const valeFlexOk = marcarCheckbox(
+          page,
+          font,
+          textLines,
+          ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
+          ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"],
+          data.valeTipo === "FLEX"
+        );
+        if (!valeVaOk) {
+          marcarCheckboxPorFrase(page, font, textLines, ["100% Vale Alimentação", "100 % Vale Alimentação", "Vale Alimentação"], data.valeTipo === "100_VA");
+        }
+        if (!valeVrOk) {
+          marcarCheckboxPorFrase(page, font, textLines, ["100% Vale Refeição", "100 % Vale Refeição", "Vale Refeição"], data.valeTipo === "100_VR");
+        }
+        if (!valeFlexOk) {
+          marcarCheckboxPorFrase(page, font, textLines, ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"], data.valeTipo === "FLEX");
+        }
 
         escreverNoMarcador(page, font, textLines, data.nomeCompleto, {
           contextoLinha: "NOME COMPLETO DO CANDIDATO",
