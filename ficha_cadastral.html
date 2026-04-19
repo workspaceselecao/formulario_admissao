@@ -762,6 +762,10 @@ function normalizarTexto(valor){
     .replace(/\s+/g, " ")
     .trim();
 }
+function normalizarComparacao(valor){
+  return normalizarTexto(valor)
+    .replace(/\s*([:;%/()\-])\s*/g, "$1");
+}
 function paraArray(valor){
   return Array.isArray(valor) ? valor : [valor];
 }
@@ -810,13 +814,15 @@ function encontrarFrase(linhas, frase, ocorrencia = 0){
   const alvos = paraArray(frase).map(normalizarTexto);
   let count = 0;
   for (const alvo of alvos) {
+    const alvoComparavel = normalizarComparacao(alvo);
     for (const linha of linhas) {
       const items = linha.items;
       for (let i = 0; i < items.length; i += 1) {
         let construido = "";
         for (let j = i; j < items.length; j += 1) {
           construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
-          if (construido === alvo) {
+          const construidoComparavel = normalizarComparacao(construido);
+          if (construidoComparavel === alvoComparavel) {
             if (count === ocorrencia) {
               return {
                 linha,
@@ -829,7 +835,7 @@ function encontrarFrase(linhas, frase, ocorrencia = 0){
             }
             count += 1;
           }
-          if (!alvo.startsWith(construido)) break;
+          if (!alvoComparavel.startsWith(construidoComparavel)) break;
         }
       }
     }
@@ -841,17 +847,19 @@ function encontrarFraseNaLinha(linha, frase, ocorrencia = 0){
   const items = linha.items;
   let count = 0;
   for (const alvo of alvos) {
+    const alvoComparavel = normalizarComparacao(alvo);
     for (let i = 0; i < items.length; i += 1) {
       let construido = "";
       for (let j = i; j < items.length; j += 1) {
         construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
-        if (construido === alvo) {
+        const construidoComparavel = normalizarComparacao(construido);
+        if (construidoComparavel === alvoComparavel) {
           if (count === ocorrencia) {
             return { inicio: items[i], fim: items[j], right: items[j].x + items[j].width };
           }
           count += 1;
         }
-        if (!alvo.startsWith(construido)) break;
+        if (!alvoComparavel.startsWith(construidoComparavel)) break;
       }
     }
   }
@@ -915,9 +923,13 @@ function marcarCheckbox(page, font, linhas, contextoLinha, palavra, ativo, optio
   if (!ativo) return;
   const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
   if (!linha) return;
-  const alvo = normalizarTexto(palavra);
-  const candidatos = linha.items.filter((item) => item.norm === alvo);
-  const item = candidatos[options.ocorrenciaPalavra || 0];
+  const alvos = paraArray(palavra).map(normalizarTexto);
+  const candidatos = linha.items.filter((item) => alvos.includes(item.norm));
+  let item = candidatos[options.ocorrenciaPalavra || 0];
+  if (!item) {
+    const frase = encontrarFraseNaLinha(linha, palavra, options.ocorrenciaPalavra || 0);
+    item = frase ? frase.inicio : null;
+  }
   if (!item) return;
   page.drawText("X", {
     x: item.x + (options.offsetX ?? -10),
@@ -990,7 +1002,13 @@ async function gerarPDF(){
     escreverNoMarcador(page, font, textLines, data.nomeSocial, { contextoLinha: "Nome Social:", ancora: "Nome Social:", linhaAbaixo: true, maxWidth: 280 });
     escreverNoMarcador(page, font, textLines, data.telefone, { contextoLinha: ["Telefone:", "Celular:"], ancora: ["Telefone:", "Telefone"], linhaAbaixo: true, gapY: 10, maxWidth: 110 });
     escreverNoMarcador(page, font, textLines, data.celular, { contextoLinha: ["Telefone:", "Celular:"], ancora: ["Celular:", "Celular"], linhaAbaixo: true, gapY: 10, maxWidth: 110 });
-    escreverNoMarcador(page, font, textLines, data.email, { contextoLinha: ["E-mail:", "Email:"], ancora: ["E-mail:", "Email:"], linhaAbaixo: true, gapY: 10, maxWidth: 240 });
+    escreverNoMarcador(page, font, textLines, data.email, {
+      contextoLinha: ["E-mail:", "E-mail", "Email:", "Email"],
+      ancora: ["E-mail:", "E-mail", "Email:", "Email"],
+      linhaAbaixo: true,
+      gapY: 10,
+      maxWidth: 240
+    });
     escreverNoMarcador(page, font, textLines, data.estadoCivil, { contextoLinha: "Estado Civil:", ancora: "Estado Civil:", linhaAbaixo: true, maxWidth: 140 });
 
     marcarCheckbox(page, font, textLines, "Primeiro emprego:", "SIM", data.primeiroEmprego === "SIM");
@@ -1035,9 +1053,32 @@ async function gerarPDF(){
     escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
     escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
 
-    marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VA", { ocorrenciaPalavra: 0 });
-    marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VR", { ocorrenciaPalavra: 1 });
-    marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "Flexibilizado", data.valeTipo === "FLEX");
+    marcarCheckbox(
+      page,
+      font,
+      textLines,
+      ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
+      ["100%", "100 %"],
+      data.valeTipo === "100_VA",
+      { ocorrenciaPalavra: 0 }
+    );
+    marcarCheckbox(
+      page,
+      font,
+      textLines,
+      ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
+      ["100%", "100 %"],
+      data.valeTipo === "100_VR",
+      { ocorrenciaPalavra: 1 }
+    );
+    marcarCheckbox(
+      page,
+      font,
+      textLines,
+      ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
+      ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"],
+      data.valeTipo === "FLEX"
+    );
 
     escreverNoMarcador(page, font, textLines, data.assinaturaNome, {
       contextoLinha: "NOME COMPLETO DO CANDIDATO",
