@@ -270,6 +270,10 @@
     let templateBytes = null;
     let textLines = null;
 
+    function clonarArrayBuffer(buffer) {
+      return buffer.slice(0);
+    }
+
     function criarCamposDependentes() {
       const fragment = document.createDocumentFragment();
       for (let i = 1; i <= 4; i += 1) {
@@ -509,8 +513,9 @@
         if (!res.ok) {
           throw new Error("Template não encontrado no mesmo diretório.");
         }
-        templateBytes = await res.arrayBuffer();
-        textLines = await construirLinhasTexto(templateBytes);
+        const fetchedBytes = await res.arrayBuffer();
+        templateBytes = clonarArrayBuffer(fetchedBytes);
+        textLines = await construirLinhasTexto(clonarArrayBuffer(fetchedBytes));
         statusEl.textContent = "Template carregado com sucesso.";
         gerarBtn.disabled = false;
       } catch (error) {
@@ -523,8 +528,9 @@
       const file = event.target.files && event.target.files[0];
       if (!file) return;
 
-      templateBytes = await file.arrayBuffer();
-      textLines = await construirLinhasTexto(templateBytes);
+      const uploadedBytes = await file.arrayBuffer();
+      templateBytes = clonarArrayBuffer(uploadedBytes);
+      textLines = await construirLinhasTexto(clonarArrayBuffer(uploadedBytes));
       statusEl.textContent = `Template carregado manualmente: ${file.name}`;
       gerarBtn.disabled = false;
     });
@@ -542,7 +548,7 @@
 
       try {
         const data = dadosDoFormulario();
-        const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+        const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
         const page = pdfDoc.getPages()[0];
         const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
 
