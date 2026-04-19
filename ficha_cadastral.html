@@ -365,21 +365,6 @@
   }
   .aviso-box strong { color: #8a4a10; }
 
-  /* ── INFO BADGE ── */
-  .info-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text-light);
-    font-family: 'DM Mono', monospace;
-    background: var(--bg);
-    border-radius: 6px;
-    padding: 4px 10px;
-    border: 1px solid var(--border);
-    margin-bottom: 16px;
-  }
-
   /* ── TOAST ── */
   #toast {
     position: fixed;
@@ -430,11 +415,6 @@
 
 <div class="container">
   <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
-
-  <div class="info-badge">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    Preencha conforme Certidão de Nascimento ou Casamento · Decreto eSocial 8373/2014
-  </div>
 
   <!-- DADOS PESSOAIS -->
   <div class="section-card">
@@ -819,6 +799,47 @@ function showToast(msg,ok=true){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3200);
 }
+function confirmarPoliticaLGPD(){
+  return window.confirm(
+    "Decisão LGPD (Lei nº 13.709/2018):\n\n" +
+    "Ao gerar o PDF, os dados informados neste formulário serão apagados automaticamente. " +
+    "A ATENTO não coleta ou mantém dados avulsos neste fluxo.\n\n" +
+    "Deseja continuar com a geração do PDF?"
+  );
+}
+function limparDadosFormulario(){
+  document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"]').forEach((el) => {
+    el.value = '';
+  });
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((el) => {
+    el.checked = false;
+  });
+  document.querySelectorAll('.radio-label.active, .check-label.active').forEach((el) => {
+    el.classList.remove('active');
+  });
+
+  const pisField = document.getElementById('pisField');
+  const defGroup = document.getElementById('defGroup');
+  const agenciaField = document.getElementById('agenciaField');
+  const contaField = document.getElementById('contaField');
+  if (pisField) pisField.style.display = 'none';
+  if (defGroup) defGroup.style.display = 'none';
+  if (agenciaField) agenciaField.style.display = 'none';
+  if (contaField) contaField.style.display = 'none';
+
+  const agenciaEl = document.getElementById('agencia');
+  const contaEl = document.getElementById('conta');
+  if (agenciaEl) {
+    agenciaEl.required = false;
+    agenciaEl.classList.remove('invalid');
+  }
+  if (contaEl) {
+    contaEl.required = false;
+    contaEl.classList.remove('invalid');
+  }
+  document.getElementById('dataAssinatura').valueAsDate = new Date();
+  updateProgress();
+}
 
 function clonarArrayBuffer(buffer){
   return buffer.slice(0);
@@ -1036,6 +1057,7 @@ async function carregarTemplateInicial(){
 // ── GERAR PDF ──
 async function gerarPDF(){
   try {
+    if (!confirmarPoliticaLGPD()) return;
     if (!validarContaBradescoObrigatoria()) return;
     if (!templateBytes || !textLines) await carregarTemplateInicial();
     if (!templateBytes || !textLines) return;
@@ -1211,6 +1233,7 @@ async function gerarPDF(){
     link.download = `Ficha_Cadastral_${nome.replace(/\s+/g, "_")}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
+    limparDadosFormulario();
     showToast("PDF gerado com sucesso!");
   } catch (error) {
     console.error(error);
