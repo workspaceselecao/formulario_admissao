@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preenchimento de Ficha Cadastral</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f6f7fb;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #dde1ea;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(20, 28, 45, 0.06);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+    p {
+      margin-top: 0;
+      color: #455066;
+    }
+    fieldset {
+      border: 1px solid #dfe4ef;
+      border-radius: 8px;
+      margin: 0 0 16px;
+      padding: 12px;
+    }
+    legend {
+      padding: 0 6px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .col-2 { grid-column: span 2; }
+    .col-3 { grid-column: span 3; }
+    .col-4 { grid-column: span 4; }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+      color: #2d3648;
+    }
+    input, select {
+      border: 1px solid #cbd4e2;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 14px;
+    }
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+      color: #2d3648;
+    }
+    .checks label {
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    button {
+      border: 0;
+      border-radius: 8px;
+      background: #1f4ed8;
+      color: #fff;
+      font-weight: 700;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #8aa2de;
+      cursor: not-allowed;
+    }
+    .status {
+      font-size: 13px;
+      color: #2d3648;
+      margin: 0;
+    }
+    .muted {
+      color: #606d84;
+      font-size: 12px;
+    }
+    @media (max-width: 840px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .col-3, .col-4 {
+        grid-column: span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Ficha Cadastral (PDF original)</h1>
+    <p>
+      Preencha os dados abaixo e exporte o PDF usando exatamente o modelo
+      <strong>Ficha_Cadastral_exemplo.pdf</strong> como base.
+    </p>
+
+    <form id="fichaForm">
+      <fieldset>
+        <legend>Dados Pessoais</legend>
+        <div class="grid">
+          <label class="col-3">Nome Completo
+            <input name="nomeCompleto" required>
+          </label>
+          <label>Nome Social
+            <input name="nomeSocial">
+          </label>
+          <label>Telefone
+            <input name="telefone">
+          </label>
+          <label>Celular
+            <input name="celular">
+          </label>
+          <label class="col-2">E-mail
+            <input name="email" type="email">
+          </label>
+          <label class="col-2">Estado Civil
+            <input name="estadoCivil">
+          </label>
+          <label>Primeiro Emprego
+            <select name="primeiroEmprego">
+              <option value="SIM">SIM</option>
+              <option value="NÃO">NÃO</option>
+            </select>
+          </label>
+          <label class="col-3">PIS
+            <input name="pis">
+          </label>
+          <label class="col-2">Endereço
+            <input name="endereco">
+          </label>
+          <label>Número
+            <input name="numero">
+          </label>
+          <label>Complemento
+            <input name="complemento">
+          </label>
+          <label>CEP
+            <input name="cep">
+          </label>
+          <label>Bairro
+            <input name="bairro">
+          </label>
+          <label class="col-2">Cidade
+            <input name="cidade">
+          </label>
+          <label>Possui Deficiência
+            <select name="possuiDeficiencia">
+              <option value="SIM">SIM</option>
+              <option value="NÃO">NÃO</option>
+            </select>
+          </label>
+          <div class="col-3">
+            <span class="muted">Tipo de Deficiência</span>
+            <div class="checks">
+              <label><input type="checkbox" name="tipoDeficiencia" value="FÍSICA">Física</label>
+              <label><input type="checkbox" name="tipoDeficiencia" value="AUDITIVA">Auditiva</label>
+              <label><input type="checkbox" name="tipoDeficiencia" value="VISUAL">Visual</label>
+              <label><input type="checkbox" name="tipoDeficiencia" value="INTELECTUAL">Intelectual</label>
+              <label><input type="checkbox" name="tipoDeficiencia" value="MÚLTIPLA">Múltipla</label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dados Conta Bancária</legend>
+        <div class="grid">
+          <div class="col-4 checks">
+            <label><input type="checkbox" name="contaMentore">Conta Mêntore</label>
+            <label><input type="checkbox" name="contaSalarioBradesco">Conta Salário Bradesco</label>
+          </div>
+          <label class="col-2">Número do CPF
+            <input name="cpfConta">
+          </label>
+          <label>Agência
+            <input name="agencia">
+          </label>
+          <label>Conta/Dígito
+            <input name="contaDigito">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dependentes</legend>
+        <div id="dependentesContainer"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Benefícios</legend>
+        <div class="grid">
+          <label>Ônibus (Qtd.)
+            <input name="onibusQtd">
+          </label>
+          <label>Ônibus (Valor Unitário)
+            <input name="onibusValor">
+          </label>
+          <label>Metrô/Trem (Qtd.)
+            <input name="metroQtd">
+          </label>
+          <label>Metrô/Trem (Valor Unitário)
+            <input name="metroValor">
+          </label>
+          <label>Intermunicipal (Qtd.)
+            <input name="interQtd">
+          </label>
+          <label>Intermunicipal (Valor Unitário)
+            <input name="interValor">
+          </label>
+          <label class="col-4">Vale Refeição/Alimentação
+            <select name="valeTipo">
+              <option value="100_VA">100% Vale Alimentação</option>
+              <option value="100_VR">100% Vale Refeição</option>
+              <option value="FLEX">Flexibilizado (50% VR e 50% VA)</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" id="gerarBtn" disabled>Gerar PDF preenchido</button>
+        <p class="status" id="status">Carregando template...</p>
+      </div>
+      <div class="actions">
+        <input id="templateFallback" type="file" accept="application/pdf" style="display:none">
+      </div>
+    </form>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    const TEMPLATE_PATH = "./Ficha_Cadastral_exemplo.pdf";
+    const statusEl = document.getElementById("status");
+    const gerarBtn = document.getElementById("gerarBtn");
+    const formEl = document.getElementById("fichaForm");
+    const templateFallbackEl = document.getElementById("templateFallback");
+    const dependentesContainer = document.getElementById("dependentesContainer");
+
+    let templateBytes = null;
+    let textLines = null;
+
+    function criarCamposDependentes() {
+      const fragment = document.createDocumentFragment();
+      for (let i = 1; i <= 4; i += 1) {
+        const wrap = document.createElement("div");
+        wrap.className = "grid";
+        wrap.style.marginBottom = "10px";
+        wrap.innerHTML = `
+          <label class="col-2">Nome do Dependente ${i}
+            <input name="dep${i}Nome">
+          </label>
+          <label>Data de Nascimento
+            <input name="dep${i}Nascimento" placeholder="dd/mm/aaaa">
+          </label>
+          <label>CPF do Dependente
+            <input name="dep${i}Cpf">
+          </label>
+        `;
+        fragment.appendChild(wrap);
+      }
+      dependentesContainer.appendChild(fragment);
+    }
+
+    function normalizarTexto(valor) {
+      return (valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    async function construirLinhasTexto(pdfBytes) {
+      const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
+      const pdf = await loadingTask.promise;
+      const page = await pdf.getPage(1);
+      const textContent = await page.getTextContent();
+
+      const itens = textContent.items
+        .map((item) => ({
+          str: item.str || "",
+          norm: normalizarTexto(item.str),
+          x: item.transform[4],
+          y: item.transform[5],
+          width: item.width || 0
+        }))
+        .filter((item) => item.norm.length > 0);
+
+      const mapa = new Map();
+      for (const item of itens) {
+        const chave = String(Math.round(item.y));
+        if (!mapa.has(chave)) {
+          mapa.set(chave, []);
+        }
+        mapa.get(chave).push(item);
+      }
+
+      const linhas = Array.from(mapa.values())
+        .map((items) => {
+          const ordenados = items.sort((a, b) => a.x - b.x);
+          return {
+            items: ordenados,
+            texto: ordenados.map((x) => x.norm).join(" ")
+          };
+        })
+        .sort((a, b) => b.items[0].y - a.items[0].y);
+
+      return linhas;
+    }
+
+    function paraArray(valor) {
+      return Array.isArray(valor) ? valor : [valor];
+    }
+
+    function encontrarLinhaPorContexto(linhas, contexto, ocorrencia = 0) {
+      const opcoes = paraArray(contexto).map(normalizarTexto);
+      let total = 0;
+      for (const linha of linhas) {
+        if (opcoes.some((texto) => linha.texto.includes(texto))) {
+          if (total === ocorrencia) {
+            return linha;
+          }
+          total += 1;
+        }
+      }
+      return null;
+    }
+
+    function encontrarFrase(linhas, frase, ocorrencia = 0) {
+      const alvos = paraArray(frase).map(normalizarTexto);
+      let count = 0;
+
+      for (const alvo of alvos) {
+        for (const linha of linhas) {
+          const items = linha.items;
+          for (let i = 0; i < items.length; i += 1) {
+            let construido = "";
+            for (let j = i; j < items.length; j += 1) {
+              construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
+              if (construido === alvo) {
+                if (count === ocorrencia) {
+                  return {
+                    linha,
+                    inicio: items[i],
+                    fim: items[j],
+                    x: items[i].x,
+                    y: items[i].y,
+                    right: items[j].x + items[j].width
+                  };
+                }
+                count += 1;
+              }
+              if (!alvo.startsWith(construido)) {
+                break;
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function encontrarFraseNaLinha(linha, frase) {
+      const alvo = normalizarTexto(frase);
+      const items = linha.items;
+
+      for (let i = 0; i < items.length; i += 1) {
+        let construido = "";
+        for (let j = i; j < items.length; j += 1) {
+          construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
+          if (construido === alvo) {
+            return {
+              inicio: items[i],
+              fim: items[j],
+              right: items[j].x + items[j].width
+            };
+          }
+          if (!alvo.startsWith(construido)) {
+            break;
+          }
+        }
+      }
+      return null;
+    }
+
+    function escreverAposFrase(page, font, linhas, frase, valor, options = {}) {
+      const texto = String(valor || "").trim();
+      if (!texto) return;
+      const found = encontrarFrase(linhas, frase, options.ocorrencia || 0);
+      if (!found) return;
+
+      page.drawText(texto, {
+        x: found.right + (options.offsetX ?? 8),
+        y: found.y + (options.offsetY ?? 0),
+        size: options.size ?? 9,
+        font,
+        maxWidth: options.maxWidth ?? 220
+      });
+    }
+
+    function escreverNaLinha(page, font, linhas, contextoLinha, valor, options = {}) {
+      const texto = String(valor || "").trim();
+      if (!texto) return;
+      const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
+      if (!linha) return;
+
+      page.drawText(texto, {
+        x: options.x ?? (linha.items[0].x + 260),
+        y: (linha.items[0].y) + (options.offsetY ?? 0),
+        size: options.size ?? 9,
+        font,
+        maxWidth: options.maxWidth ?? 200
+      });
+    }
+
+    function marcarCheckbox(page, font, linhas, contextoLinha, palavra, ativo, options = {}) {
+      if (!ativo) return;
+      const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
+      if (!linha) return;
+
+      const alvo = normalizarTexto(palavra);
+      const candidatos = linha.items.filter((item) => item.norm === alvo);
+      const item = candidatos[options.ocorrenciaPalavra || 0];
+      if (!item) return;
+
+      page.drawText("X", {
+        x: item.x + (options.offsetX ?? -10),
+        y: item.y + (options.offsetY ?? 0),
+        size: options.size ?? 10,
+        font
+      });
+    }
+
+    function dadosDoFormulario() {
+      const fd = new FormData(formEl);
+      const tipos = Array.from(formEl.querySelectorAll("input[name='tipoDeficiencia']:checked")).map((x) => x.value);
+
+      return {
+        nomeCompleto: fd.get("nomeCompleto") || "",
+        nomeSocial: fd.get("nomeSocial") || "",
+        telefone: fd.get("telefone") || "",
+        celular: fd.get("celular") || "",
+        email: fd.get("email") || "",
+        estadoCivil: fd.get("estadoCivil") || "",
+        primeiroEmprego: fd.get("primeiroEmprego") || "SIM",
+        pis: fd.get("pis") || "",
+        endereco: fd.get("endereco") || "",
+        numero: fd.get("numero") || "",
+        complemento: fd.get("complemento") || "",
+        cep: fd.get("cep") || "",
+        bairro: fd.get("bairro") || "",
+        cidade: fd.get("cidade") || "",
+        possuiDeficiencia: fd.get("possuiDeficiencia") || "NÃO",
+        tiposDeficiencia: tipos,
+        contaMentore: formEl.querySelector("input[name='contaMentore']").checked,
+        contaSalarioBradesco: formEl.querySelector("input[name='contaSalarioBradesco']").checked,
+        cpfConta: fd.get("cpfConta") || "",
+        agencia: fd.get("agencia") || "",
+        contaDigito: fd.get("contaDigito") || "",
+        dependentes: [1, 2, 3, 4].map((idx) => ({
+          nome: fd.get(`dep${idx}Nome`) || "",
+          nascimento: fd.get(`dep${idx}Nascimento`) || "",
+          cpf: fd.get(`dep${idx}Cpf`) || ""
+        })),
+        onibusQtd: fd.get("onibusQtd") || "",
+        onibusValor: fd.get("onibusValor") || "",
+        metroQtd: fd.get("metroQtd") || "",
+        metroValor: fd.get("metroValor") || "",
+        interQtd: fd.get("interQtd") || "",
+        interValor: fd.get("interValor") || "",
+        valeTipo: fd.get("valeTipo") || "100_VA"
+      };
+    }
+
+    async function carregarTemplateInicial() {
+      try {
+        const res = await fetch(TEMPLATE_PATH);
+        if (!res.ok) {
+          throw new Error("Template não encontrado no mesmo diretório.");
+        }
+        templateBytes = await res.arrayBuffer();
+        textLines = await construirLinhasTexto(templateBytes);
+        statusEl.textContent = "Template carregado com sucesso.";
+        gerarBtn.disabled = false;
+      } catch (error) {
+        statusEl.textContent = "Não foi possível carregar automaticamente. Selecione o PDF do modelo.";
+        templateFallbackEl.style.display = "block";
+      }
+    }
+
+    templateFallbackEl.addEventListener("change", async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      templateBytes = await file.arrayBuffer();
+      textLines = await construirLinhasTexto(templateBytes);
+      statusEl.textContent = `Template carregado manualmente: ${file.name}`;
+      gerarBtn.disabled = false;
+    });
+
+    formEl.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!templateBytes || !textLines) {
+        alert("Template PDF não carregado.");
+        return;
+      }
+
+      gerarBtn.disabled = true;
+      statusEl.textContent = "Gerando PDF...";
+
+      try {
+        const data = dadosDoFormulario();
+        const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+        const page = pdfDoc.getPages()[0];
+        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+        escreverAposFrase(page, font, textLines, "Nome Completo:", data.nomeCompleto, { maxWidth: 350 });
+        escreverAposFrase(page, font, textLines, "Nome Social:", data.nomeSocial, { maxWidth: 280 });
+        escreverAposFrase(page, font, textLines, "Telefone:", data.telefone, { maxWidth: 100 });
+        escreverAposFrase(page, font, textLines, "Celular:", data.celular, { maxWidth: 100 });
+        escreverAposFrase(page, font, textLines, "E-mail:", data.email, { maxWidth: 240 });
+        escreverAposFrase(page, font, textLines, "Estado Civil:", data.estadoCivil, { maxWidth: 140 });
+
+        marcarCheckbox(page, font, textLines, "Primeiro emprego:", "SIM", data.primeiroEmprego === "SIM");
+        marcarCheckbox(page, font, textLines, "Primeiro emprego:", "NÃO", data.primeiroEmprego === "NÃO");
+        escreverAposFrase(page, font, textLines, "Informar PIS:", data.pis, { maxWidth: 180 });
+
+        escreverAposFrase(page, font, textLines, "Endereço:", data.endereco, { maxWidth: 180 });
+        escreverAposFrase(page, font, textLines, ["Nº", "N°", "No"], data.numero, { maxWidth: 60 });
+        escreverAposFrase(page, font, textLines, "Complemento:", data.complemento, { maxWidth: 100 });
+        escreverAposFrase(page, font, textLines, "CEP:", data.cep, { maxWidth: 80 });
+        escreverAposFrase(page, font, textLines, "Bairro:", data.bairro, { maxWidth: 90 });
+        escreverAposFrase(page, font, textLines, "Cidade:", data.cidade, { maxWidth: 140 });
+
+        marcarCheckbox(page, font, textLines, "Possui Deficiência?", "SIM", data.possuiDeficiencia === "SIM");
+        marcarCheckbox(page, font, textLines, "Possui Deficiência?", "NÃO", data.possuiDeficiencia === "NÃO");
+        marcarCheckbox(page, font, textLines, "FÍSICA", "FÍSICA", data.tiposDeficiencia.includes("FÍSICA"));
+        marcarCheckbox(page, font, textLines, "FÍSICA", "AUDITIVA", data.tiposDeficiencia.includes("AUDITIVA"));
+        marcarCheckbox(page, font, textLines, "FÍSICA", "VISUAL", data.tiposDeficiencia.includes("VISUAL"));
+        marcarCheckbox(page, font, textLines, "FÍSICA", "INTELECTUAL", data.tiposDeficiencia.includes("INTELECTUAL"));
+        marcarCheckbox(page, font, textLines, "FÍSICA", "MÚLTIPLA", data.tiposDeficiencia.includes("MÚLTIPLA"));
+
+        marcarCheckbox(page, font, textLines, ["Conta Mêntore", "Conta Mentore"], "Conta", data.contaMentore);
+        escreverAposFrase(page, font, textLines, "Número do CPF:", data.cpfConta, { maxWidth: 140 });
+        marcarCheckbox(page, font, textLines, "Conta Salário Bradesco", "Conta", data.contaSalarioBradesco);
+        escreverAposFrase(page, font, textLines, "Agência:", data.agencia, { maxWidth: 70 });
+        escreverAposFrase(page, font, textLines, "Conta/Dígito:", data.contaDigito, { maxWidth: 80 });
+
+        data.dependentes.forEach((dep, idx) => {
+          const linhaDep = encontrarLinhaPorContexto(textLines, "CPF (do dependente):", idx);
+          if (!linhaDep) return;
+
+          const nomeAnchor = encontrarFraseNaLinha(linhaDep, "Nome:");
+          const nascAnchor = encontrarFraseNaLinha(linhaDep, "Data de nascimento:");
+          const cpfAnchor = encontrarFraseNaLinha(linhaDep, "CPF (do dependente):");
+
+          if (nomeAnchor && dep.nome) {
+            page.drawText(dep.nome, { x: nomeAnchor.right + 8, y: linhaDep.items[0].y, size: 9, font, maxWidth: 170 });
+          }
+          if (nascAnchor && dep.nascimento) {
+            page.drawText(dep.nascimento, { x: nascAnchor.right + 8, y: linhaDep.items[0].y, size: 9, font, maxWidth: 85 });
+          }
+          if (cpfAnchor && dep.cpf) {
+            page.drawText(dep.cpf, { x: cpfAnchor.right + 8, y: linhaDep.items[0].y, size: 9, font, maxWidth: 110 });
+          }
+        });
+
+        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: 330, maxWidth: 60 });
+        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: 430, maxWidth: 80 });
+        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: 330, maxWidth: 60 });
+        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: 430, maxWidth: 80 });
+        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: 330, maxWidth: 60 });
+        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: 430, maxWidth: 80 });
+
+        marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VA", { ocorrenciaPalavra: 0 });
+        marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VR", { ocorrenciaPalavra: 1 });
+        marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "Flexibilizado", data.valeTipo === "FLEX");
+
+        escreverAposFrase(page, font, textLines, "NOME COMPLETO DO CANDIDATO", data.nomeCompleto, {
+          maxWidth: 330,
+          offsetX: 6,
+          offsetY: 2
+        });
+        escreverAposFrase(page, font, textLines, "DATA", new Date().toLocaleDateString("pt-BR"), {
+          maxWidth: 90,
+          offsetX: 8,
+          offsetY: 2
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "Ficha_Cadastral_preenchida.pdf";
+        link.click();
+        URL.revokeObjectURL(url);
+
+        statusEl.textContent = "PDF gerado com sucesso.";
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = "Falha ao gerar o PDF. Veja o console do navegador.";
+      } finally {
+        gerarBtn.disabled = false;
+      }
+    });
+
+    criarCamposDependentes();
+    carregarTemplateInicial();
+  </script>
+</body>
+</html>
