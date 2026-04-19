@@ -468,10 +468,19 @@
       const anchor = options.ancora
         ? encontrarFraseNaLinha(linha, options.ancora, options.ocorrenciaAncora || 0)
         : null;
+      const linhaAbaixo = options.linhaAbaixo === true;
+      const gapY = options.gapY ?? 13;
+      const xPadrao = linhaAbaixo ? 4 : 8;
+      const xBase = options.x ?? (
+        anchor
+          ? (linhaAbaixo ? anchor.inicio.x + (options.offsetX ?? xPadrao) : anchor.right + (options.offsetX ?? xPadrao))
+          : linha.items[0].x + (options.offsetX ?? 0)
+      );
+      const yBase = linha.items[0].y + (options.offsetY ?? 0) - (linhaAbaixo ? gapY : 0);
 
       page.drawText(texto, {
-        x: options.x ?? (anchor ? anchor.right + (options.offsetX ?? 8) : linha.items[0].x + (options.offsetX ?? 0)),
-        y: linha.items[0].y + (options.offsetY ?? 0),
+        x: xBase,
+        y: yBase,
         size: options.size ?? 9,
         font,
         maxWidth: options.maxWidth ?? 220
@@ -585,31 +594,37 @@
         escreverNoMarcador(page, font, textLines, data.nomeCompleto, {
           contextoLinha: "Nome Completo:",
           ancora: "Nome Completo:",
+          linhaAbaixo: true,
           maxWidth: 350
         });
         escreverNoMarcador(page, font, textLines, data.nomeSocial, {
           contextoLinha: "Nome Social:",
           ancora: "Nome Social:",
+          linhaAbaixo: true,
           maxWidth: 280
         });
         escreverNoMarcador(page, font, textLines, data.telefone, {
           contextoLinha: "Telefone:",
           ancora: "Telefone:",
+          linhaAbaixo: true,
           maxWidth: 100
         });
         escreverNoMarcador(page, font, textLines, data.celular, {
           contextoLinha: "Telefone:",
           ancora: "Celular:",
+          linhaAbaixo: true,
           maxWidth: 100
         });
         escreverNoMarcador(page, font, textLines, data.email, {
           contextoLinha: "E-mail:",
           ancora: "E-mail:",
+          linhaAbaixo: true,
           maxWidth: 240
         });
         escreverNoMarcador(page, font, textLines, data.estadoCivil, {
           contextoLinha: "Estado Civil:",
           ancora: "Estado Civil:",
+          linhaAbaixo: true,
           maxWidth: 140
         });
 
@@ -618,37 +633,44 @@
         escreverNoMarcador(page, font, textLines, data.pis, {
           contextoLinha: "Primeiro emprego:",
           ancora: "Informar PIS:",
+          linhaAbaixo: true,
           maxWidth: 180
         });
 
         escreverNoMarcador(page, font, textLines, data.endereco, {
           contextoLinha: "Endereço:",
           ancora: "Endereço:",
+          linhaAbaixo: true,
           maxWidth: 170
         });
         escreverNoMarcador(page, font, textLines, data.numero, {
           contextoLinha: "Endereço:",
           ancora: ["Nº", "N°", "No"],
+          linhaAbaixo: true,
           maxWidth: 60
         });
         escreverNoMarcador(page, font, textLines, data.complemento, {
           contextoLinha: "Endereço:",
           ancora: "Complemento:",
+          linhaAbaixo: true,
           maxWidth: 100
         });
         escreverNoMarcador(page, font, textLines, data.cep, {
           contextoLinha: "CEP:",
           ancora: "CEP:",
+          linhaAbaixo: true,
           maxWidth: 80
         });
         escreverNoMarcador(page, font, textLines, data.bairro, {
           contextoLinha: "CEP:",
           ancora: "Bairro:",
+          linhaAbaixo: true,
           maxWidth: 90
         });
         escreverNoMarcador(page, font, textLines, data.cidade, {
           contextoLinha: "CEP:",
           ancora: "Cidade:",
+          linhaAbaixo: true,
           maxWidth: 140
         });
 
@@ -664,37 +686,45 @@
         escreverNoMarcador(page, font, textLines, data.cpfConta, {
           contextoLinha: "Número do CPF:",
           ancora: "Número do CPF:",
+          linhaAbaixo: true,
           maxWidth: 140
         });
         marcarCheckbox(page, font, textLines, "Conta Salário Bradesco", "Conta", data.contaSalarioBradesco);
         escreverNoMarcador(page, font, textLines, data.agencia, {
           contextoLinha: "Conta Salário Bradesco",
           ancora: "Agência:",
+          linhaAbaixo: true,
           maxWidth: 70
         });
         escreverNoMarcador(page, font, textLines, data.contaDigito, {
           contextoLinha: "Conta Salário Bradesco",
           ancora: "Conta/Dígito:",
+          linhaAbaixo: true,
           maxWidth: 80
         });
 
         data.dependentes.forEach((dep, idx) => {
-          const linhaDep = encontrarLinhaPorContexto(textLines, "CPF (do dependente):", idx);
-          if (!linhaDep) return;
-
-          const nomeAnchor = encontrarFraseNaLinha(linhaDep, "Nome:");
-          const nascAnchor = encontrarFraseNaLinha(linhaDep, "Data de nascimento:");
-          const cpfAnchor = encontrarFraseNaLinha(linhaDep, "CPF (do dependente):");
-
-          if (nomeAnchor && dep.nome) {
-            page.drawText(dep.nome, { x: nomeAnchor.right + 8, y: linhaDep.items[0].y, size: 9, font, maxWidth: 170 });
-          }
-          if (nascAnchor && dep.nascimento) {
-            page.drawText(dep.nascimento, { x: nascAnchor.right + 8, y: linhaDep.items[0].y, size: 9, font, maxWidth: 85 });
-          }
-          if (cpfAnchor && dep.cpf) {
-            page.drawText(dep.cpf, { x: cpfAnchor.right + 8, y: linhaDep.items[0].y, size: 9, font, maxWidth: 110 });
-          }
+          escreverNoMarcador(page, font, textLines, dep.nome, {
+            contextoLinha: "CPF (do dependente):",
+            ocorrenciaLinha: idx,
+            ancora: "Nome:",
+            linhaAbaixo: true,
+            maxWidth: 170
+          });
+          escreverNoMarcador(page, font, textLines, dep.nascimento, {
+            contextoLinha: "CPF (do dependente):",
+            ocorrenciaLinha: idx,
+            ancora: "Data de nascimento:",
+            linhaAbaixo: true,
+            maxWidth: 85
+          });
+          escreverNoMarcador(page, font, textLines, dep.cpf, {
+            contextoLinha: "CPF (do dependente):",
+            ocorrenciaLinha: idx,
+            ancora: "CPF (do dependente):",
+            linhaAbaixo: true,
+            maxWidth: 110
+          });
         });
 
         const colunaQtd = encontrarFrase(textLines, "QUANTIDADE");
@@ -702,12 +732,12 @@
         const qtdX = colunaQtd ? colunaQtd.x + 4 : 330;
         const valorX = colunaValor ? colunaValor.x + 4 : 430;
 
-        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: qtdX, maxWidth: 60 });
-        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: valorX, maxWidth: 80 });
-        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: qtdX, maxWidth: 60 });
-        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80 });
-        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
-        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
+        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: qtdX, maxWidth: 60, offsetY: -10 });
+        escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: valorX, maxWidth: 80, offsetY: -10 });
+        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: qtdX, maxWidth: 60, offsetY: -10 });
+        escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80, offsetY: -10 });
+        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60, offsetY: -10 });
+        escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80, offsetY: -10 });
 
         marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VA", { ocorrenciaPalavra: 0 });
         marcarCheckbox(page, font, textLines, "100% Vale Alimentação", "100%", data.valeTipo === "100_VR", { ocorrenciaPalavra: 1 });
