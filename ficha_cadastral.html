@@ -767,6 +767,32 @@ function maskTelefone(el){
   }
   el.value = v;
 }
+function maskMoeda(el){
+  let digitos = el.value.replace(/\D/g, "");
+  if (!digitos) {
+    el.value = "";
+    return;
+  }
+  if (digitos.length === 1) {
+    digitos = `0${digitos}`;
+  }
+  const inteiro = digitos.slice(0, -2) || "0";
+  const decimal = digitos.slice(-2);
+  const inteiroFormatado = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  el.value = `${inteiroFormatado},${decimal}`;
+}
+function aplicarMaiusculas(el){
+  const original = el.value;
+  const upper = original.toLocaleUpperCase("pt-BR");
+  if (original !== upper) {
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    el.value = upper;
+    if (start !== null && end !== null) {
+      el.setSelectionRange(start, end);
+    }
+  }
+}
 
 // ── TOGGLE ──
 function togglePIS(el){
@@ -1382,6 +1408,15 @@ document.getElementById('dataAssinatura').valueAsDate = new Date();
   const el = document.getElementById(id);
   if (el) {
     el.addEventListener("input", () => maskTelefone(el));
+  }
+});
+document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((el) => {
+  el.addEventListener("input", () => aplicarMaiusculas(el));
+});
+["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("input", () => maskMoeda(el));
   }
 });
 const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
