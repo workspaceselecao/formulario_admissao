@@ -89,14 +89,16 @@
     padding: 40px 24px 80px;
   }
 
-  .progress-bar-wrap {
+  .section-progress {
+    margin-top: 16px;
+  }
+  .section-progress-track {
     background: var(--border);
     border-radius: 100px;
     height: 4px;
-    margin-bottom: 36px;
     overflow: hidden;
   }
-  .progress-bar-fill {
+  .section-progress-fill {
     height: 100%;
     background: var(--accent);
     border-radius: 100px;
@@ -479,8 +481,6 @@
 </header>
 
 <div class="container">
-  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
-
   <!-- DADOS PESSOAIS -->
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados Pessoais</div>
@@ -575,6 +575,9 @@
           </div>
         </div>
       </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressPessoal"></div></div>
+      </div>
     </div>
   </div>
 
@@ -602,6 +605,9 @@
           <label>Conta / Dígito <span class="req">*</span></label>
           <input type="text" id="conta" placeholder="00000-0">
         </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressBancario"></div></div>
       </div>
     </div>
   </div>
@@ -644,6 +650,9 @@
           </tr>
         </tbody>
       </table>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressDependentes"></div></div>
+      </div>
     </div>
   </div>
 
@@ -677,6 +686,9 @@
           </tr>
         </tbody>
       </table>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressTransporte"></div></div>
+      </div>
     </div>
   </div>
 
@@ -688,6 +700,9 @@
         <label class="radio-label"><input type="radio" name="valeRef" value="va"> 100% Vale Alimentação</label>
         <label class="radio-label"><input type="radio" name="valeRef" value="vr"> 100% Vale Refeição</label>
         <label class="radio-label"><input type="radio" name="valeRef" value="flex"> Flexibilizado (50% VR e 50% VA)</label>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressRefeicao"></div></div>
       </div>
     </div>
   </div>
@@ -708,6 +723,9 @@
           <label>Data</label>
           <input type="date" id="dataAssinatura">
         </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressDeclaracao"></div></div>
       </div>
     </div>
   </div>
@@ -825,9 +843,67 @@ document.querySelectorAll('input,select').forEach(el=>{
   el.addEventListener('change', updateProgress);
 });
 function updateProgress(){
-  const required = ['nomeCompleto','celular','email','estadoCivil','cpf'];
-  const filled = required.filter(id=>document.getElementById(id)?.value?.trim()).length;
-  document.getElementById('progressBar').style.width = (filled/required.length*100)+'%';
+  const hasValue = (id) => v(id).length > 0;
+  const hasMoney = (id) => moedaParaPdf(v(id)) !== "0,00";
+  const calcPct = (checks) => {
+    if (!checks.length) return 0;
+    const preenchidos = checks.filter((fn) => fn()).length;
+    return Math.round((preenchidos / checks.length) * 100);
+  };
+  const setProgress = (id, pct) => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = `${pct}%`;
+  };
+
+  const pessoalPct = calcPct([
+    () => hasValue('nomeCompleto'),
+    () => hasValue('celular'),
+    () => hasValue('email'),
+    () => hasValue('estadoCivil'),
+    () => hasValue('endereco'),
+    () => hasValue('cidade'),
+    () => {
+      const pe = radio('primeiroEmprego');
+      if (!pe) return false;
+      return pe === 'nao' ? hasValue('pis') : true;
+    }
+  ]);
+
+  const bancarioPct = calcPct([
+    () => ['mentore', 'bradesco'].includes(radio('tipoConta')),
+    () => hasValue('cpf'),
+    () => (radio('tipoConta') !== 'bradesco' ? true : hasValue('agencia')),
+    () => (radio('tipoConta') !== 'bradesco' ? true : hasValue('conta'))
+  ]);
+
+  const dependentesPct = calcPct([
+    () => hasValue('dep1Nome'), () => hasValue('dep1Nasc'), () => hasValue('dep1CPF'),
+    () => hasValue('dep2Nome'), () => hasValue('dep2Nasc'), () => hasValue('dep2CPF'),
+    () => hasValue('dep3Nome'), () => hasValue('dep3Nasc'), () => hasValue('dep3CPF'),
+    () => hasValue('dep4Nome'), () => hasValue('dep4Nasc'), () => hasValue('dep4CPF')
+  ]);
+
+  const transportePct = calcPct([
+    () => hasValue('vtOnibusQtd'), () => hasMoney('vtOnibusVal'),
+    () => hasValue('vtMetroQtd'), () => hasMoney('vtMetroVal'),
+    () => hasValue('vtInterQtd'), () => hasMoney('vtInterVal')
+  ]);
+
+  const refeicaoPct = calcPct([
+    () => ['va', 'vr', 'flex'].includes(radio('valeRef'))
+  ]);
+
+  const declaracaoPct = calcPct([
+    () => hasValue('assinaturaName'),
+    () => hasValue('dataAssinatura')
+  ]);
+
+  setProgress('progressPessoal', pessoalPct);
+  setProgress('progressBancario', bancarioPct);
+  setProgress('progressDependentes', dependentesPct);
+  setProgress('progressTransporte', transportePct);
+  setProgress('progressRefeicao', refeicaoPct);
+  setProgress('progressDeclaracao', declaracaoPct);
 }
 
 // ── CHECKBOX ACTIVE STATE ──
