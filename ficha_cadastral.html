@@ -251,6 +251,14 @@
   .radio-label.active input {
     accent-color: #fff;
   }
+  .tipo-conta-opcao.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: #fff;
+  }
+  .tipo-conta-opcao.active input {
+    accent-color: #fff;
+  }
 
   .field-inline-row {
     display: flex;
@@ -528,8 +536,8 @@
         <div class="field col-span-2">
           <label>Tipo de Conta</label>
           <div class="radio-inline" style="margin-top:4px">
-            <label class="radio-label"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore</label>
-            <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
+            <label class="radio-label tipo-conta-opcao"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore</label>
+            <label class="radio-label tipo-conta-opcao"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
           </div>
         </div>
         <div class="field">
@@ -706,6 +714,7 @@ function toggleBanco(el){
   const b = el.value==='bradesco';
   document.getElementById('agenciaField').style.display = b?'block':'none';
   document.getElementById('contaField').style.display = b?'block':'none';
+  syncRadioActive(el.name);
 }
 
 // ── PROGRESS ──
@@ -736,6 +745,12 @@ document.querySelectorAll('.check-label input, .radio-label input').forEach(inpu
     }
   });
 });
+function syncRadioActive(name){
+  document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
+    r.closest('.radio-label')?.classList.toggle('active', r.checked);
+    r.closest('.check-label')?.classList.toggle('active', r.checked);
+  });
+}
 // Garante estado visual correto para opções já marcadas.
 document.querySelectorAll('.check-label input:checked, .radio-label input:checked').forEach((input) => {
   input.closest('.radio-label')?.classList.add('active');
@@ -1170,6 +1185,10 @@ document.getElementById('dataAssinatura').valueAsDate = new Date();
     el.addEventListener("input", () => maskTelefone(el));
   }
 });
+const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
+if (bancoSelecionado) {
+  toggleBanco(bancoSelecionado);
+}
 updateProgress();
 carregarTemplateInicial();
 </script>
