@@ -123,6 +123,43 @@
   }
   .btn-download-empty:active { transform: translateY(0); }
   .btn-download-empty svg { width: 16px; height: 16px; }
+  .download-empty-wrapper {
+    position: relative;
+  }
+  .download-format-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 10px 26px rgba(1,66,106,0.16);
+    padding: 6px;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .download-format-menu.show { display: flex; }
+  .download-format-option {
+    border: 1px solid transparent;
+    background: #fff;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
+  }
+  .download-format-option:hover {
+    background: var(--accent-soft);
+    border-color: var(--border);
+    color: var(--accent-dark);
+  }
   .btn-carta-bradesco {
     width: fit-content;
     justify-content: center;
@@ -550,8 +587,10 @@
   @media (max-width: 640px) {
     .page-header { padding: 20px 20px; flex-direction: column; gap: 14px; align-items: flex-start; }
     .form-actions-bottom { width: 100%; flex-direction: column; }
+    .download-empty-wrapper { width: 100%; }
     .form-actions-bottom .btn-download-empty,
     .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
+    .download-format-menu { left: 0; right: 0; min-width: 0; }
     .container { padding: 24px 16px 60px; }
     .section-body { padding: 20px 16px 16px; }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -868,12 +907,26 @@
   </div>
 
   <div class="form-actions-bottom">
-    <button class="btn-download-empty" type="button" onclick="baixarFichaVazia()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Baixar Ficha Cadastral limpa
-    </button>
+    <div class="download-empty-wrapper">
+      <button
+        class="btn-download-empty"
+        id="btnFichaLimpa"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="menuFichaLimpaFormato"
+        onclick="toggleMenuFichaLimpa(event)"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Baixar Ficha Cadastral limpa
+      </button>
+      <div class="download-format-menu" id="menuFichaLimpaFormato" role="menu" aria-labelledby="btnFichaLimpa">
+        <button type="button" class="download-format-option" role="menuitem" onclick="baixarFichaLimpaFormato('pdf')">Baixar como PDF</button>
+        <button type="button" class="download-format-option" role="menuitem" onclick="baixarFichaLimpaFormato('docx')">Baixar como DOCX</button>
+      </div>
+    </div>
     <button class="btn-export" type="button" onclick="gerarPDF()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -907,12 +960,36 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const TEMPLATE_PATH = "./Ficha_Cadastral_exemplo.pdf";
+const TEMPLATE_DOCX_PATH = "./Ficha_Cadastral_Admissao_MODELO.docx";
 const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
 let templateBytes = null;
 let textLines = null;
 const cepCache = new Map();
 let cepBuscaEmAndamento = false;
 let ultimoCepBuscado = "";
+function toggleMenuFichaLimpa(event){
+  event?.stopPropagation();
+  const menu = document.getElementById('menuFichaLimpaFormato');
+  const btn = document.getElementById('btnFichaLimpa');
+  if (!menu) return;
+  const abrir = !menu.classList.contains('show');
+  menu.classList.toggle('show', abrir);
+  if (btn) btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+}
+function fecharMenuFichaLimpa(){
+  const menu = document.getElementById('menuFichaLimpaFormato');
+  const btn = document.getElementById('btnFichaLimpa');
+  if (menu) menu.classList.remove('show');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+function baixarFichaLimpaFormato(formato){
+  fecharMenuFichaLimpa();
+  if (formato === 'docx') {
+    baixarFichaVaziaDocx();
+    return;
+  }
+  baixarFichaVazia();
+}
 
 // ── MASKS ──
 function maskCPF(el) {
@@ -1868,8 +1945,12 @@ async function gerarPDF(){
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const nome = data.nomeCompleto || "candidato";
-    link.download = `Ficha_Cadastral_${nome.replace(/\s+/g, "_")}.pdf`;
+    const nomeBaseArquivo = "F-075 (PR-011) Ficha Cadastral de Admissão Operacional e Administrativo";
+    const nomeUsuario = (data.nomeCompleto || "candidato")
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    link.download = `${nomeBaseArquivo} - ${nomeUsuario}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
     limparDadosFormulario();
@@ -1901,6 +1982,29 @@ async function baixarFichaVazia(){
   } catch (error) {
     console.error(error);
     showToast("Não foi possível baixar a ficha vazia.", false);
+  }
+}
+async function baixarFichaVaziaDocx(){
+  try {
+    const caminho = encodeURI(TEMPLATE_DOCX_PATH);
+    const resp = await fetch(caminho, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`Falha ao baixar ficha DOCX (${resp.status})`);
+    const bytes = await resp.arrayBuffer();
+    const blob = new Blob([bytes], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Ficha_Cadastral_limpa.docx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Download da ficha limpa em DOCX iniciado.");
+  } catch (error) {
+    console.error(error);
+    showToast("Não foi possível baixar a ficha limpa em DOCX.", false);
   }
 }
 async function baixarCartaAberturaConta(){
@@ -1987,7 +2091,14 @@ document.getElementById('lgpdModal')?.addEventListener('click', (event) => {
     fecharModalLGPD(false);
   }
 });
+document.addEventListener('click', (event) => {
+  const wrapper = document.querySelector('.download-empty-wrapper');
+  if (!wrapper) return;
+  if (event.target instanceof Node && wrapper.contains(event.target)) return;
+  fecharMenuFichaLimpa();
+});
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') fecharMenuFichaLimpa();
   if (event.key === 'Escape' && document.getElementById('lgpdModal')?.classList.contains('show')) {
     fecharModalLGPD(false);
   }
