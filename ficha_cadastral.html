@@ -527,6 +527,28 @@
     .address-grid { grid-template-columns: 1fr; }
     .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade, .address-uf { grid-column: span 1; }
     .dep-table, .vt-table { font-size: 12px; }
+
+    .dep-table thead { display: none; }
+    .dep-table,
+    .dep-table tbody,
+    .dep-table tr,
+    .dep-table td {
+      display: block;
+      width: 100%;
+    }
+    .dep-table tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .dep-table tr:last-child { border-bottom: none; }
+    .dep-table td {
+      padding: 0;
+      border-bottom: none;
+    }
+    .dep-table td:first-child { grid-column: 1 / -1; }
   }
 </style>
 </head>
@@ -969,6 +991,17 @@ function maskTelefone(el){
   }
   el.value = v;
 }
+function posicionarCursorNoFim(el){
+  if (!el || document.activeElement !== el) return;
+  const fim = el.value.length;
+  requestAnimationFrame(() => {
+    try {
+      el.setSelectionRange(fim, fim);
+    } catch (_) {
+      // Alguns navegadores podem bloquear setSelectionRange em estados específicos.
+    }
+  });
+}
 function maskMoeda(el){
   const digitos = el.value.replace(/\D/g, "");
   const cents = Number.parseInt(digitos || "0", 10);
@@ -979,6 +1012,7 @@ function maskMoeda(el){
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(valor);
+  posicionarCursorNoFim(el);
 }
 function aplicarMaiusculas(el){
   const original = el.value;
@@ -993,10 +1027,17 @@ function aplicarMaiusculas(el){
   }
 }
 function moedaParaPdf(valor){
-  return String(valor || "")
-    .replace(/\s+/g, "")
-    .replace(/^R\$/, "")
-    .trim();
+  const texto = String(valor || "").trim();
+  if (!texto) return "";
+  const digitos = texto.replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  const numero = Number.isNaN(cents) ? 0 : cents / 100;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(numero);
 }
 
 // ── TOGGLE ──
@@ -1778,6 +1819,8 @@ document.querySelectorAll('input[type="text"], input[type="email"], input[type="
 ["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {
+    el.addEventListener("focus", () => posicionarCursorNoFim(el));
+    el.addEventListener("click", () => posicionarCursorNoFim(el));
     el.addEventListener("input", () => maskMoeda(el));
     el.addEventListener("blur", () => maskMoeda(el));
     if (!el.value.trim()) {
