@@ -549,6 +549,19 @@
       border-bottom: none;
     }
     .dep-table td:first-child { grid-column: 1 / -1; }
+    .dep-table td::before {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-light);
+      font-family: 'DM Mono', monospace;
+    }
+    .dep-table td:nth-child(1)::before { content: "Nome completo"; }
+    .dep-table td:nth-child(2)::before { content: "Data de nascimento"; }
+    .dep-table td:nth-child(3)::before { content: "CPF"; }
   }
 </style>
 </head>
