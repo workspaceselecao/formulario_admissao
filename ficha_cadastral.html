@@ -365,6 +365,34 @@
   }
   .dep-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(1,66,106,0.10); }
   .dep-table input::placeholder { color: var(--text-light); }
+  .dep-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-add-dependente {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.12s;
+  }
+  .btn-add-dependente:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-dark);
+    color: var(--accent-dark);
+    transform: translateY(-1px);
+  }
+  .btn-add-dependente:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
 
   /* ── VT TABLE ── */
   .vt-table { width: 100%; border-collapse: collapse; }
@@ -562,6 +590,8 @@
     .dep-table td:nth-child(1)::before { content: "Nome completo"; }
     .dep-table td:nth-child(2)::before { content: "Data de nascimento"; }
     .dep-table td:nth-child(3)::before { content: "CPF"; }
+    .dep-actions { justify-content: stretch; }
+    .btn-add-dependente { width: 100%; }
   }
 </style>
 </head>
@@ -737,29 +767,17 @@
             <th style="width:35%">CPF do Dependente</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
+        <tbody id="dependentesBody">
+          <tr data-dependente-index="1">
             <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
             <td><input type="date" id="dep1Nasc"></td>
-            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
-          </tr>
-          <tr>
-            <td><input type="text" id="dep2Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep2Nasc"></td>
-            <td><input type="text" id="dep2CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
-          </tr>
-          <tr>
-            <td><input type="text" id="dep3Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep3Nasc"></td>
-            <td><input type="text" id="dep3CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
-          </tr>
-          <tr>
-            <td><input type="text" id="dep4Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep4Nasc"></td>
-            <td><input type="text" id="dep4CPF" placeholder="000.000.000-00" oninput="maskCPFInput(this)" maxlength="14"></td>
+            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14"></td>
           </tr>
         </tbody>
       </table>
+      <div class="dep-actions">
+        <button type="button" class="btn-add-dependente" id="btnAddDependente" onclick="adicionarDependente()">+ Adicionar dependente</button>
+      </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressDependentes"></div></div>
       </div>
@@ -1081,6 +1099,55 @@ function toggleBanco(el){
   }
   syncRadioActive(el.name);
 }
+const MAX_DEPENDENTES = 4;
+function listarLinhasDependentes(){
+  return [...document.querySelectorAll('#dependentesBody tr')];
+}
+function lerDependentesFormulario(){
+  return listarLinhasDependentes().map((row) => {
+    const nomeEl = row.querySelector('input[id$="Nome"]');
+    const nascEl = row.querySelector('input[id$="Nasc"]');
+    const cpfEl = row.querySelector('input[id$="CPF"]');
+    return {
+      nome: (nomeEl?.value || "").trim(),
+      nascimento: (nascEl?.value || "").trim(),
+      cpf: (cpfEl?.value || "").trim()
+    };
+  });
+}
+function atualizarEstadoBotaoDependente(){
+  const btn = document.getElementById('btnAddDependente');
+  if (!btn) return;
+  const atingiuLimite = listarLinhasDependentes().length >= MAX_DEPENDENTES;
+  btn.disabled = atingiuLimite;
+  btn.textContent = atingiuLimite ? `Limite de ${MAX_DEPENDENTES} dependentes` : "+ Adicionar dependente";
+}
+function criarLinhaDependente(indice){
+  const tr = document.createElement('tr');
+  tr.dataset.dependenteIndex = String(indice);
+  tr.innerHTML = `
+    <td><input type="text" id="dep${indice}Nome" placeholder="Nome completo"></td>
+    <td><input type="date" id="dep${indice}Nasc"></td>
+    <td><input type="text" id="dep${indice}CPF" placeholder="000.000.000-00" maxlength="14"></td>
+  `;
+  return tr;
+}
+function adicionarDependente(){
+  const tbody = document.getElementById('dependentesBody');
+  if (!tbody) return;
+  const totalAtual = listarLinhasDependentes().length;
+  if (totalAtual >= MAX_DEPENDENTES) {
+    showToast(`Limite de ${MAX_DEPENDENTES} dependentes por ficha.`, false);
+    atualizarEstadoBotaoDependente();
+    return;
+  }
+  const novoIndice = totalAtual + 1;
+  const novaLinha = criarLinhaDependente(novoIndice);
+  tbody.appendChild(novaLinha);
+  atualizarEstadoBotaoDependente();
+  updateProgress();
+  novaLinha.querySelector('input')?.focus();
+}
 
 // ── PROGRESS ──
 document.querySelectorAll('input,select').forEach(el=>{
@@ -1127,12 +1194,12 @@ function updateProgress(){
     () => (radio('tipoConta') !== 'bradesco' ? true : hasValue('conta'))
   ]);
 
-  const dependentesPct = calcPct([
-    () => hasValue('dep1Nome'), () => hasValue('dep1Nasc'), () => hasValue('dep1CPF'),
-    () => hasValue('dep2Nome'), () => hasValue('dep2Nasc'), () => hasValue('dep2CPF'),
-    () => hasValue('dep3Nome'), () => hasValue('dep3Nasc'), () => hasValue('dep3CPF'),
-    () => hasValue('dep4Nome'), () => hasValue('dep4Nasc'), () => hasValue('dep4CPF')
+  const dependentesChecks = lerDependentesFormulario().flatMap((dep) => [
+    () => dep.nome.length > 0,
+    () => dep.nascimento.length > 0,
+    () => dep.cpf.length > 0
   ]);
+  const dependentesPct = calcPct(dependentesChecks);
 
   const transportePct = calcPct([
     () => hasValue('vtOnibusQtd'), () => hasMoney('vtOnibusVal'),
@@ -1310,6 +1377,11 @@ function limparDadosFormulario(){
   document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"]').forEach((el) => {
     el.value = '';
   });
+  const dependentesBody = document.getElementById('dependentesBody');
+  if (dependentesBody) {
+    dependentesBody.innerHTML = '';
+    dependentesBody.appendChild(criarLinhaDependente(1));
+  }
   ["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
     const campo = document.getElementById(id);
     if (campo) campo.value = "R$ 0,00";
@@ -1349,6 +1421,7 @@ function limparDadosFormulario(){
     el.classList.remove('invalid');
   });
   document.getElementById('dataAssinatura').valueAsDate = new Date();
+  atualizarEstadoBotaoDependente();
   updateProgress();
 }
 
@@ -1615,10 +1688,10 @@ async function gerarPDF(){
       cpfConta: v("cpf"),
       agencia: v("agencia"),
       contaDigito: v("conta"),
-      dependentes: [1, 2, 3, 4].map((idx) => ({
-        nome: v(`dep${idx}Nome`),
-        nascimento: formatDate(v(`dep${idx}Nasc`)),
-        cpf: v(`dep${idx}CPF`)
+      dependentes: lerDependentesFormulario().map((dep) => ({
+        nome: dep.nome,
+        nascimento: formatDate(dep.nascimento),
+        cpf: dep.cpf
       })),
       onibusQtd: v("vtOnibusQtd"),
       onibusValor: moedaParaPdf(v("vtOnibusVal")),
@@ -1843,6 +1916,18 @@ document.querySelectorAll('input[type="text"], input[type="email"], input[type="
     }
   }
 });
+const dependentesBody = document.getElementById('dependentesBody');
+if (dependentesBody) {
+  dependentesBody.addEventListener('input', (event) => {
+    const el = event.target;
+    if (!(el instanceof HTMLInputElement)) return;
+    if (el.id.endsWith('Nome')) aplicarMaiusculas(el);
+    if (el.id.endsWith('CPF')) maskCPFInput(el);
+    updateProgress();
+  });
+  dependentesBody.addEventListener('change', () => updateProgress());
+}
+atualizarEstadoBotaoDependente();
 const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
 if (bancoSelecionado) {
   toggleBanco(bancoSelecionado);
