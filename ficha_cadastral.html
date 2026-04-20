@@ -37,8 +37,8 @@
 
   /* ── HEADER ── */
   .page-header {
-    background: var(--text);
-    color: #fff;
+    background: #fff;
+    color: var(--text);
     padding: 28px 48px;
     display: flex;
     align-items: center;
@@ -46,7 +46,8 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    border-bottom: 1px solid var(--border);
   }
   .page-header .brand {
     display: flex;
@@ -60,15 +61,15 @@
     height: 30px;
     width: auto;
     display: block;
-    background: #fff;
-    border-radius: 6px;
-    padding: 3px 8px;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
   }
-  .page-header .brand-text { color: #fff; }
+  .page-header .brand-text { color: var(--text); }
   .page-header .subtitle {
     font-size: 12px;
     font-weight: 400;
-    color: rgba(255,255,255,0.55);
+    color: var(--text-light);
     margin-top: 3px;
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
