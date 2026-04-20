@@ -132,6 +132,19 @@
     transition: width 0.4s ease;
     width: 0%;
   }
+  .address-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .address-cep { grid-column: span 2; }
+  .address-endereco { grid-column: span 5; }
+  .address-numero { grid-column: span 1; }
+  .address-complemento { grid-column: span 4; }
+  .address-bairro { grid-column: span 4; }
+  .address-cidade { grid-column: span 6; }
+  .address-uf { grid-column: span 2; }
 
   /* ── SECTION CARDS ── */
   .section-card {
@@ -489,6 +502,8 @@
     .section-body { padding: 20px 16px 16px; }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
+    .address-grid { grid-template-columns: 1fr; }
+    .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade, .address-uf { grid-column: span 1; }
     .dep-table, .vt-table { font-size: 12px; }
   }
 </style>
@@ -594,32 +609,32 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Endereço</div>
     <div class="section-body">
-      <div class="grid grid-4" style="margin-bottom:18px">
-        <div class="field">
+      <div class="address-grid">
+        <div class="field address-cep">
           <label>CEP</label>
           <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="onCepInput(this)" onblur="buscarCepEPreencher(true)">
         </div>
-        <div class="field col-span-2">
+        <div class="field address-endereco">
           <label>Endereço <span class="req">*</span></label>
           <input type="text" id="endereco" placeholder="Rua / Av.">
         </div>
-        <div class="field">
+        <div class="field address-numero">
           <label>Número</label>
           <input type="text" id="endNum" placeholder="Nº">
         </div>
-        <div class="field">
+        <div class="field address-complemento">
           <label>Complemento</label>
           <input type="text" id="complemento" placeholder="Apto, Bloco..." maxlength="35">
         </div>
-        <div class="field">
+        <div class="field address-bairro">
           <label>Bairro</label>
           <input type="text" id="bairro" placeholder="Bairro">
         </div>
-        <div class="field">
+        <div class="field address-cidade">
           <label>Cidade <span class="req">*</span></label>
           <input type="text" id="cidade" placeholder="Cidade">
         </div>
-        <div class="field">
+        <div class="field address-uf">
           <label>UF <span class="req">*</span></label>
           <input type="text" id="uf" placeholder="BA" maxlength="2">
         </div>
