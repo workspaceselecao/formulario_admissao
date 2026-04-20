@@ -123,6 +123,10 @@
   }
   .btn-download-empty:active { transform: translateY(0); }
   .btn-download-empty svg { width: 16px; height: 16px; }
+  .btn-carta-bradesco {
+    width: fit-content;
+    justify-content: center;
+  }
 
   /* ── LAYOUT ── */
   .container {
@@ -745,6 +749,11 @@
           <label>Conta / Dígito <span class="req">*</span></label>
           <input type="text" id="conta" placeholder="00000-0">
         </div>
+        <div class="field col-span-2" id="cartaBradescoField" style="display:none">
+          <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
+            Carta de Abertura de Conta
+          </button>
+        </div>
       </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressBancario"></div></div>
@@ -898,6 +907,7 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const TEMPLATE_PATH = "./Ficha_Cadastral_exemplo.pdf";
+const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
 let templateBytes = null;
 let textLines = null;
 const cepCache = new Map();
@@ -1089,6 +1099,8 @@ function toggleBanco(el){
   const b = el.value==='bradesco';
   document.getElementById('agenciaField').style.display = b?'block':'none';
   document.getElementById('contaField').style.display = b?'block':'none';
+  const cartaBradescoField = document.getElementById('cartaBradescoField');
+  if (cartaBradescoField) cartaBradescoField.style.display = b ? 'block' : 'none';
   const agenciaEl = document.getElementById('agencia');
   const contaEl = document.getElementById('conta');
   agenciaEl.required = b;
@@ -1397,10 +1409,12 @@ function limparDadosFormulario(){
   const defGroup = document.getElementById('defGroup');
   const agenciaField = document.getElementById('agenciaField');
   const contaField = document.getElementById('contaField');
+  const cartaBradescoField = document.getElementById('cartaBradescoField');
   if (pisField) pisField.style.display = 'none';
   if (defGroup) defGroup.style.display = 'none';
   if (agenciaField) agenciaField.style.display = 'none';
   if (contaField) contaField.style.display = 'none';
+  if (cartaBradescoField) cartaBradescoField.style.display = 'none';
 
   const agenciaEl = document.getElementById('agencia');
   const contaEl = document.getElementById('conta');
@@ -1887,6 +1901,30 @@ async function baixarFichaVazia(){
   } catch (error) {
     console.error(error);
     showToast("Não foi possível baixar a ficha vazia.", false);
+  }
+}
+async function baixarCartaAberturaConta(){
+  try {
+    const caminho = encodeURI(CARTA_ABERTURA_CONTA_PATH);
+    const resp = await fetch(caminho, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`Falha ao baixar carta de abertura (${resp.status})`);
+    const bytes = await resp.arrayBuffer();
+
+    const blob = new Blob([bytes], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Carta_Abertura_Conta_Bradesco.docx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Download da carta de abertura iniciado.");
+  } catch (error) {
+    console.error(error);
+    showToast("Não foi possível baixar a carta de abertura.", false);
   }
 }
 
