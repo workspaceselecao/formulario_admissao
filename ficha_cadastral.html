@@ -92,15 +92,17 @@
   .btn-export:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(1,66,106,0.36); }
   .btn-export:active { transform: translateY(0); }
   .btn-export svg { width: 16px; height: 16px; }
-  .header-actions {
+  .form-actions-bottom {
     display: flex;
     gap: 10px;
     align-items: center;
+    justify-content: flex-end;
+    margin-top: 8px;
   }
   .btn-download-empty {
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.35);
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
     padding: 12px 20px;
     border-radius: var(--radius);
     font-family: 'DM Sans', sans-serif;
@@ -113,8 +115,9 @@
     transition: background 0.18s, border-color 0.18s, transform 0.12s;
   }
   .btn-download-empty:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.6);
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+    border-color: var(--accent-dark);
     transform: translateY(-1px);
   }
   .btn-download-empty:active { transform: translateY(0); }
@@ -170,7 +173,7 @@
   .section-card:hover { box-shadow: var(--shadow-lg); }
 
   .section-header {
-    background: var(--text);
+    background: var(--accent);
     color: #fff;
     padding: 14px 28px;
     font-size: 11px;
@@ -184,7 +187,7 @@
   }
   .section-header .dot {
     width: 8px; height: 8px;
-    background: var(--accent);
+    background: #fff;
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -508,7 +511,9 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 640px) {
     .page-header { padding: 20px 20px; flex-direction: column; gap: 14px; align-items: flex-start; }
-    .header-actions { width: 100%; flex-wrap: wrap; }
+    .form-actions-bottom { width: 100%; flex-direction: column; }
+    .form-actions-bottom .btn-download-empty,
+    .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
     .container { padding: 24px 16px 60px; }
     .section-body { padding: 20px 16px 16px; }
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -528,20 +533,6 @@
       <span class="brand-text">Ficha Cadastral</span>
     </div>
     <div class="subtitle">F-075 (PR-011) 33 · Admissão Operacional e Administrativo</div>
-  </div>
-  <div class="header-actions">
-    <button class="btn-download-empty" type="button" onclick="baixarFichaVazia()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Baixar Ficha Cadastral vazia
-    </button>
-    <button class="btn-export" onclick="gerarPDF()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Exportar PDF
-    </button>
   </div>
 </header>
 
@@ -806,6 +797,21 @@
         <div class="section-progress-track"><div class="section-progress-fill" id="progressDeclaracao"></div></div>
       </div>
     </div>
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn-download-empty" type="button" onclick="baixarFichaVazia()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Baixar Ficha Cadastral vazia
+    </button>
+    <button class="btn-export" type="button" onclick="gerarPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Exportar PDF
+    </button>
   </div>
 
 </div>
