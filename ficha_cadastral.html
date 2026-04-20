@@ -12,9 +12,9 @@
     --card: #ffffff;
     --border: #d4cfc8;
     --border-strong: #9e9890;
-    --accent: #c8351a;
-    --accent-dark: #a02b14;
-    --accent-soft: #f5ede9;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
     --text: #1a1714;
     --text-mid: #4a453f;
     --text-light: #7a756e;
@@ -49,11 +49,22 @@
     box-shadow: 0 2px 16px rgba(0,0,0,0.18);
   }
   .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.5px;
   }
-  .page-header .brand span { color: var(--accent); }
+  .page-header .brand-logo {
+    height: 30px;
+    width: auto;
+    display: block;
+    background: #fff;
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .page-header .brand-text { color: #fff; }
   .page-header .subtitle {
     font-size: 12px;
     font-weight: 400;
@@ -76,9 +87,9 @@
     align-items: center;
     gap: 8px;
     transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
-    box-shadow: 0 2px 8px rgba(200,53,26,0.28);
+    box-shadow: 0 2px 8px rgba(1,66,106,0.28);
   }
-  .btn-export:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,53,26,0.36); }
+  .btn-export:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(1,66,106,0.36); }
   .btn-export:active { transform: translateY(0); }
   .btn-export svg { width: 16px; height: 16px; }
   .header-actions {
@@ -222,7 +233,7 @@
   .field select:focus {
     border-color: var(--accent);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(200,53,26,0.12);
+    box-shadow: 0 0 0 3px rgba(1,66,106,0.12);
   }
   .field input.invalid {
     border-color: #d1432f;
@@ -293,7 +304,7 @@
     border-color: var(--accent);
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 2px 10px rgba(200,53,26,0.28);
+    box-shadow: 0 2px 10px rgba(1,66,106,0.28);
   }
   .radio-label.active input {
     accent-color: #fff;
@@ -343,7 +354,7 @@
     width: 100%;
     transition: border-color 0.18s, box-shadow 0.18s;
   }
-  .dep-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,53,26,0.10); }
+  .dep-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(1,66,106,0.10); }
   .dep-table input::placeholder { color: var(--text-light); }
 
   /* ── VT TABLE ── */
@@ -383,7 +394,7 @@
     text-align: center;
     transition: border-color 0.18s, box-shadow 0.18s;
   }
-  .vt-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,53,26,0.10); }
+  .vt-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(1,66,106,0.10); }
   .vt-table input::placeholder { color: var(--text-light); }
 
   /* ── AVISO ── */
@@ -512,7 +523,10 @@
 
 <header class="page-header">
   <div>
-    <div class="brand">ATENTO <span>·</span> Ficha Cadastral</div>
+    <div class="brand">
+      <img src="./atento.svg" alt="Logo Atento" class="brand-logo">
+      <span class="brand-text">Ficha Cadastral</span>
+    </div>
     <div class="subtitle">F-075 (PR-011) 33 · Admissão Operacional e Administrativo</div>
   </div>
   <div class="header-actions">
