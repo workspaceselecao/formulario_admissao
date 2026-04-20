@@ -243,6 +243,11 @@
     background: #fff;
     box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
   }
+  .field select.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
+  }
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
 
@@ -995,7 +1000,14 @@ function moedaParaPdf(valor){
 
 // ── TOGGLE ──
 function togglePIS(el){
-  document.getElementById('pisField').style.display = el.value==='nao'?'block':'none';
+  const precisaPis = el.value === 'nao';
+  const pisField = document.getElementById('pisField');
+  const pisEl = document.getElementById('pis');
+  if (pisField) pisField.style.display = precisaPis ? 'block' : 'none';
+  if (pisEl) {
+    pisEl.required = precisaPis;
+    if (!precisaPis) pisEl.classList.remove('invalid');
+  }
 }
 function toggleDef(el){
   document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
@@ -1160,6 +1172,52 @@ function validarContaBradescoObrigatoria(){
   }
   return true;
 }
+function validarCamposObrigatorios(){
+  const obrigatoriosBase = [
+    { id: 'nomeCompleto', nome: 'Nome Completo' },
+    { id: 'celular', nome: 'Celular' },
+    { id: 'email', nome: 'E-mail' },
+    { id: 'estadoCivil', nome: 'Estado Civil' },
+    { id: 'endereco', nome: 'Endereço' },
+    { id: 'cidade', nome: 'Cidade' },
+    { id: 'uf', nome: 'UF' },
+    { id: 'cpf', nome: 'CPF' }
+  ];
+  const faltantes = [];
+  const validarCampo = ({ id, nome }) => {
+    const vazio = v(id).length === 0;
+    marcarCampoInvalido(id, vazio);
+    if (vazio) faltantes.push({ id, nome });
+  };
+
+  obrigatoriosBase.forEach(validarCampo);
+
+  const precisaPis = radio('primeiroEmprego') === 'nao';
+  const pisEl = document.getElementById('pis');
+  if (pisEl) pisEl.required = precisaPis;
+  if (precisaPis) {
+    validarCampo({ id: 'pis', nome: 'PIS' });
+  } else {
+    marcarCampoInvalido('pis', false);
+  }
+
+  const precisaBancoBradesco = radio('tipoConta') === 'bradesco';
+  if (precisaBancoBradesco) {
+    validarCampo({ id: 'agencia', nome: 'Agência' });
+    validarCampo({ id: 'conta', nome: 'Conta / Dígito' });
+  } else {
+    marcarCampoInvalido('agencia', false);
+    marcarCampoInvalido('conta', false);
+  }
+
+  if (faltantes.length > 0) {
+    const listaCampos = faltantes.map((campo) => campo.nome).join(', ');
+    showToast(`Preencha os campos obrigatórios: ${listaCampos}.`, false);
+    document.getElementById(faltantes[0].id)?.focus();
+    return false;
+  }
+  return true;
+}
 
 // ── TOAST ──
 function showToast(msg,ok=true){
@@ -1219,6 +1277,7 @@ function limparDadosFormulario(){
 
   const agenciaEl = document.getElementById('agencia');
   const contaEl = document.getElementById('conta');
+  const pisEl = document.getElementById('pis');
   if (agenciaEl) {
     agenciaEl.required = false;
     agenciaEl.classList.remove('invalid');
@@ -1227,6 +1286,13 @@ function limparDadosFormulario(){
     contaEl.required = false;
     contaEl.classList.remove('invalid');
   }
+  if (pisEl) {
+    pisEl.required = false;
+    pisEl.classList.remove('invalid');
+  }
+  document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
+    el.classList.remove('invalid');
+  });
   document.getElementById('dataAssinatura').valueAsDate = new Date();
   updateProgress();
 }
@@ -1466,8 +1532,8 @@ async function carregarTemplateInicial(){
 // ── GERAR PDF ──
 async function gerarPDF(){
   try {
+    if (!validarCamposObrigatorios()) return;
     if (!(await confirmarPoliticaLGPD())) return;
-    if (!validarContaBradescoObrigatoria()) return;
     if (!templateBytes || !textLines) await carregarTemplateInicial();
     if (!templateBytes || !textLines) return;
 
@@ -1724,10 +1790,15 @@ const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked
 if (bancoSelecionado) {
   toggleBanco(bancoSelecionado);
 }
-['agencia', 'conta'].forEach((id) => {
+const primeiroEmpregoSelecionado = document.querySelector('input[name="primeiroEmprego"]:checked');
+if (primeiroEmpregoSelecionado) {
+  togglePIS(primeiroEmpregoSelecionado);
+}
+['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'uf', 'cpf', 'pis', 'agencia', 'conta'].forEach((id) => {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', () => marcarCampoInvalido(id, false));
+  el.addEventListener('change', () => marcarCampoInvalido(id, false));
 });
 document.getElementById('lgpdCancelarBtn')?.addEventListener('click', () => fecharModalLGPD(false));
 document.getElementById('lgpdContinuarBtn')?.addEventListener('click', () => fecharModalLGPD(true));
