@@ -948,6 +948,8 @@ const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
+/** Só para texto preenchido: desce ~1 linha no PDF (y menor). Boxes/radios não usam isto. */
+const OFFSET_Y_TEXTO_UMA_LINHA_PT = 11;
 let templateBytes = null;
 let camposSchema = null;
 const cepCache = new Map();
@@ -1510,11 +1512,14 @@ function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
   const size = options.size ?? PDF_FONT_TEXTO;
   const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
   if (!str) return false;
-  const y = baselineYNoCampo(c, size);
+  const y =
+    baselineYNoCampo(c, size) -
+    OFFSET_Y_TEXTO_UMA_LINHA_PT +
+    (options.offsetY ?? 0);
   const x = Number(c.x) || 0;
   page.drawText(str, {
     x: x + (options.offsetX ?? 0.5),
-    y: y + (options.offsetY ?? 0),
+    y,
     size,
     font,
     maxWidth: w - 2
