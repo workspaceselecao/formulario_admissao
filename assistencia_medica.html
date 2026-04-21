@@ -273,6 +273,45 @@
     margin-bottom: 16px;
     background: var(--surface);
   }
+  .filhos-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .btn-add-filho,
+  .btn-remove-filho {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-mid);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-add-filho {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .btn-add-filho:hover:not(:disabled) {
+    background: #fff;
+    border-color: var(--accent-dark);
+    color: var(--accent-dark);
+  }
+  .btn-add-filho:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-remove-filho:hover {
+    border-color: var(--text-mid);
+    background: #fff;
+    color: var(--text);
+  }
   .form-actions-bottom {
     display: flex;
     gap: 10px;
@@ -533,6 +572,7 @@
     <div class="section-body">
       <div class="aviso-box" style="margin-bottom:18px">
         Marque <strong>Incluir</strong> apenas para quem deve constar no plano. Os campos marcados com (*) no PDF tornam-se obrigatórios quando a inclusão estiver marcada.
+        Use <strong>+ Adicionar filho</strong> para cadastrar até 4 filhos (um bloco por vez).
       </div>
 
       <div class="dep-block">
@@ -575,10 +615,10 @@
       </div>
 
       <div class="dep-block">
-        <div class="subsection-title">Filho(a) 1</div>
+        <div class="subsection-title">Filho(a)</div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil1IncluirLabel">
-            <input type="checkbox" id="fil1_incluir" onchange="toggleDepFilho(1)"> Incluir filho(a) 1 no plano
+            <input type="checkbox" id="fil1_incluir" onchange="toggleDepFilho(1)"> Incluir filho(a) no plano
           </label>
         </div>
         <div id="fil1Campos" style="display:none">
@@ -617,7 +657,12 @@
         </div>
       </div>
 
-      <div class="dep-block">
+      <div class="filhos-acoes">
+        <button type="button" class="btn-add-filho" id="btnAddFilho" onclick="adicionarFilhoExtra()">+ Adicionar filho</button>
+        <button type="button" class="btn-remove-filho" id="btnRemoveFilho" onclick="removerUltimoFilho()" style="display:none">Remover último filho</button>
+      </div>
+
+      <div id="filBloco2" class="dep-block" style="display:none">
         <div class="subsection-title">Filho(a) 2</div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil2IncluirLabel">
@@ -660,7 +705,7 @@
         </div>
       </div>
 
-      <div class="dep-block">
+      <div id="filBloco3" class="dep-block" style="display:none">
         <div class="subsection-title">Filho(a) 3</div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil3IncluirLabel">
@@ -703,7 +748,7 @@
         </div>
       </div>
 
-      <div class="dep-block">
+      <div id="filBloco4" class="dep-block" style="display:none">
         <div class="subsection-title">Filho(a) 4</div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil4IncluirLabel">
@@ -798,7 +843,56 @@ const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const NUM_FILHOS = 4;
+let filhosVisiveis = 1;
 const PDF_FONT_TEXTO = 9;
+function idsCamposFilho(n) {
+  return [
+    `fil${n}_nome`,
+    `fil${n}_cpf`,
+    `fil${n}_d`,
+    `fil${n}_m`,
+    `fil${n}_y`,
+    `fil${n}_sus`,
+    `fil${n}_nomemae`,
+    `fil${n}_nascvivo`
+  ];
+}
+function adicionarFilhoExtra() {
+  if (filhosVisiveis >= NUM_FILHOS) return;
+  filhosVisiveis += 1;
+  const bl = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (bl) bl.style.display = "";
+  atualizarBotoesFilhos();
+  agendarSalvarRascunho();
+}
+function removerUltimoFilho() {
+  if (filhosVisiveis <= 1) return;
+  limparCamposFilho(filhosVisiveis);
+  const bl = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (bl) bl.style.display = "none";
+  filhosVisiveis -= 1;
+  atualizarBotoesFilhos();
+  agendarSalvarRascunho();
+}
+function limparCamposFilho(n) {
+  const ch = document.getElementById(`fil${n}_incluir`);
+  if (ch) ch.checked = false;
+  toggleDepFilho(n);
+  idsCamposFilho(n).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+}
+function atualizarBotoesFilhos() {
+  const add = document.getElementById("btnAddFilho");
+  const rem = document.getElementById("btnRemoveFilho");
+  if (add) {
+    add.disabled = filhosVisiveis >= NUM_FILHOS;
+  }
+  if (rem) {
+    rem.style.display = filhosVisiveis > 1 ? "inline-flex" : "none";
+  }
+}
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
 let templateBytes = null;
 let camposSchema = null;
@@ -1024,7 +1118,7 @@ function validarCamposObrigatorios() {
     }
   }
 
-  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+  for (let fn = 1; fn <= filhosVisiveis; fn++) {
     if (!document.getElementById(`fil${fn}_incluir`)?.checked) continue;
     const rot = `filho(a) ${fn}`;
     add(`fil${fn}_nome`, `Nome (${rot})`);
@@ -1139,13 +1233,19 @@ function limparDadosFormulario() {
     if (ch) ch.checked = false;
     toggleDepFilho(fn);
   }
+  filhosVisiveis = 1;
+  for (let n = 2; n <= NUM_FILHOS; n++) {
+    const bl = document.getElementById(`filBloco${n}`);
+    if (bl) bl.style.display = "none";
+  }
+  atualizarBotoesFilhos();
   toggleDepConjuge();
   document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
 }
 
-const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v2";
+const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v3";
 const RASCUNHO_IDS = [
   "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
@@ -1174,11 +1274,12 @@ function coletarEstadoRascunho() {
     if (el) campos[id] = el.value;
   });
   return {
-    v: 2,
+    v: 3,
     t: Date.now(),
     campos,
     tipoAdesao: radio("tipoAdesao"),
     conj_incluir: !!document.getElementById("conj_incluir")?.checked,
+    filhosVisiveis,
     fil1_incluir: !!document.getElementById("fil1_incluir")?.checked,
     fil2_incluir: !!document.getElementById("fil2_incluir")?.checked,
     fil3_incluir: !!document.getElementById("fil3_incluir")?.checked,
@@ -1201,6 +1302,16 @@ function aplicarEstadoRascunho(obj) {
   syncRadioActive("tipoAdesao");
   const ci = document.getElementById("conj_incluir");
   if (ci) ci.checked = !!obj.conj_incluir;
+  let vis = 1;
+  if (typeof obj.filhosVisiveis === "number" && obj.filhosVisiveis >= 1 && obj.filhosVisiveis <= NUM_FILHOS) {
+    vis = obj.filhosVisiveis;
+  }
+  filhosVisiveis = vis;
+  for (let n = 2; n <= NUM_FILHOS; n++) {
+    const bl = document.getElementById(`filBloco${n}`);
+    if (bl) bl.style.display = n <= filhosVisiveis ? "" : "none";
+  }
+  atualizarBotoesFilhos();
   for (let fn = 1; fn <= NUM_FILHOS; fn++) {
     const fi = document.getElementById(`fil${fn}_incluir`);
     const key = `fil${fn}_incluir`;
@@ -1234,7 +1345,7 @@ function tentarRestaurarRascunho() {
     const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
-    if (!obj || (obj.v !== 1 && obj.v !== 2) || !obj.campos) return false;
+    if (!obj || (obj.v !== 1 && obj.v !== 2 && obj.v !== 3) || !obj.campos) return false;
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
@@ -1310,6 +1421,7 @@ async function gerarPDF() {
     const filhosSchema = C.dependentes.filhos || [];
     filhosSchema.forEach((filSchema, idx) => {
       const n = idx + 1;
+      if (n > filhosVisiveis) return;
       const fil = filSchema.campos;
       const incluirFil = document.getElementById(`fil${n}_incluir`)?.checked;
       marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
@@ -1414,6 +1526,7 @@ if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
 }
+atualizarBotoesFilhos();
 carregarTemplateInicial();
 window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
 </script>
