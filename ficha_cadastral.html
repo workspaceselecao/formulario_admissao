@@ -1149,6 +1149,20 @@ function moedaParaPdf(valor){
     maximumFractionDigits: 2
   }).format(numero);
 }
+function quantidadeVtEhZero(qtd) {
+  const s = String(qtd ?? "").trim();
+  if (s === "") return true;
+  const n = Number.parseInt(s, 10);
+  return !Number.isFinite(n) || n === 0;
+}
+function valorMoedaPdfEhZero(valorFormatado) {
+  const digitos = String(valorFormatado ?? "").replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  return Number.isNaN(cents) || cents === 0;
+}
+function valeTransporteLinhaTodaZero(qtd, valorFormatado) {
+  return quantidadeVtEhZero(qtd) && valorMoedaPdfEhZero(valorFormatado);
+}
 
 // ── TOGGLE ──
 function togglePIS(el){
@@ -1896,19 +1910,19 @@ async function gerarPDF(){
     });
 
     const vt = C.vale_transporte.itens;
-    if (vt?.onibus) {
+    if (vt?.onibus && !valeTransporteLinhaTodaZero(data.onibusQtd, data.onibusValor)) {
       escreverTextoCampoCoord(page, font, vt.onibus.quantidade.coordenadas, data.onibusQtd);
       escreverTextoCampoCoord(page, font, vt.onibus.valor_unitario.coordenadas, data.onibusValor);
     }
-    if (vt?.metro_trem) {
+    if (vt?.metro_trem && !valeTransporteLinhaTodaZero(data.metroQtd, data.metroValor)) {
       escreverTextoCampoCoord(page, font, vt.metro_trem.quantidade.coordenadas, data.metroQtd);
       escreverTextoCampoCoord(page, font, vt.metro_trem.valor_unitario.coordenadas, data.metroValor);
     }
-    if (vt?.intermunicipal) {
+    if (vt?.intermunicipal && !valeTransporteLinhaTodaZero(data.interQtd, data.interValor)) {
       escreverTextoCampoCoord(page, font, vt.intermunicipal.quantidade.coordenadas, data.interQtd);
       escreverTextoCampoCoord(page, font, vt.intermunicipal.valor_unitario.coordenadas, data.interValor);
     }
-    if (vt?.integracao) {
+    if (vt?.integracao && !valeTransporteLinhaTodaZero(data.integracaoQtd, data.integracaoValor)) {
       escreverTextoCampoCoord(page, font, vt.integracao.quantidade.coordenadas, data.integracaoQtd);
       escreverTextoCampoCoord(page, font, vt.integracao.valor_unitario.coordenadas, data.integracaoValor);
     }
