@@ -166,9 +166,9 @@
     width: 100%;
     align-items: end;
   }
-  .dados-sus-rg-cpf,
-  .dados-datas,
-  .dados-cargo-site-tel {
+  .dados-func-grid .dados-sus-rg-cpf,
+  .dados-func-grid .dados-datas,
+  .dados-func-grid .dados-cargo-site-tel {
     grid-column: span 2;
   }
   .dados-sus-rg-cpf .field--rg input {
@@ -191,6 +191,29 @@
     grid-template-columns: 1fr 1fr 1fr;
     gap: 18px;
     width: 100%;
+  }
+  @media (max-width: 768px) {
+    .dados-func-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .dados-func-grid .col-span-2 {
+      grid-column: 1 / -1;
+    }
+    .dados-func-grid .dados-sus-rg-cpf,
+    .dados-func-grid .dados-datas,
+    .dados-func-grid .dados-cargo-site-tel {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .dados-func-grid .field {
+      min-width: 0;
+    }
+    .dados-func-grid .field input {
+      min-width: 0;
+      width: 100%;
+    }
   }
   @media (max-width: 640px) {
     .endereco-cep-rua-num { grid-template-columns: 1fr; }
@@ -494,7 +517,7 @@
   .btn-modal.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
   @media (max-width: 640px) {
     .page-header { padding: 20px; flex-direction: column; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .grid-2:not(.dados-func-grid), .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: span 1; }
     .form-actions-bottom { flex-direction: column; width: 100%; }
     .btn-export, .btn-download-empty { width: 100%; justify-content: center; }
@@ -538,7 +561,7 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
     <div class="section-body">
-      <div class="grid grid-2">
+      <div class="grid grid-2 dados-func-grid">
         <div class="field col-span-2">
           <label>Nome do Funcionário <span class="req">*</span></label>
           <input type="text" id="funcionario" placeholder="Nome completo">
