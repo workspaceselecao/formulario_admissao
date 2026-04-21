@@ -234,14 +234,14 @@
               "label": "Nome do Dependente 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 17, "y": 423, "largura": 282, "altura": 15 },
+              "coordenadas": { "x": 14, "y": 422, "largura": 285, "altura": 17 },
               "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
-              "coordenadas": { "x": 308, "y": 422, "largura": 112, "altura": 15 },
+              "coordenadas": { "x": 306, "y": 422, "largura": 115, "altura": 17 },
               "obrigatorio": false,
               "mascara": "99/99/9999"
             },
@@ -249,7 +249,7 @@
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 431, "y": 422, "largura": 142, "altura": 16 },
+              "coordenadas": { "x": 428, "y": 422, "largura": 136, "altura": 17 },
               "obrigatorio": false,
               "mascara": "999.999.999-99"
             }
@@ -262,14 +262,14 @@
               "label": "Nome do Dependente 2",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 17, "y": 396, "largura": 280, "altura": 15 },
+              "coordenadas": { "x": 15, "y": 394, "largura": 285, "altura": 17 },
               "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
-              "coordenadas": { "x": 307, "y": 395, "largura": 113, "altura": 16 },
+              "coordenadas": { "x": 307, "y": 394, "largura": 115, "altura": 16 },
               "obrigatorio": false,
               "mascara": "99/99/9999"
             },
@@ -277,7 +277,7 @@
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 431, "y": 395, "largura": 141, "altura": 16 },
+              "coordenadas": { "x": 429, "y": 394, "largura": 135, "altura": 16 },
               "obrigatorio": false,
               "mascara": "999.999.999-99"
             }
@@ -290,14 +290,14 @@
               "label": "Nome do Dependente 3",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 18, "y": 345, "largura": 280, "altura": 16 },
+              "coordenadas": { "x": 15, "y": 369, "largura": 287, "altura": 17 },
               "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
-              "coordenadas": { "x": 309, "y": 344, "largura": 114, "altura": 14 },
+              "coordenadas": { "x": 307, "y": 368, "largura": 113, "altura": 16 },
               "obrigatorio": false,
               "mascara": "99/99/9999"
             },
@@ -305,7 +305,7 @@
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 428, "y": 345, "largura": 149, "altura": 14 },
+              "coordenadas": { "x": 429, "y": 368, "largura": 147, "altura": 15 },
               "obrigatorio": false,
               "mascara": "999.999.999-99"
             }
@@ -318,14 +318,14 @@
               "label": "Nome do Dependente 4",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 18, "y": 322, "largura": 283, "altura": 14 },
+              "coordenadas": { "x": 17, "y": 345, "largura": 283, "altura": 14 },
               "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
-              "coordenadas": { "x": 307, "y": 322, "largura": 116, "altura": 14 },
+              "coordenadas": { "x": 307, "y": 345, "largura": 115, "altura": 14 },
               "obrigatorio": false,
               "mascara": "99/99/9999"
             },
@@ -333,7 +333,35 @@
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 429, "y": 322, "largura": 142, "altura": 14 },
+              "coordenadas": { "x": 429, "y": 345, "largura": 143, "altura": 14 },
+              "obrigatorio": false,
+              "mascara": "999.999.999-99"
+            }
+          }
+        },
+        {
+          "id": "dependente_5",
+          "campos": {
+            "nome": {
+              "label": "Nome do Dependente 5",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 17, "y": 322, "largura": 282, "altura": 14 },
+              "obrigatorio": false
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento",
+              "tipo": "data",
+              "pagina": 1,
+              "coordenadas": { "x": 307, "y": 323, "largura": 116, "altura": 12 },
+              "obrigatorio": false,
+              "mascara": "99/99/9999"
+            },
+            "cpf": {
+              "label": "CPF do Dependente",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 428, "y": 323, "largura": 147, "altura": 13 },
               "obrigatorio": false,
               "mascara": "999.999.999-99"
             }
