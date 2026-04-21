@@ -1,0 +1,346 @@
+{
+  "documento": {
+    "titulo": "Ficha Cadastral de Admissão – Operacional e Administrativo",
+    "codigo": "F-075 (PR-011) / 37",
+    "pagina_tamanho": { "largura": 595.32, "altura": 841.92, "unidade": "pontos_pdf" },
+    "nota_geral": "PDF sem campos de formulário nativos. Inserção de texto deve ser feita via sobreposição (overlay) com reportlab ou pdf-lib, usando as coordenadas x/y abaixo. O eixo Y no PDF começa de BAIXO para CIMA; as coordenadas 'top' abaixo são medidas de CIMA para BAIXO (pdfplumber) — converter para reportlab: y_reportlab = altura_pagina - top - altura_linha."
+  },
+
+  "instrucoes_conversao_coordenadas": {
+    "sistema_pdfplumber": "top = distância do topo da página (cresce para baixo)",
+    "sistema_reportlab": "y = distância da base da página (cresce para cima)",
+    "formula": "y_reportlab = 841.92 - top_pdfplumber - altura_da_fonte",
+    "altura_fonte_recomendada": 9,
+    "fonte_recomendada": "Helvetica",
+    "cor_texto": "#000000"
+  },
+
+  "secoes": {
+
+    "DADOS_PESSOAIS": {
+      "campos": {
+        "nome_completo": {
+          "label": "Nome Completo",
+          "descricao": "Nome exatamente como consta na Certidão de Nascimento ou Casamento",
+          "tipo": "texto",
+          "area_insercao": { "x": 19.6, "top": 142, "largura": 556, "altura": 12 },
+          "y_reportlab": 688
+        },
+        "nome_social": {
+          "label": "Nome Social",
+          "descricao": "Nome para inclusão no crachá",
+          "tipo": "texto",
+          "area_insercao": { "x": 19.6, "top": 166, "largura": 556, "altura": 12 },
+          "y_reportlab": 664
+        },
+        "telefone": {
+          "label": "Telefone",
+          "descricao": "Telefone fixo",
+          "tipo": "texto",
+          "area_insercao": { "x": 60, "top": 187, "largura": 180, "altura": 10 },
+          "y_reportlab": 645
+        },
+        "celular": {
+          "label": "Celular",
+          "descricao": "Número de celular",
+          "tipo": "texto",
+          "area_insercao": { "x": 300, "top": 187, "largura": 270, "altura": 10 },
+          "y_reportlab": 645
+        },
+        "email": {
+          "label": "E-mail",
+          "descricao": "Endereço de e-mail",
+          "tipo": "texto",
+          "area_insercao": { "x": 55, "top": 206, "largura": 515, "altura": 10 },
+          "y_reportlab": 626
+        },
+        "estado_civil": {
+          "label": "Estado Civil",
+          "descricao": "Estado civil do candidato",
+          "tipo": "texto",
+          "area_insercao": { "x": 65, "top": 226, "largura": 470, "altura": 10 },
+          "y_reportlab": 606
+        },
+        "primeiro_emprego": {
+          "label": "Primeiro Emprego",
+          "descricao": "Marcar SIM ou NÃO",
+          "tipo": "checkbox",
+          "opcoes": {
+            "SIM":  { "x": 85.6, "top": 235, "y_reportlab": 597 },
+            "NAO":  { "x": 85.6, "top": 243, "y_reportlab": 589 }
+          },
+          "simbolo_marcacao": "X",
+          "offset_x_sobre_checkbox": 1,
+          "offset_y_sobre_checkbox": -1
+        },
+        "pis": {
+          "label": "PIS",
+          "descricao": "Informar somente se NÃO for primeiro emprego",
+          "tipo": "texto",
+          "condicional": "primeiro_emprego == 'NAO'",
+          "area_insercao": { "x": 162, "top": 243, "largura": 200, "altura": 10 },
+          "y_reportlab": 589
+        },
+        "endereco_logradouro": {
+          "label": "Endereço",
+          "descricao": "Nome da rua / avenida",
+          "tipo": "texto",
+          "area_insercao": { "x": 65, "top": 265, "largura": 210, "altura": 10 },
+          "y_reportlab": 567
+        },
+        "endereco_numero": {
+          "label": "Número",
+          "descricao": "Número do imóvel",
+          "tipo": "texto",
+          "area_insercao": { "x": 298, "top": 265, "largura": 38, "altura": 10 },
+          "y_reportlab": 567
+        },
+        "endereco_complemento": {
+          "label": "Complemento",
+          "descricao": "Apto, sala, bloco etc.",
+          "tipo": "texto",
+          "area_insercao": { "x": 394, "top": 265, "largura": 180, "altura": 10 },
+          "y_reportlab": 567
+        },
+        "cep": {
+          "label": "CEP",
+          "descricao": "CEP do endereço",
+          "tipo": "texto",
+          "mascara": "XXXXX-XXX",
+          "area_insercao": { "x": 40, "top": 284, "largura": 88, "altura": 10 },
+          "y_reportlab": 548
+        },
+        "bairro": {
+          "label": "Bairro",
+          "descricao": "Bairro do endereço",
+          "tipo": "texto",
+          "area_insercao": { "x": 160, "top": 284, "largura": 170, "altura": 10 },
+          "y_reportlab": 548
+        },
+        "cidade": {
+          "label": "Cidade",
+          "descricao": "Cidade de residência",
+          "tipo": "texto",
+          "area_insercao": { "x": 370, "top": 284, "largura": 200, "altura": 10 },
+          "y_reportlab": 548
+        },
+        "possui_deficiencia": {
+          "label": "Possui Deficiência",
+          "descricao": "Marcar SIM ou NÃO",
+          "tipo": "checkbox",
+          "opcoes": {
+            "SIM": { "x": 87.5, "top": 295, "y_reportlab": 537 },
+            "NAO": { "x": 110.1, "top": 295, "y_reportlab": 537 }
+          },
+          "simbolo_marcacao": "X"
+        },
+        "tipo_deficiencia": {
+          "label": "Tipo de Deficiência",
+          "descricao": "Marcar um ou mais tipos. Preencher somente se possui_deficiencia == SIM",
+          "tipo": "checkbox_multiplo",
+          "condicional": "possui_deficiencia == 'SIM'",
+          "opcoes": {
+            "FISICA":      { "x": 262.1, "top": 303, "y_reportlab": 530 },
+            "AUDITIVA":    { "x": 314.1, "top": 303, "y_reportlab": 530 },
+            "VISUAL":      { "x": 380.0, "top": 303, "y_reportlab": 530 },
+            "INTELECTUAL": { "x": 422.7, "top": 303, "y_reportlab": 530 },
+            "MULTIPLA":    { "x": 484.2, "top": 303, "y_reportlab": 530 }
+          },
+          "simbolo_marcacao": "X"
+        }
+      }
+    },
+
+    "DADOS_CONTA_BANCARIA": {
+      "campos": {
+        "tipo_conta": {
+          "label": "Tipo de Conta Bancária",
+          "descricao": "Marcar uma das opções",
+          "tipo": "checkbox_exclusivo",
+          "opcoes": {
+            "BRADESCO":    { "x": 94.2, "top": 323, "y_reportlab": 510 },
+            "MENTORE_BANK":{ "x": 94.2, "top": 350, "y_reportlab": 483 }
+          },
+          "simbolo_marcacao": "X"
+        },
+        "agencia": {
+          "label": "Agência",
+          "descricao": "Número da agência bancária",
+          "tipo": "texto",
+          "condicional": "tipo_conta == 'BRADESCO'",
+          "area_insercao": { "x": 335, "top": 322, "largura": 75, "altura": 10 },
+          "y_reportlab": 511
+        },
+        "conta_digito": {
+          "label": "Conta/Dígito",
+          "descricao": "Número da conta com dígito verificador",
+          "tipo": "texto",
+          "condicional": "tipo_conta == 'BRADESCO'",
+          "area_insercao": { "x": 470, "top": 322, "largura": 100, "altura": 10 },
+          "y_reportlab": 511
+        },
+        "cpf_conta": {
+          "label": "Número do CPF",
+          "descricao": "CPF para conta Mêntore Bank",
+          "tipo": "texto",
+          "mascara": "XXX.XXX.XXX-XX",
+          "condicional": "tipo_conta == 'MENTORE_BANK'",
+          "area_insercao": { "x": 355, "top": 343, "largura": 215, "altura": 10 },
+          "y_reportlab": 490
+        }
+      }
+    },
+
+    "DEPENDENTES": {
+      "descricao": "Até 5 dependentes. Cada linha possui os mesmos 3 campos.",
+      "linhas": [
+        {
+          "indice": 1,
+          "campos": {
+            "nome":              { "area_insercao": { "x": 42, "top": 401, "largura": 260, "altura": 10 }, "y_reportlab": 431 },
+            "data_nascimento":   { "area_insercao": { "x": 378, "top": 401, "largura": 45, "altura": 10 }, "y_reportlab": 431, "mascara": "DD/MM/AAAA" },
+            "cpf_dependente":    { "area_insercao": { "x": 505, "top": 401, "largura": 70, "altura": 10 }, "y_reportlab": 431, "mascara": "XXX.XXX.XXX-XX" }
+          }
+        },
+        {
+          "indice": 2,
+          "campos": {
+            "nome":              { "area_insercao": { "x": 42, "top": 431, "largura": 260, "altura": 10 }, "y_reportlab": 401 },
+            "data_nascimento":   { "area_insercao": { "x": 378, "top": 431, "largura": 45, "altura": 10 }, "y_reportlab": 401, "mascara": "DD/MM/AAAA" },
+            "cpf_dependente":    { "area_insercao": { "x": 505, "top": 431, "largura": 70, "altura": 10 }, "y_reportlab": 401, "mascara": "XXX.XXX.XXX-XX" }
+          }
+        },
+        {
+          "indice": 3,
+          "campos": {
+            "nome":              { "area_insercao": { "x": 42, "top": 459, "largura": 260, "altura": 10 }, "y_reportlab": 373 },
+            "data_nascimento":   { "area_insercao": { "x": 378, "top": 459, "largura": 45, "altura": 10 }, "y_reportlab": 373, "mascara": "DD/MM/AAAA" },
+            "cpf_dependente":    { "area_insercao": { "x": 505, "top": 459, "largura": 70, "altura": 10 }, "y_reportlab": 373, "mascara": "XXX.XXX.XXX-XX" }
+          }
+        },
+        {
+          "indice": 4,
+          "campos": {
+            "nome":              { "area_insercao": { "x": 42, "top": 485, "largura": 260, "altura": 10 }, "y_reportlab": 347 },
+            "data_nascimento":   { "area_insercao": { "x": 378, "top": 485, "largura": 45, "altura": 10 }, "y_reportlab": 347, "mascara": "DD/MM/AAAA" },
+            "cpf_dependente":    { "area_insercao": { "x": 505, "top": 485, "largura": 70, "altura": 10 }, "y_reportlab": 347, "mascara": "XXX.XXX.XXX-XX" }
+          }
+        },
+        {
+          "indice": 5,
+          "campos": {
+            "nome":              { "area_insercao": { "x": 42, "top": 509, "largura": 260, "altura": 10 }, "y_reportlab": 323 },
+            "data_nascimento":   { "area_insercao": { "x": 378, "top": 509, "largura": 45, "altura": 10 }, "y_reportlab": 323, "mascara": "DD/MM/AAAA" },
+            "cpf_dependente":    { "area_insercao": { "x": 505, "top": 509, "largura": 70, "altura": 10 }, "y_reportlab": 323, "mascara": "XXX.XXX.XXX-XX" }
+          }
+        }
+      ]
+    },
+
+    "VALE_TRANSPORTE": {
+      "descricao": "Tabela com 4 linhas de modalidade de transporte. Cada linha tem quantidade e valor unitário.",
+      "linhas": [
+        {
+          "modalidade": "ONIBUS",
+          "campos": {
+            "quantidade":    { "area_insercao": { "x": 230, "top": 576, "largura": 130, "altura": 10 }, "y_reportlab": 256 },
+            "valor_unitario":{ "area_insercao": { "x": 430, "top": 576, "largura": 130, "altura": 10 }, "y_reportlab": 256 }
+          }
+        },
+        {
+          "modalidade": "METRO_TREM",
+          "campos": {
+            "quantidade":    { "area_insercao": { "x": 230, "top": 597, "largura": 130, "altura": 10 }, "y_reportlab": 235 },
+            "valor_unitario":{ "area_insercao": { "x": 430, "top": 597, "largura": 130, "altura": 10 }, "y_reportlab": 235 }
+          }
+        },
+        {
+          "modalidade": "INTERMUNICIPAL",
+          "campos": {
+            "quantidade":    { "area_insercao": { "x": 230, "top": 619, "largura": 130, "altura": 10 }, "y_reportlab": 213 },
+            "valor_unitario":{ "area_insercao": { "x": 430, "top": 619, "largura": 130, "altura": 10 }, "y_reportlab": 213 }
+          }
+        },
+        {
+          "modalidade": "INTEGRACAO",
+          "campos": {
+            "quantidade":    { "area_insercao": { "x": 230, "top": 640, "largura": 130, "altura": 10 }, "y_reportlab": 192 },
+            "valor_unitario":{ "area_insercao": { "x": 430, "top": 640, "largura": 130, "altura": 10 }, "y_reportlab": 192 }
+          }
+        }
+      ]
+    },
+
+    "VALE_REFEICAO_ALIMENTACAO": {
+      "descricao": "Escolher UMA das três opções de benefício de alimentação",
+      "campo": {
+        "label": "Modalidade Vale Refeição/Alimentação",
+        "tipo": "checkbox_exclusivo",
+        "opcoes": {
+          "100_VALE_ALIMENTACAO": { "x": 57.6,  "top": 683, "y_reportlab": 150 },
+          "100_VALE_REFEICAO":    { "x": 247.7, "top": 683, "y_reportlab": 150 },
+          "FLEXIBILIZADO_50_50":  { "x": 411.2, "top": 683, "y_reportlab": 150 }
+        },
+        "simbolo_marcacao": "X"
+      }
+    },
+
+    "ASSINATURA": {
+      "campos": {
+        "nome_completo_candidato": {
+          "label": "Nome Completo do Candidato (rodapé)",
+          "descricao": "Nome completo impresso abaixo da linha de assinatura",
+          "tipo": "texto",
+          "area_insercao": { "x": 56.6, "top": 812, "largura": 238, "altura": 10 },
+          "y_reportlab": 20
+        },
+        "data_assinatura": {
+          "label": "Data",
+          "descricao": "Data no formato DD/MM/AAAA",
+          "tipo": "texto",
+          "mascara": "DD / MM / AAAA",
+          "area_insercao": { "x": 430, "top": 803, "largura": 116, "altura": 10 },
+          "y_reportlab": 29
+        }
+      }
+    }
+  },
+
+  "exemplo_codigo_python_reportlab": {
+    "descricao": "Exemplo de como sobrepor texto no PDF usando reportlab + pypdf",
+    "codigo": [
+      "from reportlab.pdfgen import canvas",
+      "from reportlab.lib.pagesizes import A4",
+      "from pypdf import PdfReader, PdfWriter",
+      "import io",
+      "",
+      "ALTURA = 841.92",
+      "",
+      "def top_to_y(top, font_size=9):",
+      "    return ALTURA - top - font_size",
+      "",
+      "packet = io.BytesIO()",
+      "c = canvas.Canvas(packet, pagesize=(595.32, ALTURA))",
+      "c.setFont('Helvetica', 9)",
+      "",
+      "# Exemplo: preencher nome completo",
+      "c.drawString(19.6, top_to_y(142), 'JOÃO DA SILVA SOUZA')",
+      "",
+      "# Exemplo: marcar checkbox 'primeiro_emprego SIM'",
+      "c.drawString(87.6, top_to_y(234), 'X')",
+      "",
+      "c.save()",
+      "packet.seek(0)",
+      "",
+      "overlay = PdfReader(packet)",
+      "original = PdfReader('ficha_cadastral.pdf')",
+      "writer = PdfWriter()",
+      "page = original.pages[0]",
+      "page.merge_page(overlay.pages[0])",
+      "writer.add_page(page)",
+      "",
+      "with open('ficha_preenchida.pdf', 'wb') as f:",
+      "    writer.write(f)"
+    ]
+  }
+}

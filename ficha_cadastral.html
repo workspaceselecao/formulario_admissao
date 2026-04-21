@@ -962,9 +962,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 const TEMPLATE_PATH = "./F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf";
 const TEMPLATE_DOCX_PATH = "./Ficha_Cadastral_Admissao_MODELO.docx";
 const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
+const FIELD_MAPPING_PATH = "./field_mapping_ficha_cadastral.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
+const FIELD_MAPPING_FETCH_PATH = encodeURI(FIELD_MAPPING_PATH);
+const PDF_PAGE_HEIGHT = 841.92;
+const PDF_FONT_SIZE = 9;
 let templateBytes = null;
 let textLines = null;
+let fieldMapping = null;
 const cepCache = new Map();
 let cepBuscaEmAndamento = false;
 let ultimoCepBuscado = "";
@@ -1734,13 +1739,105 @@ function marcarCheckboxPorFrase(page, font, linhas, frases, ativo, options = {})
   });
   return true;
 }
+function normalizarChaveMapeamento(valor){
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+function topParaY(top, fontSize = PDF_FONT_SIZE){
+  return PDF_PAGE_HEIGHT - Number(top || 0) - fontSize;
+}
+function resolverYCampo(campo, fontSize = PDF_FONT_SIZE){
+  if (campo && Number.isFinite(campo.y_reportlab)) return campo.y_reportlab;
+  if (campo?.area_insercao && Number.isFinite(campo.area_insercao.top)) {
+    return topParaY(campo.area_insercao.top, fontSize);
+  }
+  return null;
+}
+function escreverTextoPorCoordenada(page, font, campo, valor, options = {}){
+  const texto = String(valor || "").trim();
+  if (!texto || !campo) return false;
+
+  const size = options.size ?? PDF_FONT_SIZE;
+  const area = campo.area_insercao || {};
+  const xBase = Number.isFinite(area.x) ? area.x : (options.x ?? 0);
+  const yBase = resolverYCampo(campo, size);
+  if (!Number.isFinite(yBase)) return false;
+
+  page.drawText(texto, {
+    x: xBase + (options.offsetX ?? 0),
+    y: yBase + (options.offsetY ?? 0),
+    size,
+    font,
+    maxWidth: options.maxWidth ?? area.largura ?? 220
+  });
+  return true;
+}
+function marcarOpcaoPorCoordenada(page, font, campo, opcao, options = {}){
+  if (!campo?.opcoes || !opcao) return false;
+  const chaveDesejada = normalizarChaveMapeamento(opcao);
+  const entrada = Object.entries(campo.opcoes).find(
+    ([chave]) => normalizarChaveMapeamento(chave) === chaveDesejada
+  );
+  if (!entrada) return false;
+
+  const [, coordenada] = entrada;
+  const size = options.size ?? 10;
+  const x = Number.isFinite(coordenada?.x) ? coordenada.x : 0;
+  const y = Number.isFinite(coordenada?.y_reportlab)
+    ? coordenada.y_reportlab
+    : topParaY(coordenada?.top, size);
+  if (!Number.isFinite(y)) return false;
+
+  page.drawText(options.simbolo ?? campo.simbolo_marcacao ?? "X", {
+    x: x + (campo.offset_x_sobre_checkbox ?? 0) + (options.offsetX ?? 0),
+    y: y + (campo.offset_y_sobre_checkbox ?? 0) + (options.offsetY ?? 0),
+    size,
+    font
+  });
+  return true;
+}
+function marcarMultiplasOpcoesPorCoordenada(page, font, campo, opcoes = []){
+  if (!Array.isArray(opcoes) || opcoes.length === 0) return;
+  opcoes.forEach((opcao) => marcarOpcaoPorCoordenada(page, font, campo, opcao));
+}
+function campoMapeado(secao, campo){
+  return fieldMapping?.secoes?.[secao]?.campos?.[campo] || null;
+}
+function opcaoValeMapeada(valor){
+  if (valor === "100_VA") return "100_VALE_ALIMENTACAO";
+  if (valor === "100_VR") return "100_VALE_REFEICAO";
+  if (valor === "FLEX") return "FLEXIBILIZADO_50_50";
+  return "";
+}
+async function carregarFieldMapping(){
+  if (fieldMapping) return true;
+  try {
+    const res = await fetch(FIELD_MAPPING_FETCH_PATH, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Falha ao carregar mapeamento (${res.status})`);
+    fieldMapping = await res.json();
+    return true;
+  } catch (error) {
+    console.error("Falha ao carregar mapeamento de coordenadas:", error);
+    showToast(`Mapeamento não carregado. Verifique ${FIELD_MAPPING_PATH}`, false);
+    return false;
+  }
+}
 async function carregarTemplateInicial(){
   try {
     const res = await fetch(TEMPLATE_FETCH_PATH);
     if (!res.ok) throw new Error("Template não encontrado");
     const fetchedBytes = await res.arrayBuffer();
     templateBytes = clonarArrayBuffer(fetchedBytes);
-    textLines = await construirLinhasTexto(clonarArrayBuffer(fetchedBytes));
+    try {
+      textLines = await construirLinhasTexto(clonarArrayBuffer(fetchedBytes));
+    } catch (erroLinhas) {
+      console.warn("Leitura de âncoras do template indisponível:", erroLinhas);
+      textLines = null;
+    }
   } catch (_error) {
     showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
   }
@@ -1751,9 +1848,13 @@ async function gerarPDF(){
   try {
     if (!validarCamposObrigatorios()) return;
     if (!(await confirmarPoliticaLGPD())) return;
-    if (!templateBytes || !textLines) await carregarTemplateInicial();
-    if (!templateBytes || !textLines) return;
+    if (!(await carregarFieldMapping())) return;
+    if (!templateBytes) await carregarTemplateInicial();
+    if (!templateBytes) return;
 
+    const primeiroEmpregoSelecionado = radio("primeiroEmprego");
+    const possuiDeficienciaSelecionada = radio("deficiencia");
+    const valeSelecionado = radio("valeRef");
     const data = {
       nomeCompleto: v("nomeCompleto"),
       nomeSocial: v("nomeSocial"),
@@ -1761,7 +1862,7 @@ async function gerarPDF(){
       celular: formatarTelefoneBR(v("celular")),
       email: v("email"),
       estadoCivil: v("estadoCivil"),
-      primeiroEmprego: radio("primeiroEmprego") === "sim" ? "SIM" : "NÃO",
+      primeiroEmprego: primeiroEmpregoSelecionado === "sim" ? "SIM" : primeiroEmpregoSelecionado === "nao" ? "NÃO" : "",
       pis: v("pis"),
       endereco: v("endereco"),
       numero: v("endNum"),
@@ -1769,7 +1870,7 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
-      possuiDeficiencia: radio("deficiencia") === "sim" ? "SIM" : "NÃO",
+      possuiDeficiencia: possuiDeficienciaSelecionada === "sim" ? "SIM" : possuiDeficienciaSelecionada === "nao" ? "NÃO" : "",
       tiposDeficiencia: checks("tipoDeficiencia").map((item) => item.toUpperCase()),
       contaMentore: radio("tipoConta") === "mentore",
       contaSalarioBradesco: radio("tipoConta") === "bradesco",
@@ -1789,7 +1890,7 @@ async function gerarPDF(){
       interValor: moedaParaPdf(v("vtInterVal")),
       integracaoQtd: v("vtIntegracaoQtd"),
       integracaoValor: moedaParaPdf(v("vtIntegracaoVal")),
-      valeTipo: radio("valeRef") === "va" ? "100_VA" : radio("valeRef") === "vr" ? "100_VR" : "FLEX",
+      valeTipo: valeSelecionado === "va" ? "100_VA" : valeSelecionado === "vr" ? "100_VR" : valeSelecionado === "flex" ? "FLEX" : "",
       assinaturaNome: v("assinaturaName") || v("nomeCompleto"),
       assinaturaData: formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
     };
@@ -1797,148 +1898,83 @@ async function gerarPDF(){
     const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
     const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    // DADOS PESSOAIS
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_completo"), data.nomeCompleto);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_social"), data.nomeSocial);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "telefone"), data.telefone);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "celular"), data.celular);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "email"), data.email);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "estado_civil"), data.estadoCivil);
 
-    escreverNoMarcador(page, font, textLines, data.nomeCompleto, { contextoLinha: "Nome Completo:", ancora: "Nome Completo:", linhaAbaixo: true, maxWidth: 350 });
-    escreverNoMarcador(page, font, textLines, data.nomeSocial, { contextoLinha: "Nome Social:", ancora: "Nome Social:", linhaAbaixo: true, maxWidth: 280 });
-    escreverNoMarcador(page, font, textLines, data.telefone, { contextoLinha: ["Telefone:", "Celular:"], ancora: ["Telefone:", "Telefone"], linhaAbaixo: true, gapY: 10, maxWidth: 110 });
-    escreverNoMarcador(page, font, textLines, data.celular, { contextoLinha: ["Telefone:", "Celular:"], ancora: ["Celular:", "Celular"], linhaAbaixo: true, gapY: 10, maxWidth: 110 });
-    const emailOk = escreverNoMarcador(page, font, textLines, data.email, {
-      contextoLinha: ["E-mail:", "E-mail", "Email:", "Email"],
-      ancora: ["E-mail:", "E-mail", "Email:", "Email"],
-      linhaAbaixo: true,
-      gapY: 10,
-      maxWidth: 240
-    });
-    if (!emailOk) {
-      // Fallback: usa a linha de Estado Civil para posicionar na linha de E-mail.
-      const linhaEstadoCivil = encontrarLinhaPorContexto(textLines, "Estado Civil:");
-      if (linhaEstadoCivil && data.email) {
-        page.drawText(data.email, {
-          x: linhaEstadoCivil.items[0].x + 8,
-          y: linhaEstadoCivil.items[0].y + 13,
-          size: 9,
-          font,
-          maxWidth: 240
-        });
-      }
+    const primeiroEmpregoCampo = campoMapeado("DADOS_PESSOAIS", "primeiro_emprego");
+    if (data.primeiroEmprego === "SIM") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "SIM");
+    if (data.primeiroEmprego === "NÃO") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "NAO");
+    if (data.primeiroEmprego === "NÃO") {
+      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "pis"), data.pis);
     }
-    escreverNoMarcador(page, font, textLines, data.estadoCivil, { contextoLinha: "Estado Civil:", ancora: "Estado Civil:", linhaAbaixo: true, maxWidth: 140 });
 
-    marcarCheckbox(page, font, textLines, "Primeiro emprego:", "SIM", data.primeiroEmprego === "SIM");
-    marcarCheckbox(page, font, textLines, "Primeiro emprego:", "NÃO", data.primeiroEmprego === "NÃO");
-    escreverNoMarcador(page, font, textLines, data.pis, { contextoLinha: "Primeiro emprego:", ancora: "Informar PIS:", maxWidth: 180 });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_logradouro"), data.endereco);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_numero"), data.numero);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_complemento"), data.complemento);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cep"), data.cep);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "bairro"), data.bairro);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cidade"), data.cidade);
 
-    escreverNoMarcador(page, font, textLines, data.endereco, { contextoLinha: "Endereço:", ancora: "Endereço:", linhaAbaixo: true, maxWidth: 170 });
-    escreverNoMarcador(page, font, textLines, data.numero, { contextoLinha: "Endereço:", ancora: ["Nº", "N°", "No"], linhaAbaixo: true, maxWidth: 60 });
-    escreverNoMarcador(page, font, textLines, data.complemento, { contextoLinha: "Endereço:", ancora: "Complemento:", linhaAbaixo: true, maxWidth: 100 });
-    escreverNoMarcador(page, font, textLines, data.cep, { contextoLinha: "CEP:", ancora: "CEP:", linhaAbaixo: true, maxWidth: 80 });
-    escreverNoMarcador(page, font, textLines, data.bairro, { contextoLinha: "CEP:", ancora: "Bairro:", linhaAbaixo: true, maxWidth: 90 });
-    escreverNoMarcador(page, font, textLines, data.cidade, { contextoLinha: "CEP:", ancora: "Cidade:", linhaAbaixo: true, maxWidth: 160 });
+    const possuiDefCampo = campoMapeado("DADOS_PESSOAIS", "possui_deficiencia");
+    if (data.possuiDeficiencia === "SIM") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "SIM");
+    if (data.possuiDeficiencia === "NÃO") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "NAO");
+    if (data.possuiDeficiencia === "SIM") {
+      const tipoDefCampo = campoMapeado("DADOS_PESSOAIS", "tipo_deficiencia");
+      const tiposNormalizados = data.tiposDeficiencia.map(normalizarChaveMapeamento);
+      marcarMultiplasOpcoesPorCoordenada(page, font, tipoDefCampo, tiposNormalizados);
+    }
 
-    marcarCheckbox(page, font, textLines, "Possui Deficiência?", "SIM", data.possuiDeficiencia === "SIM");
-    marcarCheckbox(page, font, textLines, "Possui Deficiência?", "NÃO", data.possuiDeficiencia === "NÃO");
-    marcarCheckbox(page, font, textLines, "FÍSICA", "FÍSICA", data.tiposDeficiencia.includes("FÍSICA"));
-    marcarCheckbox(page, font, textLines, "FÍSICA", "AUDITIVA", data.tiposDeficiencia.includes("AUDITIVA"));
-    marcarCheckbox(page, font, textLines, "FÍSICA", "VISUAL", data.tiposDeficiencia.includes("VISUAL"));
-    marcarCheckbox(page, font, textLines, "FÍSICA", "INTELECTUAL", data.tiposDeficiencia.includes("INTELECTUAL"));
-    marcarCheckbox(page, font, textLines, "FÍSICA", "MÚLTIPLA", data.tiposDeficiencia.includes("MÚLTIPLA"));
+    // DADOS CONTA BANCARIA
+    const tipoContaCampo = campoMapeado("DADOS_CONTA_BANCARIA", "tipo_conta");
+    if (data.contaSalarioBradesco) marcarOpcaoPorCoordenada(page, font, tipoContaCampo, "BRADESCO");
+    if (data.contaMentore) marcarOpcaoPorCoordenada(page, font, tipoContaCampo, "MENTORE_BANK");
+    if (data.contaSalarioBradesco) {
+      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_CONTA_BANCARIA", "agencia"), data.agencia);
+      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_CONTA_BANCARIA", "conta_digito"), data.contaDigito);
+    }
+    if (data.contaMentore) {
+      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_CONTA_BANCARIA", "cpf_conta"), data.cpfConta);
+    }
 
-    marcarCheckbox(page, font, textLines, ["Conta Mêntore Bank", "Conta Mentore Bank", "Conta Mêntore", "Conta Mentore"], "Conta", data.contaMentore);
-    marcarCheckbox(page, font, textLines, "Conta Salário Bradesco", "Conta", data.contaSalarioBradesco);
-    escreverNoMarcador(page, font, textLines, data.cpfConta, { contextoLinha: "Número do CPF:", ancora: "Número do CPF:", linhaAbaixo: true, maxWidth: 140 });
-    escreverNoMarcador(page, font, textLines, data.agencia, { contextoLinha: "Conta Salário Bradesco", ancora: "Agência:", linhaAbaixo: true, maxWidth: 70 });
-    escreverNoMarcador(page, font, textLines, data.contaDigito, { contextoLinha: "Conta Salário Bradesco", ancora: "Conta/Dígito:", linhaAbaixo: true, maxWidth: 80 });
-
-    data.dependentes.forEach((dep, idx) => {
-      escreverNoMarcador(page, font, textLines, dep.nome, { contextoLinha: "CPF (do dependente):", ocorrenciaLinha: idx, ancora: "Nome:", linhaAbaixo: true, maxWidth: 170 });
-      escreverNoMarcador(page, font, textLines, dep.nascimento, { contextoLinha: "CPF (do dependente):", ocorrenciaLinha: idx, ancora: "Data de nascimento:", linhaAbaixo: true, maxWidth: 90 });
-      escreverNoMarcador(page, font, textLines, dep.cpf, { contextoLinha: "CPF (do dependente):", ocorrenciaLinha: idx, ancora: "CPF (do dependente):", linhaAbaixo: true, maxWidth: 110 });
+    // DEPENDENTES
+    const linhasDependentes = fieldMapping?.secoes?.DEPENDENTES?.linhas || [];
+    linhasDependentes.forEach((linha, idx) => {
+      const dep = data.dependentes[idx];
+      if (!dep) return;
+      escreverTextoPorCoordenada(page, font, linha.campos?.nome, dep.nome);
+      escreverTextoPorCoordenada(page, font, linha.campos?.data_nascimento, dep.nascimento);
+      escreverTextoPorCoordenada(page, font, linha.campos?.cpf_dependente, dep.cpf);
     });
 
-    const colunaQtd = encontrarFrase(textLines, "QUANTIDADE");
-    const colunaValor = encontrarFrase(textLines, ["VALOR UNITÁRIO", "VALOR UNITARIO"]);
-    const qtdX = colunaQtd ? colunaQtd.x + 4 : 330;
-    const valorX = colunaValor ? colunaValor.x + 4 : 430;
-    escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusQtd, { x: qtdX, maxWidth: 60 });
-    escreverNaLinha(page, font, textLines, "ÔNIBUS", data.onibusValor, { x: valorX, maxWidth: 80 });
-    escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroQtd, { x: qtdX, maxWidth: 60 });
-    escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80 });
-    escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
-    escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
-    escreverNaLinha(page, font, textLines, "INTEGRAÇÃO", data.integracaoQtd, { x: qtdX, maxWidth: 60 });
-    escreverNaLinha(page, font, textLines, "INTEGRAÇÃO", data.integracaoValor, { x: valorX, maxWidth: 80 });
+    // VALE TRANSPORTE
+    const linhasValeTransporte = fieldMapping?.secoes?.VALE_TRANSPORTE?.linhas || [];
+    const mapaValoresTransporte = {
+      ONIBUS: { quantidade: data.onibusQtd, valor_unitario: data.onibusValor },
+      METRO_TREM: { quantidade: data.metroQtd, valor_unitario: data.metroValor },
+      INTERMUNICIPAL: { quantidade: data.interQtd, valor_unitario: data.interValor },
+      INTEGRACAO: { quantidade: data.integracaoQtd, valor_unitario: data.integracaoValor }
+    };
+    linhasValeTransporte.forEach((linha) => {
+      const chave = normalizarChaveMapeamento(linha.modalidade);
+      const valores = mapaValoresTransporte[chave];
+      if (!valores) return;
+      escreverTextoPorCoordenada(page, font, linha.campos?.quantidade, valores.quantidade);
+      escreverTextoPorCoordenada(page, font, linha.campos?.valor_unitario, valores.valor_unitario);
+    });
 
-    const valeVaOk = marcarCheckbox(
-      page,
-      font,
-      textLines,
-      ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
-      ["100%", "100 %"],
-      data.valeTipo === "100_VA",
-      { ocorrenciaPalavra: 0 }
-    );
-    const valeVrOk = marcarCheckbox(
-      page,
-      font,
-      textLines,
-      ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
-      ["100%", "100 %"],
-      data.valeTipo === "100_VR",
-      { ocorrenciaPalavra: 1 }
-    );
-    const valeFlexOk = marcarCheckbox(
-      page,
-      font,
-      textLines,
-      ["100% Vale Alimentação", "100 % Vale Alimentação", "VALE REFEIÇÃO/ALIMENTAÇÃO"],
-      ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"],
-      data.valeTipo === "FLEX"
-    );
-    // Fallback específico por frase caso não encontre no contexto de linha.
-    if (!valeVaOk) {
-      marcarCheckboxPorFrase(page, font, textLines, ["100% Vale Alimentação", "100 % Vale Alimentação", "Vale Alimentação"], data.valeTipo === "100_VA");
-    }
-    if (!valeVrOk) {
-      marcarCheckboxPorFrase(page, font, textLines, ["100% Vale Refeição", "100 % Vale Refeição", "Vale Refeição"], data.valeTipo === "100_VR");
-    }
-    if (!valeFlexOk) {
-      marcarCheckboxPorFrase(page, font, textLines, ["Flexibilizado", "Flexibilizado (50% VR e 50% VA)"], data.valeTipo === "FLEX");
-    }
+    // VALE REFEICAO / ALIMENTACAO
+    const campoValeRefeicao = fieldMapping?.secoes?.VALE_REFEICAO_ALIMENTACAO?.campo;
+    const opcaoVale = opcaoValeMapeada(data.valeTipo);
+    if (opcaoVale) marcarOpcaoPorCoordenada(page, font, campoValeRefeicao, opcaoVale);
 
-    const assinaturaNomeOk = escreverAcimaDoRotulo(
-      page,
-      font,
-      textLines,
-      data.assinaturaNome,
-      "NOME COMPLETO DO CANDIDATO",
-      { maxWidth: 330, offsetY: 22 }
-    );
-    if (!assinaturaNomeOk) {
-      escreverNoMarcador(page, font, textLines, data.assinaturaNome, {
-        contextoLinha: "NOME COMPLETO DO CANDIDATO",
-        ancora: "NOME COMPLETO DO CANDIDATO",
-        maxWidth: 330,
-        offsetX: 6,
-        offsetY: 2
-      });
-    }
-    const assinaturaDataOk = escreverAcimaDoRotulo(
-      page,
-      font,
-      textLines,
-      data.assinaturaData,
-      "DATA",
-      { maxWidth: 90, offsetY: 22 }
-    );
-    if (!assinaturaDataOk) {
-      escreverNoMarcador(page, font, textLines, data.assinaturaData, {
-        contextoLinha: "NOME COMPLETO DO CANDIDATO",
-        ancora: "DATA",
-        maxWidth: 90,
-        offsetX: 8,
-        offsetY: 2
-      });
-    }
+    // ASSINATURA
+    escreverTextoPorCoordenada(page, font, campoMapeado("ASSINATURA", "nome_completo_candidato"), data.assinaturaNome);
+    escreverTextoPorCoordenada(page, font, campoMapeado("ASSINATURA", "data_assinatura"), data.assinaturaData);
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -2104,6 +2140,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 updateProgress();
+carregarFieldMapping();
 carregarTemplateInicial();
 </script>
 </body>
