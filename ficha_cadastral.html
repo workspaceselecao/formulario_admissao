@@ -74,6 +74,28 @@
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
   }
+  .rascunho-bar {
+    font-size: 12px;
+    color: var(--text-mid);
+    margin: 12px 0 0;
+    max-width: 520px;
+    line-height: 1.5;
+  }
+  .rascunho-descartar {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 6px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .rascunho-descartar:hover {
+    color: var(--accent-dark);
+  }
   .btn-export {
     background: var(--accent);
     color: #fff;
@@ -646,6 +668,10 @@
       <span class="brand-text">Ficha Cadastral</span>
     </div>
     <div class="subtitle">F-075 (PR-011) / 37 · Admissão Operacional e Administrativo</div>
+    <p class="rascunho-bar" id="rascunhoBar">
+      Preenchimento salvo neste navegador até você gerar o PDF.
+      <button type="button" class="rascunho-descartar" id="btnDescartarRascunho">Descartar rascunho</button>
+    </p>
   </div>
 </header>
 
@@ -928,6 +954,7 @@
   <div class="modal-card">
     <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
     <div class="modal-body">
+      O rascunho do preenchimento fica apenas neste aparelho (navegador) até você gerar o PDF.<br>
       Os dados informados serão apagados automaticamente após a geração do PDF.<br>
       A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
       <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
@@ -1198,13 +1225,168 @@ function adicionarDependente(){
   tbody.appendChild(novaLinha);
   atualizarEstadoBotaoDependente();
   updateProgress();
+  agendarSalvarRascunho();
   novaLinha.querySelector('input')?.focus();
+}
+
+// ── RASCUNHO LOCAL (navegador; removido após gerar PDF) ──
+const RASCUNHO_STORAGE_KEY = "ficha_cadastral_rascunho_v1";
+const RASCUNHO_IDS = [
+  "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
+  "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
+  "cpf", "agencia", "conta",
+  "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal",
+  "assinaturaName", "dataAssinatura"
+];
+let rascunhoSalvarTimer = null;
+let ignorarSalvarRascunho = false;
+
+function limparRascunhoLocal() {
+  try {
+    localStorage.removeItem(RASCUNHO_STORAGE_KEY);
+  } catch (_) {
+    /* storage indisponível */
+  }
+}
+
+function coletarEstadoRascunho() {
+  const campos = {};
+  RASCUNHO_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) campos[id] = el.value;
+  });
+  return {
+    v: 1,
+    t: Date.now(),
+    campos,
+    radios: {
+      primeiroEmprego: radio("primeiroEmprego"),
+      deficiencia: radio("deficiencia"),
+      tipoConta: radio("tipoConta"),
+      valeRef: radio("valeRef")
+    },
+    tipoDeficiencia: checks("tipoDeficiencia"),
+    dependentes: lerDependentesFormulario()
+  };
+}
+
+function marcarRadioRestaurar(name, value) {
+  if (!value) return;
+  const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+  if (!el) return;
+  el.checked = true;
+  if (name === "primeiroEmprego") {
+    togglePIS(el);
+    syncRadioActive(name);
+  } else if (name === "deficiencia") {
+    toggleDef(el);
+    syncRadioActive(name);
+  } else if (name === "tipoConta") toggleBanco(el);
+  else syncRadioActive(name);
+}
+
+function aplicarTipoDeficienciaSalvos(valores) {
+  document.querySelectorAll('input[name="tipoDeficiencia"]').forEach((inp) => {
+    inp.checked = false;
+    inp.closest(".check-label")?.classList.remove("active");
+  });
+  const lista = Array.isArray(valores) ? valores : [];
+  lista.forEach((val) => {
+    const inp = [...document.querySelectorAll('input[name="tipoDeficiencia"]')].find((i) => i.value === val);
+    if (inp) {
+      inp.checked = true;
+      inp.closest(".check-label")?.classList.add("active");
+    }
+  });
+}
+
+function aplicarEstadoRascunho(obj) {
+  const c = obj.campos || {};
+  RASCUNHO_IDS.forEach((id) => {
+    if (c[id] === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.value = c[id];
+  });
+  ["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && el.value) maskMoeda(el);
+  });
+
+  const rad = obj.radios || {};
+  marcarRadioRestaurar("primeiroEmprego", rad.primeiroEmprego);
+  marcarRadioRestaurar("deficiencia", rad.deficiencia);
+  marcarRadioRestaurar("tipoConta", rad.tipoConta);
+  marcarRadioRestaurar("valeRef", rad.valeRef);
+
+  aplicarTipoDeficienciaSalvos(obj.tipoDeficiencia);
+
+  const deps = Array.isArray(obj.dependentes) && obj.dependentes.length ? obj.dependentes : [{ nome: "", nascimento: "", cpf: "" }];
+  const n = Math.min(deps.length, MAX_DEPENDENTES);
+  const tbody = document.getElementById("dependentesBody");
+  if (tbody) {
+    tbody.innerHTML = "";
+    for (let i = 0; i < n; i += 1) {
+      const idx = i + 1;
+      const tr = criarLinhaDependente(idx);
+      tbody.appendChild(tr);
+      const d = deps[i] || {};
+      const nomeEl = tr.querySelector(`#dep${idx}Nome`);
+      const nascEl = tr.querySelector(`#dep${idx}Nasc`);
+      const cpfEl = tr.querySelector(`#dep${idx}CPF`);
+      if (nomeEl) nomeEl.value = d.nome || "";
+      if (nascEl) nascEl.value = d.nascimento || "";
+      if (cpfEl) cpfEl.value = d.cpf || "";
+    }
+    atualizarEstadoBotaoDependente();
+  }
+}
+
+function agendarSalvarRascunho() {
+  if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    } catch (e) {
+      console.warn("Rascunho não salvo:", e);
+    }
+  }, 500);
+}
+
+function salvarRascunhoLocalSincrono() {
+  if (ignorarSalvarRascunho) return;
+  try {
+    localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+  } catch (_) {
+    /* ignore */
+  }
+}
+
+function tentarRestaurarRascunho() {
+  try {
+    const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
+    if (!raw) return false;
+    const obj = JSON.parse(raw);
+    if (!obj || obj.v !== 1 || !obj.campos) return false;
+    ignorarSalvarRascunho = true;
+    aplicarEstadoRascunho(obj);
+    ignorarSalvarRascunho = false;
+    updateProgress();
+    showToast("Rascunho recuperado. Você pode continuar o preenchimento.", true);
+    return true;
+  } catch (e) {
+    console.warn(e);
+    ignorarSalvarRascunho = false;
+    return false;
+  }
 }
 
 // ── PROGRESS ──
 document.querySelectorAll('input,select').forEach(el=>{
   el.addEventListener('input', updateProgress);
   el.addEventListener('change', updateProgress);
+  el.addEventListener('input', agendarSalvarRascunho);
+  el.addEventListener('change', agendarSalvarRascunho);
 });
 function updateProgress(){
   const hasValue = (id) => v(id).length > 0;
@@ -1478,6 +1660,12 @@ function limparDadosFormulario(){
   updateProgress();
 }
 
+function descartarRascunhoEFormulario() {
+  limparRascunhoLocal();
+  limparDadosFormulario();
+  showToast("Rascunho descartado.", true);
+}
+
 function clonarArrayBuffer(buffer){
   return buffer.slice(0);
 }
@@ -1749,6 +1937,7 @@ async function gerarPDF(){
     link.click();
     URL.revokeObjectURL(url);
     limparDadosFormulario();
+    limparRascunhoLocal();
     showToast("PDF gerado com sucesso!");
   } catch (error) {
     console.error(error);
@@ -1804,8 +1993,10 @@ async function baixarCartaAberturaConta(){
   }
 }
 
-// Set today's date as default
-document.getElementById('dataAssinatura').valueAsDate = new Date();
+if (!tentarRestaurarRascunho()) {
+  const elData = document.getElementById("dataAssinatura");
+  if (elData) elData.valueAsDate = new Date();
+}
 ["telefone", "celular"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {
@@ -1838,8 +2029,12 @@ if (dependentesBody) {
     if (el.id.endsWith('Nome')) aplicarMaiusculas(el);
     if (el.id.endsWith('CPF')) maskCPFInput(el);
     updateProgress();
+    agendarSalvarRascunho();
   });
-  dependentesBody.addEventListener('change', () => updateProgress());
+  dependentesBody.addEventListener('change', () => {
+    updateProgress();
+    agendarSalvarRascunho();
+  });
 }
 atualizarEstadoBotaoDependente();
 const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
@@ -1868,6 +2063,8 @@ document.addEventListener('keydown', (event) => {
     fecharModalLGPD(false);
   }
 });
+window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", descartarRascunhoEFormulario);
 updateProgress();
 carregarCamposSchema();
 carregarTemplateInicial();
