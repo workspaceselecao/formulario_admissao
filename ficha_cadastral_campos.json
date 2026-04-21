@@ -34,7 +34,7 @@
           "mascara": "(99) 9999-9999"
         },
         "celular": {
-          "label": "Celular",
+          "label": "Celular (WhatsApp)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": { "x": 263, "y": 648, "largura": 205, "altura": 12 },
@@ -75,7 +75,7 @@
           "label": "PIS (informar se não for primeiro emprego)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 160, "y": 591, "largura": 226, "altura": 10 },
+          "coordenadas": { "x": 160, "y": 593, "largura": 226, "altura": 10 },
           "obrigatorio": false,
           "mascara": "999.99999.99-9",
           "dependencia": { "campo": "primeiro_emprego", "valor": "nao" }
@@ -424,14 +424,14 @@
           "label": "Nome Completo do Candidato (Assinatura)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 56, "y": 26, "largura": 240, "altura": 15 },
+          "coordenadas": { "x": 56, "y": 28, "largura": 240, "altura": 15 },
           "obrigatorio": true
         },
         "data": {
           "label": "Data",
           "tipo": "data",
           "pagina": 1,
-          "coordenadas": { "x": 467, "y": 26, "largura": 67, "altura": 15 },
+          "coordenadas": { "x": 467, "y": 28, "largura": 67, "altura": 15 },
           "obrigatorio": true,
           "mascara": "99/99/9999"
         }
