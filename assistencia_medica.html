@@ -159,16 +159,48 @@
     gap: 18px;
     width: 100%;
   }
-  .dados-site-tel {
+  .dados-sus-rg-cpf {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.7fr) minmax(0, 1.1fr);
+    gap: 16px;
+    width: 100%;
+    align-items: end;
+  }
+  .dados-sus-rg-cpf,
+  .dados-datas,
+  .dados-cargo-site-tel {
+    grid-column: span 2;
+  }
+  .dados-sus-rg-cpf .field--rg input {
+    max-width: 8.5em;
+  }
+  .dados-sus-rg-cpf .field--cpf input {
+    max-width: 11.5em;
+  }
+  .dados-sus-rg-cpf .field--sus input {
+    max-width: 15.5em;
+  }
+  .dados-datas {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    width: 100%;
+  }
+  .dados-cargo-site-tel {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 18px;
     width: 100%;
   }
   @media (max-width: 640px) {
     .endereco-cep-rua-num { grid-template-columns: 1fr; }
     .endereco-compl-bairro-cid { grid-template-columns: 1fr; }
-    .dados-site-tel { grid-template-columns: 1fr; }
+    .dados-sus-rg-cpf { grid-template-columns: 1fr; }
+    .dados-sus-rg-cpf .field--rg input,
+    .dados-sus-rg-cpf .field--cpf input,
+    .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
+    .dados-datas { grid-template-columns: 1fr; }
+    .dados-cargo-site-tel { grid-template-columns: 1fr; }
   }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
@@ -519,43 +551,47 @@
           <label>Nome da Mãe</label>
           <input type="text" id="nomemae" placeholder="">
         </div>
-        <div class="field">
-          <label>Nº do Cartão SUS <span class="req">*</span></label>
-          <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
-        </div>
-        <div class="field">
-          <label>RG</label>
-          <input type="text" id="rg" placeholder="">
-        </div>
-        <div class="field">
-          <label>CPF <span class="req">*</span></label>
-          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14">
-        </div>
-        <div class="field">
-          <label>Data de Nascimento <span class="req">*</span></label>
-          <div class="data-triple">
-            <input type="text" id="dn_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-            <span class="sep">/</span>
-            <input type="text" id="dn_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-            <span class="sep">/</span>
-            <input type="text" id="dn_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+        <div class="dados-sus-rg-cpf">
+          <div class="field field--sus" style="min-width:0">
+            <label>Nº do Cartão SUS <span class="req">*</span></label>
+            <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
+          </div>
+          <div class="field field--rg" style="min-width:0">
+            <label>RG</label>
+            <input type="text" id="rg" placeholder="">
+          </div>
+          <div class="field field--cpf" style="min-width:0">
+            <label>CPF <span class="req">*</span></label>
+            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14">
           </div>
         </div>
-        <div class="field">
-          <label>Data de Admissão</label>
-          <div class="data-triple">
-            <input type="text" id="adm_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-            <span class="sep">/</span>
-            <input type="text" id="adm_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-            <span class="sep">/</span>
-            <input type="text" id="adm_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+        <div class="dados-datas">
+          <div class="field" style="min-width:0">
+            <label>Data de Nascimento <span class="req">*</span></label>
+            <div class="data-triple">
+              <input type="text" id="dn_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+              <span class="sep">/</span>
+              <input type="text" id="dn_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+              <span class="sep">/</span>
+              <input type="text" id="dn_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+            </div>
+          </div>
+          <div class="field" style="min-width:0">
+            <label>Data de Admissão</label>
+            <div class="data-triple">
+              <input type="text" id="adm_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+              <span class="sep">/</span>
+              <input type="text" id="adm_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+              <span class="sep">/</span>
+              <input type="text" id="adm_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+            </div>
           </div>
         </div>
-        <div class="field col-span-2">
-          <label>Cargo</label>
-          <input type="text" id="cargo" placeholder="">
-        </div>
-        <div class="field col-span-2 dados-site-tel">
+        <div class="dados-cargo-site-tel">
+          <div class="field" style="min-width:0">
+            <label>Cargo</label>
+            <input type="text" id="cargo" placeholder="">
+          </div>
           <div class="field" style="min-width:0">
             <label>Site / Unidade</label>
             <input type="text" id="site" placeholder="">
