@@ -208,7 +208,7 @@
             "label": "Incluir Cônjuge no Plano",
             "tipo": "checkbox",
             "pagina": 1,
-            "coordenadas": { "x": 59, "y": 720, "largura": 19, "altura": 16 }
+            "coordenadas": { "x": 59, "y": 717, "largura": 19, "altura": 16 }
           },
           "nome": {
             "label": "Nome do Cônjuge",
@@ -271,7 +271,7 @@
               "label": "Incluir Filho(a) 1 no Plano",
               "tipo": "checkbox",
               "pagina": 1,
-              "coordenadas": { "x": 59, "y": 673, "largura": 18, "altura": 14 }
+              "coordenadas": { "x": 59, "y": 672, "largura": 18, "altura": 14 }
             },
             "nome": {
               "label": "Nome do Filho(a) 1",
@@ -284,7 +284,7 @@
               "label": "CPF do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 378, "y": 4, "largura": 113, "altura": 16 },
+              "coordenadas": { "x": 378, "y": 674, "largura": 113, "altura": 16 },
               "obrigatorio": true,
               "mascara": "999.999.999-99"
             },
