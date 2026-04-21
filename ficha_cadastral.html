@@ -200,7 +200,6 @@
   .address-complemento { grid-column: span 4; }
   .address-bairro { grid-column: span 4; }
   .address-cidade { grid-column: span 6; }
-  .address-uf { grid-column: span 2; }
 
   /* ── SECTION CARDS ── */
   .section-card {
@@ -596,7 +595,7 @@
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
     .address-grid { grid-template-columns: 1fr; }
-    .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade, .address-uf { grid-column: span 1; }
+    .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade { grid-column: span 1; }
     .dep-table, .vt-table { font-size: 12px; }
 
     .dep-table thead { display: none; }
@@ -646,7 +645,7 @@
       <img src="./atento.svg" alt="Logo Atento" class="brand-logo">
       <span class="brand-text">Ficha Cadastral</span>
     </div>
-    <div class="subtitle">F-075 (PR-011) 33 · Admissão Operacional e Administrativo</div>
+    <div class="subtitle">F-075 (PR-011) / 37 · Admissão Operacional e Administrativo</div>
   </div>
 </header>
 
@@ -753,10 +752,6 @@
           <label>Cidade <span class="req">*</span></label>
           <input type="text" id="cidade" placeholder="Cidade">
         </div>
-        <div class="field address-uf">
-          <label>UF <span class="req">*</span></label>
-          <input type="text" id="uf" placeholder="BA" maxlength="2">
-        </div>
       </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressEndereco"></div></div>
@@ -772,8 +767,8 @@
         <div class="field col-span-2">
           <label>Tipo de Conta</label>
           <div class="radio-inline" style="margin-top:4px">
-            <label class="radio-label"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore</label>
             <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore Bank</label>
           </div>
         </div>
         <div class="field">
@@ -805,7 +800,7 @@
     <div class="section-header"><div class="dot"></div>Dependentes</div>
     <div class="section-body">
       <div class="aviso-box" style="margin-bottom:18px">
-        <strong>Atenção:</strong> A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes no plano de saúde. É imprescindível o CPF de todos os dependentes.
+        <strong>Atenção:</strong> A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes (filhos e/ou cônjuge) no plano de saúde. É imprescindível a apresentação do CPF de todos os dependentes. Para que o pagamento do salário família seja realizado, é fundamental a apresentação da certidão de nascimento dos filhos menores de 14 anos. Para as crianças com menos de 7 anos de idade, também é necessário a carteira de vacinação. Estrangeiros: entregar a documentação específica (conforme Check List).
       </div>
       <table class="dep-table">
         <thead>
@@ -859,6 +854,11 @@
             <td>Intermunicipal</td>
             <td><input type="number" id="vtInterQtd" placeholder="0" min="0"></td>
             <td><input type="text" id="vtInterVal" placeholder="R$ 0,00"></td>
+          </tr>
+          <tr>
+            <td>Integração</td>
+            <td><input type="number" id="vtIntegracaoQtd" placeholder="0" min="0"></td>
+            <td><input type="text" id="vtIntegracaoVal" placeholder="R$ 0,00"></td>
           </tr>
         </tbody>
       </table>
@@ -959,9 +959,10 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-const TEMPLATE_PATH = "./Ficha_Cadastral_exemplo.pdf";
+const TEMPLATE_PATH = "./F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf";
 const TEMPLATE_DOCX_PATH = "./Ficha_Cadastral_Admissao_MODELO.docx";
 const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
+const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 let templateBytes = null;
 let textLines = null;
 const cepCache = new Map();
@@ -1012,11 +1013,9 @@ function preencherEnderecoPorCep(dados){
   const enderecoEl = document.getElementById("endereco");
   const bairroEl = document.getElementById("bairro");
   const cidadeEl = document.getElementById("cidade");
-  const ufEl = document.getElementById("uf");
   if (enderecoEl && dados.logradouro) enderecoEl.value = normalizarTextoEndereco(dados.logradouro);
   if (bairroEl && dados.bairro) bairroEl.value = normalizarTextoEndereco(dados.bairro);
   if (cidadeEl && dados.cidade) cidadeEl.value = normalizarTextoEndereco(dados.cidade);
-  if (ufEl && dados.uf) ufEl.value = normalizarTextoEndereco(dados.uf).slice(0, 2);
 }
 async function consultarCep(cep){
   if (cepCache.has(cep)) return cepCache.get(cep);
@@ -1188,7 +1187,7 @@ function toggleBanco(el){
   }
   syncRadioActive(el.name);
 }
-const MAX_DEPENDENTES = 4;
+const MAX_DEPENDENTES = 5;
 function listarLinhasDependentes(){
   return [...document.querySelectorAll('#dependentesBody tr')];
 }
@@ -1272,8 +1271,7 @@ function updateProgress(){
     () => hasValue('cep'),
     () => hasValue('endereco'),
     () => hasValue('bairro'),
-    () => hasValue('cidade'),
-    () => hasValue('uf')
+    () => hasValue('cidade')
   ]);
 
   const bancarioPct = calcPct([
@@ -1293,7 +1291,8 @@ function updateProgress(){
   const transportePct = calcPct([
     () => hasValue('vtOnibusQtd'), () => hasMoney('vtOnibusVal'),
     () => hasValue('vtMetroQtd'), () => hasMoney('vtMetroVal'),
-    () => hasValue('vtInterQtd'), () => hasMoney('vtInterVal')
+    () => hasValue('vtInterQtd'), () => hasMoney('vtInterVal'),
+    () => hasValue('vtIntegracaoQtd'), () => hasMoney('vtIntegracaoVal')
   ]);
 
   const refeicaoPct = calcPct([
@@ -1391,7 +1390,6 @@ function validarCamposObrigatorios(){
     { id: 'estadoCivil', nome: 'Estado Civil' },
     { id: 'endereco', nome: 'Endereço' },
     { id: 'cidade', nome: 'Cidade' },
-    { id: 'uf', nome: 'UF' },
     { id: 'cpf', nome: 'CPF' }
   ];
   const faltantes = [];
@@ -1471,7 +1469,7 @@ function limparDadosFormulario(){
     dependentesBody.innerHTML = '';
     dependentesBody.appendChild(criarLinhaDependente(1));
   }
-  ["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
+  ["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
     const campo = document.getElementById(id);
     if (campo) campo.value = "R$ 0,00";
   });
@@ -1738,13 +1736,13 @@ function marcarCheckboxPorFrase(page, font, linhas, frases, ativo, options = {})
 }
 async function carregarTemplateInicial(){
   try {
-    const res = await fetch(TEMPLATE_PATH);
+    const res = await fetch(TEMPLATE_FETCH_PATH);
     if (!res.ok) throw new Error("Template não encontrado");
     const fetchedBytes = await res.arrayBuffer();
     templateBytes = clonarArrayBuffer(fetchedBytes);
     textLines = await construirLinhasTexto(clonarArrayBuffer(fetchedBytes));
   } catch (_error) {
-    showToast("Template PDF não carregado. Verifique Ficha_Cadastral_exemplo.pdf", false);
+    showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
   }
 }
 
@@ -1771,7 +1769,6 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
-      uf: v("uf"),
       possuiDeficiencia: radio("deficiencia") === "sim" ? "SIM" : "NÃO",
       tiposDeficiencia: checks("tipoDeficiencia").map((item) => item.toUpperCase()),
       contaMentore: radio("tipoConta") === "mentore",
@@ -1790,6 +1787,8 @@ async function gerarPDF(){
       metroValor: moedaParaPdf(v("vtMetroVal")),
       interQtd: v("vtInterQtd"),
       interValor: moedaParaPdf(v("vtInterVal")),
+      integracaoQtd: v("vtIntegracaoQtd"),
+      integracaoValor: moedaParaPdf(v("vtIntegracaoVal")),
       valeTipo: radio("valeRef") === "va" ? "100_VA" : radio("valeRef") === "vr" ? "100_VR" : "FLEX",
       assinaturaNome: v("assinaturaName") || v("nomeCompleto"),
       assinaturaData: formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
@@ -1834,8 +1833,7 @@ async function gerarPDF(){
     escreverNoMarcador(page, font, textLines, data.complemento, { contextoLinha: "Endereço:", ancora: "Complemento:", linhaAbaixo: true, maxWidth: 100 });
     escreverNoMarcador(page, font, textLines, data.cep, { contextoLinha: "CEP:", ancora: "CEP:", linhaAbaixo: true, maxWidth: 80 });
     escreverNoMarcador(page, font, textLines, data.bairro, { contextoLinha: "CEP:", ancora: "Bairro:", linhaAbaixo: true, maxWidth: 90 });
-    const cidadeUf = data.uf ? `${data.cidade} - ${data.uf}` : data.cidade;
-    escreverNoMarcador(page, font, textLines, cidadeUf, { contextoLinha: "CEP:", ancora: "Cidade:", linhaAbaixo: true, maxWidth: 160 });
+    escreverNoMarcador(page, font, textLines, data.cidade, { contextoLinha: "CEP:", ancora: "Cidade:", linhaAbaixo: true, maxWidth: 160 });
 
     marcarCheckbox(page, font, textLines, "Possui Deficiência?", "SIM", data.possuiDeficiencia === "SIM");
     marcarCheckbox(page, font, textLines, "Possui Deficiência?", "NÃO", data.possuiDeficiencia === "NÃO");
@@ -1845,7 +1843,7 @@ async function gerarPDF(){
     marcarCheckbox(page, font, textLines, "FÍSICA", "INTELECTUAL", data.tiposDeficiencia.includes("INTELECTUAL"));
     marcarCheckbox(page, font, textLines, "FÍSICA", "MÚLTIPLA", data.tiposDeficiencia.includes("MÚLTIPLA"));
 
-    marcarCheckbox(page, font, textLines, ["Conta Mêntore", "Conta Mentore"], "Conta", data.contaMentore);
+    marcarCheckbox(page, font, textLines, ["Conta Mêntore Bank", "Conta Mentore Bank", "Conta Mêntore", "Conta Mentore"], "Conta", data.contaMentore);
     marcarCheckbox(page, font, textLines, "Conta Salário Bradesco", "Conta", data.contaSalarioBradesco);
     escreverNoMarcador(page, font, textLines, data.cpfConta, { contextoLinha: "Número do CPF:", ancora: "Número do CPF:", linhaAbaixo: true, maxWidth: 140 });
     escreverNoMarcador(page, font, textLines, data.agencia, { contextoLinha: "Conta Salário Bradesco", ancora: "Agência:", linhaAbaixo: true, maxWidth: 70 });
@@ -1867,6 +1865,8 @@ async function gerarPDF(){
     escreverNaLinha(page, font, textLines, "METRÔ/TREM", data.metroValor, { x: valorX, maxWidth: 80 });
     escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interQtd, { x: qtdX, maxWidth: 60 });
     escreverNaLinha(page, font, textLines, "INTERMUNICIPAL", data.interValor, { x: valorX, maxWidth: 80 });
+    escreverNaLinha(page, font, textLines, "INTEGRAÇÃO", data.integracaoQtd, { x: qtdX, maxWidth: 60 });
+    escreverNaLinha(page, font, textLines, "INTEGRAÇÃO", data.integracaoValor, { x: valorX, maxWidth: 80 });
 
     const valeVaOk = marcarCheckbox(
       page,
@@ -1964,7 +1964,7 @@ async function baixarFichaVazia(){
   try {
     let bytes = templateBytes;
     if (!bytes) {
-      const resp = await fetch(TEMPLATE_PATH, { cache: "no-store" });
+      const resp = await fetch(TEMPLATE_FETCH_PATH, { cache: "no-store" });
       if (!resp.ok) throw new Error(`Falha ao baixar template (${resp.status})`);
       bytes = await resp.arrayBuffer();
     }
@@ -2041,10 +2041,10 @@ document.getElementById('dataAssinatura').valueAsDate = new Date();
   }
 });
 document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((el) => {
-  if (["vtOnibusVal", "vtMetroVal", "vtInterVal"].includes(el.id)) return;
+  if (["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].includes(el.id)) return;
   el.addEventListener("input", () => aplicarMaiusculas(el));
 });
-["vtOnibusVal", "vtMetroVal", "vtInterVal"].forEach((id) => {
+["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {
     el.addEventListener("focus", () => posicionarCursorNoFim(el));
@@ -2078,7 +2078,7 @@ const primeiroEmpregoSelecionado = document.querySelector('input[name="primeiroE
 if (primeiroEmpregoSelecionado) {
   togglePIS(primeiroEmpregoSelecionado);
 }
-['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'uf', 'cpf', 'pis', 'agencia', 'conta'].forEach((id) => {
+['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agencia', 'conta'].forEach((id) => {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', () => marcarCampoInvalido(id, false));

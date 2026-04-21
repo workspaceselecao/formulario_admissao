@@ -1,13 +1,13 @@
 # Ficha Cadastral - HTML para PDF
 
-Este projeto gera um PDF preenchido usando o template original `Ficha_Cadastral_exemplo.pdf`.
+Este projeto gera um PDF preenchido usando o template oficial `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf`.
 
 ## Estrutura esperada
 
 Mantenha estes arquivos na raiz do repositório:
 
 - `index.html`
-- `Ficha_Cadastral_exemplo.pdf`
+- `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf`
 - `vercel.json`
 
 ## Publicar na Vercel (sem servidor local)
