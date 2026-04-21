@@ -713,25 +713,27 @@
             <option>Separado(a)</option>
           </select>
         </div>
-        <div class="field col-span-2">
+        <div class="field">
           <label>Primeiro Emprego?</label>
           <div class="radio-inline" style="margin-top:4px">
             <label class="radio-label"><input type="radio" name="primeiroEmprego" value="sim" onchange="togglePIS(this)"> Sim</label>
             <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
           </div>
         </div>
-        <div class="field" id="pisField" style="display:none">
+        <div class="field">
+          <label>Possui Deficiência?</label>
+          <div class="radio-inline" style="margin-top:4px">
+            <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
+            <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
+          </div>
+        </div>
+        <div class="field col-span-2" id="pisField" style="display:none">
           <label>PIS <span class="req">*</span></label>
           <input type="text" id="pis" placeholder="000.00000.00-0">
         </div>
       </div>
 
-      <div>
-        <div class="field-inline-row" style="margin-bottom:10px">
-          <span class="field-label-text">Possui Deficiência?</span>
-          <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
-          <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
-        </div>
+      <div style="margin-top:12px">
         <div id="defGroup" style="display:none">
           <div class="field-label-text" style="margin-bottom:8px;font-size:11px;color:var(--label);font-family:'DM Mono',monospace;letter-spacing:0.5px;text-transform:uppercase">Tipo de Deficiência</div>
           <div class="check-group">
