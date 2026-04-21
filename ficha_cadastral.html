@@ -967,6 +967,7 @@ const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const FIELD_MAPPING_FETCH_PATH = encodeURI(FIELD_MAPPING_PATH);
 const PDF_PAGE_HEIGHT = 841.92;
 const PDF_FONT_SIZE = 9;
+const OFFSET_Y_DADOS_PESSOAIS = 10;
 let templateBytes = null;
 let textLines = null;
 let fieldMapping = null;
@@ -1899,34 +1900,36 @@ async function gerarPDF(){
     const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
     // DADOS PESSOAIS
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_completo"), data.nomeCompleto);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_social"), data.nomeSocial);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "telefone"), data.telefone);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "celular"), data.celular);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "email"), data.email);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "estado_civil"), data.estadoCivil);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_completo"), data.nomeCompleto, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_social"), data.nomeSocial, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "telefone"), data.telefone, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "celular"), data.celular, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "email"), data.email, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "estado_civil"), data.estadoCivil, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
 
     const primeiroEmpregoCampo = campoMapeado("DADOS_PESSOAIS", "primeiro_emprego");
-    if (data.primeiroEmprego === "SIM") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "SIM");
-    if (data.primeiroEmprego === "NÃO") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "NAO");
+    if (data.primeiroEmprego === "SIM") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "SIM", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    if (data.primeiroEmprego === "NÃO") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "NAO", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
     if (data.primeiroEmprego === "NÃO") {
-      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "pis"), data.pis);
+      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "pis"), data.pis, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
     }
 
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_logradouro"), data.endereco);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_numero"), data.numero);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_complemento"), data.complemento);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cep"), data.cep);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "bairro"), data.bairro);
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cidade"), data.cidade);
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_logradouro"), data.endereco, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_numero"), data.numero, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_complemento"), data.complemento, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cep"), data.cep, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "bairro"), data.bairro, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cidade"), data.cidade, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
 
     const possuiDefCampo = campoMapeado("DADOS_PESSOAIS", "possui_deficiencia");
-    if (data.possuiDeficiencia === "SIM") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "SIM");
-    if (data.possuiDeficiencia === "NÃO") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "NAO");
+    if (data.possuiDeficiencia === "SIM") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "SIM", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    if (data.possuiDeficiencia === "NÃO") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "NAO", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
     if (data.possuiDeficiencia === "SIM") {
       const tipoDefCampo = campoMapeado("DADOS_PESSOAIS", "tipo_deficiencia");
       const tiposNormalizados = data.tiposDeficiencia.map(normalizarChaveMapeamento);
-      marcarMultiplasOpcoesPorCoordenada(page, font, tipoDefCampo, tiposNormalizados);
+      tiposNormalizados.forEach((opcao) => {
+        marcarOpcaoPorCoordenada(page, font, tipoDefCampo, opcao, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+      });
     }
 
     // DADOS CONTA BANCARIA
