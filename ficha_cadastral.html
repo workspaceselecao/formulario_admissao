@@ -1689,6 +1689,7 @@ async function gerarPDF(){
       marcarRadioJsonOpcao(page, font, cb.tipo_conta, "bradesco");
       escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
       escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
+      escreverTextoCampoCoord(page, font, cb.mentore_cpf.coordenadas, data.cpfConta);
     }
     if (data.contaMentore) {
       marcarRadioJsonOpcao(page, font, cb.tipo_conta, "mentore");

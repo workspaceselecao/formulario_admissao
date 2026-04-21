@@ -213,13 +213,13 @@
           "dependencia": { "campo": "tipo_conta", "valor": "bradesco" }
         },
         "mentore_cpf": {
-          "label": "CPF (Mêntore Bank)",
+          "label": "CPF do titular (Mêntore ou Bradesco)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": { "x": 291, "y": 476, "largura": 252, "altura": 15 },
           "obrigatorio": false,
           "mascara": "999.999.999-99",
-          "dependencia": { "campo": "tipo_conta", "valor": "mentore" }
+          "observacao": "Mesma área no PDF: preenchida para Conta Mêntore ou Conta Salário Bradesco"
         }
       }
     },
