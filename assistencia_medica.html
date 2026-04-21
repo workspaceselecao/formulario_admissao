@@ -578,7 +578,7 @@
         <div class="subsection-title">Filho(a) 1</div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil1IncluirLabel">
-            <input type="checkbox" id="fil1_incluir" onchange="toggleDepFilho()"> Incluir filho(a) no plano
+            <input type="checkbox" id="fil1_incluir" onchange="toggleDepFilho(1)"> Incluir filho(a) 1 no plano
           </label>
         </div>
         <div id="fil1Campos" style="display:none">
@@ -612,6 +612,135 @@
             <div class="field col-span-2">
               <label>Nº Declaração de Nascido Vivo <span class="req fil1-req">*</span></label>
               <input type="text" id="fil1_nascvivo" class="fil1-field" placeholder="Obrigatório para recém-nascidos">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dep-block">
+        <div class="subsection-title">Filho(a) 2</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil2IncluirLabel">
+            <input type="checkbox" id="fil2_incluir" onchange="toggleDepFilho(2)"> Incluir filho(a) 2 no plano
+          </label>
+        </div>
+        <div id="fil2Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_nome" class="fil2-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_cpf" class="fil2-field" maxlength="14" placeholder="000.000.000-00">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil2-req">*</span></label>
+              <div class="data-triple">
+                <input type="text" id="fil2_d" class="fil2-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil2_m" class="fil2-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil2_y" class="fil2-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_sus" class="fil2-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_nomemae" class="fil2-field">
+            </div>
+            <div class="field col-span-2">
+              <label>Nº Declaração de Nascido Vivo <span class="req fil2-req">*</span></label>
+              <input type="text" id="fil2_nascvivo" class="fil2-field" placeholder="Obrigatório para recém-nascidos">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dep-block">
+        <div class="subsection-title">Filho(a) 3</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil3IncluirLabel">
+            <input type="checkbox" id="fil3_incluir" onchange="toggleDepFilho(3)"> Incluir filho(a) 3 no plano
+          </label>
+        </div>
+        <div id="fil3Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_nome" class="fil3-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_cpf" class="fil3-field" maxlength="14" placeholder="000.000.000-00">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil3-req">*</span></label>
+              <div class="data-triple">
+                <input type="text" id="fil3_d" class="fil3-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil3_m" class="fil3-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil3_y" class="fil3-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_sus" class="fil3-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_nomemae" class="fil3-field">
+            </div>
+            <div class="field col-span-2">
+              <label>Nº Declaração de Nascido Vivo <span class="req fil3-req">*</span></label>
+              <input type="text" id="fil3_nascvivo" class="fil3-field" placeholder="Obrigatório para recém-nascidos">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dep-block">
+        <div class="subsection-title">Filho(a) 4</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil4IncluirLabel">
+            <input type="checkbox" id="fil4_incluir" onchange="toggleDepFilho(4)"> Incluir filho(a) 4 no plano
+          </label>
+        </div>
+        <div id="fil4Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_nome" class="fil4-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_cpf" class="fil4-field" maxlength="14" placeholder="000.000.000-00">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil4-req">*</span></label>
+              <div class="data-triple">
+                <input type="text" id="fil4_d" class="fil4-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil4_m" class="fil4-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil4_y" class="fil4-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_sus" class="fil4-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_nomemae" class="fil4-field">
+            </div>
+            <div class="field col-span-2">
+              <label>Nº Declaração de Nascido Vivo <span class="req fil4-req">*</span></label>
+              <input type="text" id="fil4_nascvivo" class="fil4-field" placeholder="Obrigatório para recém-nascidos">
             </div>
           </div>
         </div>
@@ -668,6 +797,7 @@ const TEMPLATE_PATH = "./F-089_17 (PR-090) (Adesão de Assistência Médica).pdf
 const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const NUM_FILHOS = 4;
 const PDF_FONT_TEXTO = 9;
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
 let templateBytes = null;
@@ -800,11 +930,11 @@ function toggleDepConjuge() {
   if (box) box.style.display = on ? "block" : "none";
   document.getElementById("conjIncluirLabel")?.classList.toggle("active", !!on);
 }
-function toggleDepFilho() {
-  const on = document.getElementById("fil1_incluir")?.checked;
-  const box = document.getElementById("fil1Campos");
+function toggleDepFilho(n) {
+  const on = document.getElementById(`fil${n}_incluir`)?.checked;
+  const box = document.getElementById(`fil${n}Campos`);
   if (box) box.style.display = on ? "block" : "none";
-  document.getElementById("fil1IncluirLabel")?.classList.toggle("active", !!on);
+  document.getElementById(`fil${n}IncluirLabel`)?.classList.toggle("active", !!on);
 }
 function syncRadioActive(name) {
   document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
@@ -837,7 +967,19 @@ function validarCamposObrigatorios() {
     if (vazio) faltantes.push({ id, nome });
   };
 
-  ["conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae", "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo"].forEach((id) => marcarCampoInvalido(id, false));
+  ["conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae"].forEach((id) => marcarCampoInvalido(id, false));
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    [
+      `fil${fn}_nome`,
+      `fil${fn}_cpf`,
+      `fil${fn}_d`,
+      `fil${fn}_m`,
+      `fil${fn}_y`,
+      `fil${fn}_sus`,
+      `fil${fn}_nomemae`,
+      `fil${fn}_nascvivo`
+    ].forEach((id) => marcarCampoInvalido(id, false));
+  }
 
   if (!radio("tipoAdesao")) {
     showToast("Selecione o tipo de movimentação.", false);
@@ -882,22 +1024,24 @@ function validarCamposObrigatorios() {
     }
   }
 
-  if (document.getElementById("fil1_incluir")?.checked) {
-    add("fil1_nome", "Nome do filho(a)");
-    add("fil1_cpf", "CPF do filho(a)");
-    const dnFOk = !!(v("fil1_d") && v("fil1_m") && v("fil1_y"));
-    ["fil1_d", "fil1_m", "fil1_y"].forEach((id) => marcarCampoInvalido(id, !dnFOk));
-    if (!dnFOk) faltantes.push({ id: "fil1_d", nome: "Data de nascimento do filho(a)" });
-    add("fil1_sus", "SUS do filho(a)");
-    add("fil1_nomemae", "Nome da mãe do filho(a)");
-    add("fil1_nascvivo", "Declaração de nascido vivo");
-    if (v("fil1_sus") && digitosCount(v("fil1_sus")) !== 15) {
-      marcarCampoInvalido("fil1_sus", true);
-      faltantes.push({ id: "fil1_sus", nome: "SUS do filho(a) (15 dígitos)" });
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    if (!document.getElementById(`fil${fn}_incluir`)?.checked) continue;
+    const rot = `filho(a) ${fn}`;
+    add(`fil${fn}_nome`, `Nome (${rot})`);
+    add(`fil${fn}_cpf`, `CPF (${rot})`);
+    const dnFOk = !!(v(`fil${fn}_d`) && v(`fil${fn}_m`) && v(`fil${fn}_y`));
+    [`fil${fn}_d`, `fil${fn}_m`, `fil${fn}_y`].forEach((id) => marcarCampoInvalido(id, !dnFOk));
+    if (!dnFOk) faltantes.push({ id: `fil${fn}_d`, nome: `Data de nascimento (${rot})` });
+    add(`fil${fn}_sus`, `SUS (${rot})`);
+    add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
+    add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
+    if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
+      marcarCampoInvalido(`fil${fn}_sus`, true);
+      faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
     }
-    if (v("fil1_cpf") && digitosCount(v("fil1_cpf")) !== 11) {
-      marcarCampoInvalido("fil1_cpf", true);
-      faltantes.push({ id: "fil1_cpf", nome: "CPF do filho(a) (11 dígitos)" });
+    if (v(`fil${fn}_cpf`) && digitosCount(v(`fil${fn}_cpf`)) !== 11) {
+      marcarCampoInvalido(`fil${fn}_cpf`, true);
+      faltantes.push({ id: `fil${fn}_cpf`, nome: `CPF (${rot}, 11 dígitos)` });
     }
   }
 
@@ -990,15 +1134,18 @@ function limparDadosFormulario() {
   });
   syncRadioActive("tipoAdesao");
   document.getElementById("conj_incluir").checked = false;
-  document.getElementById("fil1_incluir").checked = false;
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    const ch = document.getElementById(`fil${fn}_incluir`);
+    if (ch) ch.checked = false;
+    toggleDepFilho(fn);
+  }
   toggleDepConjuge();
-  toggleDepFilho();
   document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
 }
 
-const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v1";
+const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v2";
 const RASCUNHO_IDS = [
   "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
@@ -1006,6 +1153,9 @@ const RASCUNHO_IDS = [
   "tel_ddd", "tel_numero",
   "conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae",
   "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
+  "fil2_nome", "fil2_cpf", "fil2_d", "fil2_m", "fil2_y", "fil2_sus", "fil2_nomemae", "fil2_nascvivo",
+  "fil3_nome", "fil3_cpf", "fil3_d", "fil3_m", "fil3_y", "fil3_sus", "fil3_nomemae", "fil3_nascvivo",
+  "fil4_nome", "fil4_cpf", "fil4_d", "fil4_m", "fil4_y", "fil4_sus", "fil4_nomemae", "fil4_nascvivo",
   "assinaturaName", "dataAssinatura"
 ];
 let rascunhoSalvarTimer = null;
@@ -1024,12 +1174,15 @@ function coletarEstadoRascunho() {
     if (el) campos[id] = el.value;
   });
   return {
-    v: 1,
+    v: 2,
     t: Date.now(),
     campos,
     tipoAdesao: radio("tipoAdesao"),
     conj_incluir: !!document.getElementById("conj_incluir")?.checked,
-    fil1_incluir: !!document.getElementById("fil1_incluir")?.checked
+    fil1_incluir: !!document.getElementById("fil1_incluir")?.checked,
+    fil2_incluir: !!document.getElementById("fil2_incluir")?.checked,
+    fil3_incluir: !!document.getElementById("fil3_incluir")?.checked,
+    fil4_incluir: !!document.getElementById("fil4_incluir")?.checked
   };
 }
 
@@ -1047,11 +1200,14 @@ function aplicarEstadoRascunho(obj) {
   }
   syncRadioActive("tipoAdesao");
   const ci = document.getElementById("conj_incluir");
-  const fi = document.getElementById("fil1_incluir");
   if (ci) ci.checked = !!obj.conj_incluir;
-  if (fi) fi.checked = !!obj.fil1_incluir;
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    const fi = document.getElementById(`fil${fn}_incluir`);
+    const key = `fil${fn}_incluir`;
+    if (fi) fi.checked = !!obj[key];
+    toggleDepFilho(fn);
+  }
   toggleDepConjuge();
-  toggleDepFilho();
 }
 
 function agendarSalvarRascunho() {
@@ -1078,7 +1234,7 @@ function tentarRestaurarRascunho() {
     const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
-    if (!obj || obj.v !== 1 || !obj.campos) return false;
+    if (!obj || (obj.v !== 1 && obj.v !== 2) || !obj.campos) return false;
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
@@ -1151,18 +1307,20 @@ async function gerarPDF() {
       escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
     }
 
-    const filSchema = C.dependentes.filhos[0];
-    const fil = filSchema.campos;
-    const incluirFil = document.getElementById("fil1_incluir")?.checked;
-    marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
-    if (incluirFil) {
-      escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v("fil1_nome"));
-      escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v("fil1_cpf"));
-      preencherDataSegmentada(page, font, fil.dtnasc, v("fil1_d"), v("fil1_m"), v("fil1_y"));
-      escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v("fil1_sus"));
-      escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v("fil1_nomemae"));
-      escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, v("fil1_nascvivo"));
-    }
+    const filhosSchema = C.dependentes.filhos || [];
+    filhosSchema.forEach((filSchema, idx) => {
+      const n = idx + 1;
+      const fil = filSchema.campos;
+      const incluirFil = document.getElementById(`fil${n}_incluir`)?.checked;
+      marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
+      if (!incluirFil) return;
+      escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v(`fil${n}_nome`));
+      escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v(`fil${n}_cpf`));
+      preencherDataSegmentada(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
+      escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
+      escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
+      escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, v(`fil${n}_nascvivo`));
+    });
 
     const ass = C.assinatura.campos;
     escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, v("assinaturaName") || v("funcionario"));
@@ -1214,11 +1372,11 @@ async function baixarPdfVazio() {
   }
 }
 
-["cpf", "conj_cpf", "fil1_cpf"].forEach((id) => {
+["cpf", "conj_cpf", "fil1_cpf", "fil2_cpf", "fil3_cpf", "fil4_cpf"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", () => maskCPF(el));
 });
-["sus", "conj_sus", "fil1_sus"].forEach((id) => {
+["sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", () => maskSUS(el));
 });
@@ -1228,17 +1386,27 @@ document.getElementById("tel_ddd")?.addEventListener("input", function () {
 document.getElementById("tel_numero")?.addEventListener("input", function () {
   maskTelNumero(this);
 });
-["dn_dia", "dn_mes", "adm_dia", "adm_mes", "conj_d", "conj_m", "fil1_d", "fil1_m"].forEach((id) => {
+["dn_dia", "dn_mes", "adm_dia", "adm_mes", "conj_d", "conj_m", "fil1_d", "fil1_m", "fil2_d", "fil2_m", "fil3_d", "fil3_m", "fil4_d", "fil4_m"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", () => maskDigitos2(el));
 });
-["dn_ano", "adm_ano", "conj_y", "fil1_y"].forEach((id) => {
+["dn_ano", "adm_ano", "conj_y", "fil1_y", "fil2_y", "fil3_y", "fil4_y"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", () => maskDigitos4(el));
 });
 
 document.querySelectorAll('input[type="text"]').forEach((el) => {
-  if (["tel_ddd", "tel_numero", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano", "conj_d", "conj_m", "conj_y", "fil1_d", "fil1_m", "fil1_y", "sus", "conj_sus", "fil1_sus", "cpf", "conj_cpf", "fil1_cpf"].includes(el.id)) return;
+  if (
+    [
+      "tel_ddd", "tel_numero", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
+      "conj_d", "conj_m", "conj_y", "fil1_d", "fil1_m", "fil1_y", "fil2_d", "fil2_m", "fil2_y",
+      "fil3_d", "fil3_m", "fil3_y", "fil4_d", "fil4_m", "fil4_y",
+      "sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus",
+      "cpf", "conj_cpf", "fil1_cpf", "fil2_cpf", "fil3_cpf", "fil4_cpf"
+    ].includes(el.id)
+  ) {
+    return;
+  }
   el.addEventListener("input", () => aplicarMaiusculas(el));
 });
 
