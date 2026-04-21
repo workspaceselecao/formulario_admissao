@@ -3,7 +3,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/ficha_cadastral.html",
+      "destination": "/index.html",
       "permanent": false
     }
   ]

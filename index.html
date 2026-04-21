@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulários de Admissão – Atento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .hero {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 36px 24px 40px;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .hero-inner { max-width: 640px; margin: 0 auto; }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .brand-mark {
+    height: 36px;
+    min-width: 36px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg, #01426A, #0a6ba8);
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 20px 64px;
+  }
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+  @media (max-width: 720px) {
+    .home-grid { grid-template-columns: 1fr; }
+  }
+  .home-card {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform 0.18s, box-shadow 0.2s, border-color 0.18s;
+  }
+  .home-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+  .home-card:focus-visible {
+    outline: 3px solid rgba(1, 66, 106, 0.35);
+    outline-offset: 2px;
+  }
+  .home-card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .home-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .home-card p {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.55;
+    margin-bottom: 0;
+  }
+  .home-card-cta {
+    margin-top: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .home-card:hover .home-card-cta { color: var(--accent-dark); }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="brand-row">
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <span style="font-size:22px;font-weight:700">Atento</span>
+      </div>
+      <h1>Formulários de admissão</h1>
+      <p>Escolha o formulário abaixo para preencher e gerar o PDF no seu navegador.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="home-grid">
+      <a class="home-card" href="ficha_cadastral.html">
+        <div class="home-card-tag">F-075 · PR-011</div>
+        <h2>Ficha Cadastral</h2>
+        <p>Dados pessoais, endereço, conta bancária, dependentes, benefícios e declaração para admissão operacional e administrativo.</p>
+        <span class="home-card-cta">Abrir formulário →</span>
+      </a>
+      <a class="home-card" href="assistencia_medica.html">
+        <div class="home-card-tag">F-089 · PR-090</div>
+        <h2>Assistência Médica</h2>
+        <p>Proposta de adesão à assistência médica (Grupo NotreDame Intermédica): tipo de movimentação, dados do funcionário, dependentes e assinatura.</p>
+        <span class="home-card-cta">Abrir formulário →</span>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

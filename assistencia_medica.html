@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adesão Assistência Médica – Atento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf9f7;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --border-strong: #9e9890;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --label: #5a554e;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .page-header {
+    background: #fff;
+    padding: 28px 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .page-header .subtitle {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .page-header-home {
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+  .page-header-home a {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .page-header-home a:hover {
+    color: var(--accent-dark);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rascunho-bar {
+    font-size: 12px;
+    color: var(--text-mid);
+    margin: 12px 0 0;
+    max-width: 520px;
+    line-height: 1.5;
+  }
+  .rascunho-descartar {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 6px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  .section-card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card:hover { box-shadow: var(--shadow-lg); }
+  .section-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .section-body { padding: 28px 28px 20px; }
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+  .field input, .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    width: 100%;
+    appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(1,66,106,0.12);
+  }
+  .field input.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .data-triple {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .data-triple input {
+    width: auto;
+    min-width: 0;
+  }
+  .data-triple .sep {
+    color: var(--text-light);
+    font-weight: 600;
+    user-select: none;
+  }
+  .radio-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 6px;
+  }
+  .radio-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    max-width: 100%;
+  }
+  .radio-label input {
+    margin-top: 2px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .radio-label.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+  }
+  .radio-hint {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-light);
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .check-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+  }
+  .check-label input { accent-color: var(--accent); }
+  .check-label.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+  .aviso-box {
+    background: #fffbf5;
+    border: 1.5px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #6b5a3a;
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+  .subsection-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    color: var(--label);
+    margin-bottom: 12px;
+  }
+  .dep-block {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    background: var(--surface);
+  }
+  .form-actions-bottom {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .btn-export {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(1,66,106,0.28);
+  }
+  .btn-export:hover { background: var(--accent-dark); }
+  .btn-download-empty {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-download-empty:hover { background: var(--accent-soft); }
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--text);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.20);
+  }
+  #toast.show { display: flex; }
+  #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; }
+  body.modal-open { overflow: hidden; }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.58);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(620px, 100%);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .modal-head {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .modal-body {
+    padding: 18px;
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px 18px;
+  }
+  .btn-modal {
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-modal.cancel { background: #fff; color: var(--text-mid); }
+  .btn-modal.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
+  @media (max-width: 640px) {
+    .page-header { padding: 20px; flex-direction: column; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3 { grid-column: span 1; }
+    .form-actions-bottom { flex-direction: column; width: 100%; }
+    .btn-export, .btn-download-empty { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div>
+    <div class="brand">
+      <span class="brand-logo" aria-hidden="true" style="height:30px;min-width:30px;display:grid;place-items:center;background:linear-gradient(145deg,#01426A,#0a6ba8);border-radius:8px;color:#fff;font-weight:800;font-size:13px">A</span>
+      <span>Assistência Médica</span>
+    </div>
+    <div class="subtitle">F-089 (PR-090) / 17 · Adesão NotreDame Intermédica</div>
+    <p class="rascunho-bar" id="rascunhoBar">
+      Preenchimento salvo neste navegador até você gerar o PDF.
+      <button type="button" class="rascunho-descartar" id="btnDescartarRascunho">Descartar rascunho</button>
+    </p>
+  </div>
+  <div class="page-header-home">
+    <a href="index.html">← Início</a>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Tipo de movimentação</div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;line-height:1.55">Marque <strong>uma</strong> opção (corresponde à caixa no PDF).</p>
+      <div class="radio-inline" id="tipoAdesaoGroup">
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante"> Optante na Admissão (Inclusão)</label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante">
+          <span>Não Optante na Admissão (Cancelamento)<span class="radio-hint">Exclusão em até 60 dias após admissão, somente para os planos Smart 300 Plus Enfermaria e Advance 700 Enfermaria.</span></span>
+        </label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="matrimonio">
+          <span>Matrimônio – Inclusão de Dependente<span class="radio-hint">Prazo: até 20 dias da data do casamento.</span></span>
+        </label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="exclusaodependente">
+          <span>Exclusão de Dependente<span class="radio-hint">Somente em caso de óbito ou separação judicial.</span></span>
+        </label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="nascfilho">
+          <span>Nascimento de Filho – Inclusão de Dependente<span class="radio-hint">Prazo: até 20 dias da data do nascimento.</span></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field col-span-2">
+          <label>Nome do Funcionário <span class="req">*</span></label>
+          <input type="text" id="funcionario" placeholder="Nome completo">
+        </div>
+        <div class="field">
+          <label>Matrícula <span class="req">*</span></label>
+          <input type="text" id="matricula" placeholder="">
+        </div>
+        <div class="field">
+          <label>Nome da Mãe</label>
+          <input type="text" id="nomemae" placeholder="">
+        </div>
+        <div class="field">
+          <label>Nº do Cartão SUS <span class="req">*</span></label>
+          <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
+        </div>
+        <div class="field">
+          <label>RG</label>
+          <input type="text" id="rg" placeholder="">
+        </div>
+        <div class="field">
+          <label>CPF <span class="req">*</span></label>
+          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14">
+        </div>
+        <div class="field">
+          <label>Data de Nascimento <span class="req">*</span></label>
+          <div class="data-triple">
+            <input type="text" id="dn_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+            <span class="sep">/</span>
+            <input type="text" id="dn_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+            <span class="sep">/</span>
+            <input type="text" id="dn_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+          </div>
+        </div>
+        <div class="field">
+          <label>Data de Admissão</label>
+          <div class="data-triple">
+            <input type="text" id="adm_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+            <span class="sep">/</span>
+            <input type="text" id="adm_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+            <span class="sep">/</span>
+            <input type="text" id="adm_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+          </div>
+        </div>
+        <div class="field">
+          <label>Cargo</label>
+          <input type="text" id="cargo" placeholder="">
+        </div>
+        <div class="field">
+          <label>Site / Unidade</label>
+          <input type="text" id="site" placeholder="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Endereço residencial</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field col-span-2">
+          <label>Endereço (Rua/Av)</label>
+          <input type="text" id="rua" placeholder="">
+        </div>
+        <div class="field">
+          <label>Número</label>
+          <input type="text" id="numero" placeholder="">
+        </div>
+        <div class="field">
+          <label>Complemento</label>
+          <input type="text" id="complemento" placeholder="">
+        </div>
+        <div class="field">
+          <label>Bairro</label>
+          <input type="text" id="bairro" placeholder="">
+        </div>
+        <div class="field">
+          <label>Cidade/UF</label>
+          <input type="text" id="cidadeuf" placeholder="">
+        </div>
+        <div class="field">
+          <label>Telefone DDD</label>
+          <input type="text" id="tel_ddd" inputmode="numeric" maxlength="2" placeholder="00" style="max-width:72px">
+        </div>
+        <div class="field">
+          <label>Telefone Número</label>
+          <input type="text" id="tel_numero" inputmode="numeric" placeholder="00000-0000" maxlength="11">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dependentes</div>
+    <div class="section-body">
+      <div class="aviso-box" style="margin-bottom:18px">
+        Marque <strong>Incluir</strong> apenas para quem deve constar no plano. Os campos marcados com (*) no PDF tornam-se obrigatórios quando a inclusão estiver marcada.
+      </div>
+
+      <div class="dep-block">
+        <div class="subsection-title">Cônjuge</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="conjIncluirLabel">
+            <input type="checkbox" id="conj_incluir" onchange="toggleDepConjuge()"> Incluir cônjuge no plano
+          </label>
+        </div>
+        <div id="conjCampos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Cônjuge <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_nome" class="conj-field">
+            </div>
+            <div class="field">
+              <label>CPF do Cônjuge <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_cpf" class="conj-field" maxlength="14" placeholder="000.000.000-00">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req conj-req">*</span></label>
+              <div class="data-triple">
+                <input type="text" id="conj_d" class="conj-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="conj_m" class="conj-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="conj_y" class="conj-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_sus" class="conj-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field col-span-2">
+              <label>Nome da Mãe do(a) Cônjuge <span class="req conj-req">*</span></label>
+              <input type="text" id="conj_nomemae" class="conj-field">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dep-block">
+        <div class="subsection-title">Filho(a) 1</div>
+        <div class="check-group" style="margin-bottom:14px">
+          <label class="check-label" id="fil1IncluirLabel">
+            <input type="checkbox" id="fil1_incluir" onchange="toggleDepFilho()"> Incluir filho(a) no plano
+          </label>
+        </div>
+        <div id="fil1Campos" style="display:none">
+          <div class="grid grid-2">
+            <div class="field col-span-2">
+              <label>Nome do Filho(a) <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_nome" class="fil1-field">
+            </div>
+            <div class="field">
+              <label>CPF <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_cpf" class="fil1-field" maxlength="14" placeholder="000.000.000-00">
+            </div>
+            <div class="field">
+              <label>Data de Nascimento <span class="req fil1-req">*</span></label>
+              <div class="data-triple">
+                <input type="text" id="fil1_d" class="fil1-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil1_m" class="fil1-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
+                <span class="sep">/</span>
+                <input type="text" id="fil1_y" class="fil1-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
+              </div>
+            </div>
+            <div class="field">
+              <label>Nº Cartão SUS <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_sus" class="fil1-field" inputmode="numeric" maxlength="18" placeholder="000 0000 0000 0000">
+            </div>
+            <div class="field">
+              <label>Nome da Mãe do Filho(a) <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_nomemae" class="fil1-field">
+            </div>
+            <div class="field col-span-2">
+              <label>Nº Declaração de Nascido Vivo <span class="req fil1-req">*</span></label>
+              <input type="text" id="fil1_nascvivo" class="fil1-field" placeholder="Obrigatório para recém-nascidos">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Assinatura</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Assinatura (nome por extenso) <span class="req">*</span></label>
+          <input type="text" id="assinaturaName" placeholder="Igual ao documento de identificação">
+        </div>
+        <div class="field">
+          <label>Data <span class="req">*</span></label>
+          <input type="date" id="dataAssinatura">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn-download-empty" type="button" onclick="baixarPdfVazio()">Baixar PDF vazio</button>
+    <button class="btn-export" type="button" onclick="gerarPDF()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Gerar PDF preenchido
+    </button>
+  </div>
+</div>
+
+<div id="toast" role="status"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lgpdTitulo">
+  <div class="modal-card">
+    <div class="modal-head" id="lgpdTitulo">Privacidade e dados pessoais</div>
+    <div class="modal-body">
+      Os dados informados serão apagados automaticamente após a geração do PDF.<br>
+      A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
+      <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
+      Deseja continuar com a geração do PDF?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="lgpdCancelarBtn" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="lgpdContinuarBtn" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+const TEMPLATE_PATH = "./F-089_17 (PR-090) (Adesão de Assistência Médica).pdf";
+const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
+const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
+const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const PDF_FONT_TEXTO = 9;
+const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
+let templateBytes = null;
+let camposSchema = null;
+
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g, "").slice(0, 11);
+  if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+  el.value = v;
+}
+function maskSUS(el) {
+  let d = el.value.replace(/\D/g, "").slice(0, 15);
+  const p = [];
+  if (d.length >= 1) p.push(d.slice(0, 3));
+  if (d.length > 3) p.push(d.slice(3, 7));
+  if (d.length > 7) p.push(d.slice(7, 11));
+  if (d.length > 11) p.push(d.slice(11, 15));
+  el.value = p.join(" ");
+}
+function maskTelNumero(el) {
+  let d = el.value.replace(/\D/g, "").slice(0, 9);
+  if (d.length > 5) el.value = d.replace(/(\d{5})(\d{0,4})/, "$1-$2");
+  else el.value = d;
+}
+function maskDDD(el) {
+  el.value = el.value.replace(/\D/g, "").slice(0, 2);
+}
+function maskDigitos2(el) {
+  el.value = el.value.replace(/\D/g, "").slice(0, 2);
+}
+function maskDigitos4(el) {
+  el.value = el.value.replace(/\D/g, "").slice(0, 4);
+}
+function aplicarMaiusculas(el) {
+  const o = el.value;
+  const u = o.toLocaleUpperCase("pt-BR");
+  if (o !== u) {
+    const s = el.selectionStart;
+    const e = el.selectionEnd;
+    el.value = u;
+    if (s != null && e != null) el.setSelectionRange(s, e);
+  }
+}
+function clonarArrayBuffer(buffer) {
+  return buffer.slice(0);
+}
+function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
+  let t = String(texto || "").trim();
+  if (!t) return "";
+  if (font.widthOfTextAtSize(t, tamanhoFonte) <= larguraMax) return t;
+  const elipsis = "...";
+  let baixo = 0;
+  let alto = t.length;
+  while (baixo < alto) {
+    const meio = Math.ceil((baixo + alto) / 2);
+    const teste = t.slice(0, meio) + elipsis;
+    if (font.widthOfTextAtSize(teste, tamanhoFonte) <= larguraMax) baixo = meio;
+    else alto = meio - 1;
+  }
+  return t.slice(0, alto) + elipsis;
+}
+function baselineYNoCampo(box, tamanhoFonte) {
+  const yBottom = Number(box.y) || 0;
+  const h = Number(box.altura ?? box.height) || 12;
+  return yBottom + Math.min(h * 0.78, tamanhoFonte * 1.12);
+}
+function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
+  if (!coord) return false;
+  const c = coord;
+  const w = Number(c.largura ?? c.width) || 200;
+  const size = options.size ?? PDF_FONT_TEXTO;
+  const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
+  if (!str) return false;
+  const y =
+    baselineYNoCampo(c, size) -
+    OFFSET_Y_TEXTO_UMA_LINHA_PT +
+    (options.offsetY ?? 0);
+  const x = Number(c.x) || 0;
+  page.drawText(str, {
+    x: x + (options.offsetX ?? 0.5),
+    y,
+    size,
+    font,
+    maxWidth: w - 2
+  });
+  return true;
+}
+function marcarCheckboxCoord(page, font, coord, ativo, options = {}) {
+  if (!ativo || !coord) return false;
+  const x = Number(coord.x) || 0;
+  const yBottom = Number(coord.y) || 0;
+  const w = Number(coord.largura ?? coord.width) || 7;
+  const h = Number(coord.altura ?? coord.height) || 7;
+  const size = options.size ?? 8;
+  const sym = options.simbolo ?? "X";
+  const tw = font.widthOfTextAtSize(sym, size);
+  const cx = x + (w - tw) / 2;
+  const cy = yBottom + (h - size * 0.72) / 2;
+  page.drawText(sym, { x: cx, y: cy, size, font });
+  return true;
+}
+function marcarRadioJsonOpcao(page, font, grupoCampo, chaveOpcao) {
+  if (!grupoCampo?.opcoes || !chaveOpcao) return false;
+  const alvo = grupoCampo.opcoes[chaveOpcao];
+  const coord = alvo?.coordenadas;
+  return marcarCheckboxCoord(page, font, coord, true);
+}
+function preencherDataSegmentada(page, font, campoSchema, dia, mes, ano) {
+  if (!campoSchema?.segmentos) return;
+  const s = campoSchema.segmentos;
+  const d = String(dia || "").replace(/\D/g, "").slice(0, 2);
+  const m = String(mes || "").replace(/\D/g, "").slice(0, 2);
+  const y = String(ano || "").replace(/\D/g, "").slice(0, 4);
+  if (d) escreverTextoCampoCoord(page, font, s.dia.coordenadas, d.padStart(2, "0"));
+  if (m) escreverTextoCampoCoord(page, font, s.mes.coordenadas, m.padStart(2, "0"));
+  if (y) escreverTextoCampoCoord(page, font, s.ano.coordenadas, y);
+}
+
+function v(id) {
+  return (document.getElementById(id)?.value || "").trim();
+}
+function radio(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+}
+function toggleDepConjuge() {
+  const on = document.getElementById("conj_incluir")?.checked;
+  const box = document.getElementById("conjCampos");
+  if (box) box.style.display = on ? "block" : "none";
+  document.getElementById("conjIncluirLabel")?.classList.toggle("active", !!on);
+}
+function toggleDepFilho() {
+  const on = document.getElementById("fil1_incluir")?.checked;
+  const box = document.getElementById("fil1Campos");
+  if (box) box.style.display = on ? "block" : "none";
+  document.getElementById("fil1IncluirLabel")?.classList.toggle("active", !!on);
+}
+function syncRadioActive(name) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
+    r.closest(".radio-label")?.classList.toggle("active", r.checked);
+  });
+}
+document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
+  r.addEventListener("change", () => syncRadioActive("tipoAdesao"));
+});
+
+function formatDate(d) {
+  if (!d) return "";
+  const [y, m, day] = d.split("-");
+  return `${day}/${m}/${y}`;
+}
+function marcarCampoInvalido(id, invalido) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle("invalid", !!invalido);
+}
+function digitosCount(str) {
+  return String(str || "").replace(/\D/g, "").length;
+}
+function validarCamposObrigatorios() {
+  const faltantes = [];
+  const add = (id, nome) => {
+    const el = document.getElementById(id);
+    const vazio = !el || (el.value || "").trim().length === 0;
+    marcarCampoInvalido(id, vazio);
+    if (vazio) faltantes.push({ id, nome });
+  };
+
+  ["conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae", "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo"].forEach((id) => marcarCampoInvalido(id, false));
+
+  if (!radio("tipoAdesao")) {
+    showToast("Selecione o tipo de movimentação.", false);
+    document.getElementById("tipoAdesaoGroup")?.querySelector("input")?.focus();
+    return false;
+  }
+
+  add("funcionario", "Nome do Funcionário");
+  add("matricula", "Matrícula");
+  add("sus", "Cartão SUS");
+  add("cpf", "CPF");
+
+  const dnOk = !!(v("dn_dia") && v("dn_mes") && v("dn_ano"));
+  ["dn_dia", "dn_mes", "dn_ano"].forEach((id) => marcarCampoInvalido(id, !dnOk));
+  if (!dnOk) faltantes.push({ id: "dn_dia", nome: "Data de Nascimento (dia, mês e ano)" });
+
+  if (v("sus") && digitosCount(v("sus")) !== 15) {
+    marcarCampoInvalido("sus", true);
+    faltantes.push({ id: "sus", nome: "Cartão SUS (15 dígitos)" });
+  }
+
+  if (v("cpf") && digitosCount(v("cpf")) !== 11) {
+    marcarCampoInvalido("cpf", true);
+    faltantes.push({ id: "cpf", nome: "CPF (11 dígitos)" });
+  }
+
+  if (document.getElementById("conj_incluir")?.checked) {
+    add("conj_nome", "Nome do cônjuge");
+    add("conj_cpf", "CPF do cônjuge");
+    const dnCOk = !!(v("conj_d") && v("conj_m") && v("conj_y"));
+    ["conj_d", "conj_m", "conj_y"].forEach((id) => marcarCampoInvalido(id, !dnCOk));
+    if (!dnCOk) faltantes.push({ id: "conj_d", nome: "Data de nascimento do cônjuge" });
+    add("conj_sus", "SUS do cônjuge");
+    add("conj_nomemae", "Nome da mãe do cônjuge");
+    if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
+      marcarCampoInvalido("conj_sus", true);
+      faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos)" });
+    }
+    if (v("conj_cpf") && digitosCount(v("conj_cpf")) !== 11) {
+      marcarCampoInvalido("conj_cpf", true);
+      faltantes.push({ id: "conj_cpf", nome: "CPF do cônjuge (11 dígitos)" });
+    }
+  }
+
+  if (document.getElementById("fil1_incluir")?.checked) {
+    add("fil1_nome", "Nome do filho(a)");
+    add("fil1_cpf", "CPF do filho(a)");
+    const dnFOk = !!(v("fil1_d") && v("fil1_m") && v("fil1_y"));
+    ["fil1_d", "fil1_m", "fil1_y"].forEach((id) => marcarCampoInvalido(id, !dnFOk));
+    if (!dnFOk) faltantes.push({ id: "fil1_d", nome: "Data de nascimento do filho(a)" });
+    add("fil1_sus", "SUS do filho(a)");
+    add("fil1_nomemae", "Nome da mãe do filho(a)");
+    add("fil1_nascvivo", "Declaração de nascido vivo");
+    if (v("fil1_sus") && digitosCount(v("fil1_sus")) !== 15) {
+      marcarCampoInvalido("fil1_sus", true);
+      faltantes.push({ id: "fil1_sus", nome: "SUS do filho(a) (15 dígitos)" });
+    }
+    if (v("fil1_cpf") && digitosCount(v("fil1_cpf")) !== 11) {
+      marcarCampoInvalido("fil1_cpf", true);
+      faltantes.push({ id: "fil1_cpf", nome: "CPF do filho(a) (11 dígitos)" });
+    }
+  }
+
+  add("assinaturaName", "Assinatura (nome)");
+  add("dataAssinatura", "Data da assinatura");
+
+  const vistos = new Set();
+  const unicos = faltantes.filter((item) => {
+    const k = `${item.id}:${item.nome}`;
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  });
+
+  if (unicos.length) {
+    showToast(`Preencha ou corrija: ${unicos.map((x) => x.nome).join(", ")}.`, false);
+    document.getElementById(unicos[0].id)?.focus();
+    return false;
+  }
+  return true;
+}
+
+function showToast(msg, ok = true) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.querySelector(".toast-dot").style.background = ok ? "#4caf7d" : "#e05c3a";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+let lgpdResolver = null;
+function abrirModalLGPD() {
+  const modal = document.getElementById("lgpdModal");
+  if (!modal) return Promise.resolve(false);
+  modal.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("lgpdContinuarBtn")?.focus(), 0);
+  return new Promise((resolve) => {
+    lgpdResolver = resolve;
+  });
+}
+function fecharModalLGPD(decisao) {
+  const modal = document.getElementById("lgpdModal");
+  if (modal) modal.classList.remove("show");
+  document.body.classList.remove("modal-open");
+  const fn = lgpdResolver;
+  lgpdResolver = null;
+  if (fn) fn(!!decisao);
+}
+document.getElementById("lgpdContinuarBtn")?.addEventListener("click", () => fecharModalLGPD(true));
+document.getElementById("lgpdCancelarBtn")?.addEventListener("click", () => fecharModalLGPD(false));
+
+async function confirmarPoliticaLGPD() {
+  const ok = await abrirModalLGPD();
+  return ok;
+}
+
+async function carregarCamposSchema() {
+  if (camposSchema) return true;
+  try {
+    const res = await fetch(CAMPOS_JSON_FETCH_PATH, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    camposSchema = await res.json();
+    if (!camposSchema?.campos) throw new Error("Estrutura inválida");
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
+    return false;
+  }
+}
+
+async function carregarTemplateInicial() {
+  try {
+    const res = await fetch(TEMPLATE_FETCH_PATH);
+    if (!res.ok) throw new Error("Template não encontrado");
+    const fetchedBytes = await res.arrayBuffer();
+    templateBytes = clonarArrayBuffer(fetchedBytes);
+  } catch (_e) {
+    showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
+  }
+}
+
+function limparDadosFormulario() {
+  document.querySelectorAll('input[type="text"], input[type="date"]').forEach((el) => {
+    if (el.id === "dataAssinatura") return;
+    el.value = "";
+  });
+  document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
+    r.checked = false;
+  });
+  syncRadioActive("tipoAdesao");
+  document.getElementById("conj_incluir").checked = false;
+  document.getElementById("fil1_incluir").checked = false;
+  toggleDepConjuge();
+  toggleDepFilho();
+  document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
+  const elData = document.getElementById("dataAssinatura");
+  if (elData) elData.valueAsDate = new Date();
+}
+
+const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v1";
+const RASCUNHO_IDS = [
+  "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
+  "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
+  "cargo", "site", "rua", "numero", "complemento", "bairro", "cidadeuf",
+  "tel_ddd", "tel_numero",
+  "conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae",
+  "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
+  "assinaturaName", "dataAssinatura"
+];
+let rascunhoSalvarTimer = null;
+let ignorarSalvarRascunho = false;
+
+function limparRascunhoLocal() {
+  try {
+    localStorage.removeItem(RASCUNHO_STORAGE_KEY);
+  } catch (_) {}
+}
+
+function coletarEstadoRascunho() {
+  const campos = {};
+  RASCUNHO_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) campos[id] = el.value;
+  });
+  return {
+    v: 1,
+    t: Date.now(),
+    campos,
+    tipoAdesao: radio("tipoAdesao"),
+    conj_incluir: !!document.getElementById("conj_incluir")?.checked,
+    fil1_incluir: !!document.getElementById("fil1_incluir")?.checked
+  };
+}
+
+function aplicarEstadoRascunho(obj) {
+  const c = obj.campos || {};
+  RASCUNHO_IDS.forEach((id) => {
+    if (c[id] === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.value = c[id];
+  });
+  const ta = obj.tipoAdesao;
+  if (ta) {
+    const inp = document.querySelector(`input[name="tipoAdesao"][value="${ta}"]`);
+    if (inp) inp.checked = true;
+  }
+  syncRadioActive("tipoAdesao");
+  const ci = document.getElementById("conj_incluir");
+  const fi = document.getElementById("fil1_incluir");
+  if (ci) ci.checked = !!obj.conj_incluir;
+  if (fi) fi.checked = !!obj.fil1_incluir;
+  toggleDepConjuge();
+  toggleDepFilho();
+}
+
+function agendarSalvarRascunho() {
+  if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    } catch (e) {
+      console.warn(e);
+    }
+  }, 500);
+}
+
+function salvarRascunhoLocalSincrono() {
+  if (ignorarSalvarRascunho) return;
+  try {
+    localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+  } catch (_) {}
+}
+
+function tentarRestaurarRascunho() {
+  try {
+    const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
+    if (!raw) return false;
+    const obj = JSON.parse(raw);
+    if (!obj || obj.v !== 1 || !obj.campos) return false;
+    ignorarSalvarRascunho = true;
+    aplicarEstadoRascunho(obj);
+    ignorarSalvarRascunho = false;
+    showToast("Rascunho recuperado. Você pode continuar o preenchimento.", true);
+    return true;
+  } catch (e) {
+    console.warn(e);
+    ignorarSalvarRascunho = false;
+    return false;
+  }
+}
+
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", () => {
+  limparRascunhoLocal();
+  limparDadosFormulario();
+  showToast("Rascunho descartado.", true);
+});
+
+document.querySelectorAll("input, select").forEach((el) => {
+  el.addEventListener("input", agendarSalvarRascunho);
+  el.addEventListener("change", agendarSalvarRascunho);
+});
+
+async function gerarPDF() {
+  try {
+    if (!validarCamposObrigatorios()) return;
+    if (!(await confirmarPoliticaLGPD())) return;
+    if (!(await carregarCamposSchema())) return;
+    if (!templateBytes) await carregarTemplateInicial();
+    if (!templateBytes) return;
+
+    const C = camposSchema.campos;
+    const tipo = radio("tipoAdesao");
+
+    const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
+    const page = pdfDoc.getPages()[0];
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    marcarRadioJsonOpcao(page, font, C.tipo_adesao, tipo);
+
+    const df = C.dados_funcionario.campos;
+    escreverTextoCampoCoord(page, font, df.funcionario.coordenadas, v("funcionario"));
+    escreverTextoCampoCoord(page, font, df.matricula.coordenadas, v("matricula"));
+    escreverTextoCampoCoord(page, font, df.nomemae.coordenadas, v("nomemae"));
+    escreverTextoCampoCoord(page, font, df.sus.coordenadas, v("sus"));
+    escreverTextoCampoCoord(page, font, df.rg.coordenadas, v("rg"));
+    escreverTextoCampoCoord(page, font, df.cpf.coordenadas, v("cpf"));
+    preencherDataSegmentada(page, font, df.datanasc, v("dn_dia"), v("dn_mes"), v("dn_ano"));
+    preencherDataSegmentada(page, font, df.dataadm, v("adm_dia"), v("adm_mes"), v("adm_ano"));
+    escreverTextoCampoCoord(page, font, df.cargo.coordenadas, v("cargo"));
+    escreverTextoCampoCoord(page, font, df.site.coordenadas, v("site"));
+
+    const en = C.endereco.campos;
+    escreverTextoCampoCoord(page, font, en.rua.coordenadas, v("rua"));
+    escreverTextoCampoCoord(page, font, en.numero.coordenadas, v("numero"));
+    escreverTextoCampoCoord(page, font, en.complemento.coordenadas, v("complemento"));
+    escreverTextoCampoCoord(page, font, en.bairro.coordenadas, v("bairro"));
+    escreverTextoCampoCoord(page, font, en.cidadeuf.coordenadas, v("cidadeuf"));
+    escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, v("tel_ddd"));
+    escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, v("tel_numero"));
+
+    const conj = C.dependentes.conjuge.campos;
+    const incluirConj = document.getElementById("conj_incluir")?.checked;
+    marcarCheckboxCoord(page, font, conj.incluir.coordenadas, incluirConj);
+    if (incluirConj) {
+      escreverTextoCampoCoord(page, font, conj.nome.coordenadas, v("conj_nome"));
+      escreverTextoCampoCoord(page, font, conj.cpf.coordenadas, v("conj_cpf"));
+      preencherDataSegmentada(page, font, conj.dtnasc, v("conj_d"), v("conj_m"), v("conj_y"));
+      escreverTextoCampoCoord(page, font, conj.sus.coordenadas, v("conj_sus"));
+      escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
+    }
+
+    const filSchema = C.dependentes.filhos[0];
+    const fil = filSchema.campos;
+    const incluirFil = document.getElementById("fil1_incluir")?.checked;
+    marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
+    if (incluirFil) {
+      escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v("fil1_nome"));
+      escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v("fil1_cpf"));
+      preencherDataSegmentada(page, font, fil.dtnasc, v("fil1_d"), v("fil1_m"), v("fil1_y"));
+      escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v("fil1_sus"));
+      escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v("fil1_nomemae"));
+      escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, v("fil1_nascvivo"));
+    }
+
+    const ass = C.assinatura.campos;
+    escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, v("assinaturaName") || v("funcionario"));
+    escreverTextoCampoCoord(page, font, ass.data.coordenadas, formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"));
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const nomeBase = "F-089 (PR-090) Adesão Assistência Médica";
+    const nomeUsuario = (v("funcionario") || "funcionario")
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    link.download = `${nomeBase} - ${nomeUsuario}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+    limparDadosFormulario();
+    limparRascunhoLocal();
+    showToast("PDF gerado com sucesso!");
+  } catch (error) {
+    console.error(error);
+    showToast("Falha ao gerar PDF. Verifique o console.", false);
+  }
+}
+
+async function baixarPdfVazio() {
+  try {
+    let bytes = templateBytes;
+    if (!bytes) {
+      const resp = await fetch(TEMPLATE_FETCH_PATH, { cache: "no-store" });
+      if (!resp.ok) throw new Error(`Falha (${resp.status})`);
+      bytes = await resp.arrayBuffer();
+    }
+    const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "F-089_Assistencia_Medica_vazia.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Download do PDF vazio iniciado.", true);
+  } catch (e) {
+    console.error(e);
+    showToast("Não foi possível baixar o PDF vazio.", false);
+  }
+}
+
+["cpf", "conj_cpf", "fil1_cpf"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", () => maskCPF(el));
+});
+["sus", "conj_sus", "fil1_sus"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", () => maskSUS(el));
+});
+document.getElementById("tel_ddd")?.addEventListener("input", function () {
+  maskDDD(this);
+});
+document.getElementById("tel_numero")?.addEventListener("input", function () {
+  maskTelNumero(this);
+});
+["dn_dia", "dn_mes", "adm_dia", "adm_mes", "conj_d", "conj_m", "fil1_d", "fil1_m"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", () => maskDigitos2(el));
+});
+["dn_ano", "adm_ano", "conj_y", "fil1_y"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", () => maskDigitos4(el));
+});
+
+document.querySelectorAll('input[type="text"]').forEach((el) => {
+  if (["tel_ddd", "tel_numero", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano", "conj_d", "conj_m", "conj_y", "fil1_d", "fil1_m", "fil1_y", "sus", "conj_sus", "fil1_sus", "cpf", "conj_cpf", "fil1_cpf"].includes(el.id)) return;
+  el.addEventListener("input", () => aplicarMaiusculas(el));
+});
+
+if (!tentarRestaurarRascunho()) {
+  const elData = document.getElementById("dataAssinatura");
+  if (elData) elData.valueAsDate = new Date();
+}
+carregarTemplateInicial();
+window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
+</script>
+</body>
+</html>

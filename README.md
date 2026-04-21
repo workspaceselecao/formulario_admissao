@@ -1,14 +1,18 @@
-# Ficha Cadastral – HTML para PDF
+# Formulários de admissão – HTML para PDF
 
-Gera o PDF preenchido sobre o modelo oficial `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf`, usando as coordenadas em pontos PDF definidas em `ficha_cadastral_campos.json` (origem: canto inferior esquerdo, igual ao pdf-lib).
+A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistência Médica. Cada fluxo gera o PDF preenchido sobre o modelo oficial correspondente, usando coordenadas em pontos PDF (origem: canto inferior esquerdo, igual ao pdf-lib).
 
 ## Arquivos na raiz
 
-- `ficha_cadastral.html` — formulário e geração do PDF
-- `ficha_cadastral_campos.json` — coordenadas dos campos (pt)
-- `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf` — template
-- `vercel.json` — redireciona `/` para `ficha_cadastral.html`
-- `Carta Abertura de Conta Modelo Padrão_Bradesco.docx` — download opcional (conta Bradesco)
+- `index.html` — página inicial (escolha do formulário)
+- `ficha_cadastral.html` — F-075 (PR-011) e geração do PDF
+- `ficha_cadastral_campos.json` — coordenadas dos campos da ficha (pt)
+- `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf` — template da ficha
+- `assistencia_medica.html` — F-089 (PR-090) e geração do PDF
+- `assistencia_medica_campos.json` — coordenadas dos campos da assistência médica (pt)
+- `F-089_17 (PR-090) (Adesão de Assistência Médica).pdf` — template da assistência médica
+- `vercel.json` — redireciona `/` para `index.html`
+- `Carta Abertura de Conta Modelo Padrão_Bradesco.docx` — download opcional (conta Bradesco, só na ficha)
 
 ## Publicar na Vercel
 
