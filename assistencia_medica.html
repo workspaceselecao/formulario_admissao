@@ -194,6 +194,23 @@
     align-items: flex-start;
     margin-top: 6px;
   }
+  .radio-inline.tipo-adesao-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .radio-inline.tipo-adesao-grid .radio-label:last-child {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 640px) {
+    .radio-inline.tipo-adesao-grid {
+      grid-template-columns: 1fr;
+    }
+    .radio-inline.tipo-adesao-grid .radio-label:last-child {
+      grid-column: auto;
+    }
+  }
   .radio-label {
     display: flex;
     align-items: flex-start;
@@ -217,14 +234,6 @@
     border-color: var(--accent);
     background: var(--accent-soft);
     color: var(--accent-dark);
-  }
-  .radio-hint {
-    display: block;
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text-light);
-    margin-top: 4px;
-    line-height: 1.45;
   }
   .check-group {
     display: flex;
@@ -453,20 +462,12 @@
     <div class="section-header"><div class="dot"></div>Tipo de movimentação</div>
     <div class="section-body">
       <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;line-height:1.55">Marque <strong>uma</strong> opção (corresponde à caixa no PDF).</p>
-      <div class="radio-inline" id="tipoAdesaoGroup">
+      <div class="radio-inline tipo-adesao-grid" id="tipoAdesaoGroup">
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante"> Optante na Admissão (Inclusão)</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante">
-          <span>Não Optante na Admissão (Cancelamento)<span class="radio-hint">Exclusão em até 60 dias após admissão, somente para os planos Smart 300 Plus Enfermaria e Advance 700 Enfermaria.</span></span>
-        </label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="matrimonio">
-          <span>Matrimônio – Inclusão de Dependente<span class="radio-hint">Prazo: até 20 dias da data do casamento.</span></span>
-        </label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="exclusaodependente">
-          <span>Exclusão de Dependente<span class="radio-hint">Somente em caso de óbito ou separação judicial.</span></span>
-        </label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="nascfilho">
-          <span>Nascimento de Filho – Inclusão de Dependente<span class="radio-hint">Prazo: até 20 dias da data do nascimento.</span></span>
-        </label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante"> Não Optante na Admissão (Cancelamento)</label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="matrimonio"> Matrimônio – Inclusão de Dependente</label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="exclusaodependente"> Exclusão de Dependente</label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="nascfilho"> Nascimento de Filho – Inclusão de Dependente</label>
       </div>
     </div>
   </div>
