@@ -114,15 +114,15 @@
           "obrigatorio": false,
           "segmentos": {
             "dia": {
-              "coordenadas": { "x": 141, "y": 815, "largura": 39, "altura": 11 },
+              "coordenadas": { "x": 141, "y": 818, "largura": 39, "altura": 11 },
               "mascara": "99"
             },
             "mes": {
-              "coordenadas": { "x": 190, "y": 815, "largura": 36, "altura": 11 },
+              "coordenadas": { "x": 190, "y": 818, "largura": 39, "altura": 11 },
               "mascara": "99"
             },
             "ano": {
-              "coordenadas": { "x": 240, "y": 815, "largura": 43, "altura": 11 },
+              "coordenadas": { "x": 240, "y": 818, "largura": 39, "altura": 11 },
               "mascara": "9999"
             }
           }
@@ -171,21 +171,21 @@
           "label": "Bairro",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 96, "y": 770, "largura": 188, "altura": 14 },
+          "coordenadas": { "x": 96, "y": 773, "largura": 188, "altura": 14 },
           "obrigatorio": false
         },
         "cidadeuf": {
           "label": "Cidade/UF",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 336, "y": 770, "largura": 133, "altura": 14 },
+          "coordenadas": { "x": 336, "y": 773, "largura": 133, "altura": 14 },
           "obrigatorio": false
         },
         "tel_ddd": {
           "label": "Telefone DDD",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 500, "y": 771, "largura": 19, "altura": 12 },
+          "coordenadas": { "x": 500, "y": 773, "largura": 19, "altura": 12 },
           "obrigatorio": false,
           "mascara": "99"
         },
@@ -193,7 +193,7 @@
           "label": "Telefone Número",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 521, "y": 771, "largura": 203, "altura": 12 },
+          "coordenadas": { "x": 521, "y": 773, "largura": 203, "altura": 12 },
           "obrigatorio": false,
           "mascara": "99999-9999"
         }
@@ -208,20 +208,20 @@
             "label": "Incluir Cônjuge no Plano",
             "tipo": "checkbox",
             "pagina": 1,
-            "coordenadas": { "x": 59, "y": 717, "largura": 19, "altura": 16 }
+            "coordenadas": { "x": 59, "y": 720, "largura": 19, "altura": 16 }
           },
           "nome": {
             "label": "Nome do Cônjuge",
             "tipo": "texto",
             "pagina": 1,
-            "coordenadas": { "x": 116, "y": 719, "largura": 231, "altura": 13 },
+            "coordenadas": { "x": 116, "y": 720, "largura": 231, "altura": 16 },
             "obrigatorio": true
           },
           "cpf": {
             "label": "CPF do Cônjuge",
             "tipo": "texto",
             "pagina": 1,
-            "coordenadas": { "x": 378, "y": 719, "largura": 111, "altura": 11 },
+            "coordenadas": { "x": 378, "y": 720, "largura": 111, "altura": 16 },
             "obrigatorio": true,
             "mascara": "999.999.999-99"
           },
@@ -232,15 +232,15 @@
             "obrigatorio": true,
             "segmentos": {
               "dia": {
-                "coordenadas": { "x": 556, "y": 719, "largura": 24, "altura": 12 },
+                "coordenadas": { "x": 556, "y": 720, "largura": 24, "altura": 16 },
                 "mascara": "99"
               },
               "mes": {
-                "coordenadas": { "x": 585, "y": 719, "largura": 20, "altura": 11 },
+                "coordenadas": { "x": 585, "y": 720, "largura": 20, "altura": 16 },
                 "mascara": "99"
               },
               "ano": {
-                "coordenadas": { "x": 610, "y": 719, "largura": 82, "altura": 11 },
+                "coordenadas": { "x": 610, "y": 720, "largura": 82, "altura": 16 },
                 "mascara": "9999"
               }
             }
@@ -271,20 +271,20 @@
               "label": "Incluir Filho(a) 1 no Plano",
               "tipo": "checkbox",
               "pagina": 1,
-              "coordenadas": { "x": 59, "y": 671, "largura": 18, "altura": 14 }
+              "coordenadas": { "x": 59, "y": 673, "largura": 18, "altura": 14 }
             },
             "nome": {
               "label": "Nome do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 120, "y": 673, "largura": 229, "altura": 16 },
+              "coordenadas": { "x": 120, "y": 674, "largura": 229, "altura": 16 },
               "obrigatorio": true
             },
             "cpf": {
               "label": "CPF do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 378, "y": 673, "largura": 113, "altura": 16 },
+              "coordenadas": { "x": 378, "y": 4, "largura": 113, "altura": 16 },
               "obrigatorio": true,
               "mascara": "999.999.999-99"
             },
@@ -295,15 +295,15 @@
               "obrigatorio": true,
               "segmentos": {
                 "dia": {
-                  "coordenadas": { "x": 557, "y": 673, "largura": 26, "altura": 10 },
+                  "coordenadas": { "x": 557, "y": 674, "largura": 26, "altura": 16 },
                   "mascara": "99"
                 },
                 "mes": {
-                  "coordenadas": { "x": 586, "y": 673, "largura": 19, "altura": 10 },
+                  "coordenadas": { "x": 586, "y": 674, "largura": 19, "altura": 16 },
                   "mascara": "99"
                 },
                 "ano": {
-                  "coordenadas": { "x": 610, "y": 673, "largura": 95, "altura": 11 },
+                  "coordenadas": { "x": 610, "y": 674, "largura": 95, "altura": 16 },
                   "mascara": "9999"
                 }
               }
@@ -312,7 +312,7 @@
               "label": "Nº Cartão SUS do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 151, "y": 649, "largura": 120, "altura": 14 },
+              "coordenadas": { "x": 151, "y": 652, "largura": 120, "altura": 16 },
               "obrigatorio": true,
               "mascara": "999 9999 9999 9999"
             },
@@ -320,14 +320,14 @@
               "label": "Nome da Mãe do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 346, "y": 649, "largura": 144, "altura": 11 },
+              "coordenadas": { "x": 346, "y": 652, "largura": 144, "altura": 16 },
               "obrigatorio": true
             },
             "nascvivo": {
               "label": "Nº Declaração de Nascido Vivo do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 573, "y": 649, "largura": 168, "altura": 14 },
+              "coordenadas": { "x": 573, "y": 652, "largura": 168, "altura": 16 },
               "obrigatorio": true,
               "observacao": "Obrigatório para recém-nascidos"
             }
