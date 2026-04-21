@@ -11,7 +11,7 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `assistencia_medica.html` — F-089 (PR-090) e geração do PDF
 - `assistencia_medica_campos.json` — coordenadas dos campos da assistência médica (pt)
 - `F-089_17 (PR-090) (Adesão de Assistência Médica).pdf` — template da assistência médica
-- `vercel.json` — redireciona `/` para `index.html`
+- `vercel.json` — a raiz `/` serve internamente `index.html` (home)
 - `Carta Abertura de Conta Modelo Padrão_Bradesco.docx` — download opcional (conta Bradesco, só na ficha)
 
 ## Publicar na Vercel
