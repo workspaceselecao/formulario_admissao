@@ -949,7 +949,7 @@ const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
 /** Só para texto preenchido: desce ~1 linha no PDF (y menor). Boxes/radios não usam isto. */
-const OFFSET_Y_TEXTO_UMA_LINHA_PT = 10;
+const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
 let templateBytes = null;
 let camposSchema = null;
 const cepCache = new Map();
@@ -1527,12 +1527,13 @@ function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
   return true;
 }
 
+/** Marca "X" centrado no retângulo (x,y) = canto inferior esquerdo; largura/altura em pt — igual ao JSON. */
 function marcarCheckboxCoord(page, font, coord, ativo, options = {}) {
   if (!ativo || !coord) return false;
   const x = Number(coord.x) || 0;
   const yBottom = Number(coord.y) || 0;
-  const w = Number(coord.largura) || 7;
-  const h = Number(coord.altura) || 7;
+  const w = Number(coord.largura ?? coord.width) || 7;
+  const h = Number(coord.altura ?? coord.height) || 7;
   const size = options.size ?? 8;
   const sym = options.simbolo ?? "X";
   const tw = font.widthOfTextAtSize(sym, size);

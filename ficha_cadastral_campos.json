@@ -405,11 +405,11 @@
       "opcoes": {
         "alimentacao": {
           "label": "100% Vale Alimentação",
-          "coordenadas": { "x": 245, "y": 148, "largura": 14, "altura": 12 }
+          "coordenadas": { "x": 55, "y": 148, "largura": 15, "altura": 12 }
         },
         "refeicao": {
           "label": "100% Vale Refeição",
-          "coordenadas": { "x": 55, "y": 148, "largura": 15, "altura": 12 }
+          "coordenadas": { "x": 245, "y": 148, "largura": 14, "altura": 12 }
         },
         "flex": {
           "label": "Flexibilizado (50% VR e 50% VA)",
