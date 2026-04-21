@@ -642,7 +642,7 @@
 <header class="page-header">
   <div>
     <div class="brand">
-      <img src="./atento.svg" alt="Logo Atento" class="brand-logo">
+      <span class="brand-logo" aria-hidden="true" title="Atento" style="height:30px;min-width:30px;display:grid;place-items:center;background:linear-gradient(145deg,#01426A,#0a6ba8);border-radius:8px;color:#fff;font-weight:800;font-size:13px;font-family:system-ui,sans-serif">A</span>
       <span class="brand-text">Ficha Cadastral</span>
     </div>
     <div class="subtitle">F-075 (PR-011) / 37 · Admissão Operacional e Administrativo</div>
@@ -907,26 +907,12 @@
   </div>
 
   <div class="form-actions-bottom">
-    <div class="download-empty-wrapper">
-      <button
-        class="btn-download-empty"
-        id="btnFichaLimpa"
-        type="button"
-        aria-haspopup="true"
-        aria-expanded="false"
-        aria-controls="menuFichaLimpaFormato"
-        onclick="toggleMenuFichaLimpa(event)"
-      >
+    <button class="btn-download-empty" type="button" onclick="baixarFichaVazia()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        Baixar Ficha Cadastral limpa
-      </button>
-      <div class="download-format-menu" id="menuFichaLimpaFormato" role="menu" aria-labelledby="btnFichaLimpa">
-        <button type="button" class="download-format-option" role="menuitem" onclick="baixarFichaLimpaFormato('pdf')">Baixar como PDF</button>
-        <button type="button" class="download-format-option" role="menuitem" onclick="baixarFichaLimpaFormato('docx')">Baixar como DOCX</button>
-      </div>
-    </div>
+        Baixar Ficha Cadastral limpa (PDF)
+    </button>
     <button class="btn-export" type="button" onclick="gerarPDF()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -954,49 +940,19 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
 const TEMPLATE_PATH = "./F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf";
-const TEMPLATE_DOCX_PATH = "./Ficha_Cadastral_Admissao_MODELO.docx";
 const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
-const FIELD_MAPPING_PATH = "./field_mapping_ficha_cadastral.json";
+const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
-const FIELD_MAPPING_FETCH_PATH = encodeURI(FIELD_MAPPING_PATH);
-const PDF_PAGE_HEIGHT = 841.92;
-const PDF_FONT_SIZE = 9;
-const OFFSET_Y_DADOS_PESSOAIS = 10;
+const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const PDF_FONT_TEXTO = 9;
 let templateBytes = null;
-let textLines = null;
-let fieldMapping = null;
+let camposSchema = null;
 const cepCache = new Map();
 let cepBuscaEmAndamento = false;
 let ultimoCepBuscado = "";
-function toggleMenuFichaLimpa(event){
-  event?.stopPropagation();
-  const menu = document.getElementById('menuFichaLimpaFormato');
-  const btn = document.getElementById('btnFichaLimpa');
-  if (!menu) return;
-  const abrir = !menu.classList.contains('show');
-  menu.classList.toggle('show', abrir);
-  if (btn) btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
-}
-function fecharMenuFichaLimpa(){
-  const menu = document.getElementById('menuFichaLimpaFormato');
-  const btn = document.getElementById('btnFichaLimpa');
-  if (menu) menu.classList.remove('show');
-  if (btn) btn.setAttribute('aria-expanded', 'false');
-}
-function baixarFichaLimpaFormato(formato){
-  fecharMenuFichaLimpa();
-  if (formato === 'docx') {
-    baixarFichaVaziaDocx();
-    return;
-  }
-  baixarFichaVazia();
-}
 
 // ── MASKS ──
 function maskCPF(el) {
@@ -1193,7 +1149,7 @@ function toggleBanco(el){
   }
   syncRadioActive(el.name);
 }
-const MAX_DEPENDENTES = 5;
+const MAX_DEPENDENTES = 4;
 function listarLinhasDependentes(){
   return [...document.querySelectorAll('#dependentesBody tr')];
 }
@@ -1523,224 +1479,72 @@ function limparDadosFormulario(){
 function clonarArrayBuffer(buffer){
   return buffer.slice(0);
 }
-function normalizarTexto(valor){
-  return (valor || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
-}
-function normalizarComparacao(valor){
-  return normalizarTexto(valor)
-    .replace(/\s*([:;%/()\-])\s*/g, "$1");
-}
-function paraArray(valor){
-  return Array.isArray(valor) ? valor : [valor];
-}
-async function construirLinhasTexto(pdfBytes){
-  const loadingTask = pdfjsLib.getDocument({ data: pdfBytes });
-  const pdf = await loadingTask.promise;
-  const page = await pdf.getPage(1);
-  const textContent = await page.getTextContent();
 
-  const itens = textContent.items
-    .map((item) => ({
-      str: item.str || "",
-      norm: normalizarTexto(item.str),
-      x: item.transform[4],
-      y: item.transform[5],
-      width: item.width || 0
-    }))
-    .filter((item) => item.norm.length > 0);
-
-  const mapa = new Map();
-  for (const item of itens) {
-    const chave = String(Math.round(item.y));
-    if (!mapa.has(chave)) mapa.set(chave, []);
-    mapa.get(chave).push(item);
+/** Coordenadas em pontos PDF (pt), origem canto inferior esquerdo — igual ao pdf-lib. */
+function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
+  let t = String(texto || "").trim();
+  if (!t) return "";
+  if (font.widthOfTextAtSize(t, tamanhoFonte) <= larguraMax) return t;
+  const elipsis = "...";
+  let baixo = 0;
+  let alto = t.length;
+  while (baixo < alto) {
+    const meio = Math.ceil((baixo + alto) / 2);
+    const teste = t.slice(0, meio) + elipsis;
+    if (font.widthOfTextAtSize(teste, tamanhoFonte) <= larguraMax) baixo = meio;
+    else alto = meio - 1;
   }
-
-  return Array.from(mapa.values())
-    .map((items) => {
-      const ordenados = items.sort((a, b) => a.x - b.x);
-      return { items: ordenados, texto: ordenados.map((x) => x.norm).join(" ") };
-    })
-    .sort((a, b) => b.items[0].y - a.items[0].y);
+  return t.slice(0, alto) + elipsis;
 }
-function encontrarLinhaPorContexto(linhas, contexto, ocorrencia = 0){
-  const opcoes = paraArray(contexto).map(normalizarTexto);
-  let total = 0;
-  for (const linha of linhas) {
-    if (opcoes.some((texto) => linha.texto.includes(texto))) {
-      if (total === ocorrencia) return linha;
-      total += 1;
-    }
-  }
-  return null;
+
+function baselineYNoCampo(box, tamanhoFonte) {
+  const yBottom = Number(box.y) || 0;
+  const h = Number(box.altura ?? box.height) || 12;
+  return yBottom + Math.min(h * 0.78, tamanhoFonte * 1.12);
 }
-function encontrarFrase(linhas, frase, ocorrencia = 0){
-  const alvos = paraArray(frase).map(normalizarTexto);
-  let count = 0;
-  for (const alvo of alvos) {
-    const alvoComparavel = normalizarComparacao(alvo);
-    for (const linha of linhas) {
-      const items = linha.items;
-      for (let i = 0; i < items.length; i += 1) {
-        let construido = "";
-        for (let j = i; j < items.length; j += 1) {
-          construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
-          const construidoComparavel = normalizarComparacao(construido);
-          if (construidoComparavel === alvoComparavel) {
-            if (count === ocorrencia) {
-              return {
-                linha,
-                inicio: items[i],
-                fim: items[j],
-                x: items[i].x,
-                y: items[i].y,
-                right: items[j].x + items[j].width
-              };
-            }
-            count += 1;
-          }
-          if (!alvoComparavel.startsWith(construidoComparavel)) break;
-        }
-      }
-    }
-  }
-  return null;
-}
-function encontrarFraseNaLinha(linha, frase, ocorrencia = 0){
-  const alvos = paraArray(frase).map(normalizarTexto);
-  const items = linha.items;
-  let count = 0;
-  for (const alvo of alvos) {
-    const alvoComparavel = normalizarComparacao(alvo);
-    for (let i = 0; i < items.length; i += 1) {
-      let construido = "";
-      for (let j = i; j < items.length; j += 1) {
-        construido = construido ? `${construido} ${items[j].norm}` : items[j].norm;
-        const construidoComparavel = normalizarComparacao(construido);
-        if (construidoComparavel === alvoComparavel) {
-          if (count === ocorrencia) {
-            return { inicio: items[i], fim: items[j], right: items[j].x + items[j].width };
-          }
-          count += 1;
-        }
-        if (!alvoComparavel.startsWith(construidoComparavel)) break;
-      }
-    }
-  }
-  return null;
-}
-function escreverNoMarcador(page, font, linhas, valor, options = {}){
-  const texto = String(valor || "").trim();
-  if (!texto) return false;
 
-  let linha = encontrarLinhaPorContexto(
-    linhas,
-    options.contextoLinha || options.ancoraLinha || options.ancora,
-    options.ocorrenciaLinha || 0
-  );
-  if (!linha) return false;
-
-  let anchor = options.ancora
-    ? encontrarFraseNaLinha(linha, options.ancora, options.ocorrenciaAncora || 0)
-    : null;
-
-  if (!anchor && options.ancora) {
-    const anchorGlobal = encontrarFrase(linhas, options.ancora, options.ocorrenciaAncora || 0);
-    if (anchorGlobal) {
-      linha = anchorGlobal.linha;
-      anchor = { inicio: anchorGlobal.inicio, fim: anchorGlobal.fim, right: anchorGlobal.right };
-    }
-  }
-
-  const linhaAbaixo = options.linhaAbaixo === true;
-  const gapY = options.gapY ?? 13;
-  const xPadrao = linhaAbaixo ? 4 : 8;
-  const xBase = options.x ?? (
-    anchor
-      ? (linhaAbaixo ? anchor.inicio.x + (options.offsetX ?? xPadrao) : anchor.right + (options.offsetX ?? xPadrao))
-      : linha.items[0].x + (options.offsetX ?? 0)
-  );
-  const yBase = linha.items[0].y + (options.offsetY ?? 0) - (linhaAbaixo ? gapY : 0);
-
-  page.drawText(texto, {
-    x: xBase,
-    y: yBase,
-    size: options.size ?? 9,
-    font,
-    maxWidth: options.maxWidth ?? 220
-  });
-  return true;
-}
-function escreverAcimaDoRotulo(page, font, linhas, valor, frase, options = {}){
-  const texto = String(valor || "").trim();
-  if (!texto) return false;
-  const anchor = encontrarFrase(linhas, frase, options.ocorrencia || 0);
-  if (!anchor) return false;
-
-  const size = options.size ?? 9;
-  const larguraTexto = font.widthOfTextAtSize(texto, size);
-  const centroRotuloX = (anchor.x + anchor.right) / 2;
-
-  page.drawText(texto, {
-    x: centroRotuloX - (larguraTexto / 2) + (options.offsetX ?? 0),
-    y: anchor.y + (options.offsetY ?? 12),
+function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
+  if (!coord) return false;
+  const c = coord;
+  const w = Number(c.largura ?? c.width) || 200;
+  const size = options.size ?? PDF_FONT_TEXTO;
+  const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
+  if (!str) return false;
+  const y = baselineYNoCampo(c, size);
+  const x = Number(c.x) || 0;
+  page.drawText(str, {
+    x: x + (options.offsetX ?? 0.5),
+    y: y + (options.offsetY ?? 0),
     size,
     font,
-    maxWidth: options.maxWidth ?? 330
+    maxWidth: w - 2
   });
   return true;
 }
-function escreverNaLinha(page, font, linhas, contextoLinha, valor, options = {}){
-  const texto = String(valor || "").trim();
-  if (!texto) return;
-  const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
-  if (!linha) return;
-  page.drawText(texto, {
-    x: options.x ?? (linha.items[0].x + 260),
-    y: linha.items[0].y + (options.offsetY ?? 0),
-    size: options.size ?? 9,
-    font,
-    maxWidth: options.maxWidth ?? 200
-  });
-}
-function marcarCheckbox(page, font, linhas, contextoLinha, palavra, ativo, options = {}){
-  if (!ativo) return false;
-  const linha = encontrarLinhaPorContexto(linhas, contextoLinha, options.ocorrenciaLinha || 0);
-  if (!linha) return false;
-  const alvos = paraArray(palavra).map(normalizarTexto);
-  const candidatos = linha.items.filter((item) => alvos.includes(item.norm));
-  let item = candidatos[options.ocorrenciaPalavra || 0];
-  if (!item) {
-    const frase = encontrarFraseNaLinha(linha, palavra, options.ocorrenciaPalavra || 0);
-    item = frase ? frase.inicio : null;
-  }
-  if (!item) return false;
-  page.drawText("X", {
-    x: item.x + (options.offsetX ?? -10),
-    y: item.y + (options.offsetY ?? 0),
-    size: options.size ?? 10,
-    font
-  });
+
+function marcarCheckboxCoord(page, font, coord, ativo, options = {}) {
+  if (!ativo || !coord) return false;
+  const x = Number(coord.x) || 0;
+  const yBottom = Number(coord.y) || 0;
+  const w = Number(coord.largura) || 7;
+  const h = Number(coord.altura) || 7;
+  const size = options.size ?? 8;
+  const sym = options.simbolo ?? "X";
+  const tw = font.widthOfTextAtSize(sym, size);
+  const cx = x + (w - tw) / 2;
+  const cy = yBottom + (h - size * 0.72) / 2;
+  page.drawText(sym, { x: cx, y: cy, size, font });
   return true;
 }
-function marcarCheckboxPorFrase(page, font, linhas, frases, ativo, options = {}){
-  if (!ativo) return false;
-  const anchor = encontrarFrase(linhas, frases, options.ocorrencia || 0);
-  if (!anchor) return false;
-  page.drawText("X", {
-    x: anchor.inicio.x + (options.offsetX ?? -10),
-    y: anchor.y + (options.offsetY ?? 0),
-    size: options.size ?? 10,
-    font
-  });
-  return true;
+
+function marcarRadioJsonOpcao(page, font, grupoCampo, chaveOpcao) {
+  if (!grupoCampo?.opcoes || !chaveOpcao) return false;
+  const alvo = grupoCampo.opcoes[chaveOpcao];
+  const coord = alvo?.coordenadas;
+  return marcarCheckboxCoord(page, font, coord, true);
 }
-function normalizarChaveMapeamento(valor){
+
+function normalizarChavePdf(valor) {
   return String(valor || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -1748,97 +1552,40 @@ function normalizarChaveMapeamento(valor){
     .replace(/[^A-Z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 }
-function topParaY(top, fontSize = PDF_FONT_SIZE){
-  return PDF_PAGE_HEIGHT - Number(top || 0) - fontSize;
-}
-function resolverYCampo(campo, fontSize = PDF_FONT_SIZE){
-  if (campo && Number.isFinite(campo.y_reportlab)) return campo.y_reportlab;
-  if (campo?.area_insercao && Number.isFinite(campo.area_insercao.top)) {
-    return topParaY(campo.area_insercao.top, fontSize);
-  }
-  return null;
-}
-function escreverTextoPorCoordenada(page, font, campo, valor, options = {}){
-  const texto = String(valor || "").trim();
-  if (!texto || !campo) return false;
 
-  const size = options.size ?? PDF_FONT_SIZE;
-  const area = campo.area_insercao || {};
-  const xBase = Number.isFinite(area.x) ? area.x : (options.x ?? 0);
-  const yBase = resolverYCampo(campo, size);
-  if (!Number.isFinite(yBase)) return false;
+function chaveTipoDeficienciaDoForm(valor) {
+  const k = normalizarChavePdf(valor).toLowerCase();
+  const mapa = {
+    fisica: "fisica",
+    auditiva: "auditiva",
+    visual: "visual",
+    intelectual: "intelectual",
+    multipla: "multipla"
+  };
+  return mapa[k] || null;
+}
 
-  page.drawText(texto, {
-    x: xBase + (options.offsetX ?? 0),
-    y: yBase + (options.offsetY ?? 0),
-    size,
-    font,
-    maxWidth: options.maxWidth ?? area.largura ?? 220
-  });
-  return true;
-}
-function marcarOpcaoPorCoordenada(page, font, campo, opcao, options = {}){
-  if (!campo?.opcoes || !opcao) return false;
-  const chaveDesejada = normalizarChaveMapeamento(opcao);
-  const entrada = Object.entries(campo.opcoes).find(
-    ([chave]) => normalizarChaveMapeamento(chave) === chaveDesejada
-  );
-  if (!entrada) return false;
-
-  const [, coordenada] = entrada;
-  const size = options.size ?? 10;
-  const x = Number.isFinite(coordenada?.x) ? coordenada.x : 0;
-  const y = Number.isFinite(coordenada?.y_reportlab)
-    ? coordenada.y_reportlab
-    : topParaY(coordenada?.top, size);
-  if (!Number.isFinite(y)) return false;
-
-  page.drawText(options.simbolo ?? campo.simbolo_marcacao ?? "X", {
-    x: x + (campo.offset_x_sobre_checkbox ?? 0) + (options.offsetX ?? 0),
-    y: y + (campo.offset_y_sobre_checkbox ?? 0) + (options.offsetY ?? 0),
-    size,
-    font
-  });
-  return true;
-}
-function marcarMultiplasOpcoesPorCoordenada(page, font, campo, opcoes = []){
-  if (!Array.isArray(opcoes) || opcoes.length === 0) return;
-  opcoes.forEach((opcao) => marcarOpcaoPorCoordenada(page, font, campo, opcao));
-}
-function campoMapeado(secao, campo){
-  return fieldMapping?.secoes?.[secao]?.campos?.[campo] || null;
-}
-function opcaoValeMapeada(valor){
-  if (valor === "100_VA") return "100_VALE_ALIMENTACAO";
-  if (valor === "100_VR") return "100_VALE_REFEICAO";
-  if (valor === "FLEX") return "FLEXIBILIZADO_50_50";
-  return "";
-}
-async function carregarFieldMapping(){
-  if (fieldMapping) return true;
+async function carregarCamposSchema() {
+  if (camposSchema) return true;
   try {
-    const res = await fetch(FIELD_MAPPING_FETCH_PATH, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Falha ao carregar mapeamento (${res.status})`);
-    fieldMapping = await res.json();
+    const res = await fetch(CAMPOS_JSON_FETCH_PATH, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    camposSchema = await res.json();
+    if (!camposSchema?.campos) throw new Error("Estrutura inválida");
     return true;
-  } catch (error) {
-    console.error("Falha ao carregar mapeamento de coordenadas:", error);
-    showToast(`Mapeamento não carregado. Verifique ${FIELD_MAPPING_PATH}`, false);
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
     return false;
   }
 }
-async function carregarTemplateInicial(){
+
+async function carregarTemplateInicial() {
   try {
     const res = await fetch(TEMPLATE_FETCH_PATH);
     if (!res.ok) throw new Error("Template não encontrado");
     const fetchedBytes = await res.arrayBuffer();
     templateBytes = clonarArrayBuffer(fetchedBytes);
-    try {
-      textLines = await construirLinhasTexto(clonarArrayBuffer(fetchedBytes));
-    } catch (erroLinhas) {
-      console.warn("Leitura de âncoras do template indisponível:", erroLinhas);
-      textLines = null;
-    }
   } catch (_error) {
     showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
   }
@@ -1849,7 +1596,7 @@ async function gerarPDF(){
   try {
     if (!validarCamposObrigatorios()) return;
     if (!(await confirmarPoliticaLGPD())) return;
-    if (!(await carregarFieldMapping())) return;
+    if (!(await carregarCamposSchema())) return;
     if (!templateBytes) await carregarTemplateInicial();
     if (!templateBytes) return;
 
@@ -1863,7 +1610,6 @@ async function gerarPDF(){
       celular: formatarTelefoneBR(v("celular")),
       email: v("email"),
       estadoCivil: v("estadoCivil"),
-      primeiroEmprego: primeiroEmpregoSelecionado === "sim" ? "SIM" : primeiroEmpregoSelecionado === "nao" ? "NÃO" : "",
       pis: v("pis"),
       endereco: v("endereco"),
       numero: v("endNum"),
@@ -1871,8 +1617,6 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
-      possuiDeficiencia: possuiDeficienciaSelecionada === "sim" ? "SIM" : possuiDeficienciaSelecionada === "nao" ? "NÃO" : "",
-      tiposDeficiencia: checks("tipoDeficiencia").map((item) => item.toUpperCase()),
       contaMentore: radio("tipoConta") === "mentore",
       contaSalarioBradesco: radio("tipoConta") === "bradesco",
       cpfConta: v("cpf"),
@@ -1891,7 +1635,6 @@ async function gerarPDF(){
       interValor: moedaParaPdf(v("vtInterVal")),
       integracaoQtd: v("vtIntegracaoQtd"),
       integracaoValor: moedaParaPdf(v("vtIntegracaoVal")),
-      valeTipo: valeSelecionado === "va" ? "100_VA" : valeSelecionado === "vr" ? "100_VR" : valeSelecionado === "flex" ? "FLEX" : "",
       assinaturaNome: v("assinaturaName") || v("nomeCompleto"),
       assinaturaData: formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
     };
@@ -1899,85 +1642,91 @@ async function gerarPDF(){
     const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
     const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-    // DADOS PESSOAIS
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_completo"), data.nomeCompleto, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "nome_social"), data.nomeSocial, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "telefone"), data.telefone, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "celular"), data.celular, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "email"), data.email, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "estado_civil"), data.estadoCivil, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    const C = camposSchema.campos;
 
-    const primeiroEmpregoCampo = campoMapeado("DADOS_PESSOAIS", "primeiro_emprego");
-    if (data.primeiroEmprego === "SIM") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "SIM", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    if (data.primeiroEmprego === "NÃO") marcarOpcaoPorCoordenada(page, font, primeiroEmpregoCampo, "NAO", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    if (data.primeiroEmprego === "NÃO") {
-      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "pis"), data.pis, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    const dp = C.dados_pessoais.campos;
+    escreverTextoCampoCoord(page, font, dp.nome.coordenadas, data.nomeCompleto);
+    escreverTextoCampoCoord(page, font, dp["craxá"].coordenadas, data.nomeSocial);
+    escreverTextoCampoCoord(page, font, dp.fone.coordenadas, data.telefone);
+    escreverTextoCampoCoord(page, font, dp.celular.coordenadas, data.celular);
+    escreverTextoCampoCoord(page, font, dp.email.coordenadas, data.email);
+    escreverTextoCampoCoord(page, font, dp.estadocivil.coordenadas, data.estadoCivil);
+
+    const pe = dp.primeiro_emprego;
+    if (primeiroEmpregoSelecionado === "sim") marcarRadioJsonOpcao(page, font, pe, "sim");
+    if (primeiroEmpregoSelecionado === "nao") {
+      marcarRadioJsonOpcao(page, font, pe, "nao");
+      escreverTextoCampoCoord(page, font, dp.informarpis.coordenadas, data.pis);
     }
 
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_logradouro"), data.endereco, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_numero"), data.numero, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "endereco_complemento"), data.complemento, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cep"), data.cep, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "bairro"), data.bairro, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_PESSOAIS", "cidade"), data.cidade, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    const en = C.endereco.campos;
+    escreverTextoCampoCoord(page, font, en.rua.coordenadas, data.endereco);
+    escreverTextoCampoCoord(page, font, en.numero.coordenadas, data.numero);
+    escreverTextoCampoCoord(page, font, en.complemento.coordenadas, data.complemento);
+    escreverTextoCampoCoord(page, font, en.cep.coordenadas, data.cep);
+    escreverTextoCampoCoord(page, font, en.bairro.coordenadas, data.bairro);
+    escreverTextoCampoCoord(page, font, en.cidadeuf.coordenadas, data.cidade);
 
-    const possuiDefCampo = campoMapeado("DADOS_PESSOAIS", "possui_deficiencia");
-    if (data.possuiDeficiencia === "SIM") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "SIM", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    if (data.possuiDeficiencia === "NÃO") marcarOpcaoPorCoordenada(page, font, possuiDefCampo, "NAO", { offsetY: OFFSET_Y_DADOS_PESSOAIS });
-    if (data.possuiDeficiencia === "SIM") {
-      const tipoDefCampo = campoMapeado("DADOS_PESSOAIS", "tipo_deficiencia");
-      const tiposNormalizados = data.tiposDeficiencia.map(normalizarChaveMapeamento);
-      tiposNormalizados.forEach((opcao) => {
-        marcarOpcaoPorCoordenada(page, font, tipoDefCampo, opcao, { offsetY: OFFSET_Y_DADOS_PESSOAIS });
+    const def = C.deficiencia.campos;
+    if (possuiDeficienciaSelecionada === "sim") marcarRadioJsonOpcao(page, font, def.possui_deficiencia, "sim");
+    if (possuiDeficienciaSelecionada === "nao") marcarRadioJsonOpcao(page, font, def.possui_deficiencia, "nao");
+    if (possuiDeficienciaSelecionada === "sim" && def.tipo_deficiencia?.opcoes) {
+      const opT = def.tipo_deficiencia.opcoes;
+      checks("tipoDeficiencia").forEach((label) => {
+        const k = chaveTipoDeficienciaDoForm(label);
+        if (k && opT[k]?.coordenadas) marcarCheckboxCoord(page, font, opT[k].coordenadas, true);
       });
     }
 
-    // DADOS CONTA BANCARIA
-    const tipoContaCampo = campoMapeado("DADOS_CONTA_BANCARIA", "tipo_conta");
-    if (data.contaSalarioBradesco) marcarOpcaoPorCoordenada(page, font, tipoContaCampo, "BRADESCO");
-    if (data.contaMentore) marcarOpcaoPorCoordenada(page, font, tipoContaCampo, "MENTORE_BANK");
+    const cb = C.conta_bancaria.campos;
     if (data.contaSalarioBradesco) {
-      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_CONTA_BANCARIA", "agencia"), data.agencia);
-      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_CONTA_BANCARIA", "conta_digito"), data.contaDigito);
+      marcarRadioJsonOpcao(page, font, cb.tipo_conta, "bradesco");
+      escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
+      escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
     }
     if (data.contaMentore) {
-      escreverTextoPorCoordenada(page, font, campoMapeado("DADOS_CONTA_BANCARIA", "cpf_conta"), data.cpfConta);
+      marcarRadioJsonOpcao(page, font, cb.tipo_conta, "mentore");
+      escreverTextoCampoCoord(page, font, cb.mentore_cpf.coordenadas, data.cpfConta);
     }
 
-    // DEPENDENTES
-    const linhasDependentes = fieldMapping?.secoes?.DEPENDENTES?.linhas || [];
-    linhasDependentes.forEach((linha, idx) => {
-      const dep = data.dependentes[idx];
-      if (!dep) return;
-      escreverTextoPorCoordenada(page, font, linha.campos?.nome, dep.nome);
-      escreverTextoPorCoordenada(page, font, linha.campos?.data_nascimento, dep.nascimento);
-      escreverTextoPorCoordenada(page, font, linha.campos?.cpf_dependente, dep.cpf);
+    const itensDep = C.dependentes.itens || [];
+    data.dependentes.slice(0, itensDep.length).forEach((dep, idx) => {
+      const item = itensDep[idx];
+      if (!item?.campos) return;
+      escreverTextoCampoCoord(page, font, item.campos.nome.coordenadas, dep.nome);
+      escreverTextoCampoCoord(page, font, item.campos.dtnasc.coordenadas, dep.nascimento);
+      escreverTextoCampoCoord(page, font, item.campos.cpf.coordenadas, dep.cpf);
     });
 
-    // VALE TRANSPORTE
-    const linhasValeTransporte = fieldMapping?.secoes?.VALE_TRANSPORTE?.linhas || [];
-    const mapaValoresTransporte = {
-      ONIBUS: { quantidade: data.onibusQtd, valor_unitario: data.onibusValor },
-      METRO_TREM: { quantidade: data.metroQtd, valor_unitario: data.metroValor },
-      INTERMUNICIPAL: { quantidade: data.interQtd, valor_unitario: data.interValor },
-      INTEGRACAO: { quantidade: data.integracaoQtd, valor_unitario: data.integracaoValor }
-    };
-    linhasValeTransporte.forEach((linha) => {
-      const chave = normalizarChaveMapeamento(linha.modalidade);
-      const valores = mapaValoresTransporte[chave];
-      if (!valores) return;
-      escreverTextoPorCoordenada(page, font, linha.campos?.quantidade, valores.quantidade);
-      escreverTextoPorCoordenada(page, font, linha.campos?.valor_unitario, valores.valor_unitario);
-    });
+    const vt = C.vale_transporte.itens;
+    if (vt?.onibus) {
+      escreverTextoCampoCoord(page, font, vt.onibus.quantidade.coordenadas, data.onibusQtd);
+      escreverTextoCampoCoord(page, font, vt.onibus.valor_unitario.coordenadas, data.onibusValor);
+    }
+    if (vt?.metro_trem) {
+      escreverTextoCampoCoord(page, font, vt.metro_trem.quantidade.coordenadas, data.metroQtd);
+      escreverTextoCampoCoord(page, font, vt.metro_trem.valor_unitario.coordenadas, data.metroValor);
+    }
+    if (vt?.intermunicipal) {
+      escreverTextoCampoCoord(page, font, vt.intermunicipal.quantidade.coordenadas, data.interQtd);
+      escreverTextoCampoCoord(page, font, vt.intermunicipal.valor_unitario.coordenadas, data.interValor);
+    }
+    if (vt?.integracao) {
+      escreverTextoCampoCoord(page, font, vt.integracao.quantidade.coordenadas, data.integracaoQtd);
+      escreverTextoCampoCoord(page, font, vt.integracao.valor_unitario.coordenadas, data.integracaoValor);
+    }
 
-    // VALE REFEICAO / ALIMENTACAO
-    const campoValeRefeicao = fieldMapping?.secoes?.VALE_REFEICAO_ALIMENTACAO?.campo;
-    const opcaoVale = opcaoValeMapeada(data.valeTipo);
-    if (opcaoVale) marcarOpcaoPorCoordenada(page, font, campoValeRefeicao, opcaoVale);
+    const varf = C.vale_alimentacao_refeicao;
+    const opV = varf?.opcoes;
+    if (opV) {
+      if (valeSelecionado === "va") marcarCheckboxCoord(page, font, opV.alimentacao.coordenadas, true);
+      if (valeSelecionado === "vr") marcarCheckboxCoord(page, font, opV.refeicao.coordenadas, true);
+      if (valeSelecionado === "flex") marcarCheckboxCoord(page, font, opV.flex.coordenadas, true);
+    }
 
-    // ASSINATURA
-    escreverTextoPorCoordenada(page, font, campoMapeado("ASSINATURA", "nome_completo_candidato"), data.assinaturaNome);
-    escreverTextoPorCoordenada(page, font, campoMapeado("ASSINATURA", "data_assinatura"), data.assinaturaData);
+    const ass = C.assinatura.campos;
+    escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, data.assinaturaNome);
+    escreverTextoCampoCoord(page, font, ass.data.coordenadas, data.assinaturaData);
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -2021,29 +1770,6 @@ async function baixarFichaVazia(){
   } catch (error) {
     console.error(error);
     showToast("Não foi possível baixar a ficha vazia.", false);
-  }
-}
-async function baixarFichaVaziaDocx(){
-  try {
-    const caminho = encodeURI(TEMPLATE_DOCX_PATH);
-    const resp = await fetch(caminho, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`Falha ao baixar ficha DOCX (${resp.status})`);
-    const bytes = await resp.arrayBuffer();
-    const blob = new Blob([bytes], {
-      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Ficha_Cadastral_limpa.docx";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-    showToast("Download da ficha limpa em DOCX iniciado.");
-  } catch (error) {
-    console.error(error);
-    showToast("Não foi possível baixar a ficha limpa em DOCX.", false);
   }
 }
 async function baixarCartaAberturaConta(){
@@ -2130,20 +1856,13 @@ document.getElementById('lgpdModal')?.addEventListener('click', (event) => {
     fecharModalLGPD(false);
   }
 });
-document.addEventListener('click', (event) => {
-  const wrapper = document.querySelector('.download-empty-wrapper');
-  if (!wrapper) return;
-  if (event.target instanceof Node && wrapper.contains(event.target)) return;
-  fecharMenuFichaLimpa();
-});
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') fecharMenuFichaLimpa();
   if (event.key === 'Escape' && document.getElementById('lgpdModal')?.classList.contains('show')) {
     fecharModalLGPD(false);
   }
 });
 updateProgress();
-carregarFieldMapping();
+carregarCamposSchema();
 carregarTemplateInicial();
 </script>
 </body>

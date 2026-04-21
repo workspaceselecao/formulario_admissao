@@ -1,27 +1,20 @@
-# Ficha Cadastral - HTML para PDF
+# Ficha Cadastral – HTML para PDF
 
-Este projeto gera um PDF preenchido usando o template oficial `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf`.
+Gera o PDF preenchido sobre o modelo oficial `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf`, usando as coordenadas em pontos PDF definidas em `ficha_cadastral_campos.json` (origem: canto inferior esquerdo, igual ao pdf-lib).
 
-## Estrutura esperada
+## Arquivos na raiz
 
-Mantenha estes arquivos na raiz do repositório:
+- `ficha_cadastral.html` — formulário e geração do PDF
+- `ficha_cadastral_campos.json` — coordenadas dos campos (pt)
+- `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf` — template
+- `vercel.json` — redireciona `/` para `ficha_cadastral.html`
+- `Carta Abertura de Conta Modelo Padrão_Bradesco.docx` — download opcional (conta Bradesco)
 
-- `index.html`
-- `F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf`
-- `vercel.json`
+## Publicar na Vercel
 
-## Publicar na Vercel (sem servidor local)
+1. Envie o repositório para o GitHub.
+2. Em [vercel.com/new](https://vercel.com/new), importe o projeto.
+3. Preset: **Other** (ou automático).
+4. **Deploy**.
 
-1. Suba os arquivos para um repositório no GitHub.
-2. Acesse [https://vercel.com/new](https://vercel.com/new).
-3. Importe o repositório.
-4. Framework Preset: **Other** (ou deixe automático).
-5. Clique em **Deploy**.
-
-Após o deploy, a Vercel gera uma URL pública. Esse link já pode ser enviado ao usuário.
-
-## Observações
-
-- O template PDF não é alterado; os dados são escritos por cima no momento da exportação.
-- O botão de geração cria e baixa o arquivo `Ficha_Cadastral_preenchida.pdf`.
-- Se o template não carregar automaticamente, a tela permite selecionar o PDF manualmente.
+O template PDF não é alterado no disco; os dados são desenhados por cima na exportação. Após gerar o PDF, o formulário é limpo (fluxo LGPD).
