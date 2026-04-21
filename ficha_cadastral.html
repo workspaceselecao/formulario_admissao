@@ -987,6 +987,24 @@
     </div>
   </div>
 </div>
+<div id="modalCopiaAssistencia" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="copiaAssistTitulo">
+  <div class="modal-card" style="max-width: 440px">
+    <div class="modal-head" id="copiaAssistTitulo">Assistência Médica</div>
+    <div class="modal-body">
+      Deseja que as informações preenchidas nesta <strong>Ficha Cadastral</strong> sejam copiadas para o
+      formulário de <strong>Adesão à Assistência Médica</strong>?<br><br>
+      Campos com o mesmo sentido (nome, CPF, endereço, telefone, dependentes, assinatura, etc.) serão
+      sugeridos na próxima vez que você abrir aquele formulário.
+    </div>
+    <label class="check-label" style="display: flex; align-items: center; gap: 8px; margin: 0 18px 12px; font-size: 13px; cursor: pointer; color: var(--text-mid)">
+      <input type="checkbox" id="naoPerguntarCopiaAssist"> Não perguntar novamente neste navegador
+    </label>
+    <div class="modal-actions">
+      <button type="button" id="btnCopiaAssistNao" class="btn-modal cancel">Agora não</button>
+      <button type="button" id="btnCopiaAssistSim" class="btn-modal confirm">Sim, copiar</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
@@ -1262,6 +1280,68 @@ function adicionarDependente(){
   updateProgress();
   agendarSalvarRascunho();
   novaLinha.querySelector('input')?.focus();
+}
+
+// ── Cópia para Assistência Médica (abre com modal; consome em assistencia_medica.html) ──
+const CROSS_COPY_FICHA_ASSISTENCIA_KEY = "cross_copy_ficha_para_assistencia_v1";
+const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = "ficha_cadastral_nao_perguntar_copia_assistencia";
+
+function construirPayloadCopiaParaAssistencia() {
+  const c = (id) => (document.getElementById(id)?.value || "").trim();
+  const nascEmPartes = (iso) => {
+    const s = (iso || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}/.test(s)) return { d: "", m: "", y: "" };
+    const p = s.split("T")[0].split("-");
+    return { y: p[0] || "", m: p[1] || "", d: p[2] || "" };
+  };
+  const out = {
+    v: 1,
+    t: Date.now(),
+    campos: {
+      funcionario: c("nomeCompleto"),
+      cpf: c("cpf"),
+      cep: c("cep"),
+      rua: c("endereco"),
+      numero: c("endNum"),
+      complemento: c("complemento"),
+      bairro: c("bairro"),
+      cidadeuf: c("cidade"),
+      assinaturaName: c("assinaturaName")
+    },
+    dataAssinatura: (document.getElementById("dataAssinatura")?.value || "").trim()
+  };
+  const cel = c("celular");
+  const tel = c("telefone");
+  out.telefoneDigitos = (cel || tel).replace(/\D/g, "").slice(0, 11);
+  const deps = lerDependentesFormulario();
+  out.dependentesFilhos = deps
+    .filter((d) => d.nome)
+    .slice(0, 4)
+    .map((d) => {
+      const p = nascEmPartes(d.nascimento);
+      return { nome: d.nome, cpf: d.cpf, d: p.d, m: p.m, y: p.y };
+    });
+  return out;
+}
+function abrirModalCopiaAssistencia() {
+  const m = document.getElementById("modalCopiaAssistencia");
+  if (!m) return;
+  m.classList.add("show");
+  document.body.classList.add("modal-open");
+}
+function fecharModalCopiaAssistencia() {
+  const m = document.getElementById("modalCopiaAssistencia");
+  if (m) m.classList.remove("show");
+  if (!document.getElementById("lgpdModal")?.classList.contains("show")) {
+    document.body.classList.remove("modal-open");
+  }
+}
+function initModalCopiaParaAssistencia() {
+  if (localStorage.getItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST) === "1") return;
+  setTimeout(() => {
+    if (document.getElementById("lgpdModal")?.classList.contains("show")) return;
+    abrirModalCopiaAssistencia();
+  }, 0);
 }
 
 // ── RASCUNHO LOCAL (navegador; removido após gerar PDF) ──
@@ -2112,11 +2192,43 @@ document.getElementById('lgpdModal')?.addEventListener('click', (event) => {
     fecharModalLGPD(false);
   }
 });
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && document.getElementById('lgpdModal')?.classList.contains('show')) {
-    fecharModalLGPD(false);
+document.getElementById("btnCopiaAssistSim")?.addEventListener("click", () => {
+  try {
+    localStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(construirPayloadCopiaParaAssistencia()));
+  } catch (e) {
+    console.warn(e);
+  }
+  if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
+    try {
+      localStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
+    } catch (_e) {}
+  }
+  fecharModalCopiaAssistencia();
+  showToast("Ao abrir a Assistência Médica, os campos equivalentes serão sugeridos.", true);
+});
+document.getElementById("btnCopiaAssistNao")?.addEventListener("click", () => {
+  if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
+    try {
+      localStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
+    } catch (_e) {}
+  }
+  fecharModalCopiaAssistencia();
+});
+document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalCopiaAssistencia") {
+    fecharModalCopiaAssistencia();
   }
 });
+document.addEventListener('keydown', (event) => {
+  if (event.key !== "Escape") return;
+  if (document.getElementById('lgpdModal')?.classList.contains('show')) {
+    fecharModalLGPD(false);
+  }
+  if (document.getElementById("modalCopiaAssistencia")?.classList.contains("show")) {
+    fecharModalCopiaAssistencia();
+  }
+});
+initModalCopiaParaAssistencia();
 window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
 document.getElementById("btnDescartarRascunho")?.addEventListener("click", descartarRascunhoEFormulario);
 updateProgress();

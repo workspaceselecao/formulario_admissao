@@ -1513,6 +1513,128 @@ function aplicarEstadoRascunho(obj) {
   atualizarVisibilidadeModuloDependentes();
 }
 
+const CROSS_COPY_FICHA_ASSISTENCIA_KEY = "cross_copy_ficha_para_assistencia_v1";
+
+function tentarAplicarCopiaFichaCadastral() {
+  let raw;
+  try {
+    raw = localStorage.getItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+  } catch (_e) {
+    return;
+  }
+  if (!raw) return;
+  let obj;
+  try {
+    obj = JSON.parse(raw);
+  } catch (_e) {
+    try {
+      localStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+    } catch (e2) {}
+    return;
+  }
+  if (!obj || !obj.campos) {
+    try {
+      localStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+    } catch (e2) {}
+    return;
+  }
+  const c = obj.campos;
+  const temAlgumDadoUtil =
+    String(c.funcionario || "").trim() ||
+    String(c.cpf || "").trim() ||
+    String(c.cep || "").trim() ||
+    String(c.rua || "").trim() ||
+    (obj.telefoneDigitos && String(obj.telefoneDigitos).replace(/\D/g, "").length >= 8) ||
+    (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.some((d) => d && String(d.nome || "").trim()));
+  if (!temAlgumDadoUtil) {
+    try {
+      localStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+    } catch (e2) {}
+    return;
+  }
+  const up = (s) => String(s || "").trim().toLocaleUpperCase("pt-BR");
+  const setIf = (id, val) => {
+    if (val == null || String(val).trim() === "") return;
+    const el = document.getElementById(id);
+    if (el) el.value = String(val);
+  };
+  ignorarSalvarRascunho = true;
+  try {
+    if (c.funcionario) setIf("funcionario", up(c.funcionario));
+    if (c.cpf) {
+      const elc = document.getElementById("cpf");
+      if (elc) {
+        elc.value = c.cpf;
+        maskCPF(elc);
+      }
+    }
+    if (c.cep) {
+      const ce = document.getElementById("cep");
+      if (ce) {
+        ce.value = String(c.cep).replace(/\D/g, "").slice(0, 8);
+        maskCep(ce);
+        ultimoCepPreenchido = String(c.cep).replace(/\D/g, "").slice(0, 8);
+      }
+    }
+    if (c.rua) setIf("rua", up(c.rua));
+    if (c.numero) setIf("numero", up(c.numero));
+    if (c.complemento) setIf("complemento", up(c.complemento));
+    if (c.bairro) setIf("bairro", up(c.bairro));
+    if (c.cidadeuf) setIf("cidadeuf", up(c.cidadeuf));
+    if (obj.telefoneDigitos) {
+      const te = document.getElementById("telefone");
+      if (te) {
+        te.value = String(obj.telefoneDigitos).replace(/\D/g, "").slice(0, 11);
+        maskTelefone(te);
+      }
+    }
+    if (c.assinaturaName) setIf("assinaturaName", up(c.assinaturaName));
+    if (obj.dataAssinatura) {
+      const d = document.getElementById("dataAssinatura");
+      if (d) d.value = obj.dataAssinatura;
+    }
+    if (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.length) {
+      const n = Math.min(NUM_FILHOS, obj.dependentesFilhos.length);
+      filhosVisiveis = Math.max(1, n);
+      for (let k = 2; k <= filhosVisiveis; k++) {
+        const bl = document.getElementById(`filBloco${k}`);
+        if (bl) bl.style.display = "";
+      }
+      for (let k = filhosVisiveis + 1; k <= NUM_FILHOS; k++) {
+        const bl = document.getElementById(`filBloco${k}`);
+        if (bl) bl.style.display = "none";
+      }
+      atualizarBotoesFilhos();
+      obj.dependentesFilhos.forEach((dep, i) => {
+        const fn = i + 1;
+        if (fn > NUM_FILHOS) return;
+        if (!dep || !String(dep.nome || "").trim()) return;
+        const ch = document.getElementById(`fil${fn}_incluir`);
+        if (ch) ch.checked = true;
+        toggleDepFilho(fn);
+        setIf(`fil${fn}_nome`, up(dep.nome));
+        if (dep.cpf) {
+          const cfp = document.getElementById(`fil${fn}_cpf`);
+          if (cfp) {
+            cfp.value = dep.cpf;
+            maskCPF(cfp);
+          }
+        }
+        if (dep.d) setIf(`fil${fn}_d`, String(dep.d).replace(/\D/g, "").padStart(2, "0").slice(0, 2));
+        if (dep.m) setIf(`fil${fn}_m`, String(dep.m).replace(/\D/g, "").padStart(2, "0").slice(0, 2));
+        if (dep.y) setIf(`fil${fn}_y`, String(dep.y).replace(/\D/g, "").slice(0, 4));
+      });
+    }
+  } finally {
+    ignorarSalvarRascunho = false;
+  }
+  try {
+    localStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+  } catch (e2) {}
+  agendarSalvarRascunho();
+  showToast("Dados importados da Ficha Cadastral. Revise os campos antes de concluir.", true);
+}
+
 function agendarSalvarRascunho() {
   if (ignorarSalvarRascunho) return;
   clearTimeout(rascunhoSalvarTimer);
@@ -1731,6 +1853,7 @@ if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
 }
+tentarAplicarCopiaFichaCadastral();
 atualizarBotoesFilhos();
 atualizarVisibilidadeModuloDependentes();
 carregarTemplateInicial();
