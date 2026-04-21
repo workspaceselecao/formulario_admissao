@@ -578,13 +578,9 @@
           <label>Cidade/UF</label>
           <input type="text" id="cidadeuf" placeholder="">
         </div>
-        <div class="field">
-          <label>Telefone DDD</label>
-          <input type="text" id="tel_ddd" inputmode="numeric" maxlength="2" placeholder="00" style="max-width:72px">
-        </div>
-        <div class="field">
-          <label>Telefone Número</label>
-          <input type="text" id="tel_numero" inputmode="numeric" placeholder="00000-0000" maxlength="11">
+        <div class="field col-span-2">
+          <label>Telefone</label>
+          <input type="text" id="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="16" spellcheck="false" autocomplete="tel">
         </div>
       </div>
     </div>
@@ -936,13 +932,32 @@ function maskSUS(el) {
   if (d.length > 11) p.push(d.slice(11, 15));
   el.value = p.join(" ");
 }
-function maskTelNumero(el) {
-  let d = el.value.replace(/\D/g, "").slice(0, 9);
-  if (d.length > 5) el.value = d.replace(/(\d{5})(\d{0,4})/, "$1-$2");
-  else el.value = d;
+function maskTelefone(el) {
+  const d = el.value.replace(/\D/g, "").slice(0, 11);
+  if (!d) {
+    el.value = "";
+    return;
+  }
+  if (d.length <= 2) {
+    el.value = d;
+    return;
+  }
+  const ddd = d.slice(0, 2);
+  const n = d.slice(2);
+  if (n.length <= 4) {
+    el.value = `(${ddd}) ${n}`;
+    return;
+  }
+  if (d.length <= 10) {
+    el.value = `(${ddd}) ${n.slice(0, 4)}-${n.slice(4, 8)}`;
+    return;
+  }
+  el.value = `(${ddd}) ${n.slice(0, 5)}-${n.slice(5, 9)}`;
 }
-function maskDDD(el) {
-  el.value = el.value.replace(/\D/g, "").slice(0, 2);
+function telefoneSeparadoParaPdf() {
+  const d = (v("telefone") || "").replace(/\D/g, "").slice(0, 11);
+  if (d.length < 10) return { ddd: "", num: "" };
+  return { ddd: d.slice(0, 2), num: d.slice(2) };
 }
 let ultimoCepPreenchido = "";
 let cepBuscaTimer = null;
@@ -1349,7 +1364,7 @@ const RASCUNHO_IDS = [
   "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
   "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
-  "tel_ddd", "tel_numero",
+  "telefone",
   "conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae",
   "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
   "fil2_nome", "fil2_cpf", "fil2_d", "fil2_m", "fil2_y", "fil2_sus", "fil2_nomemae", "fil2_nascvivo",
@@ -1393,6 +1408,15 @@ function aplicarEstadoRascunho(obj) {
     const el = document.getElementById(id);
     if (el) el.value = c[id];
   });
+  const elTelefone = document.getElementById("telefone");
+  if (elTelefone && !String(elTelefone.value).trim() && (c.tel_ddd != null || c.tel_numero != null)) {
+    const a = String(c.tel_ddd ?? "").replace(/\D/g, "");
+    const b = String(c.tel_numero ?? "").replace(/\D/g, "");
+    if (a.length >= 2 && b.length >= 8) {
+      elTelefone.value = a.slice(0, 2) + b;
+      maskTelefone(elTelefone);
+    }
+  }
   const ta = obj.tipoAdesao;
   if (ta) {
     const inp = document.querySelector(`input[name="tipoAdesao"][value="${ta}"]`);
@@ -1504,8 +1528,9 @@ async function gerarPDF() {
     escreverTextoCampoCoord(page, font, en.complemento.coordenadas, v("complemento"));
     escreverTextoCampoCoord(page, font, en.bairro.coordenadas, v("bairro"));
     escreverTextoCampoCoord(page, font, en.cidadeuf.coordenadas, v("cidadeuf"));
-    escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, v("tel_ddd"));
-    escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, v("tel_numero"));
+    const telPartes = telefoneSeparadoParaPdf();
+    escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, telPartes.ddd);
+    escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, telPartes.num);
 
     if (tipo !== "naooptante") {
       const conj = C.dependentes.conjuge.campos;
@@ -1594,11 +1619,8 @@ async function baixarPdfVazio() {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", () => maskSUS(el));
 });
-document.getElementById("tel_ddd")?.addEventListener("input", function () {
-  maskDDD(this);
-});
-document.getElementById("tel_numero")?.addEventListener("input", function () {
-  maskTelNumero(this);
+document.getElementById("telefone")?.addEventListener("input", function () {
+  maskTelefone(this);
 });
 const elCep = document.getElementById("cep");
 if (elCep) {
@@ -1625,7 +1647,7 @@ if (elCep) {
 document.querySelectorAll('input[type="text"]').forEach((el) => {
   if (
     [
-      "tel_ddd", "tel_numero", "cep", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
+      "telefone", "cep", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
       "conj_d", "conj_m", "conj_y", "fil1_d", "fil1_m", "fil1_y", "fil2_d", "fil2_m", "fil2_y",
       "fil3_d", "fil3_m", "fil3_y", "fil4_d", "fil4_m", "fil4_y",
       "sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus",
