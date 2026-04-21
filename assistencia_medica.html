@@ -113,6 +113,14 @@
     transition: box-shadow 0.2s;
   }
   .section-card:hover { box-shadow: var(--shadow-lg); }
+  #secaoDependentes.sec-dependentes--off,
+  #secaoDependentes[hidden] {
+    display: none !important;
+  }
+  /* Não optante (cancelamento): esconde o card de dependentes. Declarativo; não depende de script. */
+  html:has(#tipoAdesaoNaooptante:checked) #secaoDependentes {
+    display: none !important;
+  }
   .section-header {
     background: var(--accent);
     color: #fff;
@@ -139,6 +147,18 @@
   .col-span-2 { grid-column: span 2; }
   .col-span-3 { grid-column: span 3; }
   .field { display: flex; flex-direction: column; gap: 6px; }
+  .field .field-hint {
+    font-weight: 400;
+    color: var(--text-light);
+  }
+  .field .field-hint {
+    font-weight: 400;
+    color: var(--text-light);
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+  }
   .field label {
     font-size: 11px;
     font-weight: 600;
@@ -229,6 +249,11 @@
     margin-top: 2px;
     accent-color: var(--accent);
     flex-shrink: 0;
+  }
+  .radio-label .adesao-sublabel {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-light);
   }
   .radio-label.active {
     border-color: var(--accent);
@@ -463,7 +488,7 @@
     <div class="section-body">
       <div class="radio-inline tipo-adesao-grid" id="tipoAdesaoGroup">
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante"> NÃO QUERO ADERIR AO PLANO</label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante"> NÃO QUERO ADERIR AO PLANO <span class="adesao-sublabel">(Não Optante na Admissão)</span></label>
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="matrimonio"> Matrimônio – Inclusão de Dependente</label>
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="exclusaodependente"> Exclusão de Dependente</label>
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="nascfilho"> Nascimento de Filho – Inclusão de Dependente</label>
@@ -536,6 +561,11 @@
     <div class="section-body">
       <div class="grid grid-2">
         <div class="field col-span-2">
+          <label>CEP <span class="field-hint">(busca automática — ViaCEP; não consta no PDF)</span></label>
+          <input type="text" id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code" spellcheck="false" aria-describedby="cepAjuda">
+          <p id="cepAjuda" class="rascunho-bar" style="margin-top:6px">Informe o CEP com 8 dígitos; rua, bairro e cidade/UF serão preenchidos quando possível.</p>
+        </div>
+        <div class="field col-span-2">
           <label>Endereço (Rua/Av)</label>
           <input type="text" id="rua" placeholder="">
         </div>
@@ -567,7 +597,7 @@
     </div>
   </div>
 
-  <div class="section-card">
+  <div class="section-card" id="secaoDependentes">
     <div class="section-header"><div class="dot"></div>Dependentes</div>
     <div class="section-body">
       <div class="aviso-box" style="margin-bottom:18px">
@@ -921,6 +951,50 @@ function maskTelNumero(el) {
 function maskDDD(el) {
   el.value = el.value.replace(/\D/g, "").slice(0, 2);
 }
+let ultimoCepPreenchido = "";
+let cepBuscaTimer = null;
+function maskCep(el) {
+  const d = el.value.replace(/\D/g, "").slice(0, 8);
+  el.value = d.length > 5 ? d.replace(/(\d{5})(\d{0,3})/, "$1-$2") : d;
+}
+function agendarBuscaCep() {
+  clearTimeout(cepBuscaTimer);
+  cepBuscaTimer = setTimeout(() => void buscarEnderecoPorCep(), 450);
+}
+async function buscarEnderecoPorCep() {
+  const el = document.getElementById("cep");
+  if (!el) return;
+  const raw = el.value.replace(/\D/g, "");
+  if (raw.length !== 8) return;
+  if (raw === ultimoCepPreenchido) return;
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`, { method: "GET" });
+    if (!res.ok) throw new Error("http");
+    const data = await res.json();
+    if (data.erro) {
+      showToast("CEP não encontrado na base dos Correios.", false);
+      return;
+    }
+    const up = (s) => (s || "").toLocaleUpperCase("pt-BR");
+    const rua = document.getElementById("rua");
+    const bairro = document.getElementById("bairro");
+    const cidadeuf = document.getElementById("cidadeuf");
+    if (data.logradouro && rua) rua.value = up(String(data.logradouro).trim());
+    if (data.bairro && bairro) bairro.value = up(String(data.bairro).trim());
+    if (data.localidade && data.uf && cidadeuf) {
+      cidadeuf.value = up(`${String(data.localidade).trim()} / ${String(data.uf).trim()}`);
+    } else if (data.localidade && cidadeuf) {
+      cidadeuf.value = up(String(data.localidade).trim());
+    } else if (data.uf && cidadeuf) {
+      cidadeuf.value = up(String(data.uf).trim());
+    }
+    ultimoCepPreenchido = raw;
+    showToast("Endereço preenchido a partir do CEP.", true);
+    agendarSalvarRascunho();
+  } catch (_e) {
+    showToast("Não foi possível consultar o CEP. Verifique a conexão e tente de novo.", false);
+  }
+}
 function maskDigitos2(el) {
   el.value = el.value.replace(/\D/g, "").slice(0, 2);
 }
@@ -1016,7 +1090,11 @@ function v(id) {
   return (document.getElementById(id)?.value || "").trim();
 }
 function radio(name) {
-  return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+  const list = document.querySelectorAll(`input[name="${name}"]`);
+  for (const r of list) {
+    if (r.checked) return String(r.value || "").trim();
+  }
+  return "";
 }
 function toggleDepConjuge() {
   const on = document.getElementById("conj_incluir")?.checked;
@@ -1035,9 +1113,32 @@ function syncRadioActive(name) {
     r.closest(".radio-label")?.classList.toggle("active", r.checked);
   });
 }
-document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
-  r.addEventListener("change", () => syncRadioActive("tipoAdesao"));
-});
+/** Oculta cônjuge e filhos quando a opção é cancelamento (não aderir ao plano). */
+function atualizarVisibilidadeModuloDependentes() {
+  const sec = document.getElementById("secaoDependentes");
+  if (!sec) return;
+  const ro = document.getElementById("tipoAdesaoNaooptante");
+  const naoAderir = ro ? ro.checked : radio("tipoAdesao") === "naooptante";
+  sec.classList.toggle("sec-dependentes--off", naoAderir);
+  if (naoAderir) {
+    sec.setAttribute("hidden", "");
+    sec.style.setProperty("display", "none", "important");
+  } else {
+    sec.removeAttribute("hidden");
+    sec.style.removeProperty("display");
+  }
+}
+(function initTipoAdesaoDependentes() {
+  const aplicar = () => {
+    syncRadioActive("tipoAdesao");
+    atualizarVisibilidadeModuloDependentes();
+  };
+  document.getElementById("tipoAdesaoGroup")?.addEventListener("click", () => setTimeout(aplicar, 0));
+  document.querySelectorAll('input[name="tipoAdesao"]').forEach((inp) => {
+    inp.addEventListener("change", aplicar);
+    inp.addEventListener("input", aplicar);
+  });
+})();
 
 function formatDate(d) {
   if (!d) return "";
@@ -1100,42 +1201,44 @@ function validarCamposObrigatorios() {
     faltantes.push({ id: "cpf", nome: "CPF (11 dígitos)" });
   }
 
-  if (document.getElementById("conj_incluir")?.checked) {
-    add("conj_nome", "Nome do cônjuge");
-    add("conj_cpf", "CPF do cônjuge");
-    const dnCOk = !!(v("conj_d") && v("conj_m") && v("conj_y"));
-    ["conj_d", "conj_m", "conj_y"].forEach((id) => marcarCampoInvalido(id, !dnCOk));
-    if (!dnCOk) faltantes.push({ id: "conj_d", nome: "Data de nascimento do cônjuge" });
-    add("conj_sus", "SUS do cônjuge");
-    add("conj_nomemae", "Nome da mãe do cônjuge");
-    if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
-      marcarCampoInvalido("conj_sus", true);
-      faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos)" });
+  if (radio("tipoAdesao") !== "naooptante") {
+    if (document.getElementById("conj_incluir")?.checked) {
+      add("conj_nome", "Nome do cônjuge");
+      add("conj_cpf", "CPF do cônjuge");
+      const dnCOk = !!(v("conj_d") && v("conj_m") && v("conj_y"));
+      ["conj_d", "conj_m", "conj_y"].forEach((id) => marcarCampoInvalido(id, !dnCOk));
+      if (!dnCOk) faltantes.push({ id: "conj_d", nome: "Data de nascimento do cônjuge" });
+      add("conj_sus", "SUS do cônjuge");
+      add("conj_nomemae", "Nome da mãe do cônjuge");
+      if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
+        marcarCampoInvalido("conj_sus", true);
+        faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos)" });
+      }
+      if (v("conj_cpf") && digitosCount(v("conj_cpf")) !== 11) {
+        marcarCampoInvalido("conj_cpf", true);
+        faltantes.push({ id: "conj_cpf", nome: "CPF do cônjuge (11 dígitos)" });
+      }
     }
-    if (v("conj_cpf") && digitosCount(v("conj_cpf")) !== 11) {
-      marcarCampoInvalido("conj_cpf", true);
-      faltantes.push({ id: "conj_cpf", nome: "CPF do cônjuge (11 dígitos)" });
-    }
-  }
 
-  for (let fn = 1; fn <= filhosVisiveis; fn++) {
-    if (!document.getElementById(`fil${fn}_incluir`)?.checked) continue;
-    const rot = `filho(a) ${fn}`;
-    add(`fil${fn}_nome`, `Nome (${rot})`);
-    add(`fil${fn}_cpf`, `CPF (${rot})`);
-    const dnFOk = !!(v(`fil${fn}_d`) && v(`fil${fn}_m`) && v(`fil${fn}_y`));
-    [`fil${fn}_d`, `fil${fn}_m`, `fil${fn}_y`].forEach((id) => marcarCampoInvalido(id, !dnFOk));
-    if (!dnFOk) faltantes.push({ id: `fil${fn}_d`, nome: `Data de nascimento (${rot})` });
-    add(`fil${fn}_sus`, `SUS (${rot})`);
-    add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
-    add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
-    if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
-      marcarCampoInvalido(`fil${fn}_sus`, true);
-      faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
-    }
-    if (v(`fil${fn}_cpf`) && digitosCount(v(`fil${fn}_cpf`)) !== 11) {
-      marcarCampoInvalido(`fil${fn}_cpf`, true);
-      faltantes.push({ id: `fil${fn}_cpf`, nome: `CPF (${rot}, 11 dígitos)` });
+    for (let fn = 1; fn <= filhosVisiveis; fn++) {
+      if (!document.getElementById(`fil${fn}_incluir`)?.checked) continue;
+      const rot = `filho(a) ${fn}`;
+      add(`fil${fn}_nome`, `Nome (${rot})`);
+      add(`fil${fn}_cpf`, `CPF (${rot})`);
+      const dnFOk = !!(v(`fil${fn}_d`) && v(`fil${fn}_m`) && v(`fil${fn}_y`));
+      [`fil${fn}_d`, `fil${fn}_m`, `fil${fn}_y`].forEach((id) => marcarCampoInvalido(id, !dnFOk));
+      if (!dnFOk) faltantes.push({ id: `fil${fn}_d`, nome: `Data de nascimento (${rot})` });
+      add(`fil${fn}_sus`, `SUS (${rot})`);
+      add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
+      add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
+      if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
+        marcarCampoInvalido(`fil${fn}_sus`, true);
+        faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
+      }
+      if (v(`fil${fn}_cpf`) && digitosCount(v(`fil${fn}_cpf`)) !== 11) {
+        marcarCampoInvalido(`fil${fn}_cpf`, true);
+        faltantes.push({ id: `fil${fn}_cpf`, nome: `CPF (${rot}, 11 dígitos)` });
+      }
     }
   }
 
@@ -1240,16 +1343,19 @@ function limparDadosFormulario() {
   }
   atualizarBotoesFilhos();
   toggleDepConjuge();
+  atualizarVisibilidadeModuloDependentes();
   document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
+  ultimoCepPreenchido = "";
+  clearTimeout(cepBuscaTimer);
 }
 
 const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v3";
 const RASCUNHO_IDS = [
   "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
-  "cargo", "site", "rua", "numero", "complemento", "bairro", "cidadeuf",
+  "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
   "tel_ddd", "tel_numero",
   "conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae",
   "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
@@ -1319,6 +1425,7 @@ function aplicarEstadoRascunho(obj) {
     toggleDepFilho(fn);
   }
   toggleDepConjuge();
+  atualizarVisibilidadeModuloDependentes();
 }
 
 function agendarSalvarRascunho() {
@@ -1407,32 +1514,34 @@ async function gerarPDF() {
     escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, v("tel_ddd"));
     escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, v("tel_numero"));
 
-    const conj = C.dependentes.conjuge.campos;
-    const incluirConj = document.getElementById("conj_incluir")?.checked;
-    marcarCheckboxCoord(page, font, conj.incluir.coordenadas, incluirConj);
-    if (incluirConj) {
-      escreverTextoCampoCoord(page, font, conj.nome.coordenadas, v("conj_nome"));
-      escreverTextoCampoCoord(page, font, conj.cpf.coordenadas, v("conj_cpf"));
-      preencherDataSegmentada(page, font, conj.dtnasc, v("conj_d"), v("conj_m"), v("conj_y"));
-      escreverTextoCampoCoord(page, font, conj.sus.coordenadas, v("conj_sus"));
-      escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
-    }
+    if (tipo !== "naooptante") {
+      const conj = C.dependentes.conjuge.campos;
+      const incluirConj = document.getElementById("conj_incluir")?.checked;
+      marcarCheckboxCoord(page, font, conj.incluir.coordenadas, incluirConj);
+      if (incluirConj) {
+        escreverTextoCampoCoord(page, font, conj.nome.coordenadas, v("conj_nome"));
+        escreverTextoCampoCoord(page, font, conj.cpf.coordenadas, v("conj_cpf"));
+        preencherDataSegmentada(page, font, conj.dtnasc, v("conj_d"), v("conj_m"), v("conj_y"));
+        escreverTextoCampoCoord(page, font, conj.sus.coordenadas, v("conj_sus"));
+        escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
+      }
 
-    const filhosSchema = C.dependentes.filhos || [];
-    filhosSchema.forEach((filSchema, idx) => {
-      const n = idx + 1;
-      if (n > filhosVisiveis) return;
-      const fil = filSchema.campos;
-      const incluirFil = document.getElementById(`fil${n}_incluir`)?.checked;
-      marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
-      if (!incluirFil) return;
-      escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v(`fil${n}_nome`));
-      escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v(`fil${n}_cpf`));
-      preencherDataSegmentada(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
-      escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
-      escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
-      escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, v(`fil${n}_nascvivo`));
-    });
+      const filhosSchema = C.dependentes.filhos || [];
+      filhosSchema.forEach((filSchema, idx) => {
+        const n = idx + 1;
+        if (n > filhosVisiveis) return;
+        const fil = filSchema.campos;
+        const incluirFil = document.getElementById(`fil${n}_incluir`)?.checked;
+        marcarCheckboxCoord(page, font, fil.incluir.coordenadas, incluirFil);
+        if (!incluirFil) return;
+        escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v(`fil${n}_nome`));
+        escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v(`fil${n}_cpf`));
+        preencherDataSegmentada(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
+        escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
+        escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
+        escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, v(`fil${n}_nascvivo`));
+      });
+    }
 
     const ass = C.assinatura.campos;
     escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, v("assinaturaName") || v("funcionario"));
@@ -1498,6 +1607,19 @@ document.getElementById("tel_ddd")?.addEventListener("input", function () {
 document.getElementById("tel_numero")?.addEventListener("input", function () {
   maskTelNumero(this);
 });
+const elCep = document.getElementById("cep");
+if (elCep) {
+  elCep.addEventListener("input", function () {
+    maskCep(this);
+    const raw = this.value.replace(/\D/g, "");
+    if (raw.length < 8) ultimoCepPreenchido = "";
+    if (raw.length === 8) agendarBuscaCep();
+  });
+  elCep.addEventListener("blur", function () {
+    clearTimeout(cepBuscaTimer);
+    void buscarEnderecoPorCep();
+  });
+}
 ["dn_dia", "dn_mes", "adm_dia", "adm_mes", "conj_d", "conj_m", "fil1_d", "fil1_m", "fil2_d", "fil2_m", "fil3_d", "fil3_m", "fil4_d", "fil4_m"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", () => maskDigitos2(el));
@@ -1510,7 +1632,7 @@ document.getElementById("tel_numero")?.addEventListener("input", function () {
 document.querySelectorAll('input[type="text"]').forEach((el) => {
   if (
     [
-      "tel_ddd", "tel_numero", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
+      "tel_ddd", "tel_numero", "cep", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
       "conj_d", "conj_m", "conj_y", "fil1_d", "fil1_m", "fil1_y", "fil2_d", "fil2_m", "fil2_y",
       "fil3_d", "fil3_m", "fil3_y", "fil4_d", "fil4_m", "fil4_y",
       "sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus",
@@ -1527,6 +1649,7 @@ if (!tentarRestaurarRascunho()) {
   if (elData) elData.valueAsDate = new Date();
 }
 atualizarBotoesFilhos();
+atualizarVisibilidadeModuloDependentes();
 carregarTemplateInicial();
 window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
 </script>
