@@ -1,0 +1,367 @@
+{
+  "documento": {
+    "id": "F-089_PR-090_17",
+    "titulo": "Proposta de Adesão Assistência Médica – Grupo NotreDame Intermédica",
+    "versao": "17",
+    "data_publicacao": "23/12/2024",
+    "vigencia": "2 anos",
+    "paginas": 1
+  },
+  "campos": {
+    "tipo_adesao": {
+      "descricao": "Tipo de movimentação do formulário",
+      "tipo": "grupo_checkbox",
+      "pagina": 1,
+      "secao": "inclusao_cancelamento",
+      "opcoes": {
+        "optante": {
+          "label": "Optante na Admissão (Inclusão)",
+          "coordenadas": { "x": 94, "y": 995, "largura": 19, "altura": 15 }
+        },
+        "naooptante": {
+          "label": "Não Optante na Admissão (Cancelamento)",
+          "observacao": "Exclusão em até 60 dias após admissão, somente para os planos Smart 300 Plus Enfermaria e Advance 700 Enfermaria",
+          "coordenadas": { "x": 452, "y": 997, "largura": 20, "altura": 14 }
+        },
+        "matrimonio": {
+          "label": "Matrimônio – Inclusão de Dependente",
+          "observacao": "Prazo: até 20 dias da data do casamento",
+          "coordenadas": { "x": 93, "y": 968, "largura": 20, "altura": 14 }
+        },
+        "exclusaodependente": {
+          "label": "Exclusão de Dependente",
+          "observacao": "Somente em caso de óbito ou separação judicial",
+          "coordenadas": { "x": 452, "y": 967, "largura": 19, "altura": 14 }
+        },
+        "nascfilho": {
+          "label": "Nascimento de Filho – Inclusão de Dependente",
+          "observacao": "Prazo: até 20 dias da data do nascimento",
+          "coordenadas": { "x": 94, "y": 939, "largura": 19, "altura": 13 }
+        }
+      }
+    },
+    "dados_funcionario": {
+      "descricao": "Dados cadastrais do funcionário",
+      "campos": {
+        "funcionario": {
+          "label": "Nome do Funcionário",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 118, "y": 881, "largura": 370, "altura": 16 },
+          "obrigatorio": true
+        },
+        "matricula": {
+          "label": "Matrícula",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 543, "y": 881, "largura": 189, "altura": 16 },
+          "obrigatorio": true
+        },
+        "nomemae": {
+          "label": "Nome da Mãe",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 120, "y": 859, "largura": 245, "altura": 13 },
+          "obrigatorio": false
+        },
+        "sus": {
+          "label": "Nº do Cartão SUS",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 458, "y": 859, "largura": 260, "altura": 13 },
+          "obrigatorio": true,
+          "mascara": "999 9999 9999 9999"
+        },
+        "rg": {
+          "label": "RG",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 80, "y": 838, "largura": 198, "altura": 12 },
+          "obrigatorio": false
+        },
+        "cpf": {
+          "label": "CPF",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 318, "y": 838, "largura": 152, "altura": 14 },
+          "obrigatorio": true,
+          "mascara": "999.999.999-99"
+        },
+        "datanasc": {
+          "label": "Data de Nascimento",
+          "tipo": "data_segmentada",
+          "pagina": 1,
+          "obrigatorio": true,
+          "segmentos": {
+            "dia": {
+              "coordenadas": { "x": 537, "y": 838, "largura": 26, "altura": 13 },
+              "mascara": "99"
+            },
+            "mes": {
+              "coordenadas": { "x": 566, "y": 838, "largura": 28, "altura": 13 },
+              "mascara": "99"
+            },
+            "ano": {
+              "coordenadas": { "x": 599, "y": 838, "largura": 63, "altura": 13 },
+              "mascara": "9999"
+            }
+          }
+        },
+        "dataadm": {
+          "label": "Data de Admissão",
+          "tipo": "data_segmentada",
+          "pagina": 1,
+          "obrigatorio": false,
+          "segmentos": {
+            "dia": {
+              "coordenadas": { "x": 141, "y": 815, "largura": 39, "altura": 11 },
+              "mascara": "99"
+            },
+            "mes": {
+              "coordenadas": { "x": 190, "y": 815, "largura": 36, "altura": 11 },
+              "mascara": "99"
+            },
+            "ano": {
+              "coordenadas": { "x": 240, "y": 815, "largura": 43, "altura": 11 },
+              "mascara": "9999"
+            }
+          }
+        },
+        "cargo": {
+          "label": "Cargo",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 324, "y": 815, "largura": 169, "altura": 14 },
+          "obrigatorio": false
+        },
+        "site": {
+          "label": "Site / Unidade",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 516, "y": 815, "largura": 217, "altura": 13 },
+          "obrigatorio": false
+        }
+      }
+    },
+    "endereco": {
+      "descricao": "Endereço residencial do funcionário",
+      "campos": {
+        "rua": {
+          "label": "Endereço Residencial (Rua/Av)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 140, "y": 793, "largura": 328, "altura": 14 },
+          "obrigatorio": false
+        },
+        "numero": {
+          "label": "Número",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 492, "y": 793, "largura": 52, "altura": 14 },
+          "obrigatorio": false
+        },
+        "complemento": {
+          "label": "Complemento",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 578, "y": 793, "largura": 166, "altura": 14 },
+          "obrigatorio": false
+        },
+        "bairro": {
+          "label": "Bairro",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 96, "y": 770, "largura": 188, "altura": 14 },
+          "obrigatorio": false
+        },
+        "cidadeuf": {
+          "label": "Cidade/UF",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 336, "y": 770, "largura": 133, "altura": 14 },
+          "obrigatorio": false
+        },
+        "tel_ddd": {
+          "label": "Telefone DDD",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 500, "y": 771, "largura": 19, "altura": 12 },
+          "obrigatorio": false,
+          "mascara": "99"
+        },
+        "tel_numero": {
+          "label": "Telefone Número",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 521, "y": 771, "largura": 203, "altura": 12 },
+          "obrigatorio": false,
+          "mascara": "99999-9999"
+        }
+      }
+    },
+    "dependentes": {
+      "descricao": "Dependentes para inclusão no plano de saúde. Marcar 'x' no(s) dependente(s) desejado(s).",
+      "conjuge": {
+        "label": "Cônjuge",
+        "campos": {
+          "incluir": {
+            "label": "Incluir Cônjuge no Plano",
+            "tipo": "checkbox",
+            "pagina": 1,
+            "coordenadas": { "x": 59, "y": 717, "largura": 19, "altura": 16 }
+          },
+          "nome": {
+            "label": "Nome do Cônjuge",
+            "tipo": "texto",
+            "pagina": 1,
+            "coordenadas": { "x": 116, "y": 719, "largura": 231, "altura": 13 },
+            "obrigatorio": true
+          },
+          "cpf": {
+            "label": "CPF do Cônjuge",
+            "tipo": "texto",
+            "pagina": 1,
+            "coordenadas": { "x": 378, "y": 719, "largura": 111, "altura": 11 },
+            "obrigatorio": true,
+            "mascara": "999.999.999-99"
+          },
+          "dtnasc": {
+            "label": "Data de Nascimento do Cônjuge",
+            "tipo": "data_segmentada",
+            "pagina": 1,
+            "obrigatorio": true,
+            "segmentos": {
+              "dia": {
+                "coordenadas": { "x": 556, "y": 719, "largura": 24, "altura": 12 },
+                "mascara": "99"
+              },
+              "mes": {
+                "coordenadas": { "x": 585, "y": 719, "largura": 20, "altura": 11 },
+                "mascara": "99"
+              },
+              "ano": {
+                "coordenadas": { "x": 610, "y": 719, "largura": 82, "altura": 11 },
+                "mascara": "9999"
+              }
+            }
+          },
+          "sus": {
+            "label": "Nº Cartão SUS do Cônjuge",
+            "tipo": "texto",
+            "pagina": 1,
+            "coordenadas": { "x": 148, "y": 698, "largura": 127, "altura": 12 },
+            "obrigatorio": true,
+            "mascara": "999 9999 9999 9999"
+          },
+          "nomemae": {
+            "label": "Nome da Mãe do(a) Cônjuge",
+            "tipo": "texto",
+            "pagina": 1,
+            "coordenadas": { "x": 409, "y": 698, "largura": 333, "altura": 12 },
+            "obrigatorio": true
+          }
+        }
+      },
+      "filhos": [
+        {
+          "id": "filho_1",
+          "label": "Filho(a) 1",
+          "campos": {
+            "incluir": {
+              "label": "Incluir Filho(a) 1 no Plano",
+              "tipo": "checkbox",
+              "pagina": 1,
+              "coordenadas": { "x": 59, "y": 671, "largura": 18, "altura": 14 }
+            },
+            "nome": {
+              "label": "Nome do Filho(a) 1",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 120, "y": 673, "largura": 229, "altura": 16 },
+              "obrigatorio": true
+            },
+            "cpf": {
+              "label": "CPF do Filho(a) 1",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 378, "y": 673, "largura": 113, "altura": 16 },
+              "obrigatorio": true,
+              "mascara": "999.999.999-99"
+            },
+            "dtnasc": {
+              "label": "Data de Nascimento do Filho(a) 1",
+              "tipo": "data_segmentada",
+              "pagina": 1,
+              "obrigatorio": true,
+              "segmentos": {
+                "dia": {
+                  "coordenadas": { "x": 557, "y": 673, "largura": 26, "altura": 10 },
+                  "mascara": "99"
+                },
+                "mes": {
+                  "coordenadas": { "x": 586, "y": 673, "largura": 19, "altura": 10 },
+                  "mascara": "99"
+                },
+                "ano": {
+                  "coordenadas": { "x": 610, "y": 673, "largura": 95, "altura": 11 },
+                  "mascara": "9999"
+                }
+              }
+            },
+            "sus": {
+              "label": "Nº Cartão SUS do Filho(a) 1",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 151, "y": 649, "largura": 120, "altura": 14 },
+              "obrigatorio": true,
+              "mascara": "999 9999 9999 9999"
+            },
+            "nomemae": {
+              "label": "Nome da Mãe do Filho(a) 1",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 346, "y": 649, "largura": 144, "altura": 11 },
+              "obrigatorio": true
+            },
+            "nascvivo": {
+              "label": "Nº Declaração de Nascido Vivo do Filho(a) 1",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 573, "y": 649, "largura": 168, "altura": 14 },
+              "obrigatorio": true,
+              "observacao": "Obrigatório para recém-nascidos"
+            }
+          }
+        }
+      ]
+    },
+    "assinatura": {
+      "descricao": "Assinatura e data do funcionário",
+      "campos": {
+        "assinatura": {
+          "label": "Assinatura do Funcionário Ciente",
+          "tipo": "assinatura",
+          "pagina": 1,
+          "coordenadas": { "x": 60, "y": 106, "largura": 428, "altura": 33 },
+          "obrigatorio": true
+        },
+        "data": {
+          "label": "Data",
+          "tipo": "data",
+          "pagina": 1,
+          "coordenadas": { "x": 552, "y": 111, "largura": 142, "altura": 32 },
+          "obrigatorio": true,
+          "mascara": "99/99/9999"
+        }
+      }
+    }
+  },
+  "metadados": {
+    "sistema_coordenadas": "PDF points (pt)",
+    "origem": "canto_inferior_esquerdo",
+    "nota": "As coordenadas y crescem de baixo para cima. Para conversão em bibliotecas onde y cresce para baixo (ex: reportlab/PyMuPDF), use: y_convertido = altura_pagina - y - altura_campo",
+    "altura_pagina_estimada": 1122,
+    "campos_obrigatorios_observacao": "Campos marcados com obrigatorio:true correspondem aos itens sinalizados com (*) no formulário original",
+    "versao_json": "1.0"
+  }
+}
