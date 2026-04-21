@@ -13,7 +13,7 @@
           "label": "Nome Completo",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 20, "y": 687, "largura": 543, "altura": 12 },
+          "coordenadas": { "x": 20, "y": 689, "largura": 543, "altura": 12 },
           "obrigatorio": true,
           "observacao": "Preencher conforme Certidão de Nascimento ou Casamento"
         },
@@ -21,7 +21,7 @@
           "label": "Nome Social (Crachá)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 20, "y": 665, "largura": 479, "altura": 13 },
+          "coordenadas": { "x": 20, "y": 667, "largura": 479, "altura": 13 },
           "obrigatorio": false,
           "observacao": "Nome para inclusão no crachá"
         },
@@ -29,7 +29,7 @@
           "label": "Telefone",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 20, "y": 646, "largura": 230, "altura": 12 },
+          "coordenadas": { "x": 20, "y": 648, "largura": 230, "altura": 12 },
           "obrigatorio": false,
           "mascara": "(99) 9999-9999"
         },
@@ -37,7 +37,7 @@
           "label": "Celular",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 263, "y": 646, "largura": 205, "altura": 12 },
+          "coordenadas": { "x": 263, "y": 648, "largura": 205, "altura": 12 },
           "obrigatorio": false,
           "mascara": "(99) 99999-9999"
         },
@@ -45,7 +45,7 @@
           "label": "E-mail",
           "tipo": "email",
           "pagina": 1,
-          "coordenadas": { "x": 20, "y": 627, "largura": 447, "altura": 11 },
+          "coordenadas": { "x": 20, "y": 629, "largura": 447, "altura": 11 },
           "obrigatorio": false
         },
         "estadocivil": {
@@ -75,7 +75,7 @@
           "label": "PIS (informar se não for primeiro emprego)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 160, "y": 588, "largura": 226, "altura": 10 },
+          "coordenadas": { "x": 160, "y": 591, "largura": 226, "altura": 10 },
           "obrigatorio": false,
           "mascara": "999.99999.99-9",
           "dependencia": { "campo": "primeiro_emprego", "valor": "nao" }
@@ -89,28 +89,28 @@
           "label": "Endereço (Rua/Av)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 15, "y": 569, "largura": 265, "altura": 12 },
+          "coordenadas": { "x": 15, "y": 570, "largura": 265, "altura": 12 },
           "obrigatorio": false
         },
         "numero": {
           "label": "Número",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 290, "y": 569, "largura": 42, "altura": 11 },
+          "coordenadas": { "x": 290, "y": 570, "largura": 42, "altura": 11 },
           "obrigatorio": false
         },
         "complemento": {
           "label": "Complemento",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 340, "y": 568, "largura": 235, "altura": 12 },
+          "coordenadas": { "x": 340, "y": 570, "largura": 235, "altura": 12 },
           "obrigatorio": false
         },
         "cep": {
           "label": "CEP",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 18, "y": 550, "largura": 109, "altura": 12 },
+          "coordenadas": { "x": 18, "y": 553, "largura": 109, "altura": 12 },
           "obrigatorio": false,
           "mascara": "99999-999"
         },
@@ -118,14 +118,14 @@
           "label": "Bairro",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 134, "y": 550, "largura": 198, "altura": 12 },
+          "coordenadas": { "x": 134, "y": 553, "largura": 198, "altura": 12 },
           "obrigatorio": false
         },
         "cidadeuf": {
           "label": "Cidade/UF",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 339, "y": 550, "largura": 234, "altura": 12 },
+          "coordenadas": { "x": 339, "y": 553, "largura": 234, "altura": 12 },
           "obrigatorio": false
         }
       }
@@ -208,7 +208,7 @@
           "label": "Conta/Dígito (Bradesco)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 418, "y": 501, "largura": 142, "altura": 16 },
+          "coordenadas": { "x": 418, "y": 504, "largura": 142, "altura": 16 },
           "obrigatorio": false,
           "dependencia": { "campo": "tipo_conta", "valor": "bradesco" }
         },
@@ -424,14 +424,14 @@
           "label": "Nome Completo do Candidato (Assinatura)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 56, "y": 27, "largura": 240, "altura": 14 },
+          "coordenadas": { "x": 56, "y": 26, "largura": 240, "altura": 15 },
           "obrigatorio": true
         },
         "data": {
           "label": "Data",
           "tipo": "data",
           "pagina": 1,
-          "coordenadas": { "x": 467, "y": 27, "largura": 67, "altura": 15 },
+          "coordenadas": { "x": 467, "y": 26, "largura": 67, "altura": 15 },
           "obrigatorio": true,
           "mascara": "99/99/9999"
         }
