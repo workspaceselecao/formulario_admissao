@@ -53,10 +53,11 @@
     margin-bottom: 18px;
   }
   .hero-logo {
-    height: 48px;
-    width: auto;
-    max-width: min(280px, 88vw);
     display: block;
+    height: clamp(44px, 11vw, 56px);
+    width: auto;
+    max-width: min(300px, 92vw);
+    margin: 0 auto;
   }
   .container {
     max-width: 920px;
@@ -128,7 +129,18 @@
   <header class="hero">
     <div class="hero-inner">
       <div class="brand-row">
-        <img src="atento.svg" alt="Atento" class="hero-logo" width="200" height="48" decoding="async" />
+        <svg class="hero-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-labelledby="homeLogoAtentoTitle" preserveAspectRatio="xMidYMid meet">
+          <title id="homeLogoAtentoTitle">Atento</title>
+          <defs>
+            <linearGradient id="homeLogoAtentoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#01426A"/>
+              <stop offset="100%" stop-color="#0a6ba8"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="4" width="40" height="40" rx="10" fill="url(#homeLogoAtentoGrad)"/>
+          <text x="20" y="33" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#fff" text-anchor="middle">A</text>
+          <text x="52" y="33" font-family="'DM Sans', system-ui, sans-serif" font-size="26" font-weight="700" fill="#1a1714">Atento</text>
+        </svg>
       </div>
       <h1>Formulários de admissão</h1>
       <p>Escolha o formulário abaixo para preencher e gerar o PDF no seu navegador.</p>
