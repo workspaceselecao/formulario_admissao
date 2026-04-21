@@ -431,7 +431,7 @@
           "label": "Data",
           "tipo": "data",
           "pagina": 1,
-          "coordenadas": { "x": 468, "y": 27, "largura": 47, "altura": 14 },
+          "coordenadas": { "x": 467, "y": 27, "largura": 67, "altura": 15 },
           "obrigatorio": true,
           "mascara": "99/99/9999"
         }
