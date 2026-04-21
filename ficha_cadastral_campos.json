@@ -457,11 +457,23 @@
         },
         "data": {
           "label": "Data",
-          "tipo": "data",
+          "tipo": "data_segmentada",
           "pagina": 1,
-          "coordenadas": { "x": 467, "y": 28, "largura": 67, "altura": 15 },
           "obrigatorio": true,
-          "mascara": "99/99/9999"
+          "segmentos": {
+            "dia": {
+              "coordenadas": { "x": 432, "y": 28, "largura": 32, "altura": 14 },
+              "mascara": "99"
+            },
+            "mes": {
+              "coordenadas": { "x": 476, "y": 28, "largura": 32, "altura": 14 },
+              "mascara": "99"
+            },
+            "ano": {
+              "coordenadas": { "x": 517, "y": 28, "largura": 34, "altura": 14 },
+              "mascara": "9999"
+            }
+          }
         }
       }
     }

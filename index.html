@@ -50,19 +50,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
   }
-  .brand-mark {
-    height: 36px;
-    min-width: 36px;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(145deg, #01426A, #0a6ba8);
-    border-radius: 10px;
-    color: #fff;
-    font-weight: 800;
-    font-size: 15px;
+  .hero-logo {
+    height: 48px;
+    width: auto;
+    max-width: min(280px, 88vw);
+    display: block;
   }
   .container {
     max-width: 920px;
@@ -134,8 +128,7 @@
   <header class="hero">
     <div class="hero-inner">
       <div class="brand-row">
-        <span class="brand-mark" aria-hidden="true">A</span>
-        <span style="font-size:22px;font-weight:700">Atento</span>
+        <img src="atento.svg" alt="Atento" class="hero-logo" width="200" height="48" decoding="async" />
       </div>
       <h1>Formulários de admissão</h1>
       <p>Escolha o formulário abaixo para preencher e gerar o PDF no seu navegador.</p>

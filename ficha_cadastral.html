@@ -1773,6 +1773,21 @@ function marcarRadioJsonOpcao(page, font, grupoCampo, chaveOpcao) {
   return marcarCheckboxCoord(page, font, coord, true);
 }
 
+/** Campo `data` no JSON com `tipo: data_segmentada` e `segmentos.dia|mes|ano`. */
+function preencherDataSegmentadaAssinatura(page, font, campoData, valorDataIso) {
+  if (!campoData?.segmentos || !valorDataIso) return;
+  const parts = String(valorDataIso).trim().split("-");
+  if (parts.length < 3) return;
+  const [ano, mes, dia] = parts;
+  const d = String(dia || "").replace(/\D/g, "").slice(0, 2);
+  const m = String(mes || "").replace(/\D/g, "").slice(0, 2);
+  const y = String(ano || "").replace(/\D/g, "").slice(0, 4);
+  const s = campoData.segmentos;
+  if (d) escreverTextoCampoCoord(page, font, s.dia.coordenadas, d.padStart(2, "0"));
+  if (m) escreverTextoCampoCoord(page, font, s.mes.coordenadas, m.padStart(2, "0"));
+  if (y) escreverTextoCampoCoord(page, font, s.ano.coordenadas, y);
+}
+
 function normalizarChavePdf(valor) {
   return String(valor || "")
     .normalize("NFD")
@@ -1956,7 +1971,11 @@ async function gerarPDF(){
 
     const ass = C.assinatura.campos;
     escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, data.assinaturaNome);
-    escreverTextoCampoCoord(page, font, ass.data.coordenadas, data.assinaturaData);
+    if (ass.data?.segmentos) {
+      preencherDataSegmentadaAssinatura(page, font, ass.data, v("dataAssinatura"));
+    } else if (ass.data?.coordenadas) {
+      escreverTextoCampoCoord(page, font, ass.data.coordenadas, data.assinaturaData);
+    }
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
