@@ -1456,24 +1456,25 @@ function aplicarEstadoRascunho(obj) {
   }
 }
 
+const RASCUNHO_DEBOUNCE_MS = 250;
+
 function agendarSalvarRascunho() {
   if (ignorarSalvarRascunho) return;
   clearTimeout(rascunhoSalvarTimer);
   rascunhoSalvarTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
-    } catch (e) {
-      console.warn("Rascunho não salvo:", e);
-    }
-  }, 500);
+    rascunhoSalvarTimer = null;
+    salvarRascunhoLocalSincrono();
+  }, RASCUNHO_DEBOUNCE_MS);
 }
 
 function salvarRascunhoLocalSincrono() {
   if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = null;
   try {
     localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
-  } catch (_) {
-    /* ignore */
+  } catch (e) {
+    console.warn("Rascunho não salvo:", e);
   }
 }
 
@@ -1501,7 +1502,8 @@ document.querySelectorAll('input,select').forEach(el=>{
   el.addEventListener('input', updateProgress);
   el.addEventListener('change', updateProgress);
   el.addEventListener('input', agendarSalvarRascunho);
-  el.addEventListener('change', agendarSalvarRascunho);
+  /* `change` grava de imediato: no mobile o debounce perde o último estado com frequência. */
+  el.addEventListener('change', salvarRascunhoLocalSincrono);
 });
 function updateProgress(){
   const hasValue = (id) => v(id).length > 0;
@@ -2229,7 +2231,13 @@ document.addEventListener('keydown', (event) => {
   }
 });
 initModalCopiaParaAssistencia();
-window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
+function salvarRascunhoAoSair() {
+  salvarRascunhoLocalSincrono();
+}
+window.addEventListener("pagehide", salvarRascunhoAoSair);
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") salvarRascunhoAoSair();
+});
 document.getElementById("btnDescartarRascunho")?.addEventListener("click", descartarRascunhoEFormulario);
 updateProgress();
 carregarCamposSchema();

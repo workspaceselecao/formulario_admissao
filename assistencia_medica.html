@@ -1635,20 +1635,21 @@ function tentarAplicarCopiaFichaCadastral() {
   showToast("Dados importados da Ficha Cadastral. Revise os campos antes de concluir.", true);
 }
 
+const RASCUNHO_DEBOUNCE_MS = 250;
+
 function agendarSalvarRascunho() {
   if (ignorarSalvarRascunho) return;
   clearTimeout(rascunhoSalvarTimer);
   rascunhoSalvarTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
-    } catch (e) {
-      console.warn(e);
-    }
-  }, 500);
+    rascunhoSalvarTimer = null;
+    salvarRascunhoLocalSincrono();
+  }, RASCUNHO_DEBOUNCE_MS);
 }
 
 function salvarRascunhoLocalSincrono() {
   if (ignorarSalvarRascunho) return;
+  clearTimeout(rascunhoSalvarTimer);
+  rascunhoSalvarTimer = null;
   try {
     localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
   } catch (_) {}
@@ -1680,7 +1681,9 @@ document.getElementById("btnDescartarRascunho")?.addEventListener("click", () =>
 
 document.querySelectorAll("input, select").forEach((el) => {
   el.addEventListener("input", agendarSalvarRascunho);
-  el.addEventListener("change", agendarSalvarRascunho);
+  /* `change` grava de imediato: no mobile o debounce costuma perder o último estado
+     ( Safari/iOS: pagehide instável, utilizador muda de app com timer pendente ). */
+  el.addEventListener("change", salvarRascunhoLocalSincrono);
 });
 
 async function gerarPDF() {
@@ -1857,7 +1860,13 @@ tentarAplicarCopiaFichaCadastral();
 atualizarBotoesFilhos();
 atualizarVisibilidadeModuloDependentes();
 carregarTemplateInicial();
-window.addEventListener("pagehide", salvarRascunhoLocalSincrono);
+function salvarRascunhoAoSair() {
+  salvarRascunhoLocalSincrono();
+}
+window.addEventListener("pagehide", salvarRascunhoAoSair);
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") salvarRascunhoAoSair();
+});
 </script>
 </body>
 </html>
