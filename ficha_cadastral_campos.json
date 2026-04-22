@@ -188,11 +188,11 @@
           "opcoes": {
             "bradesco": {
               "label": "Conta Salário Bradesco",
-              "coordenadas": { "x": 93, "y": 510, "largura": 11, "altura": 10 }
+              "coordenadas": { "x": 92, "y": 510, "largura": 11, "altura": 10 }
             },
             "mentore": {
               "label": "Conta Mêntore Bank",
-              "coordenadas": { "x": 93, "y": 482, "largura": 12, "altura": 10 }
+              "coordenadas": { "x": 92, "y": 484, "largura": 12, "altura": 10 }
             }
           }
         },
@@ -462,7 +462,7 @@
           "obrigatorio": true,
           "segmentos": {
             "dia": {
-              "coordenadas": { "x": 432, "y": 28, "largura": 32, "altura": 14 },
+              "coordenadas": { "x": 436, "y": 28, "largura": 32, "altura": 14 },
               "mascara": "99"
             },
             "mes": {
