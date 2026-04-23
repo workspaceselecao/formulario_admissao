@@ -178,7 +178,7 @@
   }
   .dados-cargo-site-tel {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: minmax(72px, 96px) 1fr 1fr 1fr;
     gap: 18px;
     width: 100%;
   }
@@ -213,7 +213,8 @@
     .dados-sus-rg-cpf .field--cpf input,
     .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
     .dados-datas { grid-template-columns: 1fr; }
-    .dados-cargo-site-tel { grid-template-columns: 1fr; }
+    .dados-cargo-site-tel { grid-template-columns: 1fr 1fr; }
+    .dados-cargo-site-tel .field--uf { grid-column: 1 / -1; }
   }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
@@ -243,7 +244,8 @@
     background: #fff;
     box-shadow: 0 0 0 3px rgba(1,66,106,0.12);
   }
-  .field input.invalid {
+  .field input.invalid,
+  .field select.invalid {
     border-color: #d1432f;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
@@ -601,6 +603,39 @@
           </div>
         </div>
         <div class="dados-cargo-site-tel">
+          <div class="field field--uf" style="min-width:0">
+            <label>UF <span class="req">*</span></label>
+            <select id="uf">
+              <option value="">—</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AM">AM</option>
+              <option value="AP">AP</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MG">MG</option>
+              <option value="MS">MS</option>
+              <option value="MT">MT</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="PR">PR</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="RS">RS</option>
+              <option value="SC">SC</option>
+              <option value="SE">SE</option>
+              <option value="SP">SP</option>
+              <option value="TO">TO</option>
+            </select>
+          </div>
           <div class="field" style="min-width:0">
             <label>Cargo</label>
             <input type="text" id="cargo" placeholder="">
@@ -925,10 +960,38 @@
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
-const TEMPLATE_PATH = "./F-089_17 (PR-090) (Adesão de Assistência Médica).pdf";
 const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
-const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+
+const UF_PARA_TEMPLATE = {
+  AC: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  AM: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  AP: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  PA: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  RO: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  RR: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  TO: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
+  AL: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  BA: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  CE: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  MA: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  PB: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  PE: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  PI: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  RN: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  SE: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
+  DF: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
+  GO: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
+  MS: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
+  MT: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
+  MG: "MG_F-089_Assistencia_Medica.pdf",
+  PR: "PR - RS - SC_F-089_Assistencia_Medica.pdf",
+  RS: "PR - RS - SC_F-089_Assistencia_Medica.pdf",
+  SC: "PR - RS - SC_F-089_Assistencia_Medica.pdf",
+  RJ: "RJ - ES_F-089_Assistencia_Medica.pdf",
+  ES: "RJ - ES_F-089_Assistencia_Medica.pdf",
+  SP: "SP_F-089_Assistencia_Medica.pdf"
+};
 const NUM_FILHOS = 4;
 let filhosVisiveis = 1;
 const PDF_FONT_TEXTO = 9;
@@ -981,7 +1044,7 @@ function atualizarBotoesFilhos() {
   }
 }
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
-let templateBytes = null;
+const templateBytesCache = {};
 let camposSchema = null;
 
 function maskCPF(el) {
@@ -1258,6 +1321,18 @@ function validarCamposObrigatorios() {
     return false;
   }
 
+  const ufVal = v("uf");
+  if (!ufVal || !UF_PARA_TEMPLATE[ufVal]) {
+    const msgUF = ufVal
+      ? `UF "${ufVal}" não encontrada. Verifique a sigla selecionada.`
+      : "Selecione a UF antes de gerar o PDF.";
+    showToast(msgUF, false);
+    marcarCampoInvalido("uf", true);
+    document.getElementById("uf")?.focus();
+    return false;
+  }
+  marcarCampoInvalido("uf", false);
+
   add("funcionario", "Nome do Funcionário");
   add("matricula", "Matrícula");
   add("sus", "Cartão SUS");
@@ -1386,14 +1461,27 @@ async function carregarCamposSchema() {
   }
 }
 
-async function carregarTemplateInicial() {
+async function carregarTemplatePorUF(uf) {
+  const sigla = String(uf || "").toUpperCase().trim();
+  const arquivo = UF_PARA_TEMPLATE[sigla];
+  if (!arquivo) {
+    const msg = sigla
+      ? `UF "${sigla}" não encontrada nos arquivos disponíveis. Verifique a sigla selecionada.`
+      : "Selecione a UF antes de continuar.";
+    showToast(msg, false);
+    marcarCampoInvalido("uf", true);
+    return null;
+  }
+  if (templateBytesCache[arquivo]) return templateBytesCache[arquivo];
   try {
-    const res = await fetch(TEMPLATE_FETCH_PATH);
-    if (!res.ok) throw new Error("Template não encontrado");
-    const fetchedBytes = await res.arrayBuffer();
-    templateBytes = clonarArrayBuffer(fetchedBytes);
+    const res = await fetch(encodeURI("./" + arquivo));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const bytes = await res.arrayBuffer();
+    templateBytesCache[arquivo] = clonarArrayBuffer(bytes);
+    return templateBytesCache[arquivo];
   } catch (_e) {
-    showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
+    showToast(`Não foi possível carregar o template para UF ${sigla}. Verifique se o arquivo está disponível.`, false);
+    return null;
   }
 }
 
@@ -1402,6 +1490,8 @@ function limparDadosFormulario() {
     if (el.id === "dataAssinatura") return;
     el.value = "";
   });
+  const elUF = document.getElementById("uf");
+  if (elUF) elUF.value = "";
   document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
     r.checked = false;
   });
@@ -1429,7 +1519,7 @@ function limparDadosFormulario() {
 
 const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v3";
 const RASCUNHO_IDS = [
-  "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
+  "uf", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
   "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
   "telefone",
@@ -1691,7 +1781,7 @@ async function gerarPDF() {
     if (!validarCamposObrigatorios()) return;
     if (!(await confirmarPoliticaLGPD())) return;
     if (!(await carregarCamposSchema())) return;
-    if (!templateBytes) await carregarTemplateInicial();
+    const templateBytes = await carregarTemplatePorUF(v("uf"));
     if (!templateBytes) return;
 
     const C = camposSchema.campos;
@@ -1782,17 +1872,21 @@ async function gerarPDF() {
 
 async function baixarPdfVazio() {
   try {
-    let bytes = templateBytes;
-    if (!bytes) {
-      const resp = await fetch(TEMPLATE_FETCH_PATH, { cache: "no-store" });
-      if (!resp.ok) throw new Error(`Falha (${resp.status})`);
-      bytes = await resp.arrayBuffer();
+    const uf = v("uf");
+    if (!uf) {
+      showToast("Selecione a UF para baixar o modelo correto.", false);
+      marcarCampoInvalido("uf", true);
+      document.getElementById("uf")?.focus();
+      return;
     }
+    const bytes = await carregarTemplatePorUF(uf);
+    if (!bytes) return;
     const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "F-089_Assistencia_Medica_vazia.pdf";
+    const arquivo = UF_PARA_TEMPLATE[uf.toUpperCase().trim()] || "F-089_Assistencia_Medica.pdf";
+    link.download = arquivo;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1859,7 +1953,11 @@ if (!tentarRestaurarRascunho()) {
 tentarAplicarCopiaFichaCadastral();
 atualizarBotoesFilhos();
 atualizarVisibilidadeModuloDependentes();
-carregarTemplateInicial();
+
+document.getElementById("uf")?.addEventListener("change", function () {
+  marcarCampoInvalido("uf", false);
+  if (this.value) carregarTemplatePorUF(this.value).catch(() => {});
+});
 function salvarRascunhoAoSair() {
   salvarRascunhoLocalSincrono();
 }
