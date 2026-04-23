@@ -172,13 +172,14 @@
   }
   .dados-datas {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr minmax(72px, 96px);
     gap: 18px;
     width: 100%;
+    align-items: end;
   }
   .dados-cargo-site-tel {
     display: grid;
-    grid-template-columns: minmax(72px, 96px) 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 18px;
     width: 100%;
   }
@@ -212,9 +213,8 @@
     .dados-sus-rg-cpf .field--rg input,
     .dados-sus-rg-cpf .field--cpf input,
     .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
-    .dados-datas { grid-template-columns: 1fr; }
-    .dados-cargo-site-tel { grid-template-columns: 1fr 1fr; }
-    .dados-cargo-site-tel .field--uf { grid-column: 1 / -1; }
+    .dados-datas { grid-template-columns: 1fr 1fr; }
+    .dados-cargo-site-tel { grid-template-columns: 1fr; }
   }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
@@ -279,15 +279,9 @@
     gap: 10px;
     align-items: stretch;
   }
-  .radio-inline.tipo-adesao-grid .radio-label:last-child {
-    grid-column: 1 / -1;
-  }
   @media (max-width: 640px) {
     .radio-inline.tipo-adesao-grid {
       grid-template-columns: 1fr;
-    }
-    .radio-inline.tipo-adesao-grid .radio-label:last-child {
-      grid-column: auto;
     }
   }
   .radio-label {
@@ -543,9 +537,6 @@
       <div class="radio-inline tipo-adesao-grid" id="tipoAdesaoGroup">
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante"> NÃO QUERO ADERIR AO PLANO</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="matrimonio"> Matrimônio – Inclusão de Dependente</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="exclusaodependente"> Exclusão de Dependente</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="nascfilho"> Nascimento de Filho – Inclusão de Dependente</label>
       </div>
     </div>
   </div>
@@ -601,10 +592,8 @@
               <input type="text" id="adm_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
             </div>
           </div>
-        </div>
-        <div class="dados-cargo-site-tel">
           <div class="field field--uf" style="min-width:0">
-            <label>UF <span class="req">*</span></label>
+            <label>Estado <span class="req">*</span></label>
             <select id="uf">
               <option value="">—</option>
               <option value="AC">AC</option>
@@ -636,6 +625,8 @@
               <option value="TO">TO</option>
             </select>
           </div>
+        </div>
+        <div class="dados-cargo-site-tel">
           <div class="field" style="min-width:0">
             <label>Cargo</label>
             <input type="text" id="cargo" placeholder="">
