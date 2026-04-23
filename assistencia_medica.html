@@ -594,7 +594,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Matrícula <span class="req">*</span></label>
+          <label>Matrícula</label>
           <input type="text" id="matricula" placeholder="">
         </div>
         <div class="field">
@@ -603,7 +603,7 @@
         </div>
         <div class="dados-sus-rg-cpf">
           <div class="field field--sus" style="min-width:0">
-            <label>Nº do Cartão SUS <span class="req">*</span></label>
+            <label>Nº do Cartão SUS</label>
             <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
           </div>
           <div class="field field--rg" style="min-width:0">
@@ -617,7 +617,7 @@
         </div>
         <div class="dados-datas">
           <div class="field" style="min-width:0">
-            <label>Data de Nascimento <span class="req">*</span></label>
+            <label>Data de Nascimento</label>
             <div class="data-triple">
               <input type="text" id="dn_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
               <span class="sep">/</span>
@@ -922,11 +922,11 @@
     <div class="section-body">
       <div class="grid grid-2">
         <div class="field">
-          <label>Assinatura (nome por extenso) <span class="req">*</span></label>
+          <label>Assinatura (nome por extenso)</label>
           <input type="text" id="assinaturaName" placeholder="Igual ao documento de identificação">
         </div>
         <div class="field">
-          <label>Data <span class="req">*</span></label>
+          <label>Data</label>
           <input type="date" id="dataAssinatura">
         </div>
       </div>
@@ -1336,18 +1336,7 @@ function validarCamposObrigatorios() {
   marcarCampoInvalido("uf", false);
 
   add("funcionario", "Nome do Funcionário");
-  add("matricula", "Matrícula");
-  add("sus", "Cartão SUS");
   add("cpf", "CPF");
-
-  const dnOk = !!(v("dn_dia") && v("dn_mes") && v("dn_ano"));
-  ["dn_dia", "dn_mes", "dn_ano"].forEach((id) => marcarCampoInvalido(id, !dnOk));
-  if (!dnOk) faltantes.push({ id: "dn_dia", nome: "Data de Nascimento (dia, mês e ano)" });
-
-  if (v("sus") && digitosCount(v("sus")) !== 15) {
-    marcarCampoInvalido("sus", true);
-    faltantes.push({ id: "sus", nome: "Cartão SUS (15 dígitos)" });
-  }
 
   if (v("cpf") && digitosCount(v("cpf")) !== 11) {
     marcarCampoInvalido("cpf", true);
@@ -1394,9 +1383,6 @@ function validarCamposObrigatorios() {
       }
     }
   }
-
-  add("assinaturaName", "Assinatura (nome)");
-  add("dataAssinatura", "Data da assinatura");
 
   const vistos = new Set();
   const unicos = faltantes.filter((item) => {
