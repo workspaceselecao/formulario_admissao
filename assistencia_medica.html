@@ -170,9 +170,16 @@
   .dados-func-grid .dados-cargo-site-tel {
     grid-column: span 2;
   }
+  .nome-uf-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+    width: 100%;
+    align-items: end;
+  }
   .dados-datas {
     display: grid;
-    grid-template-columns: 1fr 1fr minmax(72px, 96px);
+    grid-template-columns: 1fr 1fr;
     gap: 18px;
     width: 100%;
     align-items: end;
@@ -190,6 +197,7 @@
     .dados-func-grid .col-span-2 {
       grid-column: 1 / -1;
     }
+    .dados-func-grid .nome-uf-row,
     .dados-func-grid .dados-sus-rg-cpf,
     .dados-func-grid .dados-datas,
     .dados-func-grid .dados-cargo-site-tel {
@@ -213,6 +221,7 @@
     .dados-sus-rg-cpf .field--rg input,
     .dados-sus-rg-cpf .field--cpf input,
     .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
+    .nome-uf-row { grid-template-columns: 1fr; }
     .dados-datas { grid-template-columns: 1fr; }
     .dados-cargo-site-tel { grid-template-columns: 1fr; }
   }
@@ -545,9 +554,44 @@
     <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
     <div class="section-body">
       <div class="grid grid-2 dados-func-grid">
-        <div class="field col-span-2">
-          <label>Nome do Funcionário <span class="req">*</span></label>
-          <input type="text" id="funcionario" placeholder="Nome completo">
+        <div class="nome-uf-row col-span-2">
+          <div class="field" style="min-width:0">
+            <label>Nome do Funcionário <span class="req">*</span></label>
+            <input type="text" id="funcionario" placeholder="Nome completo">
+          </div>
+          <div class="field field--uf" style="min-width:0">
+            <label>Estado <span class="req">*</span></label>
+            <select id="uf">
+              <option value="">—</option>
+              <option value="AC">AC – Acre</option>
+              <option value="AL">AL – Alagoas</option>
+              <option value="AM">AM – Amazonas</option>
+              <option value="AP">AP – Amapá</option>
+              <option value="BA">BA – Bahia</option>
+              <option value="CE">CE – Ceará</option>
+              <option value="DF">DF – Distrito Federal</option>
+              <option value="ES">ES – Espírito Santo</option>
+              <option value="GO">GO – Goiás</option>
+              <option value="MA">MA – Maranhão</option>
+              <option value="MG">MG – Minas Gerais</option>
+              <option value="MS">MS – Mato Grosso do Sul</option>
+              <option value="MT">MT – Mato Grosso</option>
+              <option value="PA">PA – Pará</option>
+              <option value="PB">PB – Paraíba</option>
+              <option value="PE">PE – Pernambuco</option>
+              <option value="PI">PI – Piauí</option>
+              <option value="PR">PR – Paraná</option>
+              <option value="RJ">RJ – Rio de Janeiro</option>
+              <option value="RN">RN – Rio Grande do Norte</option>
+              <option value="RO">RO – Rondônia</option>
+              <option value="RR">RR – Roraima</option>
+              <option value="RS">RS – Rio Grande do Sul</option>
+              <option value="SC">SC – Santa Catarina</option>
+              <option value="SE">SE – Sergipe</option>
+              <option value="SP">SP – São Paulo</option>
+              <option value="TO">TO – Tocantins</option>
+            </select>
+          </div>
         </div>
         <div class="field">
           <label>Matrícula <span class="req">*</span></label>
@@ -591,39 +635,6 @@
               <span class="sep">/</span>
               <input type="text" id="adm_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
             </div>
-          </div>
-          <div class="field field--uf" style="min-width:0">
-            <label>Estado <span class="req">*</span></label>
-            <select id="uf">
-              <option value="">—</option>
-              <option value="AC">AC – Acre</option>
-              <option value="AL">AL – Alagoas</option>
-              <option value="AM">AM – Amazonas</option>
-              <option value="AP">AP – Amapá</option>
-              <option value="BA">BA – Bahia</option>
-              <option value="CE">CE – Ceará</option>
-              <option value="DF">DF – Distrito Federal</option>
-              <option value="ES">ES – Espírito Santo</option>
-              <option value="GO">GO – Goiás</option>
-              <option value="MA">MA – Maranhão</option>
-              <option value="MG">MG – Minas Gerais</option>
-              <option value="MS">MS – Mato Grosso do Sul</option>
-              <option value="MT">MT – Mato Grosso</option>
-              <option value="PA">PA – Pará</option>
-              <option value="PB">PB – Paraíba</option>
-              <option value="PE">PE – Pernambuco</option>
-              <option value="PI">PI – Piauí</option>
-              <option value="PR">PR – Paraná</option>
-              <option value="RJ">RJ – Rio de Janeiro</option>
-              <option value="RN">RN – Rio Grande do Norte</option>
-              <option value="RO">RO – Rondônia</option>
-              <option value="RR">RR – Roraima</option>
-              <option value="RS">RS – Rio Grande do Sul</option>
-              <option value="SC">SC – Santa Catarina</option>
-              <option value="SE">SE – Sergipe</option>
-              <option value="SP">SP – São Paulo</option>
-              <option value="TO">TO – Tocantins</option>
-            </select>
           </div>
         </div>
         <div class="dados-cargo-site-tel">
