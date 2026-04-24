@@ -1003,6 +1003,19 @@
   </div>
 </div>
 
+<div id="modalDocsDependentes" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalDocsDepTitulo">
+  <div class="modal-card">
+    <div class="modal-head" id="modalDocsDepTitulo">Documentação de dependentes</div>
+    <div class="modal-body">
+      <p id="modalDocsDepP1" style="margin:0"></p>
+      <p id="modalDocsDepP2" style="margin:12px 0 0"></p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="modalDocsDepOkBtn" class="btn-modal confirm">Entendi</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
@@ -1670,7 +1683,7 @@ async function validarCamposObrigatorios() {
   if (unicos.length) {
     const falhaCpfFilhoIncluido = unicos.some((x) => /^fil[1-4]_cpf$/.test(x.id));
     if (falhaCpfFilhoIncluido) {
-      window.alert(MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE);
+      await abrirModalDocsDependentes();
     }
     showToast(`Preencha ou corrija: ${unicos.map((x) => x.nome).join(", ")}.`, false);
     document.getElementById(unicos[0].id)?.focus();
@@ -1707,6 +1720,32 @@ function fecharModalLGPD(decisao) {
 }
 document.getElementById("lgpdContinuarBtn")?.addEventListener("click", () => fecharModalLGPD(true));
 document.getElementById("lgpdCancelarBtn")?.addEventListener("click", () => fecharModalLGPD(false));
+
+let docsDepResolver = null;
+function abrirModalDocsDependentes() {
+  const modal = document.getElementById("modalDocsDependentes");
+  if (!modal) return Promise.resolve();
+  const p1 = document.getElementById("modalDocsDepP1");
+  const p2 = document.getElementById("modalDocsDepP2");
+  const parts = MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE.split("\n\n");
+  if (p1) p1.textContent = (parts[0] || "").trim();
+  if (p2) p2.textContent = (parts[1] || "").trim();
+  modal.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("modalDocsDepOkBtn")?.focus(), 0);
+  return new Promise((resolve) => {
+    docsDepResolver = resolve;
+  });
+}
+function fecharModalDocsDependentes() {
+  const modal = document.getElementById("modalDocsDependentes");
+  if (modal) modal.classList.remove("show");
+  document.body.classList.remove("modal-open");
+  const fn = docsDepResolver;
+  docsDepResolver = null;
+  if (fn) fn();
+}
+document.getElementById("modalDocsDepOkBtn")?.addEventListener("click", fecharModalDocsDependentes);
 
 async function confirmarPoliticaLGPD() {
   const ok = await abrirModalLGPD();
