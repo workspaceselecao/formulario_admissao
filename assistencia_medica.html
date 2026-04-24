@@ -1502,7 +1502,7 @@ function digitosCount(str) {
 }
 /** Aviso quando dependente está no plano mas CPF não foi informado (ou está incompleto). */
 const MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE =
-  "Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do Pessoas Online, após sua admissão.";
+  "Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do Pessoas Online, após sua admissão.\n\nPor favor, remova o dependente que ainda não possui CPF.";
 async function validarCamposObrigatorios() {
   const faltantes = [];
   const add = (id, nome) => {
