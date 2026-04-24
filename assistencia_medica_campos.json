@@ -547,7 +547,7 @@
         {
           "id": "filho_2",
           "label": "Filho(a) 2",
-          "offset_y_em_relacao_ao_filho_1": -32,
+          "offset_y_em_relacao_ao_filho_1": -31,
           "campos": {
             "incluir": {
               "label": "Incluir Filho(a) 2 no Plano",
@@ -555,7 +555,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 441,
+                "y": 442,
                 "largura": 12,
                 "altura": 9
               }
@@ -566,7 +566,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 102,
-                "y": 448,
+                "y": 449,
                 "largura": 153,
                 "altura": 10
               },
@@ -578,7 +578,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 275,
-                "y": 448,
+                "y": 449,
                 "largura": 78,
                 "altura": 10
               },
@@ -594,7 +594,7 @@
                 "dia": {
                   "coordenadas": {
                     "x": 400,
-                    "y": 448,
+                    "y": 449,
                     "largura": 14,
                     "altura": 10
                   },
@@ -603,7 +603,7 @@
                 "mes": {
                   "coordenadas": {
                     "x": 418,
-                    "y": 448,
+                    "y": 449,
                     "largura": 12,
                     "altura": 10
                   },
@@ -612,7 +612,7 @@
                 "ano": {
                   "coordenadas": {
                     "x": 434,
-                    "y": 448,
+                    "y": 449,
                     "largura": 71,
                     "altura": 10
                   },
@@ -626,7 +626,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 122,
-                "y": 432,
+                "y": 433,
                 "largura": 85,
                 "altura": 10
               },
@@ -639,7 +639,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 254,
-                "y": 432,
+                "y": 433,
                 "largura": 95,
                 "altura": 10
               },
@@ -651,7 +651,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 411,
-                "y": 432,
+                "y": 433,
                 "largura": 113,
                 "altura": 10
               },
@@ -663,7 +663,7 @@
         {
           "id": "filho_3",
           "label": "Filho(a) 3",
-          "offset_y_em_relacao_ao_filho_1": -64,
+          "offset_y_em_relacao_ao_filho_1": -62,
           "campos": {
             "incluir": {
               "label": "Incluir Filho(a) 3 no Plano",
@@ -671,7 +671,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 406,
+                "y": 408,
                 "largura": 12,
                 "altura": 9
               }
@@ -682,7 +682,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 102,
-                "y": 416,
+                "y": 418,
                 "largura": 153,
                 "altura": 10
               },
@@ -694,7 +694,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 275,
-                "y": 416,
+                "y": 418,
                 "largura": 78,
                 "altura": 10
               },
@@ -710,7 +710,7 @@
                 "dia": {
                   "coordenadas": {
                     "x": 400,
-                    "y": 416,
+                    "y": 418,
                     "largura": 14,
                     "altura": 10
                   },
@@ -719,7 +719,7 @@
                 "mes": {
                   "coordenadas": {
                     "x": 418,
-                    "y": 416,
+                    "y": 418,
                     "largura": 12,
                     "altura": 10
                   },
@@ -728,7 +728,7 @@
                 "ano": {
                   "coordenadas": {
                     "x": 434,
-                    "y": 416,
+                    "y": 418,
                     "largura": 71,
                     "altura": 10
                   },
@@ -742,7 +742,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 122,
-                "y": 400,
+                "y": 402,
                 "largura": 85,
                 "altura": 10
               },
@@ -755,7 +755,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 254,
-                "y": 400,
+                "y": 402,
                 "largura": 95,
                 "altura": 10
               },
@@ -767,7 +767,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 411,
-                "y": 400,
+                "y": 402,
                 "largura": 113,
                 "altura": 10
               },
@@ -779,7 +779,7 @@
         {
           "id": "filho_4",
           "label": "Filho(a) 4",
-          "offset_y_em_relacao_ao_filho_1": -96,
+          "offset_y_em_relacao_ao_filho_1": -93,
           "campos": {
             "incluir": {
               "label": "Incluir Filho(a) 4 no Plano",
@@ -787,7 +787,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 371,
+                "y": 374,
                 "largura": 12,
                 "altura": 9
               }
@@ -798,7 +798,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 102,
-                "y": 384,
+                "y": 387,
                 "largura": 153,
                 "altura": 10
               },
@@ -810,7 +810,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 275,
-                "y": 384,
+                "y": 387,
                 "largura": 78,
                 "altura": 10
               },
@@ -826,7 +826,7 @@
                 "dia": {
                   "coordenadas": {
                     "x": 400,
-                    "y": 384,
+                    "y": 387,
                     "largura": 14,
                     "altura": 10
                   },
@@ -835,7 +835,7 @@
                 "mes": {
                   "coordenadas": {
                     "x": 418,
-                    "y": 384,
+                    "y": 387,
                     "largura": 12,
                     "altura": 10
                   },
@@ -844,7 +844,7 @@
                 "ano": {
                   "coordenadas": {
                     "x": 434,
-                    "y": 384,
+                    "y": 387,
                     "largura": 71,
                     "altura": 10
                   },
@@ -858,7 +858,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 122,
-                "y": 368,
+                "y": 371,
                 "largura": 85,
                 "altura": 10
               },
@@ -871,7 +871,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 254,
-                "y": 368,
+                "y": 371,
                 "largura": 95,
                 "altura": 10
               },
@@ -883,7 +883,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 411,
-                "y": 368,
+                "y": 371,
                 "largura": 113,
                 "altura": 10
               },
@@ -929,7 +929,7 @@
     "sistema_coordenadas": "PDF points (pt)",
     "origem": "canto_inferior_esquerdo",
     "altura_pagina_pt": 842,
-    "nota": "Checkboxes tipo adesão, cônjuge e filho 1 conforme coordenadas base. Filhos 2–4: campos de texto −32 pt por bloco; caixinha 'incluir' adicional −3 pt por nível (441, 406, 371 a partir de filho 1 y=476). Texto PDF: 8 pt em assistencia_medica.html.",
-    "versao_json": "2.2"
+    "nota": "Filhos 2–4: bloco inteiro subido em Y (filho2 +1, filho3 +2, filho4 +3 pt vs. posição anterior). Texto PDF: 7 pt em assistencia_medica.html.",
+    "versao_json": "2.3"
   }
 }
