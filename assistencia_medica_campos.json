@@ -18,7 +18,7 @@
           "label": "Optante na Admissão (Inclusão)",
           "coordenadas": {
             "x": 83,
-            "y": 701,
+            "y": 698,
             "largura": 11,
             "altura": 10
           }
@@ -27,7 +27,7 @@
           "label": "Não Optante na Admissão (Cancelamento)",
           "coordenadas": {
             "x": 326,
-            "y": 700,
+            "y": 698,
             "largura": 14,
             "altura": 10
           }
@@ -36,7 +36,7 @@
           "label": "Matrimônio – Inclusão de Dependente",
           "coordenadas": {
             "x": 81,
-            "y": 680,
+            "y": 677,
             "largura": 14,
             "altura": 10
           }
@@ -45,7 +45,7 @@
           "label": "Exclusão de Dependente",
           "coordenadas": {
             "x": 327,
-            "y": 680,
+            "y": 677,
             "largura": 12,
             "altura": 10
           }
@@ -54,7 +54,7 @@
           "label": "Nascimento de Filho – Inclusão de Dependente",
           "coordenadas": {
             "x": 83,
-            "y": 660,
+            "y": 657,
             "largura": 12,
             "altura": 11
           }
@@ -336,7 +336,7 @@
             "pagina": 1,
             "coordenadas": {
               "x": 58,
-              "y": 511,
+              "y": 508,
               "largura": 12,
               "altura": 9
             }
@@ -439,7 +439,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 479,
+                "y": 476,
                 "largura": 12,
                 "altura": 9
               }
@@ -555,7 +555,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 447,
+                "y": 441,
                 "largura": 12,
                 "altura": 9
               }
@@ -671,7 +671,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 415,
+                "y": 406,
                 "largura": 12,
                 "altura": 9
               }
@@ -787,7 +787,7 @@
               "pagina": 1,
               "coordenadas": {
                 "x": 58,
-                "y": 383,
+                "y": 371,
                 "largura": 12,
                 "altura": 9
               }
@@ -929,7 +929,7 @@
     "sistema_coordenadas": "PDF points (pt)",
     "origem": "canto_inferior_esquerdo",
     "altura_pagina_pt": 842,
-    "nota": "Ajuste: +3 pt em Y em todo o formulário. Filhos 2–4: mesmo layout do filho 1, deslocamento −32 pt por filho (2 linhas ≈ 2×16 pt entre 1ª e 2ª linha do bloco filho 1).",
-    "versao_json": "2.1"
+    "nota": "Checkboxes tipo adesão, cônjuge e filho 1 conforme coordenadas base. Filhos 2–4: campos de texto −32 pt por bloco; caixinha 'incluir' adicional −3 pt por nível (441, 406, 371 a partir de filho 1 y=476). Texto PDF: 10 pt em assistencia_medica.html.",
+    "versao_json": "2.2"
   }
 }
