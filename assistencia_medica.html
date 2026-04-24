@@ -599,7 +599,7 @@
             </select>
           </div>
           <div class="field field--cidade" style="min-width:0">
-            <label>Cidade</label>
+            <label>Cidade <span class="req">*</span></label>
             <select id="cidade" disabled>
               <option value="">— Selecione o estado —</option>
             </select>
@@ -982,36 +982,90 @@
 <script>
 const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const CIDADES_BRASIL_JSON_PATH = "./cidades_brasil.json";
 
-const UF_PARA_TEMPLATE = {
-  AC: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  AM: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  AP: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  PA: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  RO: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  RR: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  TO: "AC - AM - AP - PA - RO - RR - TO_F-089_Assistencia_Medica.pdf",
-  AL: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  BA: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  CE: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  MA: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  PB: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  PE: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  PI: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  RN: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  SE: "AL - BA - CE - MA - PB - PE - PI - RN - SE_F-089_Assistencia_Medica.pdf",
-  DF: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
-  GO: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
-  MS: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
-  MT: "DF - GO - MS - MT_F-089_Assistencia_Medica.pdf",
-  MG: "MG_F-089_Assistencia_Medica.pdf",
-  PR: "PR - RS - SC_F-089_Assistencia_Medica.pdf",
-  RS: "PR - RS - SC_F-089_Assistencia_Medica.pdf",
-  SC: "PR - RS - SC_F-089_Assistencia_Medica.pdf",
-  RJ: "RJ - ES_F-089_Assistencia_Medica.pdf",
-  ES: "RJ - ES_F-089_Assistencia_Medica.pdf",
-  SP: "SP_F-089_Assistencia_Medica.pdf"
+/** Tipo vindo de cidades_brasil.json ("FICHA A UTILIZAR") → arquivo PDF no repositório. */
+const FICHA_UTILIZAR_PARA_ARQUIVO = {
+  "FICHA GOIANIA": "FICHA GOIANIA.pdf",
+  "FICHA REEMBOLSO": "FICHA REEMBOLSO.pdf",
+  "FICHA GNDI": "FICHA GNDI.pdf",
+  "FICHA FSA": "FICHA FSA.pdf",
+  "FICHA SAFO": "FICHA SA_FO.pdf",
+  "FICHA BH": "FICHA REEMBOLSO.pdf"
 };
+
+let mapaCidadeParaFichaUtilizar = null;
+
+function normalizarChaveCidade(s) {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleUpperCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function garantirMapaCidadesBrasil() {
+  if (mapaCidadeParaFichaUtilizar) return true;
+  try {
+    const res = await fetch(encodeURI(CIDADES_BRASIL_JSON_PATH), { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const arr = await res.json();
+    if (!Array.isArray(arr)) throw new Error("formato");
+    const m = new Map();
+    for (const row of arr) {
+      const k = normalizarChaveCidade(row.CIDADE);
+      if (!k) continue;
+      let tipo = String(row["FICHA A UTILIZAR"] || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, " ");
+      if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
+      m.set(k, tipo);
+    }
+    mapaCidadeParaFichaUtilizar = m;
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${CIDADES_BRASIL_JSON_PATH}`, false);
+    return false;
+  }
+}
+
+function resolverArquivoPdfPorCidadeNome(nomeIbge) {
+  if (!nomeIbge || !mapaCidadeParaFichaUtilizar) return null;
+  const tipo = mapaCidadeParaFichaUtilizar.get(normalizarChaveCidade(nomeIbge));
+  if (!tipo) return null;
+  return FICHA_UTILIZAR_PARA_ARQUIVO[tipo] || null;
+}
+
+async function carregarTemplatePdf(nomeArquivo) {
+  if (!nomeArquivo) return null;
+  if (templateBytesCache[nomeArquivo]) return templateBytesCache[nomeArquivo];
+  try {
+    const res = await fetch(encodeURI("./" + nomeArquivo));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const bytes = await res.arrayBuffer();
+    templateBytesCache[nomeArquivo] = clonarArrayBuffer(bytes);
+    return templateBytesCache[nomeArquivo];
+  } catch (_e) {
+    showToast(`Não foi possível carregar o arquivo ${nomeArquivo}.`, false);
+    return null;
+  }
+}
+
+async function carregarTemplateParaCidadeSelecionada() {
+  if (!(await garantirMapaCidadesBrasil())) return null;
+  const nome = v("cidade");
+  const arq = resolverArquivoPdfPorCidadeNome(nome);
+  if (!arq) {
+    if (nome) showToast("Não há PDF configurado para esta cidade na base cidades_brasil.", false);
+    marcarCampoInvalido("cidade", !!nome);
+    return null;
+  }
+  marcarCampoInvalido("cidade", false);
+  return carregarTemplatePdf(arq);
+}
 const NUM_FILHOS = 4;
 let filhosVisiveis = 1;
 const PDF_FONT_TEXTO = 9;
@@ -1168,6 +1222,7 @@ let ultimoCepPreenchido = "";
 let cepBuscaTimer = null;
 
 async function carregarMunicipiosIBGE(uf) {
+  if (!(await garantirMapaCidadesBrasil())) return;
   const sigla = String(uf || "").toUpperCase().trim();
   const sel = document.getElementById("cidade");
   if (!sel) return;
@@ -1182,9 +1237,18 @@ async function carregarMunicipiosIBGE(uf) {
       `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`
     );
     if (!res.ok) throw new Error("http");
-    const lista = await res.json();
-    if (!Array.isArray(lista)) throw new Error("formato");
+    const listaFull = await res.json();
+    if (!Array.isArray(listaFull)) throw new Error("formato");
+    const lista = listaFull.filter((m) =>
+      mapaCidadeParaFichaUtilizar.has(normalizarChaveCidade(m.nome))
+    );
     lista.sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
+    if (!lista.length) {
+      showToast(
+        "Nenhuma cidade deste estado consta em cidades_brasil.json. Verifique com o suporte.",
+        false
+      );
+    }
     for (const m of lista) {
       const opt = document.createElement("option");
       opt.value = m.nome;
@@ -1432,7 +1496,7 @@ function marcarCampoInvalido(id, invalido) {
 function digitosCount(str) {
   return String(str || "").replace(/\D/g, "").length;
 }
-function validarCamposObrigatorios() {
+async function validarCamposObrigatorios() {
   const faltantes = [];
   const add = (id, nome) => {
     const el = document.getElementById(id);
@@ -1461,17 +1525,26 @@ function validarCamposObrigatorios() {
     return false;
   }
 
-  const ufVal = v("uf");
-  if (!ufVal || !UF_PARA_TEMPLATE[ufVal]) {
-    const msgUF = ufVal
-      ? `UF "${ufVal}" não encontrada. Verifique a sigla selecionada.`
-      : "Selecione a UF antes de gerar o PDF.";
-    showToast(msgUF, false);
+  if (!v("uf")) {
+    showToast("Selecione o estado.", false);
     marcarCampoInvalido("uf", true);
     document.getElementById("uf")?.focus();
     return false;
   }
   marcarCampoInvalido("uf", false);
+
+  add("cidade", "Cidade");
+  if (v("cidade")) {
+    if (!(await garantirMapaCidadesBrasil())) {
+      marcarCampoInvalido("cidade", true);
+      document.getElementById("cidade")?.focus();
+      return false;
+    }
+    if (!resolverArquivoPdfPorCidadeNome(v("cidade"))) {
+      marcarCampoInvalido("cidade", true);
+      faltantes.push({ id: "cidade", nome: "Cidade (sem ficha configurada)" });
+    }
+  }
 
   add("funcionario", "Nome do Funcionário");
   add("cpf", "CPF");
@@ -1586,30 +1659,6 @@ async function carregarCamposSchema() {
     console.error(e);
     showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
     return false;
-  }
-}
-
-async function carregarTemplatePorUF(uf) {
-  const sigla = String(uf || "").toUpperCase().trim();
-  const arquivo = UF_PARA_TEMPLATE[sigla];
-  if (!arquivo) {
-    const msg = sigla
-      ? `UF "${sigla}" não encontrada nos arquivos disponíveis. Verifique a sigla selecionada.`
-      : "Selecione a UF antes de continuar.";
-    showToast(msg, false);
-    marcarCampoInvalido("uf", true);
-    return null;
-  }
-  if (templateBytesCache[arquivo]) return templateBytesCache[arquivo];
-  try {
-    const res = await fetch(encodeURI("./" + arquivo));
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const bytes = await res.arrayBuffer();
-    templateBytesCache[arquivo] = clonarArrayBuffer(bytes);
-    return templateBytesCache[arquivo];
-  } catch (_e) {
-    showToast(`Não foi possível carregar o template para UF ${sigla}. Verifique se o arquivo está disponível.`, false);
-    return null;
   }
 }
 
@@ -1864,7 +1913,7 @@ function tentarAplicarCopiaFichaCadastral() {
         const nomeCid = parsedCu[1].trim();
         const ufImp = parsedCu[2];
         const selUf = document.getElementById("uf");
-        if (selUf && UF_PARA_TEMPLATE[ufImp]) {
+        if (selUf && ufImp.length === 2) {
           selUf.value = ufImp;
           await carregarMunicipiosIBGE(ufImp);
           const selC = document.getElementById("cidade");
@@ -1874,7 +1923,7 @@ function tentarAplicarCopiaFichaCadastral() {
             );
             if (hit) selC.value = hit.value;
           }
-          carregarTemplatePorUF(ufImp).catch(() => {});
+          await carregarTemplateParaCidadeSelecionada();
         }
       } finally {
         ignorarSalvarRascunho = false;
@@ -1934,6 +1983,7 @@ function tentarRestaurarRascunho() {
         );
         if (hit) sel.value = hit.value;
       }
+      await carregarTemplateParaCidadeSelecionada();
     })();
     showToast("Rascunho recuperado. Você pode continuar o preenchimento.", true);
     return true;
@@ -1959,10 +2009,10 @@ document.querySelectorAll("input, select").forEach((el) => {
 
 async function gerarPDF() {
   try {
-    if (!validarCamposObrigatorios()) return;
+    if (!(await validarCamposObrigatorios())) return;
     if (!(await confirmarPoliticaLGPD())) return;
     if (!(await carregarCamposSchema())) return;
-    const templateBytes = await carregarTemplatePorUF(v("uf"));
+    const templateBytes = await carregarTemplateParaCidadeSelecionada();
     if (!templateBytes) return;
 
     const C = camposSchema.campos;
@@ -2054,20 +2104,25 @@ async function gerarPDF() {
 
 async function baixarPdfVazio() {
   try {
-    const uf = v("uf");
-    if (!uf) {
-      showToast("Selecione a UF para baixar o modelo correto.", false);
+    if (!v("uf")) {
+      showToast("Selecione o estado e a cidade para baixar o modelo correto.", false);
       marcarCampoInvalido("uf", true);
       document.getElementById("uf")?.focus();
       return;
     }
-    const bytes = await carregarTemplatePorUF(uf);
+    if (!v("cidade")) {
+      showToast("Selecione a cidade para baixar o modelo correto.", false);
+      marcarCampoInvalido("cidade", true);
+      document.getElementById("cidade")?.focus();
+      return;
+    }
+    const bytes = await carregarTemplateParaCidadeSelecionada();
     if (!bytes) return;
     const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const arquivo = UF_PARA_TEMPLATE[uf.toUpperCase().trim()] || "F-089_Assistencia_Medica.pdf";
+    const arquivo = resolverArquivoPdfPorCidadeNome(v("cidade")) || "assistencia_medica.pdf";
     link.download = arquivo;
     document.body.appendChild(link);
     link.click();
@@ -2150,11 +2205,11 @@ for (let n = 1; n <= NUM_FILHOS; n++) {
 document.getElementById("uf")?.addEventListener("change", function () {
   marcarCampoInvalido("uf", false);
   void carregarMunicipiosIBGE(this.value);
-  if (this.value) carregarTemplatePorUF(this.value).catch(() => {});
 });
 document.getElementById("cidade")?.addEventListener("change", function () {
   marcarCampoInvalido("cidade", false);
   atualizarCidadeufApartirDosCamposLocalidade();
+  void carregarTemplateParaCidadeSelecionada();
 });
 function salvarRascunhoAoSair() {
   salvarRascunhoLocalSincrono();
