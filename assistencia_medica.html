@@ -1418,6 +1418,28 @@ function preencherDataSegmentada(page, font, campoSchema, dia, mes, ano) {
   if (y) escreverTextoCampoCoord(page, font, s.ano.coordenadas, y);
 }
 
+/** Data em um único retângulo (dd/mm/aaaa) ou segmentada conforme `campoSchema`. */
+function preencherDataCampoPdf(page, font, campoSchema, dia, mes, ano) {
+  if (!campoSchema) return;
+  if (campoSchema.tipo === "data_campo_unico" && campoSchema.coordenadas) {
+    const d = String(dia || "").replace(/\D/g, "").slice(0, 2);
+    const m = String(mes || "").replace(/\D/g, "").slice(0, 2);
+    const y = String(ano || "").replace(/\D/g, "").slice(0, 4);
+    if (d && m && y) {
+      const txt = `${d.padStart(2, "0")}/${m.padStart(2, "0")}/${y}`;
+      escreverTextoCampoCoord(page, font, campoSchema.coordenadas, txt);
+    }
+    return;
+  }
+  preencherDataSegmentada(page, font, campoSchema, dia, mes, ano);
+}
+
+function partesDataInputIso(iso) {
+  if (!iso) return { d: "", m: "", y: "" };
+  const [y, m, day] = String(iso).trim().split("-");
+  return { d: day || "", m: m || "", y: y || "" };
+}
+
 function v(id) {
   return (document.getElementById(id)?.value || "").trim();
 }
@@ -2022,7 +2044,9 @@ async function gerarPDF() {
     const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
 
-    marcarRadioJsonOpcao(page, font, C.tipo_adesao, tipo);
+    if (C.tipo_adesao?.opcoes && tipo) {
+      marcarRadioJsonOpcao(page, font, C.tipo_adesao, tipo);
+    }
 
     const df = C.dados_funcionario.campos;
     escreverTextoCampoCoord(page, font, df.funcionario.coordenadas, v("funcionario"));
@@ -2031,20 +2055,26 @@ async function gerarPDF() {
     escreverTextoCampoCoord(page, font, df.sus.coordenadas, v("sus"));
     escreverTextoCampoCoord(page, font, df.rg.coordenadas, v("rg"));
     escreverTextoCampoCoord(page, font, df.cpf.coordenadas, v("cpf"));
-    preencherDataSegmentada(page, font, df.datanasc, v("dn_dia"), v("dn_mes"), v("dn_ano"));
-    preencherDataSegmentada(page, font, df.dataadm, v("adm_dia"), v("adm_mes"), v("adm_ano"));
+    preencherDataCampoPdf(page, font, df.datanasc, v("dn_dia"), v("dn_mes"), v("dn_ano"));
+    preencherDataCampoPdf(page, font, df.dataadm, v("adm_dia"), v("adm_mes"), v("adm_ano"));
     escreverTextoCampoCoord(page, font, df.cargo.coordenadas, v("cargo"));
     escreverTextoCampoCoord(page, font, df.site.coordenadas, v("site"));
 
     const en = C.endereco.campos;
+    if (en.telefone_completo?.coordenadas) {
+      escreverTextoCampoCoord(page, font, en.telefone_completo.coordenadas, v("telefone"));
+    }
+    escreverTextoCampoCoord(page, font, en.cep?.coordenadas, v("cep"));
     escreverTextoCampoCoord(page, font, en.rua.coordenadas, v("rua"));
     escreverTextoCampoCoord(page, font, en.numero.coordenadas, v("numero"));
     escreverTextoCampoCoord(page, font, en.complemento.coordenadas, v("complemento"));
     escreverTextoCampoCoord(page, font, en.bairro.coordenadas, v("bairro"));
     escreverTextoCampoCoord(page, font, en.cidadeuf.coordenadas, v("cidadeuf"));
-    const telPartes = telefoneSeparadoParaPdf();
-    escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, telPartes.ddd);
-    escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, telPartes.num);
+    if (!en.telefone_completo?.coordenadas) {
+      const telPartes = telefoneSeparadoParaPdf();
+      escreverTextoCampoCoord(page, font, en.tel_ddd.coordenadas, telPartes.ddd);
+      escreverTextoCampoCoord(page, font, en.tel_numero.coordenadas, telPartes.num);
+    }
 
     if (tipo !== "naooptante") {
       const conj = C.dependentes.conjuge.campos;
@@ -2053,7 +2083,7 @@ async function gerarPDF() {
       if (incluirConj) {
         escreverTextoCampoCoord(page, font, conj.nome.coordenadas, v("conj_nome"));
         escreverTextoCampoCoord(page, font, conj.cpf.coordenadas, v("conj_cpf"));
-        preencherDataSegmentada(page, font, conj.dtnasc, v("conj_d"), v("conj_m"), v("conj_y"));
+        preencherDataCampoPdf(page, font, conj.dtnasc, v("conj_d"), v("conj_m"), v("conj_y"));
         escreverTextoCampoCoord(page, font, conj.sus.coordenadas, v("conj_sus"));
         escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
       }
@@ -2068,7 +2098,7 @@ async function gerarPDF() {
         if (!incluirFil) return;
         escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v(`fil${n}_nome`));
         escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v(`fil${n}_cpf`));
-        preencherDataSegmentada(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
+        preencherDataCampoPdf(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
         escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
         escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
         const dnvTexto = filhoDeveExibirCampoDnv(n) ? v(`fil${n}_nascvivo`) : "";
@@ -2078,7 +2108,14 @@ async function gerarPDF() {
 
     const ass = C.assinatura.campos;
     escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, v("assinaturaName") || v("funcionario"));
-    escreverTextoCampoCoord(page, font, ass.data.coordenadas, formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"));
+    const padAss = partesDataInputIso(v("dataAssinatura"));
+    if (!padAss.d && !padAss.m && !padAss.y) {
+      const hoje = new Date();
+      padAss.d = String(hoje.getDate()).padStart(2, "0");
+      padAss.m = String(hoje.getMonth() + 1).padStart(2, "0");
+      padAss.y = String(hoje.getFullYear());
+    }
+    preencherDataCampoPdf(page, font, ass.data, padAss.d, padAss.m, padAss.y);
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
