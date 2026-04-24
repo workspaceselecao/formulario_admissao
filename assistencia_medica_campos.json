@@ -1,54 +1,85 @@
 {
   "documento": {
-    "id": "assistencia_medica_coordenadasficha",
-    "titulo": "Assistência Médica – coordenadas (coordenadasficha.txt)",
-    "versao": "1",
+    "id": "assistencia_medica_regional",
+    "titulo": "Proposta de Adesão Assistência Médica",
+    "versao": "coordenadasassmedica",
+    "data_publicacao": "",
+    "vigencia": "",
     "paginas": 1
   },
   "campos": {
+    "tipo_adesao": {
+      "descricao": "Tipo de movimentação do formulário",
+      "tipo": "grupo_checkbox",
+      "pagina": 1,
+      "secao": "inclusao_cancelamento",
+      "opcoes": {
+        "optante": {
+          "label": "Optante na Admissão (Inclusão)",
+          "coordenadas": { "x": 83, "y": 698, "largura": 11, "altura": 10 }
+        },
+        "naooptante": {
+          "label": "Não Optante na Admissão (Cancelamento)",
+          "coordenadas": { "x": 326, "y": 697, "largura": 14, "altura": 10 }
+        },
+        "matrimonio": {
+          "label": "Matrimônio – Inclusão de Dependente",
+          "coordenadas": { "x": 81, "y": 677, "largura": 14, "altura": 10 }
+        },
+        "exclusaodependente": {
+          "label": "Exclusão de Dependente",
+          "coordenadas": { "x": 327, "y": 677, "largura": 12, "altura": 10 }
+        },
+        "nascfilho": {
+          "label": "Nascimento de Filho – Inclusão de Dependente",
+          "coordenadas": { "x": 83, "y": 657, "largura": 12, "altura": 11 }
+        }
+      }
+    },
     "dados_funcionario": {
-      "descricao": "Dados do funcionário (origem: coordenadasficha.txt)",
+      "descricao": "Dados cadastrais do funcionário",
       "campos": {
         "funcionario": {
-          "label": "Nome",
+          "label": "Nome do Funcionário",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 20, "y": 687, "largura": 543, "altura": 12 },
+          "coordenadas": { "x": 100, "y": 619, "largura": 250, "altura": 11 },
+          "obrigatorio": true
+        },
+        "matricula": {
+          "label": "Matrícula",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 391, "y": 619, "largura": 126, "altura": 10 },
           "obrigatorio": true
         },
         "nomemae": {
-          "label": "Linha 2 (arquivo: craxá → nome da mãe no formulário web)",
+          "label": "Nome da Mãe",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 20, "y": 665, "largura": 479, "altura": 13 },
-          "obrigatorio": false
-        },
-        "matricula": {
-          "label": "Matrícula (PDF: campo informar PIS)",
-          "tipo": "texto",
-          "pagina": 1,
-          "coordenadas": { "x": 160, "y": 588, "largura": 226, "altura": 10 },
+          "coordenadas": { "x": 100, "y": 604, "largura": 166, "altura": 12 },
           "obrigatorio": false
         },
         "sus": {
-          "label": "SUS",
+          "label": "Nº do Cartão SUS",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": null,
-          "obrigatorio": false
+          "coordenadas": { "x": 330, "y": 604, "largura": 178, "altura": 11 },
+          "obrigatorio": true,
+          "mascara": "999 9999 9999 9999"
         },
         "rg": {
           "label": "RG",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": null,
+          "coordenadas": { "x": 74, "y": 589, "largura": 140, "altura": 11 },
           "obrigatorio": false
         },
         "cpf": {
-          "label": "CPF (PDF: contamentore cpf)",
+          "label": "CPF",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 291, "y": 476, "largura": 252, "altura": 15 },
+          "coordenadas": { "x": 235, "y": 589, "largura": 100, "altura": 11 },
           "obrigatorio": true,
           "mascara": "999.999.999-99"
         },
@@ -56,153 +87,174 @@
           "label": "Data de Nascimento",
           "tipo": "data_segmentada",
           "pagina": 1,
-          "obrigatorio": false,
-          "segmentos": null
+          "obrigatorio": true,
+          "segmentos": {
+            "dia": {
+              "coordenadas": { "x": 389, "y": 589, "largura": 12, "altura": 9 },
+              "mascara": "99"
+            },
+            "mes": {
+              "coordenadas": { "x": 409, "y": 589, "largura": 13, "altura": 9 },
+              "mascara": "99"
+            },
+            "ano": {
+              "coordenadas": { "x": 430, "y": 589, "largura": 44, "altura": 9 },
+              "mascara": "9999"
+            }
+          }
         },
         "dataadm": {
           "label": "Data de Admissão",
           "tipo": "data_segmentada",
           "pagina": 1,
           "obrigatorio": false,
-          "segmentos": null
+          "segmentos": {
+            "dia": {
+              "coordenadas": { "x": 120, "y": 574, "largura": 20, "altura": 10 },
+              "mascara": "99"
+            },
+            "mes": {
+              "coordenadas": { "x": 148, "y": 574, "largura": 20, "altura": 10 },
+              "mascara": "99"
+            },
+            "ano": {
+              "coordenadas": { "x": 182, "y": 574, "largura": 27, "altura": 10 },
+              "mascara": "9999"
+            }
+          }
         },
         "cargo": {
           "label": "Cargo",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": null,
+          "coordenadas": { "x": 242, "y": 574, "largura": 111, "altura": 11 },
           "obrigatorio": false
         },
         "site": {
           "label": "Site / Unidade",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": null,
+          "coordenadas": { "x": 372, "y": 574, "largura": 145, "altura": 11 },
           "obrigatorio": false
         }
       }
     },
     "endereco": {
-      "descricao": "Endereço e telefone (coordenadasficha.txt)",
+      "descricao": "Endereço residencial do funcionário",
       "campos": {
-        "telefone_completo": {
-          "label": "Telefone (campo fone)",
-          "tipo": "texto",
-          "pagina": 1,
-          "coordenadas": { "x": 20, "y": 646, "largura": 230, "altura": 12 },
-          "obrigatorio": false
-        },
-        "telefone_celular": {
-          "label": "Celular (campo celular; opcional)",
-          "tipo": "texto",
-          "pagina": 1,
-          "coordenadas": { "x": 263, "y": 646, "largura": 205, "altura": 12 },
-          "obrigatorio": false
-        },
         "rua": {
-          "label": "Rua",
+          "label": "Endereço Residencial (Rua/Av)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 15, "y": 569, "largura": 265, "altura": 12 },
+          "coordenadas": { "x": 118, "y": 560, "largura": 221, "altura": 10 },
           "obrigatorio": false
         },
         "numero": {
           "label": "Número",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 290, "y": 569, "largura": 42, "altura": 11 },
+          "coordenadas": { "x": 357, "y": 560, "largura": 34, "altura": 10 },
           "obrigatorio": false
         },
         "complemento": {
           "label": "Complemento",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 340, "y": 568, "largura": 235, "altura": 12 },
-          "obrigatorio": false
-        },
-        "cep": {
-          "label": "CEP",
-          "tipo": "texto",
-          "pagina": 1,
-          "coordenadas": { "x": 18, "y": 550, "largura": 109, "altura": 12 },
+          "coordenadas": { "x": 414, "y": 560, "largura": 110, "altura": 10 },
           "obrigatorio": false
         },
         "bairro": {
           "label": "Bairro",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 134, "y": 550, "largura": 198, "altura": 12 },
+          "coordenadas": { "x": 86, "y": 544, "largura": 125, "altura": 10 },
           "obrigatorio": false
         },
         "cidadeuf": {
           "label": "Cidade/UF",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 339, "y": 550, "largura": 234, "altura": 12 },
+          "coordenadas": { "x": 250, "y": 544, "largura": 85, "altura": 10 },
           "obrigatorio": false
         },
         "tel_ddd": {
-          "label": "DDD (fallback se telefone_completo ausente)",
+          "label": "Telefone DDD",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": null,
-          "obrigatorio": false
+          "coordenadas": { "x": 359, "y": 544, "largura": 12, "altura": 10 },
+          "obrigatorio": false,
+          "mascara": "99"
         },
         "tel_numero": {
-          "label": "Número (fallback)",
+          "label": "Telefone Número",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": null,
-          "obrigatorio": false
+          "coordenadas": { "x": 375, "y": 544, "largura": 130, "altura": 10 },
+          "obrigatorio": false,
+          "mascara": "99999-9999"
         }
       }
     },
     "dependentes": {
-      "descricao": "Cônjuge = dependenteum; filhos 1–4 = dependentedois…cinco (coordenadasficha.txt). Sem caixas de inclusão no PDF.",
+      "descricao": "Dependentes para inclusão no plano de saúde.",
       "conjuge": {
         "label": "Cônjuge",
         "campos": {
           "incluir": {
-            "label": "Incluir",
+            "label": "Incluir Cônjuge no Plano",
             "tipo": "checkbox",
             "pagina": 1,
-            "coordenadas": null
+            "coordenadas": { "x": 58, "y": 508, "largura": 12, "altura": 9 }
           },
           "nome": {
-            "label": "Nome",
+            "label": "Nome do Cônjuge",
             "tipo": "texto",
             "pagina": 1,
-            "coordenadas": { "x": 14, "y": 422, "largura": 285, "altura": 17 },
+            "coordenadas": { "x": 102, "y": 509, "largura": 153, "altura": 10 },
             "obrigatorio": true
           },
           "cpf": {
-            "label": "CPF",
+            "label": "CPF do Cônjuge",
             "tipo": "texto",
             "pagina": 1,
-            "coordenadas": { "x": 428, "y": 422, "largura": 136, "altura": 17 },
+            "coordenadas": { "x": 275, "y": 509, "largura": 78, "altura": 10 },
             "obrigatorio": true,
             "mascara": "999.999.999-99"
           },
           "dtnasc": {
-            "label": "Data de nascimento",
-            "tipo": "data_campo_unico",
+            "label": "Data de Nascimento do Cônjuge",
+            "tipo": "data_segmentada",
             "pagina": 1,
             "obrigatorio": true,
-            "coordenadas": { "x": 306, "y": 422, "largura": 115, "altura": 17 }
+            "segmentos": {
+              "dia": {
+                "coordenadas": { "x": 399, "y": 509, "largura": 15, "altura": 10 },
+                "mascara": "99"
+              },
+              "mes": {
+                "coordenadas": { "x": 418, "y": 509, "largura": 12, "altura": 10 },
+                "mascara": "99"
+              },
+              "ano": {
+                "coordenadas": { "x": 437, "y": 509, "largura": 60, "altura": 10 },
+                "mascara": "9999"
+              }
+            }
           },
           "sus": {
-            "label": "SUS",
+            "label": "Nº Cartão SUS do Cônjuge",
             "tipo": "texto",
             "pagina": 1,
-            "coordenadas": null,
-            "obrigatorio": false
+            "coordenadas": { "x": 121, "y": 493, "largura": 87, "altura": 10 },
+            "obrigatorio": true,
+            "mascara": "999 9999 9999 9999"
           },
           "nomemae": {
-            "label": "Nome da mãe",
+            "label": "Nome da Mãe do(a) Cônjuge",
             "tipo": "texto",
             "pagina": 1,
-            "coordenadas": null,
-            "obrigatorio": false
+            "coordenadas": { "x": 299, "y": 493, "largura": 221, "altura": 10 },
+            "obrigatorio": true
           }
         }
       },
@@ -212,178 +264,303 @@
           "label": "Filho(a) 1",
           "campos": {
             "incluir": {
-              "label": "Incluir",
+              "label": "Incluir Filho(a) 1 no Plano",
               "tipo": "checkbox",
               "pagina": 1,
-              "coordenadas": null
+              "coordenadas": { "x": 58, "y": 476, "largura": 12, "altura": 9 }
             },
             "nome": {
-              "label": "Nome",
+              "label": "Nome do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 15, "y": 394, "largura": 285, "altura": 17 },
+              "coordenadas": { "x": 102, "y": 477, "largura": 153, "altura": 10 },
               "obrigatorio": true
             },
             "cpf": {
-              "label": "CPF",
+              "label": "CPF do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 429, "y": 394, "largura": 135, "altura": 16 },
+              "coordenadas": { "x": 275, "y": 477, "largura": 78, "altura": 10 },
               "obrigatorio": true,
               "mascara": "999.999.999-99"
             },
             "dtnasc": {
-              "label": "Data de nascimento",
-              "tipo": "data_campo_unico",
+              "label": "Data de Nascimento do Filho(a) 1",
+              "tipo": "data_segmentada",
               "pagina": 1,
               "obrigatorio": true,
-              "coordenadas": { "x": 307, "y": 394, "largura": 115, "altura": 16 }
+              "segmentos": {
+                "dia": {
+                  "coordenadas": { "x": 400, "y": 477, "largura": 14, "altura": 10 },
+                  "mascara": "99"
+                },
+                "mes": {
+                  "coordenadas": { "x": 418, "y": 477, "largura": 12, "altura": 10 },
+                  "mascara": "99"
+                },
+                "ano": {
+                  "coordenadas": { "x": 434, "y": 477, "largura": 71, "altura": 10 },
+                  "mascara": "9999"
+                }
+              }
             },
             "sus": {
-              "label": "SUS",
+              "label": "Nº Cartão SUS do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": null,
-              "obrigatorio": false
+              "coordenadas": { "x": 122, "y": 461, "largura": 85, "altura": 10 },
+              "obrigatorio": true,
+              "mascara": "999 9999 9999 9999"
             },
             "nomemae": {
-              "label": "Nome da mãe",
+              "label": "Nome da Mãe do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": null,
-              "obrigatorio": false
+              "coordenadas": { "x": 254, "y": 461, "largura": 95, "altura": 10 },
+              "obrigatorio": true
             },
             "nascvivo": {
-              "label": "DNV",
+              "label": "Nº Declaração de Nascido Vivo do Filho(a) 1",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": null,
-              "obrigatorio": false
+              "coordenadas": { "x": 411, "y": 461, "largura": 113, "altura": 10 },
+              "obrigatorio": true,
+              "observacao": "Obrigatório para recém-nascidos"
             }
           }
         },
         {
           "id": "filho_2",
           "label": "Filho(a) 2",
+          "offset_y_em_relacao_ao_filho_1": -46,
           "campos": {
             "incluir": {
+              "label": "Incluir Filho(a) 2 no Plano",
               "tipo": "checkbox",
               "pagina": 1,
-              "coordenadas": null
+              "coordenadas": { "x": 58, "y": 430, "largura": 12, "altura": 9 }
             },
             "nome": {
+              "label": "Nome do Filho(a) 2",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 15, "y": 369, "largura": 287, "altura": 17 },
+              "coordenadas": { "x": 102, "y": 431, "largura": 153, "altura": 10 },
               "obrigatorio": true
             },
             "cpf": {
+              "label": "CPF do Filho(a) 2",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 429, "y": 368, "largura": 147, "altura": 15 },
+              "coordenadas": { "x": 275, "y": 431, "largura": 78, "altura": 10 },
               "obrigatorio": true,
               "mascara": "999.999.999-99"
             },
             "dtnasc": {
-              "tipo": "data_campo_unico",
+              "label": "Data de Nascimento do Filho(a) 2",
+              "tipo": "data_segmentada",
               "pagina": 1,
               "obrigatorio": true,
-              "coordenadas": { "x": 307, "y": 368, "largura": 113, "altura": 16 }
+              "segmentos": {
+                "dia": {
+                  "coordenadas": { "x": 400, "y": 431, "largura": 14, "altura": 10 },
+                  "mascara": "99"
+                },
+                "mes": {
+                  "coordenadas": { "x": 418, "y": 431, "largura": 12, "altura": 10 },
+                  "mascara": "99"
+                },
+                "ano": {
+                  "coordenadas": { "x": 434, "y": 431, "largura": 71, "altura": 10 },
+                  "mascara": "9999"
+                }
+              }
             },
-            "sus": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false },
-            "nomemae": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false },
-            "nascvivo": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false }
+            "sus": {
+              "label": "Nº Cartão SUS do Filho(a) 2",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 122, "y": 415, "largura": 85, "altura": 10 },
+              "obrigatorio": true,
+              "mascara": "999 9999 9999 9999"
+            },
+            "nomemae": {
+              "label": "Nome da Mãe do Filho(a) 2",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 254, "y": 415, "largura": 95, "altura": 10 },
+              "obrigatorio": true
+            },
+            "nascvivo": {
+              "label": "Nº Declaração de Nascido Vivo do Filho(a) 2",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 411, "y": 415, "largura": 113, "altura": 10 },
+              "obrigatorio": true,
+              "observacao": "Obrigatório para recém-nascidos"
+            }
           }
         },
         {
           "id": "filho_3",
           "label": "Filho(a) 3",
+          "offset_y_em_relacao_ao_filho_1": -92,
           "campos": {
-            "incluir": { "tipo": "checkbox", "pagina": 1, "coordenadas": null },
+            "incluir": {
+              "label": "Incluir Filho(a) 3 no Plano",
+              "tipo": "checkbox",
+              "pagina": 1,
+              "coordenadas": { "x": 58, "y": 384, "largura": 12, "altura": 9 }
+            },
             "nome": {
+              "label": "Nome do Filho(a) 3",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 17, "y": 345, "largura": 283, "altura": 14 },
+              "coordenadas": { "x": 102, "y": 385, "largura": 153, "altura": 10 },
               "obrigatorio": true
             },
             "cpf": {
+              "label": "CPF do Filho(a) 3",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 429, "y": 345, "largura": 143, "altura": 14 },
+              "coordenadas": { "x": 275, "y": 385, "largura": 78, "altura": 10 },
               "obrigatorio": true,
               "mascara": "999.999.999-99"
             },
             "dtnasc": {
-              "tipo": "data_campo_unico",
+              "label": "Data de Nascimento do Filho(a) 3",
+              "tipo": "data_segmentada",
               "pagina": 1,
               "obrigatorio": true,
-              "coordenadas": { "x": 307, "y": 345, "largura": 115, "altura": 14 }
+              "segmentos": {
+                "dia": {
+                  "coordenadas": { "x": 400, "y": 385, "largura": 14, "altura": 10 },
+                  "mascara": "99"
+                },
+                "mes": {
+                  "coordenadas": { "x": 418, "y": 385, "largura": 12, "altura": 10 },
+                  "mascara": "99"
+                },
+                "ano": {
+                  "coordenadas": { "x": 434, "y": 385, "largura": 71, "altura": 10 },
+                  "mascara": "9999"
+                }
+              }
             },
-            "sus": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false },
-            "nomemae": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false },
-            "nascvivo": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false }
+            "sus": {
+              "label": "Nº Cartão SUS do Filho(a) 3",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 122, "y": 369, "largura": 85, "altura": 10 },
+              "obrigatorio": true,
+              "mascara": "999 9999 9999 9999"
+            },
+            "nomemae": {
+              "label": "Nome da Mãe do Filho(a) 3",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 254, "y": 369, "largura": 95, "altura": 10 },
+              "obrigatorio": true
+            },
+            "nascvivo": {
+              "label": "Nº Declaração de Nascido Vivo do Filho(a) 3",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 411, "y": 369, "largura": 113, "altura": 10 },
+              "obrigatorio": true,
+              "observacao": "Obrigatório para recém-nascidos"
+            }
           }
         },
         {
           "id": "filho_4",
           "label": "Filho(a) 4",
+          "offset_y_em_relacao_ao_filho_1": -138,
           "campos": {
-            "incluir": { "tipo": "checkbox", "pagina": 1, "coordenadas": null },
+            "incluir": {
+              "label": "Incluir Filho(a) 4 no Plano",
+              "tipo": "checkbox",
+              "pagina": 1,
+              "coordenadas": { "x": 58, "y": 338, "largura": 12, "altura": 9 }
+            },
             "nome": {
+              "label": "Nome do Filho(a) 4",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 17, "y": 322, "largura": 282, "altura": 14 },
+              "coordenadas": { "x": 102, "y": 339, "largura": 153, "altura": 10 },
               "obrigatorio": true
             },
             "cpf": {
+              "label": "CPF do Filho(a) 4",
               "tipo": "texto",
               "pagina": 1,
-              "coordenadas": { "x": 428, "y": 323, "largura": 147, "altura": 13 },
+              "coordenadas": { "x": 275, "y": 339, "largura": 78, "altura": 10 },
               "obrigatorio": true,
               "mascara": "999.999.999-99"
             },
             "dtnasc": {
-              "tipo": "data_campo_unico",
+              "label": "Data de Nascimento do Filho(a) 4",
+              "tipo": "data_segmentada",
               "pagina": 1,
               "obrigatorio": true,
-              "coordenadas": { "x": 307, "y": 323, "largura": 116, "altura": 12 }
+              "segmentos": {
+                "dia": {
+                  "coordenadas": { "x": 400, "y": 339, "largura": 14, "altura": 10 },
+                  "mascara": "99"
+                },
+                "mes": {
+                  "coordenadas": { "x": 418, "y": 339, "largura": 12, "altura": 10 },
+                  "mascara": "99"
+                },
+                "ano": {
+                  "coordenadas": { "x": 434, "y": 339, "largura": 71, "altura": 10 },
+                  "mascara": "9999"
+                }
+              }
             },
-            "sus": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false },
-            "nomemae": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false },
-            "nascvivo": { "tipo": "texto", "pagina": 1, "coordenadas": null, "obrigatorio": false }
+            "sus": {
+              "label": "Nº Cartão SUS do Filho(a) 4",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 122, "y": 323, "largura": 85, "altura": 10 },
+              "obrigatorio": true,
+              "mascara": "999 9999 9999 9999"
+            },
+            "nomemae": {
+              "label": "Nome da Mãe do Filho(a) 4",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 254, "y": 323, "largura": 95, "altura": 10 },
+              "obrigatorio": true
+            },
+            "nascvivo": {
+              "label": "Nº Declaração de Nascido Vivo do Filho(a) 4",
+              "tipo": "texto",
+              "pagina": 1,
+              "coordenadas": { "x": 411, "y": 323, "largura": 113, "altura": 10 },
+              "obrigatorio": true,
+              "observacao": "Obrigatório para recém-nascidos"
+            }
           }
         }
       ]
     },
     "assinatura": {
-      "descricao": "Assinatura e data",
+      "descricao": "Assinatura e data do funcionário",
       "campos": {
         "assinatura": {
-          "label": "Assinatura",
+          "label": "Assinatura do Funcionário Ciente",
           "tipo": "assinatura",
           "pagina": 1,
-          "coordenadas": { "x": 56, "y": 27, "largura": 240, "altura": 14 },
+          "coordenadas": { "x": 71, "y": 88, "largura": 273, "altura": 19 },
           "obrigatorio": true
         },
         "data": {
           "label": "Data",
-          "tipo": "data_segmentada",
+          "tipo": "data",
           "pagina": 1,
+          "coordenadas": { "x": 380, "y": 88, "largura": 122, "altura": 19 },
           "obrigatorio": true,
-          "segmentos": {
-            "dia": {
-              "coordenadas": { "x": 432, "y": 28, "largura": 32, "altura": 14 },
-              "mascara": "99"
-            },
-            "mes": {
-              "coordenadas": { "x": 476, "y": 28, "largura": 32, "altura": 14 },
-              "mascara": "99"
-            },
-            "ano": {
-              "coordenadas": { "x": 517, "y": 28, "largura": 34, "altura": 14 },
-              "mascara": "9999"
-            }
-          }
+          "mascara": "99/99/9999"
         }
       }
     }
@@ -391,8 +568,8 @@
   "metadados": {
     "sistema_coordenadas": "PDF points (pt)",
     "origem": "canto_inferior_esquerdo",
-    "fonte_coordenadas": "coordenadasficha.txt",
-    "nota": "Campos do PDF não cobertos pelo formulário web ficam com coordenadas null. Cônjuge usa a linha dependenteum; filhos 1–4 usam dependentedois…cinco.",
+    "altura_pagina_pt": 842,
+    "nota": "Coordenadas extraídas de coordenadasassmedica.txt (page 595×842 pt). y = borda inferior do retângulo. Cônjuge nome/CPF: no .txt havia mesma caixa para ambos; aplicado o mesmo alinhamento horizontal da linha do filho 1 (x 102 / 275). Filhos 2–4: deslocamento −46 pt em y em relação ao bloco anterior (layout repetido).",
     "versao_json": "2.0"
   }
 }
