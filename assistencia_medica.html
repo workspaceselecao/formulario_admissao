@@ -367,6 +367,17 @@
     color: var(--label);
     margin-bottom: 12px;
   }
+  .subsection-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .subsection-title-row .subsection-title {
+    margin-bottom: 0;
+  }
   .dep-block {
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -381,23 +392,35 @@
     align-items: center;
     margin-bottom: 16px;
   }
-  .btn-add-filho,
-  .btn-remove-filho {
+  .btn-excluir-filho {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1.5px solid rgba(198, 40, 40, 0.35);
+    background: rgba(198, 40, 40, 0.06);
+    color: #b71c1c;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+  }
+  .btn-excluir-filho:hover {
+    border-color: #c62828;
+    background: #ffebee;
+    color: #c62828;
+  }
+  .btn-add-filho {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 600;
     padding: 10px 18px;
     border-radius: 8px;
     cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    color: var(--text-mid);
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .btn-add-filho {
-    border-color: var(--accent);
+    border: 1.5px solid var(--accent);
     background: var(--accent-soft);
     color: var(--accent);
+    transition: border-color 0.15s, background 0.15s;
   }
   .btn-add-filho:hover:not(:disabled) {
     background: #fff;
@@ -407,11 +430,6 @@
   .btn-add-filho:disabled {
     opacity: 0.45;
     cursor: not-allowed;
-  }
-  .btn-remove-filho:hover {
-    border-color: var(--text-mid);
-    background: #fff;
-    color: var(--text);
   }
   .form-actions-bottom {
     display: flex;
@@ -800,11 +818,13 @@
 
       <div class="filhos-acoes" id="filhosAcoesBar">
         <button type="button" class="btn-add-filho" id="btnAddFilho" onclick="adicionarFilhoExtra()">+ Adicionar filho</button>
-        <button type="button" class="btn-remove-filho" id="btnRemoveFilho" onclick="removerUltimoFilho()" style="display:none">Remover último filho</button>
       </div>
 
       <div id="filBloco2" class="dep-block" style="display:none">
-        <div class="subsection-title">Filho(a) 2</div>
+        <div class="subsection-title-row">
+          <div class="subsection-title">Filho(a) 2</div>
+          <button type="button" class="btn-excluir-filho" onclick="excluirFilhoModulo(2)" aria-label="Excluir módulo filho 2">✕ Excluir</button>
+        </div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil2IncluirLabel">
             <input type="checkbox" id="fil2_incluir" onchange="toggleDepFilho(2)"> Incluir filho(a) 2 no plano
@@ -847,7 +867,10 @@
       </div>
 
       <div id="filBloco3" class="dep-block" style="display:none">
-        <div class="subsection-title">Filho(a) 3</div>
+        <div class="subsection-title-row">
+          <div class="subsection-title">Filho(a) 3</div>
+          <button type="button" class="btn-excluir-filho" onclick="excluirFilhoModulo(3)" aria-label="Excluir módulo filho 3">✕ Excluir</button>
+        </div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil3IncluirLabel">
             <input type="checkbox" id="fil3_incluir" onchange="toggleDepFilho(3)"> Incluir filho(a) 3 no plano
@@ -890,7 +913,10 @@
       </div>
 
       <div id="filBloco4" class="dep-block" style="display:none">
-        <div class="subsection-title">Filho(a) 4</div>
+        <div class="subsection-title-row">
+          <div class="subsection-title">Filho(a) 4</div>
+          <button type="button" class="btn-excluir-filho" onclick="excluirFilhoModulo(4)" aria-label="Excluir módulo filho 4">✕ Excluir</button>
+        </div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil4IncluirLabel">
             <input type="checkbox" id="fil4_incluir" onchange="toggleDepFilho(4)"> Incluir filho(a) 4 no plano
@@ -1134,6 +1160,38 @@ function idsCamposFilho(n) {
     `fil${n}_nascvivo`
   ];
 }
+/** Copia checkbox e campos do filho `de` para o slot `para` (mesmos ids, reordenação ao excluir um bloco do meio). */
+function copiarCamposFilhoDePara(de, para) {
+  const chDe = document.getElementById(`fil${de}_incluir`);
+  const chPara = document.getElementById(`fil${para}_incluir`);
+  if (chPara) chPara.checked = !!chDe?.checked;
+  idsCamposFilho(de).forEach((idDe, idx) => {
+    const idPara = idsCamposFilho(para)[idx];
+    const elDe = document.getElementById(idDe);
+    const elPa = document.getElementById(idPara);
+    if (elPa && elDe) elPa.value = elDe.value;
+    if (elPa) marcarCampoInvalido(idPara, false);
+  });
+  toggleDepFilho(para);
+}
+/** Remove o módulo do filho `n` (2–4): oculta o último slot visível e, se necessário, desloca os dados dos blocos seguintes. */
+function excluirFilhoModulo(n) {
+  if (n < 2 || n > filhosVisiveis) return;
+  if (n === filhosVisiveis) {
+    removerUltimoFilho();
+    return;
+  }
+  for (let i = n; i < filhosVisiveis; i++) {
+    copiarCamposFilhoDePara(i + 1, i);
+  }
+  limparCamposFilho(filhosVisiveis);
+  const bl = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (bl) bl.style.display = "none";
+  filhosVisiveis -= 1;
+  atualizarBotoesFilhos();
+  atualizarTodosDnvFilhos();
+  agendarSalvarRascunho();
+}
 function adicionarFilhoExtra() {
   if (filhosVisiveis >= NUM_FILHOS) return;
   filhosVisiveis += 1;
@@ -1149,6 +1207,7 @@ function removerUltimoFilho() {
   if (bl) bl.style.display = "none";
   filhosVisiveis -= 1;
   atualizarBotoesFilhos();
+  atualizarTodosDnvFilhos();
   agendarSalvarRascunho();
 }
 function limparCamposFilho(n) {
@@ -1167,12 +1226,8 @@ function atualizarBotoesFilhos() {
     alvo.insertAdjacentElement("afterend", acoes);
   }
   const add = document.getElementById("btnAddFilho");
-  const rem = document.getElementById("btnRemoveFilho");
   if (add) {
     add.disabled = filhosVisiveis >= NUM_FILHOS;
-  }
-  if (rem) {
-    rem.style.display = filhosVisiveis > 1 ? "inline-flex" : "none";
   }
 }
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
