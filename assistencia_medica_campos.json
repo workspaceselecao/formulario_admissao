@@ -547,7 +547,7 @@
         {
           "id": "filho_2",
           "label": "Filho(a) 2",
-          "offset_y_em_relacao_ao_filho_1": -31,
+          "offset_y_em_relacao_ao_filho_1": -32,
           "campos": {
             "incluir": {
               "label": "Incluir Filho(a) 2 no Plano",
@@ -663,7 +663,7 @@
         {
           "id": "filho_3",
           "label": "Filho(a) 3",
-          "offset_y_em_relacao_ao_filho_1": -62,
+          "offset_y_em_relacao_ao_filho_1": -64,
           "campos": {
             "incluir": {
               "label": "Incluir Filho(a) 3 no Plano",
@@ -779,7 +779,7 @@
         {
           "id": "filho_4",
           "label": "Filho(a) 4",
-          "offset_y_em_relacao_ao_filho_1": -93,
+          "offset_y_em_relacao_ao_filho_1": -96,
           "campos": {
             "incluir": {
               "label": "Incluir Filho(a) 4 no Plano",
@@ -929,7 +929,7 @@
     "sistema_coordenadas": "PDF points (pt)",
     "origem": "canto_inferior_esquerdo",
     "altura_pagina_pt": 842,
-    "nota": "Filhos 2–4: bloco inteiro subido em Y (filho2 +1, filho3 +2, filho4 +3 pt vs. posição anterior). Texto PDF: 7 pt em assistencia_medica.html.",
+    "nota": "Checkboxes tipo adesão, cônjuge e filho 1 conforme coordenadas base. Filhos 2–4: ajuste adicional em Y (+1, +2, +3 pt). Texto PDF: 7 pt em assistencia_medica.html.",
     "versao_json": "2.3"
   }
 }
