@@ -1500,6 +1500,9 @@ function marcarCampoInvalido(id, invalido) {
 function digitosCount(str) {
   return String(str || "").replace(/\D/g, "").length;
 }
+/** Aviso quando dependente está no plano mas CPF não foi informado (ou está incompleto). */
+const MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE =
+  "Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do Pessoas Online, após sua admissão.";
 async function validarCamposObrigatorios() {
   const faltantes = [];
   const add = (id, nome) => {
@@ -1610,6 +1613,10 @@ async function validarCamposObrigatorios() {
   });
 
   if (unicos.length) {
+    const falhaCpfFilhoIncluido = unicos.some((x) => /^fil[1-4]_cpf$/.test(x.id));
+    if (falhaCpfFilhoIncluido) {
+      window.alert(MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE);
+    }
     showToast(`Preencha ou corrija: ${unicos.map((x) => x.nome).join(", ")}.`, false);
     document.getElementById(unicos[0].id)?.focus();
     return false;
