@@ -554,10 +554,10 @@
               "tipo": "checkbox",
               "pagina": 1,
               "coordenadas": {
-                "x": 58,
-                "y": 442,
+                "x": 59,
+                "y": 443,
                 "largura": 12,
-                "altura": 9
+                "altura": 10
               }
             },
             "nome": {
@@ -670,10 +670,10 @@
               "tipo": "checkbox",
               "pagina": 1,
               "coordenadas": {
-                "x": 58,
-                "y": 408,
+                "x": 59,
+                "y": 411,
                 "largura": 12,
-                "altura": 9
+                "altura": 10
               }
             },
             "nome": {
@@ -786,10 +786,10 @@
               "tipo": "checkbox",
               "pagina": 1,
               "coordenadas": {
-                "x": 58,
-                "y": 374,
-                "largura": 12,
-                "altura": 9
+                "x": 59,
+                "y": 381,
+                "largura": 11,
+                "altura": 10
               }
             },
             "nome": {
@@ -929,7 +929,7 @@
     "sistema_coordenadas": "PDF points (pt)",
     "origem": "canto_inferior_esquerdo",
     "altura_pagina_pt": 842,
-    "nota": "Checkboxes tipo adesão, cônjuge e filho 1 conforme coordenadas base. Filhos 2–4: ajuste adicional em Y (+1, +2, +3 pt). Texto PDF: 7 pt em assistencia_medica.html.",
-    "versao_json": "2.3"
+    "nota": "Checkboxes incluir filho 2–4: x/y/largura/altura conforme especificação (59,443,12,10 / 59,411,12,10 / 59,381,11,10). Texto PDF: 7 pt.",
+    "versao_json": "2.4"
   }
 }
