@@ -713,8 +713,7 @@
     <div class="section-header"><div class="dot"></div>Dependentes</div>
     <div class="section-body">
       <div class="aviso-box" style="margin-bottom:18px">
-        Marque <strong>Incluir</strong> apenas para quem deve constar no plano. Os campos marcados com (*) no PDF tornam-se obrigatórios quando a inclusão estiver marcada.
-        Use <strong>+ Adicionar filho</strong> para cadastrar até 4 filhos (um bloco por vez).
+        Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do <strong>Pessoas Online</strong>, após sua admissão.
       </div>
 
       <div class="dep-block">
@@ -756,7 +755,7 @@
         </div>
       </div>
 
-      <div class="dep-block">
+      <div id="filBloco1" class="dep-block">
         <div class="subsection-title">Filho(a)</div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil1IncluirLabel">
@@ -799,7 +798,7 @@
         </div>
       </div>
 
-      <div class="filhos-acoes">
+      <div class="filhos-acoes" id="filhosAcoesBar">
         <button type="button" class="btn-add-filho" id="btnAddFilho" onclick="adicionarFilhoExtra()">+ Adicionar filho</button>
         <button type="button" class="btn-remove-filho" id="btnRemoveFilho" onclick="removerUltimoFilho()" style="display:none">Remover último filho</button>
       </div>
@@ -1162,6 +1161,11 @@ function limparCamposFilho(n) {
   });
 }
 function atualizarBotoesFilhos() {
+  const acoes = document.getElementById("filhosAcoesBar");
+  const alvo = document.getElementById(`filBloco${filhosVisiveis}`);
+  if (acoes && alvo) {
+    alvo.insertAdjacentElement("afterend", acoes);
+  }
   const add = document.getElementById("btnAddFilho");
   const rem = document.getElementById("btnRemoveFilho");
   if (add) {
