@@ -929,7 +929,7 @@
     "sistema_coordenadas": "PDF points (pt)",
     "origem": "canto_inferior_esquerdo",
     "altura_pagina_pt": 842,
-    "nota": "Checkboxes tipo adesão, cônjuge e filho 1 conforme coordenadas base. Filhos 2–4: campos de texto −32 pt por bloco; caixinha 'incluir' adicional −3 pt por nível (441, 406, 371 a partir de filho 1 y=476). Texto PDF: 10 pt em assistencia_medica.html.",
+    "nota": "Checkboxes tipo adesão, cônjuge e filho 1 conforme coordenadas base. Filhos 2–4: campos de texto −32 pt por bloco; caixinha 'incluir' adicional −3 pt por nível (441, 406, 371 a partir de filho 1 y=476). Texto PDF: 8 pt em assistencia_medica.html.",
     "versao_json": "2.2"
   }
 }
