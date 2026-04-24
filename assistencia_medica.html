@@ -773,9 +773,9 @@
               <label>Nome da Mãe do Filho(a) <span class="req fil1-req">*</span></label>
               <input type="text" id="fil1_nomemae" class="fil1-field">
             </div>
-            <div class="field col-span-2">
+            <div class="field col-span-2" id="fil1_wrapDnv" hidden>
               <label>Nº Declaração de Nascido Vivo <span class="req fil1-req">*</span></label>
-              <input type="text" id="fil1_nascvivo" class="fil1-field" placeholder="Obrigatório para recém-nascidos">
+              <input type="text" id="fil1_nascvivo" class="fil1-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
             </div>
           </div>
         </div>
@@ -821,9 +821,9 @@
               <label>Nome da Mãe do Filho(a) <span class="req fil2-req">*</span></label>
               <input type="text" id="fil2_nomemae" class="fil2-field">
             </div>
-            <div class="field col-span-2">
+            <div class="field col-span-2" id="fil2_wrapDnv" hidden>
               <label>Nº Declaração de Nascido Vivo <span class="req fil2-req">*</span></label>
-              <input type="text" id="fil2_nascvivo" class="fil2-field" placeholder="Obrigatório para recém-nascidos">
+              <input type="text" id="fil2_nascvivo" class="fil2-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
             </div>
           </div>
         </div>
@@ -864,9 +864,9 @@
               <label>Nome da Mãe do Filho(a) <span class="req fil3-req">*</span></label>
               <input type="text" id="fil3_nomemae" class="fil3-field">
             </div>
-            <div class="field col-span-2">
+            <div class="field col-span-2" id="fil3_wrapDnv" hidden>
               <label>Nº Declaração de Nascido Vivo <span class="req fil3-req">*</span></label>
-              <input type="text" id="fil3_nascvivo" class="fil3-field" placeholder="Obrigatório para recém-nascidos">
+              <input type="text" id="fil3_nascvivo" class="fil3-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
             </div>
           </div>
         </div>
@@ -907,9 +907,9 @@
               <label>Nome da Mãe do Filho(a) <span class="req fil4-req">*</span></label>
               <input type="text" id="fil4_nomemae" class="fil4-field">
             </div>
-            <div class="field col-span-2">
+            <div class="field col-span-2" id="fil4_wrapDnv" hidden>
               <label>Nº Declaração de Nascido Vivo <span class="req fil4-req">*</span></label>
-              <input type="text" id="fil4_nascvivo" class="fil4-field" placeholder="Obrigatório para recém-nascidos">
+              <input type="text" id="fil4_nascvivo" class="fil4-field" placeholder="Obrigatório para neonatos (0 a 28 dias de vida)">
             </div>
           </div>
         </div>
@@ -997,6 +997,60 @@ const UF_PARA_TEMPLATE = {
 const NUM_FILHOS = 4;
 let filhosVisiveis = 1;
 const PDF_FONT_TEXTO = 9;
+/** Neonato: até 28 dias de vida (inclusive). Acima disso, DNV não se aplica. */
+const NEONATO_ATE_DIAS_VIDA = 28;
+
+/**
+ * Diferença em dias (calendário local) entre a data de nascimento e hoje, ou `null` se a data for inválida.
+ */
+function idadeFilhoEmDiasAteHoje(n) {
+  const d = v(`fil${n}_d`);
+  const m = v(`fil${n}_m`);
+  const y = v(`fil${n}_y`);
+  if (!d || !m || !y) return null;
+  const di = parseInt(d, 10);
+  const mi = parseInt(m, 10);
+  const yi = parseInt(y, 10);
+  if (Number.isNaN(di) || Number.isNaN(mi) || Number.isNaN(yi)) return null;
+  if (mi < 1 || mi > 12 || di < 1 || di > 31) return null;
+  const birth = new Date(yi, mi - 1, di);
+  if (birth.getFullYear() !== yi || birth.getMonth() !== mi - 1 || birth.getDate() !== di) return null;
+  const today = new Date();
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const b0 = new Date(birth.getFullYear(), birth.getMonth(), birth.getDate());
+  return Math.floor((t0 - b0) / 86400000);
+}
+
+/** DNV: obrigatório só para filho(a) no plano, com data válida, idade em dias entre 0 e 28 (neonato). */
+function filhoDeveExibirCampoDnv(n) {
+  if (!document.getElementById(`fil${n}_incluir`)?.checked) return false;
+  const dias = idadeFilhoEmDiasAteHoje(n);
+  if (dias == null) return false;
+  return dias >= 0 && dias <= NEONATO_ATE_DIAS_VIDA;
+}
+
+function atualizarVisibilidadeDnvFilho(n) {
+  const wrap = document.getElementById(`fil${n}_wrapDnv`);
+  if (!wrap) return;
+  const exibir = filhoDeveExibirCampoDnv(n);
+  if (exibir) {
+    wrap.removeAttribute("hidden");
+  } else {
+    wrap.setAttribute("hidden", "");
+    const nv = document.getElementById(`fil${n}_nascvivo`);
+    if (nv) {
+      nv.value = "";
+      marcarCampoInvalido(`fil${n}_nascvivo`, false);
+    }
+  }
+}
+
+function atualizarTodosDnvFilhos() {
+  for (let fn = 1; fn <= NUM_FILHOS; fn++) {
+    atualizarVisibilidadeDnvFilho(fn);
+  }
+}
+
 function idsCamposFilho(n) {
   return [
     `fil${n}_nome`,
@@ -1248,6 +1302,17 @@ function toggleDepFilho(n) {
   const box = document.getElementById(`fil${n}Campos`);
   if (box) box.style.display = on ? "block" : "none";
   document.getElementById(`fil${n}IncluirLabel`)?.classList.toggle("active", !!on);
+  if (!on) {
+    const wrap = document.getElementById(`fil${n}_wrapDnv`);
+    if (wrap) wrap.setAttribute("hidden", "");
+    const nv = document.getElementById(`fil${n}_nascvivo`);
+    if (nv) {
+      nv.value = "";
+      marcarCampoInvalido(`fil${n}_nascvivo`, false);
+    }
+  } else {
+    atualizarVisibilidadeDnvFilho(n);
+  }
 }
 function syncRadioActive(name) {
   document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
@@ -1372,7 +1437,9 @@ function validarCamposObrigatorios() {
       if (!dnFOk) faltantes.push({ id: `fil${fn}_d`, nome: `Data de nascimento (${rot})` });
       add(`fil${fn}_sus`, `SUS (${rot})`);
       add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
-      add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
+      if (filhoDeveExibirCampoDnv(fn)) {
+        add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
+      }
       if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
         marcarCampoInvalido(`fil${fn}_sus`, true);
         faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
@@ -1498,6 +1565,7 @@ function limparDadosFormulario() {
   atualizarBotoesFilhos();
   toggleDepConjuge();
   atualizarVisibilidadeModuloDependentes();
+  atualizarTodosDnvFilhos();
   document.querySelectorAll(".invalid").forEach((el) => el.classList.remove("invalid"));
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
@@ -1589,6 +1657,7 @@ function aplicarEstadoRascunho(obj) {
   }
   toggleDepConjuge();
   atualizarVisibilidadeModuloDependentes();
+  atualizarTodosDnvFilhos();
 }
 
 const CROSS_COPY_FICHA_ASSISTENCIA_KEY = "cross_copy_ficha_para_assistencia_v1";
@@ -1703,6 +1772,7 @@ function tentarAplicarCopiaFichaCadastral() {
         if (dep.y) setIf(`fil${fn}_y`, String(dep.y).replace(/\D/g, "").slice(0, 4));
       });
     }
+    atualizarTodosDnvFilhos();
   } finally {
     ignorarSalvarRascunho = false;
   }
@@ -1828,7 +1898,8 @@ async function gerarPDF() {
         preencherDataSegmentada(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
         escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
         escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
-        escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, v(`fil${n}_nascvivo`));
+        const dnvTexto = filhoDeveExibirCampoDnv(n) ? v(`fil${n}_nascvivo`) : "";
+        escreverTextoCampoCoord(page, font, fil.nascvivo.coordenadas, dnvTexto);
       });
     }
 
@@ -1941,6 +2012,17 @@ if (!tentarRestaurarRascunho()) {
 tentarAplicarCopiaFichaCadastral();
 atualizarBotoesFilhos();
 atualizarVisibilidadeModuloDependentes();
+atualizarTodosDnvFilhos();
+
+for (let n = 1; n <= NUM_FILHOS; n++) {
+  ["_d", "_m", "_y"].forEach((s) => {
+    const el = document.getElementById(`fil${n}${s}`);
+    if (!el) return;
+    const run = () => atualizarVisibilidadeDnvFilho(n);
+    el.addEventListener("input", run);
+    el.addEventListener("change", run);
+  });
+}
 
 document.getElementById("uf")?.addEventListener("change", function () {
   marcarCampoInvalido("uf", false);
