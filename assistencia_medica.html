@@ -170,9 +170,9 @@
   .dados-func-grid .dados-cargo-site-tel {
     grid-column: span 2;
   }
-  .nome-uf-row {
+  .estado-cidade-nome-row {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(100px, 1fr) minmax(140px, 1.15fr) minmax(0, 2fr);
     gap: 18px;
     width: 100%;
     align-items: end;
@@ -197,7 +197,7 @@
     .dados-func-grid .col-span-2 {
       grid-column: 1 / -1;
     }
-    .dados-func-grid .nome-uf-row,
+    .dados-func-grid .estado-cidade-nome-row,
     .dados-func-grid .dados-sus-rg-cpf,
     .dados-func-grid .dados-datas,
     .dados-func-grid .dados-cargo-site-tel {
@@ -221,7 +221,7 @@
     .dados-sus-rg-cpf .field--rg input,
     .dados-sus-rg-cpf .field--cpf input,
     .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
-    .nome-uf-row { grid-template-columns: 1fr; }
+    .estado-cidade-nome-row { grid-template-columns: 1fr; }
     .dados-datas { grid-template-columns: 1fr; }
     .dados-cargo-site-tel { grid-template-columns: 1fr; }
   }
@@ -554,11 +554,7 @@
     <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
     <div class="section-body">
       <div class="grid grid-2 dados-func-grid">
-        <div class="nome-uf-row col-span-2">
-          <div class="field" style="min-width:0">
-            <label>Nome do Funcionário <span class="req">*</span></label>
-            <input type="text" id="funcionario" placeholder="Nome completo">
-          </div>
+        <div class="estado-cidade-nome-row col-span-2">
           <div class="field field--uf" style="min-width:0">
             <label>Estado <span class="req">*</span></label>
             <select id="uf">
@@ -591,6 +587,16 @@
               <option value="SP">SP – São Paulo</option>
               <option value="TO">TO – Tocantins</option>
             </select>
+          </div>
+          <div class="field field--cidade" style="min-width:0">
+            <label>Cidade</label>
+            <select id="cidade" disabled>
+              <option value="">— Selecione o estado —</option>
+            </select>
+          </div>
+          <div class="field" style="min-width:0">
+            <label>Nome do Funcionário <span class="req">*</span></label>
+            <input type="text" id="funcionario" placeholder="Nome completo">
           </div>
         </div>
         <div class="field">
@@ -1148,6 +1154,60 @@ function telefoneSeparadoParaPdf() {
 }
 let ultimoCepPreenchido = "";
 let cepBuscaTimer = null;
+
+async function carregarMunicipiosIBGE(uf) {
+  const sigla = String(uf || "").toUpperCase().trim();
+  const sel = document.getElementById("cidade");
+  if (!sel) return;
+  sel.innerHTML = sigla
+    ? '<option value="">— Selecione —</option>'
+    : '<option value="">— Selecione o estado —</option>';
+  sel.disabled = !sigla;
+  marcarCampoInvalido("cidade", false);
+  if (!sigla) return;
+  try {
+    const res = await fetch(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`
+    );
+    if (!res.ok) throw new Error("http");
+    const lista = await res.json();
+    if (!Array.isArray(lista)) throw new Error("formato");
+    lista.sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
+    for (const m of lista) {
+      const opt = document.createElement("option");
+      opt.value = m.nome;
+      opt.textContent = m.nome;
+      sel.appendChild(opt);
+    }
+  } catch (_e) {
+    showToast("Não foi possível carregar as cidades (IBGE). Tente outra vez.", false);
+  }
+}
+
+function atualizarCidadeufApartirDosCamposLocalidade() {
+  const uf = v("uf");
+  const cid = v("cidade");
+  const el = document.getElementById("cidadeuf");
+  if (!el || !cid || !uf) return;
+  el.value = `${cid} / ${uf}`.toLocaleUpperCase("pt-BR");
+}
+
+function tentarSincronizarSelectCidadeComTexto(localidade, ufCep) {
+  const ufForm = v("uf");
+  const sel = document.getElementById("cidade");
+  if (!sel || sel.disabled || !localidade) return;
+  const loc = String(localidade).trim();
+  const uCep = String(ufCep || "").toUpperCase().trim();
+  if (uCep && ufForm && uCep !== ufForm) return;
+  const match = [...sel.options].find(
+    (o) => o.value && o.value.localeCompare(loc, "pt-BR", { sensitivity: "accent" }) === 0
+  );
+  if (match) {
+    sel.value = match.value;
+    atualizarCidadeufApartirDosCamposLocalidade();
+  }
+}
+
 function maskCep(el) {
   const d = el.value.replace(/\D/g, "").slice(0, 8);
   el.value = d.length > 5 ? d.replace(/(\d{5})(\d{0,3})/, "$1-$2") : d;
@@ -1183,6 +1243,7 @@ async function buscarEnderecoPorCep() {
     } else if (data.uf && cidadeuf) {
       cidadeuf.value = up(String(data.uf).trim());
     }
+    tentarSincronizarSelectCidadeComTexto(data.localidade, data.uf);
     ultimoCepPreenchido = raw;
     showToast("Endereço preenchido a partir do CEP.", true);
     agendarSalvarRascunho();
@@ -1547,6 +1608,12 @@ function limparDadosFormulario() {
   });
   const elUF = document.getElementById("uf");
   if (elUF) elUF.value = "";
+  const elCidade = document.getElementById("cidade");
+  if (elCidade) {
+    elCidade.innerHTML = '<option value="">— Selecione o estado —</option>';
+    elCidade.value = "";
+    elCidade.disabled = true;
+  }
   document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
     r.checked = false;
   });
@@ -1575,7 +1642,7 @@ function limparDadosFormulario() {
 
 const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v3";
 const RASCUNHO_IDS = [
-  "uf", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
+  "uf", "cidade", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
   "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
   "telefone",
@@ -1776,6 +1843,33 @@ function tentarAplicarCopiaFichaCadastral() {
   } finally {
     ignorarSalvarRascunho = false;
   }
+  const cu = c.cidadeuf ? String(c.cidadeuf).trim().toLocaleUpperCase("pt-BR") : "";
+  const parsedCu = cu.match(/^(.+?)\s*\/\s*([A-Z]{2})$/);
+  if (parsedCu) {
+    void (async () => {
+      ignorarSalvarRascunho = true;
+      try {
+        const nomeCid = parsedCu[1].trim();
+        const ufImp = parsedCu[2];
+        const selUf = document.getElementById("uf");
+        if (selUf && UF_PARA_TEMPLATE[ufImp]) {
+          selUf.value = ufImp;
+          await carregarMunicipiosIBGE(ufImp);
+          const selC = document.getElementById("cidade");
+          if (selC) {
+            const hit = [...selC.options].find(
+              (o) => o.value && o.value.localeCompare(nomeCid, "pt-BR", { sensitivity: "accent" }) === 0
+            );
+            if (hit) selC.value = hit.value;
+          }
+          carregarTemplatePorUF(ufImp).catch(() => {});
+        }
+      } finally {
+        ignorarSalvarRascunho = false;
+        agendarSalvarRascunho();
+      }
+    })();
+  }
   try {
     localStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
   } catch (e2) {}
@@ -1812,6 +1906,23 @@ function tentarRestaurarRascunho() {
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
+    const savedCidade = obj.campos?.cidade;
+    void (async () => {
+      if (!v("uf")) return;
+      await carregarMunicipiosIBGE(v("uf"));
+      const sel = document.getElementById("cidade");
+      if (!sel || !savedCidade) return;
+      if ([...sel.options].some((o) => o.value === savedCidade)) {
+        sel.value = savedCidade;
+      } else {
+        const hit = [...sel.options].find(
+          (o) =>
+            o.value &&
+            o.value.localeCompare(String(savedCidade), "pt-BR", { sensitivity: "accent" }) === 0
+        );
+        if (hit) sel.value = hit.value;
+      }
+    })();
     showToast("Rascunho recuperado. Você pode continuar o preenchimento.", true);
     return true;
   } catch (e) {
@@ -2026,7 +2137,12 @@ for (let n = 1; n <= NUM_FILHOS; n++) {
 
 document.getElementById("uf")?.addEventListener("change", function () {
   marcarCampoInvalido("uf", false);
+  void carregarMunicipiosIBGE(this.value);
   if (this.value) carregarTemplatePorUF(this.value).catch(() => {});
+});
+document.getElementById("cidade")?.addEventListener("change", function () {
+  marcarCampoInvalido("cidade", false);
+  atualizarCidadeufApartirDosCamposLocalidade();
 });
 function salvarRascunhoAoSair() {
   salvarRascunhoLocalSincrono();
