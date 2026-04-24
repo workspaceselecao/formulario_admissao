@@ -170,9 +170,17 @@
   .dados-func-grid .dados-cargo-site-tel {
     grid-column: span 2;
   }
-  .estado-cidade-nome-row {
+  /* Matrícula ~40% da largura de uma coluna “igual” (redução de 60%); Estado e Cidade com mais espaço. */
+  .estado-cidade-matricula-row {
     display: grid;
-    grid-template-columns: minmax(100px, 1fr) minmax(140px, 1.15fr) minmax(0, 2fr);
+    grid-template-columns: minmax(112px, 1.45fr) minmax(160px, 1.55fr) minmax(56px, 0.4fr);
+    gap: 18px;
+    width: 100%;
+    align-items: end;
+  }
+  .nome-mae-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 18px;
     width: 100%;
     align-items: end;
@@ -197,7 +205,8 @@
     .dados-func-grid .col-span-2 {
       grid-column: 1 / -1;
     }
-    .dados-func-grid .estado-cidade-nome-row,
+    .dados-func-grid .estado-cidade-matricula-row,
+    .dados-func-grid .nome-mae-row,
     .dados-func-grid .dados-sus-rg-cpf,
     .dados-func-grid .dados-datas,
     .dados-func-grid .dados-cargo-site-tel {
@@ -221,7 +230,8 @@
     .dados-sus-rg-cpf .field--rg input,
     .dados-sus-rg-cpf .field--cpf input,
     .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
-    .estado-cidade-nome-row { grid-template-columns: 1fr; }
+    .estado-cidade-matricula-row,
+    .nome-mae-row { grid-template-columns: 1fr; }
     .dados-datas { grid-template-columns: 1fr; }
     .dados-cargo-site-tel { grid-template-columns: 1fr; }
   }
@@ -554,7 +564,7 @@
     <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
     <div class="section-body">
       <div class="grid grid-2 dados-func-grid">
-        <div class="estado-cidade-nome-row col-span-2">
+        <div class="estado-cidade-matricula-row col-span-2">
           <div class="field field--uf" style="min-width:0">
             <label>Estado <span class="req">*</span></label>
             <select id="uf">
@@ -594,18 +604,20 @@
               <option value="">— Selecione o estado —</option>
             </select>
           </div>
+          <div class="field field--matricula" style="min-width:0">
+            <label>Matrícula</label>
+            <input type="text" id="matricula" placeholder="">
+          </div>
+        </div>
+        <div class="nome-mae-row col-span-2">
           <div class="field" style="min-width:0">
             <label>Nome do Funcionário <span class="req">*</span></label>
             <input type="text" id="funcionario" placeholder="Nome completo">
           </div>
-        </div>
-        <div class="field">
-          <label>Matrícula</label>
-          <input type="text" id="matricula" placeholder="">
-        </div>
-        <div class="field">
-          <label>Nome da Mãe</label>
-          <input type="text" id="nomemae" placeholder="">
+          <div class="field" style="min-width:0">
+            <label>Nome da Mãe</label>
+            <input type="text" id="nomemae" placeholder="">
+          </div>
         </div>
         <div class="dados-sus-rg-cpf">
           <div class="field field--sus" style="min-width:0">
