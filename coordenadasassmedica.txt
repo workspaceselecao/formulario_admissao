@@ -1,0 +1,49 @@
+Page size: 595 x 842 pt
+
+optante{"page":1,"x":83,"y":698,"width":11,"height":10}
+naooptante{"page":1,"x":326,"y":697,"width":14,"height":10}
+matrimonio{"page":1,"x":81,"y":677,"width":14,"height":10}
+exclusaodependente{"page":1,"x":327,"y":677,"width":12,"height":10}
+nascfilho{"page":1,"x":83,"y":657,"width":12,"height":11}
+funcionario{"page":1,"x":100,"y":619,"width":250,"height":11}
+matricula{"page":1,"x":391,"y":619,"width":126,"height":10}
+nomemae{"page":1,"x":100,"y":604,"width":166,"height":12}
+sus{"page":1,"x":330,"y":604,"width":178,"height":11}
+rg{"page":1,"x":74,"y":589,"width":140,"height":11}
+cpf{"page":1,"x":235,"y":589,"width":100,"height":11}
+datanasc dia{"page":1,"x":389,"y":589,"width":12,"height":9}
+datanasc mês{"page":1,"x":409,"y":589,"width":13,"height":9}
+datanasc ano{"page":1,"x":430,"y":589,"width":44,"height":9}
+dataadm dia{"page":1,"x":120,"y":574,"width":20,"height":10}
+dataadm mes{"page":1,"x":148,"y":574,"width":20,"height":10}
+dataadm ano{"page":1,"x":182,"y":574,"width":27,"height":10}
+cargo{"page":1,"x":242,"y":574,"width":111,"height":11}
+site{"page":1,"x":372,"y":574,"width":145,"height":11}
+endresidencial{"page":1,"x":118,"y":560,"width":221,"height":10}
+endresidencial num{"page":1,"x":357,"y":560,"width":34,"height":10}
+endresidencial compl{"page":1,"x":414,"y":560,"width":110,"height":10}
+endresidencial bairro{"page":1,"x":86,"y":544,"width":125,"height":10}
+endresidencial cidadeuf{"page":1,"x":250,"y":544,"width":85,"height":10}
+tel ddd{"page":1,"x":359,"y":544,"width":12,"height":10}
+tel num{"page":1,"x":375,"y":544,"width":130,"height":10}
+conjuge{"page":1,"x":58,"y":508,"width":12,"height":9}
+cônjuge nome{"page":1,"x":276,"y":509,"width":78,"height":10}
+cônjuge cpf{"page":1,"x":276,"y":509,"width":75,"height":10}
+comjuge dtnasc dia{"page":1,"x":399,"y":509,"width":15,"height":10}
+comjuge dtnasc mes{"page":1,"x":418,"y":509,"width":12,"height":10}
+comjuge dtnasc ano{"page":1,"x":437,"y":509,"width":60,"height":10}
+cônjuge sus{"page":1,"x":121,"y":493,"width":87,"height":10}
+cônjuge nomemae{"page":1,"x":299,"y":493,"width":221,"height":10}
+
+filho1{"page":1,"x":58,"y":476,"width":12,"height":9}
+filho1 nome{"page":1,"x":102,"y":477,"width":153,"height":10}
+filho1 cpf{"page":1,"x":275,"y":477,"width":78,"height":10}
+filho1 dtnasc dia{"page":1,"x":400,"y":477,"width":14,"height":10}
+filho1 dtnasc mês{"page":1,"x":418,"y":477,"width":12,"height":10}
+filho1 dtnasc ano{"page":1,"x":434,"y":477,"width":71,"height":10}
+filho1 sus{"page":1,"x":122,"y":461,"width":85,"height":10}
+filho1 nomemae{"page":1,"x":254,"y":461,"width":95,"height":10}
+filho1 nascvivo{"page":1,"x":411,"y":461,"width":113,"height":10}
+
+assinatura{"page":1,"x":71,"y":88,"width":273,"height":19}
+data{"page":1,"x":380,"y":88,"width":122,"height":19}

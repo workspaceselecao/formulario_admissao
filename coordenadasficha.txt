@@ -1,0 +1,57 @@
+nome{"page":1,"x":20,"y":687,"width":543,"height":12} 
+craxá{"page":1,"x":20,"y":665,"width":479,"height":13}
+fone{"page":1,"x":20,"y":646,"width":230,"height":12}
+celular{"page":1,"x":263,"y":646,"width":205,"height":12}
+email{"page":1,"x":20,"y":627,"width":447,"height":11}
+estadocivil{"page":1,"x":19,"y":608,"width":378,"height":12}
+primeiroemprego sim{"page":1,"x":84,"y":599,"width":7,"height":7}
+primeiroemprego nao{"page":1,"x":85,"y":591,"width":6,"height":7}
+informarpis{"page":1,"x":160,"y":588,"width":226,"height":10}
+endereço rua{"page":1,"x":15,"y":569,"width":265,"height":12}
+endereço numero{"page":1,"x":290,"y":569,"width":42,"height":11}
+endereço complemento{"page":1,"x":340,"y":568,"width":235,"height":12}
+endereço cep{"page":1,"x":18,"y":550,"width":109,"height":12}
+endereço bairro {"page":1,"x":134,"y":550,"width":198,"height":12}
+endereço cidadeuf{"page":1,"x":339,"y":550,"width":234,"height":12}
+possuideficiencia sim{"page":1,"x":86,"y":539,"width":9,"height":7}
+possuideficiencia nao{"page":1,"x":109,"y":539,"width":7,"height":7}
+tipodeficiencia fisica{"page":1,"x":260,"y":531,"width":11,"height":9}
+tipodeficiencia auditiva{"page":1,"x":313,"y":531,"width":9,"height":9}
+tipodeficiencia visual{"page":1,"x":378,"y":530,"width":11,"height":10}
+tipodeficiencia intelectual{"page":1,"x":421,"y":531,"width":9,"height":8}
+tipodeficiencia multipla{"page":1,"x":483,"y":531,"width":9,"height":9}
+contabradesco{"page":1,"x":93,"y":510,"width":11,"height":10}
+contabradesco agencia{"page":1,"x":288,"y":504,"width":122,"height":14}
+contabradesco contadigito{"page":1,"x":418,"y":501,"width":142,"height":16}
+contamentore{"page":1,"x":93,"y":482,"width":12,"height":10}
+contamentore cpf{"page":1,"x":291,"y":476,"width":252,"height":15}
+dependenteum{"page":1,"x":14,"y":422,"width":285,"height":17}
+dependenteum dtnasc{"page":1,"x":306,"y":422,"width":115,"height":17}
+dependenteum cpf{"page":1,"x":428,"y":422,"width":136,"height":17}
+dependentedois{"page":1,"x":15,"y":394,"width":285,"height":17}
+dependentedois dtnasc{"page":1,"x":307,"y":394,"width":115,"height":16}
+dependentedois cpf{"page":1,"x":429,"y":394,"width":135,"height":16}
+dependentetres{"page":1,"x":15,"y":369,"width":287,"height":17}
+dependentetres dtnasc{"page":1,"x":307,"y":368,"width":113,"height":16}
+dependentetres cpf{"page":1,"x":429,"y":368,"width":147,"height":15}
+dependentequatro{"page":1,"x":17,"y":345,"width":283,"height":14}
+dependentequatro dtnasc{"page":1,"x":307,"y":345,"width":115,"height":14}
+dependentequatro cpf{"page":1,"x":429,"y":345,"width":143,"height":14}
+dependentecinco{"page":1,"x":17,"y":322,"width":282,"height":14}
+dependentecinco dtnasc{"page":1,"x":307,"y":323,"width":116,"height":12}
+dependentecinco cpf{"page":1,"x":428,"y":323,"width":147,"height":13}
+onibusqtd{"page":1,"x":273,"y":253,"width":48,"height":19}
+onibusvalor{"page":1,"x":455,"y":253,"width":58,"height":19}
+metroqtd{"page":1,"x":274,"y":231,"width":47,"height":19}
+metrovalor{"page":1,"x":456,"y":231,"width":57,"height":19}
+interqtd{"page":1,"x":274,"y":210,"width":49,"height":18}
+intervalor{"page":1,"x":456,"y":210,"width":60,"height":19}
+integqtd{"page":1,"x":273,"y":188,"width":58,"height":18}
+integvalor{"page":1,"x":456,"y":188,"width":69,"height":19}
+refeiçao{"page":1,"x":55,"y":148,"width":15,"height":12}
+alimentaçao{"page":1,"x":245,"y":148,"width":14,"height":12}
+flex{"page":1,"x":410,"y":149,"width":12,"height":10}
+assinatura{"page":1,"x":56,"y":27,"width":240,"height":14}
+data dia{"page":1,"x":432,"y":28,"width":32,"height":14}
+data mês{"page":1,"x":476,"y":28,"width":32,"height":14}
+data ano{"page":1,"x":517,"y":28,"width":34,"height":14}
