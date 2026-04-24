@@ -11,7 +11,7 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `assistencia_medica.html` — F-089 (PR-090) e geração do PDF
 - `assistencia_medica_campos.json` — coordenadas dos campos da assistência médica (pt)
 - `cidades_brasil.json` — mapeia cidade → ficha PDF da assistência médica
-- `FICHA FSA.pdf`, `FICHA GNDI.pdf`, `FICHA GOIANIA.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA SA_FO.pdf` — templates da assistência médica (conforme a cidade)
+- `FICHA BH.pdf`, `FICHA FSA.pdf`, `FICHA GNDI.pdf`, `FICHA GOIANIA.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA SA_FO.pdf` — templates da assistência médica (conforme `cidades_brasil.json`)
 - `vercel.json` — a raiz `/` serve internamente `index.html` (home)
 - `Carta Abertura de Conta Modelo Padrão_Bradesco.docx` — download opcional (conta Bradesco, só na ficha)
 
