@@ -1048,7 +1048,8 @@
 const CAMPOS_JSON_PATH = "/assistencia_medica_campos.json";
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const CIDADES_BRASIL_JSON_PATH = "/cidades_brasil.json";
-const MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH = "/municipios_cidades_ficha_por_uf.json";
+/** Lista oficial de municípios por UF (CORS aberto, cache no CDN). */
+const CIDADES_KSTR_API_BASE = "https://api.kstrtech.com.br/cidades/";
 
 /** Tipo vindo de cidades_brasil.json ("FICHA A UTILIZAR") → arquivo PDF no repositório. */
 const FICHA_UTILIZAR_PARA_ARQUIVO = {
@@ -1061,7 +1062,6 @@ const FICHA_UTILIZAR_PARA_ARQUIVO = {
 };
 
 let mapaCidadeParaFichaUtilizar = null;
-let mapaMunicipiosPorUfEstatico = null;
 
 function normalizarChaveCidade(s) {
   return String(s || "")
@@ -1095,21 +1095,6 @@ async function garantirMapaCidadesBrasil() {
   } catch (e) {
     console.error(e);
     showToast(`Não foi possível carregar ${CIDADES_BRASIL_JSON_PATH}`, false);
-    return false;
-  }
-}
-
-async function garantirMapaMunicipiosPorUfEstatico() {
-  if (mapaMunicipiosPorUfEstatico) return true;
-  try {
-    const res = await fetch(encodeURI(MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH), { cache: "default" });
-    if (!res.ok) return false;
-    const j = await res.json();
-    if (typeof j !== "object" || j === null) return false;
-    mapaMunicipiosPorUfEstatico = j;
-    return true;
-  } catch (e) {
-    console.warn("Falha ao carregar municípios estáticos:", MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH, e);
     return false;
   }
 }
@@ -1345,31 +1330,30 @@ let ibgeMunicipiosCargaGen = 0;
 let ibgeMunicipiosAbort = null;
 
 /**
- * Apenas ficheiro no repositório (mesma origem, sem CORS/timeout).
- * IBGE e outras APIs públicas não são chamadas: redes bloqueiam o IBGE; a Brasil API falhou CORS/504 a partir de Vercel.
+ * Municípios por UF via api.kstrtech.com.br (JSON array de strings; CORS *).
+ * O select continua filtrado por cidades com ficha em cidades_brasil.json.
  */
 async function buscarMunicipiosPorUf(sigla, ctrl, cargaId) {
   const genOk = () => cargaId === ibgeMunicipiosCargaGen;
-  const estaticoParaLista = (arr) =>
-    arr
-      .map((n) => ({ nome: String(n).trim() }))
-      .filter((m) => m.nome);
   if (!genOk() || ctrl.signal.aborted) return null;
-  if (await garantirMapaMunicipiosPorUfEstatico()) {
-    const loc = mapaMunicipiosPorUfEstatico[sigla];
-    if (Array.isArray(loc) && loc.length) {
-      if (!genOk() || ctrl.signal.aborted) return null;
-      return estaticoParaLista(loc);
-    }
-  }
+  const res = await fetch(
+    `${CIDADES_KSTR_API_BASE}${encodeURIComponent(sigla)}`,
+    { method: "GET", cache: "default", signal: ctrl.signal }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const j = await res.json();
+  if (!Array.isArray(j)) throw new Error("formato");
   if (!genOk() || ctrl.signal.aborted) return null;
-  throw new Error("municipios-indisponivel");
+  return j
+    .map((n) => ({ nome: String(n).trim() }))
+    .filter((m) => m.nome);
 }
 
+/** Preenche o select de cidade (id cidade) com municípios da API kstr, filtrados por cidades_brasil. */
 async function carregarMunicipiosIBGE(uf) {
   // cargaId/abort SÓ após garantir o mapa: change+input no <select#uf> disparam
   // duas vezes; se incrementarmos a geração antes do await, a 1.ª conclusão
-  // cai no "cargaId !== gen" e nunca chama o IBGE (cidades vazias).
+  // cai no "cargaId !== gen" e a lista não aplica.
   if (!(await garantirMapaCidadesBrasil())) {
     return;
   }
@@ -2629,7 +2613,6 @@ document.querySelectorAll('input[type="text"]').forEach((el) => {
 });
 
 initAssinaturaCanvas();
-void garantirMapaMunicipiosPorUfEstatico();
 if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
