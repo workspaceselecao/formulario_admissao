@@ -1326,6 +1326,41 @@ let cepBuscaTimer = null;
 let ibgeMunicipiosCargaGen = 0;
 let ibgeMunicipiosAbort = null;
 
+/**
+ * IBGE (servicodados) primeiro; se falhar ou estiver vazio, tenta a Brasil API
+ * (dados alinhados ao IBGE, outro host). Evita o erro quando o domínio do IBGE
+ * não responde na rede do utilizador.
+ */
+async function buscarMunicipiosPorUf(sigla, signal, cargaId) {
+  const genOk = () => cargaId === ibgeMunicipiosCargaGen;
+  const urlIbge = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`;
+  let ibge = null;
+  try {
+    const res = await fetch(urlIbge, { signal, cache: "no-store" });
+    if (!genOk()) return null;
+    if (res.ok) {
+      const data = await res.json();
+      if (!genOk()) return null;
+      if (Array.isArray(data) && data.length) ibge = data;
+    }
+  } catch (e) {
+    if (e && e.name === "AbortError") throw e;
+  }
+  if (ibge) return ibge;
+  const res2 = await fetch(
+    `https://brasilapi.com.br/api/ibge/municipios/v1/${encodeURIComponent(sigla)}`,
+    { signal, cache: "no-store" }
+  );
+  if (!genOk()) return null;
+  if (!res2.ok) throw new Error("http");
+  const arr = await res2.json();
+  if (!genOk()) return null;
+  if (!Array.isArray(arr) || !arr.length) throw new Error("formato");
+  return arr
+    .map((x) => ({ nome: String((x && x.nome) || "").trim() }))
+    .filter((m) => m.nome);
+}
+
 async function carregarMunicipiosIBGE(uf) {
   // cargaId/abort SÓ após garantir o mapa: change+input no <select#uf> disparam
   // duas vezes; se incrementarmos a geração antes do await, a 1.ª conclusão
@@ -1354,13 +1389,8 @@ async function carregarMunicipiosIBGE(uf) {
     return;
   }
   try {
-    const res = await fetch(
-      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`,
-      { signal: ctrl.signal, cache: "no-store" }
-    );
-    if (cargaId !== ibgeMunicipiosCargaGen) return;
-    if (!res.ok) throw new Error("http");
-    const listaFull = await res.json();
+    const listaFull = await buscarMunicipiosPorUf(sigla, ctrl.signal, cargaId);
+    if (listaFull == null) return;
     if (cargaId !== ibgeMunicipiosCargaGen) return;
     if (!Array.isArray(listaFull)) throw new Error("formato");
     const ufAinda = String(document.getElementById("uf")?.value || "")
@@ -1387,7 +1417,7 @@ async function carregarMunicipiosIBGE(uf) {
   } catch (e) {
     if (e && e.name === "AbortError") return;
     if (cargaId === ibgeMunicipiosCargaGen) {
-      showToast("Não foi possível carregar as cidades (IBGE). Tente outra vez.", false);
+      showToast("Não foi possível carregar as cidades. Verifique a conexão e tente de novo.", false);
     }
   } finally {
     if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
