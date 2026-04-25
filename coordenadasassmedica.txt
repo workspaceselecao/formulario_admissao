@@ -48,3 +48,4 @@ filho1 nascvivo{"page":1,"x":411,"y":461,"width":113,"height":10}
 rubrica assinatura manual{"page":1,"x":86,"y":65,"width":239,"height":35}
 nome legivel (assinatura){"page":1,"x":86,"y":100,"width":229,"height":15}
 data{"page":1,"x":380,"y":88,"width":122,"height":19}
+evidencia assinatura (rodapé){"page":1,"x":18,"y":2,"width":555,"height":28}

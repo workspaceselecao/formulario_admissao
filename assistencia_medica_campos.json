@@ -933,6 +933,13 @@
           },
           "obrigatorio": true,
           "mascara": "99/99/9999"
+        },
+        "evidencia": {
+          "label": "Rodapé: evidência da assinatura eletrônica (texto informativo)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 18, "y": 2, "largura": 555, "altura": 28 },
+          "obrigatorio": false
         }
       }
     }

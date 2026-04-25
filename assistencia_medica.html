@@ -974,7 +974,7 @@
     <div class="section-body">
       <div class="signature-pad-wrap">
         <label>Assinatura manuscrita <span class="req">*</span></label>
-        <p class="signature-pad-hint">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF.</p>
+        <p class="signature-pad-hint">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
         </div>
@@ -1126,6 +1126,7 @@ async function carregarTemplateParaCidadeSelecionada() {
 const NUM_FILHOS = 4;
 let filhosVisiveis = 1;
 const PDF_FONT_TEXTO = 7;
+const PDF_FONT_EVIDENCIA = 5.5;
 let assinaturaCanvasCtx = null;
 let assinaturaCanvasTemTraço = false;
 let assinaturaDesenhando = false;
@@ -1552,6 +1553,53 @@ function desenharPngAjustadoNoCampo(page, png, box) {
     h = hImg * scale;
   }
   page.drawImage(png, { x, y: yBottom, width: w, height: h });
+}
+async function obterIpPublicoEvidencia() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3500);
+  try {
+    const r = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal, cache: "no-store" });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return typeof j.ip === "string" ? j.ip.trim() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+function quebrarTextoEvidencia(font, texto, tamanho, larguraMax) {
+  const palavras = String(texto).split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let linha = "";
+  for (const p of palavras) {
+    const teste = linha ? linha + " " + p : p;
+    if (font.widthOfTextAtSize(teste, tamanho) <= larguraMax) {
+      linha = teste;
+    } else {
+      if (linha) linhas.push(linha);
+      linha = p;
+    }
+  }
+  if (linha) linhas.push(linha);
+  return linhas;
+}
+function desenharEvidenciaAssinatura(page, font, box, linhas) {
+  if (!box || !linhas?.length) return;
+  const x = (Number(box.x) || 0) + 0.5;
+  const yBase = Number(box.y) || 0;
+  const tamanho = PDF_FONT_EVIDENCIA;
+  const lineH = tamanho * 1.18;
+  for (let i = 0; i < linhas.length; i++) {
+    page.drawText(linhas[i], {
+      x,
+      y: yBase + 3 + i * lineH,
+      size: tamanho,
+      font,
+      maxWidth: (Number(box.largura) || 500) - 1
+    });
+  }
 }
 function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
   let t = String(texto || "").trim();
@@ -2362,7 +2410,7 @@ async function gerarPDF() {
     }
 
     const ass = C.assinatura.campos;
-    const bufPng = await canvasAssinaturaParaPngArrayBuffer();
+    const [bufPng, ipRef] = await Promise.all([canvasAssinaturaParaPngArrayBuffer(), obterIpPublicoEvidencia()]);
     if (bufPng) {
       const rubrica = ass.rubrica;
       if (rubrica?.coordenadas) {
@@ -2379,6 +2427,30 @@ async function gerarPDF() {
       );
     }
     escreverTextoCampoCoord(page, font, ass.data.coordenadas, formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"));
+    const agora = new Date();
+    const docId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc-${agora.getTime()}`;
+    const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+    const dataHoraBr = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: fuso,
+      dateStyle: "short",
+      timeStyle: "medium"
+    }).format(agora);
+    const parEvid =
+      "Assinatura manuscrita no navegador. Doc. " +
+      docId +
+      ". Reg.: " +
+      dataHoraBr +
+      " (fuso " +
+      fuso +
+      "). IP: " +
+      (ipRef || "n/d") +
+      ".";
+    if (ass.evidencia?.coordenadas) {
+      const cEv = ass.evidencia.coordenadas;
+      const wEv = (Number(cEv.largura) || 550) - 2;
+      const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
+      desenharEvidenciaAssinatura(page, font, cEv, linhasE);
+    }
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
