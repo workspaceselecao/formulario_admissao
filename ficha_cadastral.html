@@ -327,6 +327,31 @@
     background: #fff;
     box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
   }
+
+  .signature-pad-wrap { margin-bottom: 20px; }
+  .signature-pad-wrap label {
+    font-size: 11px; font-weight: 600; color: var(--label);
+    letter-spacing: 0.6px; text-transform: uppercase; font-family: 'DM Mono', monospace;
+    display: block; margin-bottom: 8px;
+  }
+  .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
+  .signature-canvas-outer {
+    position: relative;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    max-width: 100%;
+  }
+  .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: 0 0 0 3px rgba(209,67,47,0.14); }
+  #assinaturaCanvas {
+    display: block; width: 100%; height: 140px; touch-action: none; cursor: crosshair;
+  }
+  .signature-pad-tools { display: flex; justify-content: flex-end; margin-top: 8px; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn-signature-clear {
+    background: var(--surface); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
 
@@ -937,13 +962,26 @@
       <p style="font-size:13px;color:var(--text-mid);margin-bottom:18px;line-height:1.6">
         Declaro que as informações prestadas nesta ficha são verdadeiras e que estou ciente das responsabilidades assumidas ao assinar este documento.
       </p>
+      <div class="signature-pad-wrap">
+        <label>Assinatura manuscrita <span class="req">*</span></label>
+        <p class="signature-pad-hint">Desenhe sua assinatura com o mouse ou o dedo na área abaixo. O traço será incluído no PDF.</p>
+        <div class="signature-canvas-outer" id="signatureCanvasOuter">
+          <canvas id="assinaturaCanvas" width="800" height="280" aria-label="Área de assinatura manuscrita"></canvas>
+        </div>
+        <div class="signature-pad-tools">
+          <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
+        </div>
+        <p class="signature-pad-hint" style="font-size:11px;margin-top:10px;margin-bottom:0">
+          No PDF, serão exibidos data e hora do envio, fuso horário, referência de IP (se disponível) e identificador do documento — apenas no arquivo baixado, sem armazenamento em servidor.
+        </p>
+      </div>
       <div class="grid grid-2">
         <div class="field">
-          <label>Nome Completo do Candidato</label>
+          <label>Nome completo (legível) <span class="req">*</span></label>
           <input type="text" id="assinaturaName" placeholder="Nome legível">
         </div>
         <div class="field">
-          <label>Data</label>
+          <label>Data <span class="req">*</span></label>
           <input type="date" id="dataAssinatura">
         </div>
       </div>
@@ -1013,8 +1051,13 @@ const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
+const PDF_FONT_EVIDENCIA = 5.5;
 /** Só para texto preenchido: desce ~1 linha no PDF (y menor). Boxes/radios não usam isto. */
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
+let assinaturaCanvasCtx = null;
+let assinaturaCanvasTemTraço = false;
+let assinaturaDesenhando = false;
+let assinaturaUltPos = null;
 let templateBytes = null;
 let camposSchema = null;
 const cepCache = new Map();
@@ -1122,6 +1165,177 @@ function onCepInput(el){
   const cepNumerico = el.value.replace(/\D/g, "");
   if (cepNumerico.length === 8) {
     buscarCepEPreencher(false);
+  }
+}
+
+// ── Assinatura manuscrita (canvas) ──
+function obterPontoNoCanvas(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+  return {
+    x: ((clientX - r.left) * canvas.width) / r.width,
+    y: ((clientY - r.top) * canvas.height) / r.height
+  };
+}
+function marcarAssinaturaInvalidaCanvas(mostrar) {
+  const wrap = document.getElementById("signatureCanvasOuter");
+  if (wrap) wrap.classList.toggle("invalid", !!mostrar);
+}
+function initAssinaturaCanvas() {
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas) return;
+  assinaturaCanvasCtx = canvas.getContext("2d");
+  const ctx = assinaturaCanvasCtx;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#1a1a1a";
+  const inícioTraco = (e) => {
+    if (e.button === 2) return;
+    assinaturaDesenhando = true;
+    e.preventDefault();
+    marcarAssinaturaInvalidaCanvas(false);
+    assinaturaUltPos = obterPontoNoCanvas(e, canvas);
+  };
+  const fimTraco = () => {
+    assinaturaDesenhando = false;
+    assinaturaUltPos = null;
+    if (isAssinaturaManuscritaPreenchida()) assinaturaCanvasTemTraço = true;
+    updateProgress();
+  };
+  const mover = (e) => {
+    if (!assinaturaDesenhando || !assinaturaCanvasCtx) return;
+    e.preventDefault();
+    const p = obterPontoNoCanvas(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(assinaturaUltPos.x, assinaturaUltPos.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    assinaturaUltPos = p;
+    assinaturaCanvasTemTraço = true;
+    agendarSalvarRascunho();
+    updateProgress();
+  };
+  canvas.addEventListener("pointerdown", inícioTraco);
+  canvas.addEventListener("pointermove", mover);
+  canvas.addEventListener("pointerup", fimTraco);
+  canvas.addEventListener("pointercancel", fimTraco);
+  canvas.addEventListener("pointerleave", fimTraco);
+  document.getElementById("btnLimparAssinatura")?.addEventListener("click", () => {
+    limparAssinaturaCanvas();
+    agendarSalvarRascunho();
+    updateProgress();
+  });
+}
+function limparAssinaturaCanvas() {
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas || !assinaturaCanvasCtx) return;
+  assinaturaCanvasCtx.fillStyle = "#ffffff";
+  assinaturaCanvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+  assinaturaCanvasTemTraço = false;
+  marcarAssinaturaInvalidaCanvas(false);
+}
+function isAssinaturaManuscritaPreenchida() {
+  if (assinaturaCanvasTemTraço) return true;
+  const canvas = document.getElementById("assinaturaCanvas");
+  if (!canvas) return false;
+  const ctx = canvas.getContext("2d");
+  const { width: W, height: H } = canvas;
+  const d = ctx.getImageData(0, 0, W, H).data;
+  const passo = 6;
+  for (let y = 0; y < H; y += passo) {
+    for (let x = 0; x < W; x += passo) {
+      const i = (y * W + x) * 4;
+      if (d[i] < 248 || d[i + 1] < 248 || d[i + 2] < 248) return true;
+    }
+  }
+  return false;
+}
+function canvasAssinaturaParaPngArrayBuffer() {
+  return new Promise((resolve, reject) => {
+    const canvas = document.getElementById("assinaturaCanvas");
+    if (!canvas) {
+      resolve(null);
+      return;
+    }
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          resolve(null);
+          return;
+        }
+        blob
+          .arrayBuffer()
+          .then(resolve)
+          .catch(reject);
+      },
+      "image/png",
+      0.95
+    );
+  });
+}
+async function obterIpPublicoEvidencia() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3500);
+  try {
+    const r = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal, cache: "no-store" });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return typeof j.ip === "string" ? j.ip.trim() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+function quebrarTextoEvidencia(font, texto, tamanho, larguraMax) {
+  const palavras = String(texto).split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let linha = "";
+  for (const p of palavras) {
+    const teste = linha ? linha + " " + p : p;
+    if (font.widthOfTextAtSize(teste, tamanho) <= larguraMax) {
+      linha = teste;
+    } else {
+      if (linha) linhas.push(linha);
+      linha = p;
+    }
+  }
+  if (linha) linhas.push(linha);
+  return linhas;
+}
+function desenharPngAjustadoNoCampo(page, png, box) {
+  if (!box || !png) return;
+  const x = Number(box.x) || 0;
+  const yBottom = Number(box.y) || 0;
+  const wMax = Number(box.largura) || 200;
+  const hMax = Number(box.altura) || 30;
+  const wImg = png.width;
+  const hImg = png.height;
+  if (!wImg || !hImg) return;
+  const scale = Math.min(wMax / wImg, hMax / hImg, 1);
+  const w = wImg * scale;
+  const h = hImg * scale;
+  page.drawImage(png, { x, y: yBottom, width: w, height: h });
+}
+function desenharEvidenciaAssinatura(page, font, box, linhas) {
+  if (!box || !linhas?.length) return;
+  const x = (Number(box.x) || 0) + 0.5;
+  const yBase = Number(box.y) || 0;
+  const tamanho = PDF_FONT_EVIDENCIA;
+  const lineH = tamanho * 1.18;
+  for (let i = 0; i < linhas.length; i++) {
+    page.drawText(linhas[i], {
+      x,
+      y: yBase + 3 + i * lineH,
+      size: tamanho,
+      font,
+      maxWidth: (Number(box.largura) || 500) - 1
+    });
   }
 }
 function maskTelefone(el){
@@ -1381,7 +1595,7 @@ function oferecerIrParaAssistenciaAposPdf(payload) {
 }
 
 // ── RASCUNHO LOCAL (navegador; removido após gerar PDF) ──
-const RASCUNHO_STORAGE_KEY = "ficha_cadastral_rascunho_v1";
+const RASCUNHO_STORAGE_KEY = "ficha_cadastral_rascunho_v2";
 const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
   "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
@@ -1406,10 +1620,20 @@ function coletarEstadoRascunho() {
     const el = document.getElementById(id);
     if (el) campos[id] = el.value;
   });
+  let assinaturaCanvasPng = null;
+  try {
+    const c = document.getElementById("assinaturaCanvas");
+    if (c && (assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida())) {
+      assinaturaCanvasPng = c.toDataURL("image/png", 0.88);
+    }
+  } catch (_) {
+    assinaturaCanvasPng = null;
+  }
   return {
-    v: 1,
+    v: 2,
     t: Date.now(),
     campos,
+    assinaturaCanvasPng,
     radios: {
       primeiroEmprego: radio("primeiroEmprego"),
       deficiencia: radio("deficiencia"),
@@ -1490,6 +1714,28 @@ function aplicarEstadoRascunho(obj) {
     }
     atualizarEstadoBotaoDependente();
   }
+  if (obj.assinaturaCanvasPng) {
+    const c = document.getElementById("assinaturaCanvas");
+    const ctx = c && (assinaturaCanvasCtx || c.getContext("2d"));
+    if (c && ctx) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        assinaturaCanvasCtx = ctx;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        assinaturaCanvasTemTraço = true;
+        updateProgress();
+      };
+      img.onerror = () => {
+        assinaturaCanvasTemTraço = false;
+      };
+      img.src = obj.assinaturaCanvasPng;
+    }
+  } else {
+    limparAssinaturaCanvas();
+  }
 }
 
 const RASCUNHO_DEBOUNCE_MS = 250;
@@ -1519,7 +1765,7 @@ function tentarRestaurarRascunho() {
     const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
-    if (!obj || obj.v !== 1 || !obj.campos) return false;
+    if (!obj || (obj.v !== 1 && obj.v !== 2) || !obj.campos) return false;
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
@@ -1599,6 +1845,7 @@ function updateProgress(){
   ]);
 
   const declaracaoPct = calcPct([
+    () => assinaturaCanvasTemTraço,
     () => hasValue('assinaturaName'),
     () => hasValue('dataAssinatura')
   ]);
@@ -1724,6 +1971,12 @@ function validarCamposObrigatorios(){
     document.getElementById(faltantes[0].id)?.focus();
     return false;
   }
+  if (!isAssinaturaManuscritaPreenchida()) {
+    showToast("Desenhe sua assinatura manuscrita na área indicada.", false);
+    marcarAssinaturaInvalidaCanvas(true);
+    document.getElementById("assinaturaCanvas")?.focus();
+    return false;
+  }
   return true;
 }
 
@@ -1808,6 +2061,7 @@ function limparDadosFormulario(){
   document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
     el.classList.remove('invalid');
   });
+  limparAssinaturaCanvas();
   document.getElementById('dataAssinatura').valueAsDate = new Date();
   atualizarEstadoBotaoDependente();
   updateProgress();
@@ -2088,11 +2342,43 @@ async function gerarPDF(){
     }
 
     const ass = C.assinatura.campos;
+    const [bufPng, ipRef] = await Promise.all([canvasAssinaturaParaPngArrayBuffer(), obterIpPublicoEvidencia()]);
+    if (bufPng) {
+      const rubrica = ass.rubrica;
+      if (rubrica?.coordenadas) {
+        const png = await pdfDoc.embedPng(bufPng);
+        desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
+      }
+    }
     escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, data.assinaturaNome);
     if (ass.data?.segmentos) {
       preencherDataSegmentadaAssinatura(page, font, ass.data, v("dataAssinatura"));
     } else if (ass.data?.coordenadas) {
       escreverTextoCampoCoord(page, font, ass.data.coordenadas, data.assinaturaData);
+    }
+    const agora = new Date();
+    const docId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc-${agora.getTime()}`;
+    const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+    const dataHoraBr = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: fuso,
+      dateStyle: "short",
+      timeStyle: "medium"
+    }).format(agora);
+    const parEvid =
+      "Assinatura manuscrita no navegador. Doc. " +
+      docId +
+      ". Reg.: " +
+      dataHoraBr +
+      " (fuso " +
+      fuso +
+      "). IP: " +
+      (ipRef || "n/d") +
+      ". Evidência somente neste PDF; nada em servidor.";
+    if (ass.evidencia?.coordenadas) {
+      const cEv = ass.evidencia.coordenadas;
+      const wEv = (Number(cEv.largura) || 550) - 2;
+      const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
+      desenharEvidenciaAssinatura(page, font, cEv, linhasE);
     }
 
     const pdfBytes = await pdfDoc.save();
@@ -2167,6 +2453,7 @@ async function baixarCartaAberturaConta(){
   }
 }
 
+initAssinaturaCanvas();
 if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
