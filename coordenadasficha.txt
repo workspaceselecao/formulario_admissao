@@ -51,7 +51,7 @@ integvalor{"page":1,"x":456,"y":188,"width":69,"height":19}
 refeiçao{"page":1,"x":55,"y":148,"width":15,"height":12}
 alimentaçao{"page":1,"x":245,"y":148,"width":14,"height":12}
 flex{"page":1,"x":410,"y":149,"width":12,"height":10}
-assinatura{"page":1,"x":56,"y":27,"width":240,"height":14}
+assinatura manual (rubrica){"page":1,"x":82,"y":25,"width":210,"height":35}
 data dia{"page":1,"x":432,"y":28,"width":32,"height":14}
 data mês{"page":1,"x":476,"y":28,"width":32,"height":14}
 data ano{"page":1,"x":517,"y":28,"width":34,"height":14}

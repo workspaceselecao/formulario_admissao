@@ -449,17 +449,10 @@
       "descricao": "Assinatura e data do candidato",
       "campos": {
         "rubrica": {
-          "label": "Imagem da assinatura manuscrita (desenho na tela)",
+          "label": "Assinatura manuscrita (imagem; substitui o nome no PDF na área do modelo)",
           "tipo": "imagem",
           "pagina": 1,
-          "coordenadas": { "x": 56, "y": 45, "largura": 220, "altura": 32 },
-          "obrigatorio": true
-        },
-        "assinatura": {
-          "label": "Nome Completo do Candidato (Assinatura)",
-          "tipo": "texto",
-          "pagina": 1,
-          "coordenadas": { "x": 56, "y": 28, "largura": 240, "altura": 15 },
+          "coordenadas": { "x": 82, "y": 25, "largura": 210, "altura": 35 },
           "obrigatorio": true
         },
         "data": {

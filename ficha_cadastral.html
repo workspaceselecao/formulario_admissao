@@ -1317,9 +1317,15 @@ function desenharPngAjustadoNoCampo(page, png, box) {
   const wImg = png.width;
   const hImg = png.height;
   if (!wImg || !hImg) return;
-  const scale = Math.min(wMax / wImg, hMax / hImg, 1);
-  const w = wImg * scale;
-  const h = hImg * scale;
+  const base = Math.min(wMax / wImg, hMax / hImg);
+  let scale = base * 1.4;
+  let w = wImg * scale;
+  let h = hImg * scale;
+  if (w > wMax || h > hMax) {
+    scale = base;
+    w = wImg * scale;
+    h = hImg * scale;
+  }
   page.drawImage(png, { x, y: yBottom, width: w, height: h });
 }
 function desenharEvidenciaAssinatura(page, font, box, linhas) {
@@ -2350,7 +2356,6 @@ async function gerarPDF(){
         desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
       }
     }
-    escreverTextoCampoCoord(page, font, ass.assinatura.coordenadas, data.assinaturaNome);
     if (ass.data?.segmentos) {
       preencherDataSegmentadaAssinatura(page, font, ass.data, v("dataAssinatura"));
     } else if (ass.data?.coordenadas) {
@@ -2373,7 +2378,7 @@ async function gerarPDF(){
       fuso +
       "). IP: " +
       (ipRef || "n/d") +
-      ". Evidência somente neste PDF; nada em servidor.";
+      ".";
     if (ass.evidencia?.coordenadas) {
       const cEv = ass.evidencia.coordenadas;
       const wEv = (Number(cEv.largura) || 550) - 2;
