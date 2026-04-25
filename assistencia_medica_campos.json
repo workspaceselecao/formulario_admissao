@@ -897,15 +897,27 @@
     "assinatura": {
       "descricao": "Assinatura e data do funcionário",
       "campos": {
-        "assinatura": {
-          "label": "Assinatura do Funcionário Ciente",
-          "tipo": "assinatura",
+        "rubrica": {
+          "label": "Assinatura manuscrita (imagem)",
+          "tipo": "imagem",
           "pagina": 1,
           "coordenadas": {
-            "x": 71,
-            "y": 91,
-            "largura": 273,
-            "altura": 19
+            "x": 86,
+            "y": 65,
+            "largura": 239,
+            "altura": 35
+          },
+          "obrigatorio": true
+        },
+        "nome_legivel": {
+          "label": "Nome por extenso (texto no PDF)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 86,
+            "y": 100,
+            "largura": 229,
+            "altura": 15
           },
           "obrigatorio": true
         },
@@ -915,7 +927,7 @@
           "pagina": 1,
           "coordenadas": {
             "x": 380,
-            "y": 91,
+            "y": 88,
             "largura": 122,
             "altura": 19
           },
