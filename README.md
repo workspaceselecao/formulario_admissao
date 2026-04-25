@@ -4,6 +4,12 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 
 **Manutenção e extensão:** veja o guia [MANUTENCAO.md](MANUTENCAO.md) (cidades, templates, coordenadas, APIs, deploy e checklists).
 
+## Repositório e tipo de projeto
+
+- **Repositório Git (GitHub):** [workspaceselecao/formulario_admissao](https://github.com/workspaceselecao/formulario_admissao) — clone HTTPS: `https://github.com/workspaceselecao/formulario_admissao.git`
+- **Tipo:** site **estático** (HTML, CSS, JavaScript no cliente, [pdf-lib](https://github.com/Hopding/pdf-lib) em CDN), **sem** backend nem banco de dados; o PDF é gerado no navegador.
+- **Deploy de referência:** [Vercel](https://vercel.com) (arquivo `vercel.json` na raiz).
+
 ## Arquivos na raiz
 
 - `index.html` — página inicial (escolha do formulário)
