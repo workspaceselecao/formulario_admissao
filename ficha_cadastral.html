@@ -991,17 +991,16 @@
   <div class="modal-card" style="max-width: 440px">
     <div class="modal-head" id="copiaAssistTitulo">Assistência Médica</div>
     <div class="modal-body">
-      Deseja que as informações preenchidas nesta <strong>Ficha Cadastral</strong> sejam copiadas para o
-      formulário de <strong>Adesão à Assistência Médica</strong>?<br><br>
-      Campos com o mesmo sentido (nome, CPF, endereço, telefone, dependentes, assinatura, etc.) serão
-      sugeridos na próxima vez que você abrir aquele formulário.
+      O PDF da <strong>Ficha Cadastral</strong> foi gerado. Deseja abrir agora o formulário de
+      <strong>Adesão à Assistência Médica</strong> com nome, CPF, endereço, telefone, dependentes
+      (filhos) e assinatura já preenchidos a partir desta ficha?
     </div>
     <label class="check-label" style="display: flex; align-items: center; gap: 8px; margin: 0 18px 12px; font-size: 13px; cursor: pointer; color: var(--text-mid)">
-      <input type="checkbox" id="naoPerguntarCopiaAssist"> Não perguntar novamente neste navegador
+      <input type="checkbox" id="naoPerguntarCopiaAssist"> Não perguntar novamente após gerar o PDF
     </label>
     <div class="modal-actions">
       <button type="button" id="btnCopiaAssistNao" class="btn-modal cancel">Agora não</button>
-      <button type="button" id="btnCopiaAssistSim" class="btn-modal confirm">Sim, copiar</button>
+      <button type="button" id="btnCopiaAssistSim" class="btn-modal confirm">Sim, abrir Assistência Médica</button>
     </div>
   </div>
 </div>
@@ -1282,9 +1281,27 @@ function adicionarDependente(){
   novaLinha.querySelector('input')?.focus();
 }
 
-// ── Cópia para Assistência Médica (abre com modal; consome em assistencia_medica.html) ──
+// ── Cópia para Assistência Médica (modal após PDF; consome em assistencia_medica.html) ──
 const CROSS_COPY_FICHA_ASSISTENCIA_KEY = "cross_copy_ficha_para_assistencia_v1";
 const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = "ficha_cadastral_nao_perguntar_copia_assistencia";
+/** Payload montado após o PDF, antes de limpar o formulário (usado no modal e no redirecionamento). */
+let payloadPosPdfAssistenciaPendente = null;
+
+/** Formato esperado em assistencia_medica: "CIDADE / UF" para preencher UF e município (IBGE). */
+function montarCidadeUfParaCopiaAssistencia() {
+  const c = (id) => (document.getElementById(id)?.value || "").trim();
+  const cidade = c("cidade");
+  if (!cidade) return "";
+  if (/\s\/\s*[A-Z]{2}$/i.test(cidade)) return cidade;
+  const cep = c("cep").replace(/\D/g, "").slice(0, 8);
+  if (cep.length === 8) {
+    const cached = cepCache.get(cep);
+    if (cached && cached.uf) {
+      return `${cidade} / ${String(cached.uf).trim()}`.toLocaleUpperCase("pt-BR");
+    }
+  }
+  return cidade;
+}
 
 function construirPayloadCopiaParaAssistencia() {
   const c = (id) => (document.getElementById(id)?.value || "").trim();
@@ -1305,7 +1322,7 @@ function construirPayloadCopiaParaAssistencia() {
       numero: c("endNum"),
       complemento: c("complemento"),
       bairro: c("bairro"),
-      cidadeuf: c("cidade"),
+      cidadeuf: montarCidadeUfParaCopiaAssistencia(),
       assinaturaName: c("assinaturaName")
     },
     dataAssinatura: (document.getElementById("dataAssinatura")?.value || "").trim()
@@ -1336,8 +1353,27 @@ function fecharModalCopiaAssistencia() {
     document.body.classList.remove("modal-open");
   }
 }
-function initModalCopiaParaAssistencia() {
-  if (localStorage.getItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST) === "1") return;
+
+function salvarPayloadCopiaAssistenciaNoStorage(payload) {
+  try {
+    localStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+/**
+ * Chama após o PDF com sucesso. Se o utilizador desmarcou o aviso, grava a cópia e segue;
+ * senão, abre o modal e redireciona se confirmar.
+ */
+function oferecerIrParaAssistenciaAposPdf(payload) {
+  if (localStorage.getItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST) === "1") {
+    salvarPayloadCopiaAssistenciaNoStorage(payload);
+    showToast("Dados da ficha prontos para a Assistência Médica. Abra o formulário no menu principal.", true);
+    payloadPosPdfAssistenciaPendente = null;
+    return;
+  }
+  payloadPosPdfAssistenciaPendente = payload;
   setTimeout(() => {
     if (document.getElementById("lgpdModal")?.classList.contains("show")) return;
     abrirModalCopiaAssistencia();
@@ -2072,9 +2108,11 @@ async function gerarPDF(){
     link.download = `${nomeBaseArquivo} - ${nomeUsuario}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
+    const payloadCopiaAssistencia = construirPayloadCopiaParaAssistencia();
     limparDadosFormulario();
     limparRascunhoLocal();
     showToast("PDF gerado com sucesso!");
+    oferecerIrParaAssistenciaAposPdf(payloadCopiaAssistencia);
   } catch (error) {
     console.error(error);
     showToast("Falha ao gerar PDF. Verifique o console.", false);
@@ -2195,30 +2233,38 @@ document.getElementById('lgpdModal')?.addEventListener('click', (event) => {
   }
 });
 document.getElementById("btnCopiaAssistSim")?.addEventListener("click", () => {
-  try {
-    localStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(construirPayloadCopiaParaAssistencia()));
-  } catch (e) {
-    console.warn(e);
+  if (payloadPosPdfAssistenciaPendente) {
+    salvarPayloadCopiaAssistenciaNoStorage(payloadPosPdfAssistenciaPendente);
   }
   if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
     try {
       localStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
     } catch (_e) {}
   }
+  payloadPosPdfAssistenciaPendente = null;
   fecharModalCopiaAssistencia();
-  showToast("Ao abrir a Assistência Médica, os campos equivalentes serão sugeridos.", true);
+  window.location.assign("assistencia_medica.html");
 });
-document.getElementById("btnCopiaAssistNao")?.addEventListener("click", () => {
+function fecharModalCopiaAssistRecusandoRedirecionamento() {
+  if (payloadPosPdfAssistenciaPendente) {
+    salvarPayloadCopiaAssistenciaNoStorage(payloadPosPdfAssistenciaPendente);
+  }
   if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
     try {
       localStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
     } catch (_e) {}
   }
+  payloadPosPdfAssistenciaPendente = null;
   fecharModalCopiaAssistencia();
+  showToast("Quando abrir a Assistência Médica, os campos equivalentes serão sugeridos.", true);
+}
+
+document.getElementById("btnCopiaAssistNao")?.addEventListener("click", () => {
+  fecharModalCopiaAssistRecusandoRedirecionamento();
 });
 document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) => {
   if (e.target.id === "modalCopiaAssistencia") {
-    fecharModalCopiaAssistencia();
+    fecharModalCopiaAssistRecusandoRedirecionamento();
   }
 });
 document.addEventListener('keydown', (event) => {
@@ -2227,10 +2273,9 @@ document.addEventListener('keydown', (event) => {
     fecharModalLGPD(false);
   }
   if (document.getElementById("modalCopiaAssistencia")?.classList.contains("show")) {
-    fecharModalCopiaAssistencia();
+    fecharModalCopiaAssistRecusandoRedirecionamento();
   }
 });
-initModalCopiaParaAssistencia();
 function salvarRascunhoAoSair() {
   salvarRascunhoLocalSincrono();
 }
