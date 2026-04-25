@@ -1327,23 +1327,23 @@ let ibgeMunicipiosCargaGen = 0;
 let ibgeMunicipiosAbort = null;
 
 async function carregarMunicipiosIBGE(uf) {
-  ibgeMunicipiosAbort?.abort();
-  const ctrl = new AbortController();
-  ibgeMunicipiosAbort = ctrl;
-  const cargaId = ++ibgeMunicipiosCargaGen;
-
+  // cargaId/abort SÓ após garantir o mapa: change+input no <select#uf> disparam
+  // duas vezes; se incrementarmos a geração antes do await, a 1.ª conclusão
+  // cai no "cargaId !== gen" e nunca chama o IBGE (cidades vazias).
   if (!(await garantirMapaCidadesBrasil())) {
-    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
     return;
   }
-  if (cargaId !== ibgeMunicipiosCargaGen) return;
 
   const sigla = String(uf || "").toUpperCase().trim();
   const sel = document.getElementById("cidade");
   if (!sel) {
-    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
     return;
   }
+
+  ibgeMunicipiosAbort?.abort();
+  const ctrl = new AbortController();
+  ibgeMunicipiosAbort = ctrl;
+  const cargaId = ++ibgeMunicipiosCargaGen;
   sel.innerHTML = sigla
     ? '<option value="">— Selecione —</option>'
     : '<option value="">— Selecione o estado —</option>';
