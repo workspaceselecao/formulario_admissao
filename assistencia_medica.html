@@ -1044,10 +1044,11 @@
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
-const CAMPOS_JSON_PATH = "./assistencia_medica_campos.json";
+/* Caminhos a partir da raiz do sítio; evitam 404 com rotas do tipo /assistencia_medica (sem e sem barra). */
+const CAMPOS_JSON_PATH = "/assistencia_medica_campos.json";
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
-const CIDADES_BRASIL_JSON_PATH = "./cidades_brasil.json";
-const MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH = "./municipios_cidades_ficha_por_uf.json";
+const CIDADES_BRASIL_JSON_PATH = "/cidades_brasil.json";
+const MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH = "/municipios_cidades_ficha_por_uf.json";
 
 /** Tipo vindo de cidades_brasil.json ("FICHA A UTILIZAR") → arquivo PDF no repositório. */
 const FICHA_UTILIZAR_PARA_ARQUIVO = {
@@ -1101,13 +1102,14 @@ async function garantirMapaCidadesBrasil() {
 async function garantirMapaMunicipiosPorUfEstatico() {
   if (mapaMunicipiosPorUfEstatico) return true;
   try {
-    const res = await fetch(encodeURI(MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH), { cache: "no-store" });
+    const res = await fetch(encodeURI(MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH), { cache: "default" });
     if (!res.ok) return false;
     const j = await res.json();
     if (typeof j !== "object" || j === null) return false;
     mapaMunicipiosPorUfEstatico = j;
     return true;
-  } catch (_e) {
+  } catch (e) {
+    console.warn("Falha ao carregar municípios estáticos:", MUNICIPIOS_CIDADES_FICHA_POR_UF_PATH, e);
     return false;
   }
 }
@@ -1342,72 +1344,25 @@ let cepBuscaTimer = null;
 let ibgeMunicipiosCargaGen = 0;
 let ibgeMunicipiosAbort = null;
 
-const IBGE_MUNICIPIOS_TIMEOUT_MS = 8000;
-
 /**
- * 1) IBGE com teto de tempo (evita minutos a esgotar o pedido e nunca cair no fallback);
- * 2) Brasil API; 3) ficheiro local municipios_cidades_ficha_por_uf.json (Vercel / mesmo repositório).
+ * Apenas ficheiro no repositório (mesma origem, sem CORS/timeout).
+ * IBGE e outras APIs públicas não são chamadas: redes bloqueiam o IBGE; a Brasil API falhou CORS/504 a partir de Vercel.
  */
 async function buscarMunicipiosPorUf(sigla, ctrl, cargaId) {
   const genOk = () => cargaId === ibgeMunicipiosCargaGen;
-  const urlIbge = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`;
-  const ibgeLocal = new AbortController();
-  const tOut = setTimeout(() => {
-    try {
-      ibgeLocal.abort();
-    } catch (_e) {}
-  }, IBGE_MUNICIPIOS_TIMEOUT_MS);
-  const onPai = () => {
-    clearTimeout(tOut);
-    try {
-      ibgeLocal.abort();
-    } catch (_e) {}
-  };
-  ctrl.signal.addEventListener("abort", onPai);
-  let ibge = null;
-  try {
-    const res = await fetch(urlIbge, { signal: ibgeLocal.signal, cache: "no-store" });
-    if (!genOk()) return null;
-    if (res.ok) {
-      const data = await res.json();
-      if (!genOk()) return null;
-      if (Array.isArray(data) && data.length) ibge = data;
-    }
-  } catch (e) {
-    if (e && e.name === "AbortError" && ctrl.signal.aborted) return null;
-  } finally {
-    clearTimeout(tOut);
-    ctrl.signal.removeEventListener("abort", onPai);
-  }
-  if (ibge) return ibge;
+  const estaticoParaLista = (arr) =>
+    arr
+      .map((n) => ({ nome: String(n).trim() }))
+      .filter((m) => m.nome);
   if (!genOk() || ctrl.signal.aborted) return null;
-  let res2;
-  try {
-    res2 = await fetch(
-      `https://brasilapi.com.br/api/ibge/municipios/v1/${encodeURIComponent(sigla)}`,
-      { signal: ctrl.signal, cache: "no-store" }
-    );
-  } catch (e) {
-    if (e && e.name === "AbortError") return null;
-  }
-  if (genOk() && res2 && res2.ok) {
-    const arr = await res2.json();
-    if (!genOk()) return null;
-    if (Array.isArray(arr) && arr.length) {
-      return arr
-        .map((x) => ({ nome: String((x && x.nome) || "").trim() }))
-        .filter((m) => m.nome);
+  if (await garantirMapaMunicipiosPorUfEstatico()) {
+    const loc = mapaMunicipiosPorUfEstatico[sigla];
+    if (Array.isArray(loc) && loc.length) {
+      if (!genOk() || ctrl.signal.aborted) return null;
+      return estaticoParaLista(loc);
     }
   }
-  if (!genOk()) return null;
-  if (await guarantirMapaMunicipiosPorUfEstatico()) {
-    const arr = mapaMunicipiosPorUfEstatico[sigla];
-    if (Array.isArray(arr) && arr.length) {
-      return arr
-        .map((n) => ({ nome: String(n).trim() }))
-        .filter((m) => m.nome);
-    }
-  }
+  if (!genOk() || ctrl.signal.aborted) return null;
   throw new Error("municipios-indisponivel");
 }
 
@@ -2674,6 +2629,7 @@ document.querySelectorAll('input[type="text"]').forEach((el) => {
 });
 
 initAssinaturaCanvas();
+void garantirMapaMunicipiosPorUfEstatico();
 if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
