@@ -2,6 +2,8 @@
 
 A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistência Médica. Cada fluxo gera o PDF preenchido sobre o modelo oficial correspondente, usando coordenadas em pontos PDF (origem: canto inferior esquerdo, igual ao pdf-lib).
 
+**Manutenção e extensão:** veja o guia [MANUTENCAO.md](MANUTENCAO.md) (cidades, templates, coordenadas, APIs, deploy e checklists).
+
 ## Arquivos na raiz
 
 - `index.html` — página inicial (escolha do formulário)
