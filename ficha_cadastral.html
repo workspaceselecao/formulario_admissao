@@ -344,7 +344,8 @@
   }
   .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: 0 0 0 3px rgba(209,67,47,0.14); }
   #assinaturaCanvas {
-    display: block; width: 100%; height: 140px; touch-action: none; cursor: crosshair;
+    display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280;
+    max-height: 200px; touch-action: none; cursor: crosshair;
   }
   .signature-pad-tools { display: flex; justify-content: flex-end; margin-top: 8px; gap: 10px; align-items: center; flex-wrap: wrap; }
   .btn-signature-clear {
@@ -966,7 +967,7 @@
         <label>Assinatura manuscrita <span class="req">*</span></label>
         <p class="signature-pad-hint">Desenhe sua assinatura com o mouse ou o dedo na área abaixo. O traço será incluído no PDF.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
-          <canvas id="assinaturaCanvas" width="800" height="280" aria-label="Área de assinatura manuscrita"></canvas>
+          <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
         </div>
         <div class="signature-pad-tools">
           <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
@@ -1185,14 +1186,14 @@ function marcarAssinaturaInvalidaCanvas(mostrar) {
 function initAssinaturaCanvas() {
   const canvas = document.getElementById("assinaturaCanvas");
   if (!canvas) return;
-  assinaturaCanvasCtx = canvas.getContext("2d");
+  assinaturaCanvasCtx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
   const ctx = assinaturaCanvasCtx;
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.lineWidth = 2.4;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineWidth = 2.8;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = "#1a1a1a";
+  ctx.globalCompositeOperation = "source-over";
   const inícioTraco = (e) => {
     if (e.button === 2) return;
     assinaturaDesenhando = true;
@@ -1233,8 +1234,7 @@ function initAssinaturaCanvas() {
 function limparAssinaturaCanvas() {
   const canvas = document.getElementById("assinaturaCanvas");
   if (!canvas || !assinaturaCanvasCtx) return;
-  assinaturaCanvasCtx.fillStyle = "#ffffff";
-  assinaturaCanvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+  assinaturaCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
   assinaturaCanvasTemTraço = false;
   marcarAssinaturaInvalidaCanvas(false);
 }
@@ -1242,14 +1242,16 @@ function isAssinaturaManuscritaPreenchida() {
   if (assinaturaCanvasTemTraço) return true;
   const canvas = document.getElementById("assinaturaCanvas");
   if (!canvas) return false;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
   const { width: W, height: H } = canvas;
   const d = ctx.getImageData(0, 0, W, H).data;
-  const passo = 6;
+  const passo = 8;
   for (let y = 0; y < H; y += passo) {
     for (let x = 0; x < W; x += passo) {
       const i = (y * W + x) * 4;
-      if (d[i] < 248 || d[i + 1] < 248 || d[i + 2] < 248) return true;
+      const a = d[i + 3];
+      if (a < 24) continue;
+      if (d[i] < 252 || d[i + 1] < 252 || d[i + 2] < 252) return true;
     }
   }
   return false;
@@ -1728,8 +1730,7 @@ function aplicarEstadoRascunho(obj) {
       img.crossOrigin = "anonymous";
       img.onload = () => {
         assinaturaCanvasCtx = ctx;
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.clearRect(0, 0, c.width, c.height);
         ctx.drawImage(img, 0, 0, c.width, c.height);
         assinaturaCanvasTemTraço = true;
         updateProgress();
@@ -2355,6 +2356,9 @@ async function gerarPDF(){
         const png = await pdfDoc.embedPng(bufPng);
         desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
       }
+    }
+    if (ass.nome_legivel?.coordenadas) {
+      escreverTextoCampoCoord(page, font, ass.nome_legivel.coordenadas, data.assinaturaNome);
     }
     if (ass.data?.segmentos) {
       preencherDataSegmentadaAssinatura(page, font, ass.data, v("dataAssinatura"));

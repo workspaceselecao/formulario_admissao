@@ -455,6 +455,13 @@
           "coordenadas": { "x": 82, "y": 25, "largura": 210, "altura": 35 },
           "obrigatorio": true
         },
+        "nome_legivel": {
+          "label": "Nome completo legível (texto impresso no PDF)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 74, "y": 67, "largura": 219, "altura": 15 },
+          "obrigatorio": true
+        },
         "data": {
           "label": "Data",
           "tipo": "data_segmentada",
