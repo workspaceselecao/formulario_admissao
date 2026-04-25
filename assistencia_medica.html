@@ -553,6 +553,13 @@
     .col-span-2, .col-span-3 { grid-column: span 1; }
     .form-actions-bottom { flex-direction: column; width: 100%; }
     .btn-export, .btn-download-empty { width: 100%; justify-content: center; }
+    /* 16px evita zoom automático do iOS ao focar; estabiliza o picker de UF/cidade. */
+    .field--uf select,
+    .field--cidade select,
+    #uf,
+    #cidade {
+      font-size: 16px;
+    }
   }
 </style>
 </head>
@@ -1316,29 +1323,55 @@ function telefoneSeparadoParaPdf() {
 }
 let ultimoCepPreenchido = "";
 let cepBuscaTimer = null;
+let ibgeMunicipiosCargaGen = 0;
+let ibgeMunicipiosAbort = null;
 
 async function carregarMunicipiosIBGE(uf) {
-  if (!(await garantirMapaCidadesBrasil())) return;
+  ibgeMunicipiosAbort?.abort();
+  const ctrl = new AbortController();
+  ibgeMunicipiosAbort = ctrl;
+  const cargaId = ++ibgeMunicipiosCargaGen;
+
+  if (!(await garantirMapaCidadesBrasil())) {
+    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
+    return;
+  }
+  if (cargaId !== ibgeMunicipiosCargaGen) return;
+
   const sigla = String(uf || "").toUpperCase().trim();
   const sel = document.getElementById("cidade");
-  if (!sel) return;
+  if (!sel) {
+    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
+    return;
+  }
   sel.innerHTML = sigla
     ? '<option value="">— Selecione —</option>'
     : '<option value="">— Selecione o estado —</option>';
   sel.disabled = !sigla;
   marcarCampoInvalido("cidade", false);
-  if (!sigla) return;
+  if (!sigla) {
+    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
+    return;
+  }
   try {
     const res = await fetch(
-      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${encodeURIComponent(sigla)}/municipios`,
+      { signal: ctrl.signal, cache: "no-store" }
     );
+    if (cargaId !== ibgeMunicipiosCargaGen) return;
     if (!res.ok) throw new Error("http");
     const listaFull = await res.json();
+    if (cargaId !== ibgeMunicipiosCargaGen) return;
     if (!Array.isArray(listaFull)) throw new Error("formato");
+    const ufAinda = String(document.getElementById("uf")?.value || "")
+      .toUpperCase()
+      .trim();
+    if (ufAinda !== sigla) return;
     const lista = listaFull.filter((m) =>
       mapaCidadeParaFichaUtilizar.has(normalizarChaveCidade(m.nome))
     );
     lista.sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
+    if (cargaId !== ibgeMunicipiosCargaGen) return;
     if (!lista.length) {
       showToast(
         "Nenhuma cidade deste estado consta em cidades_brasil.json. Verifique com o suporte.",
@@ -1351,8 +1384,13 @@ async function carregarMunicipiosIBGE(uf) {
       opt.textContent = m.nome;
       sel.appendChild(opt);
     }
-  } catch (_e) {
-    showToast("Não foi possível carregar as cidades (IBGE). Tente outra vez.", false);
+  } catch (e) {
+    if (e && e.name === "AbortError") return;
+    if (cargaId === ibgeMunicipiosCargaGen) {
+      showToast("Não foi possível carregar as cidades (IBGE). Tente outra vez.", false);
+    }
+  } finally {
+    if (ibgeMunicipiosAbort === ctrl) ibgeMunicipiosAbort = null;
   }
 }
 
@@ -2575,15 +2613,26 @@ for (let n = 1; n <= NUM_FILHOS; n++) {
   });
 }
 
-document.getElementById("uf")?.addEventListener("change", function () {
+const elUfSelect = document.getElementById("uf");
+function onUfAlteradoAssistencia() {
   marcarCampoInvalido("uf", false);
-  void carregarMunicipiosIBGE(this.value);
-});
-document.getElementById("cidade")?.addEventListener("change", function () {
+  void carregarMunicipiosIBGE(elUfSelect ? elUfSelect.value : "");
+}
+if (elUfSelect) {
+  elUfSelect.addEventListener("change", onUfAlteradoAssistencia);
+  /* WebKit móvel (iOS) nem sempre dispara "change" ao fechar o picker; "input" cobre. */
+  elUfSelect.addEventListener("input", onUfAlteradoAssistencia);
+}
+const elCidadeSelect = document.getElementById("cidade");
+function onCidadeAlteradaAssistencia() {
   marcarCampoInvalido("cidade", false);
   atualizarCidadeufApartirDosCamposLocalidade();
   void carregarTemplateParaCidadeSelecionada();
-});
+}
+if (elCidadeSelect) {
+  elCidadeSelect.addEventListener("change", onCidadeAlteradaAssistencia);
+  elCidadeSelect.addEventListener("input", onCidadeAlteradaAssistencia);
+}
 function salvarRascunhoAoSair() {
   salvarRascunhoLocalSincrono();
 }
