@@ -223,7 +223,7 @@
       width: 100%;
     }
   }
-  @media (max-width: 640px) {
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
     .endereco-cep-rua-num { grid-template-columns: 1fr; }
     .endereco-compl-bairro-cid { grid-template-columns: 1fr; }
     .dados-sus-rg-cpf { grid-template-columns: 1fr; }
@@ -307,7 +307,7 @@
     gap: 10px;
     align-items: stretch;
   }
-  @media (max-width: 640px) {
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
     .radio-inline.tipo-adesao-grid {
       grid-template-columns: 1fr;
     }
@@ -547,7 +547,7 @@
   }
   .btn-modal.cancel { background: #fff; color: var(--text-mid); }
   .btn-modal.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
-  @media (max-width: 640px) {
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
     .page-header { padding: 20px; flex-direction: column; }
     body.page-header-mobile .page-header {
       position: fixed;
@@ -2679,7 +2679,9 @@ document.addEventListener("visibilitychange", function () {
 });
 
 (function initPageHeaderScrollMobile() {
-  const mq = window.matchMedia("(max-width: 640px)");
+  const MQ_HEADER_MOBILE =
+    "(max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none))";
+  const mq = window.matchMedia(MQ_HEADER_MOBILE);
   const header = document.querySelector(".page-header");
   if (!header) return;
   const body = document.body;
@@ -2726,11 +2728,24 @@ document.addEventListener("visibilitychange", function () {
     }
   }
 
+  function onLayoutChanged() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    setHeaderH();
+    onScroll();
+  }
+
   applyMode();
   if (typeof mq.addEventListener === "function") mq.addEventListener("change", applyMode);
   else if (typeof mq.addListener === "function") mq.addListener(applyMode);
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("load", setHeaderH);
+  window.addEventListener("resize", onLayoutChanged, { passive: true });
+  window.addEventListener("orientationchange", () => {
+    setTimeout(onLayoutChanged, 150);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", onLayoutChanged, { passive: true });
+  }
 })();
 </script>
 </body>
