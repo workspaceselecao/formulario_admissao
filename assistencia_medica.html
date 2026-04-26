@@ -66,18 +66,44 @@
   }
   .page-header-home {
     flex-shrink: 0;
+    align-self: flex-start;
     padding-top: 4px;
   }
   .page-header-home a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-size: 14px;
     font-weight: 600;
     color: var(--accent);
     text-decoration: none;
+    padding: 10px 16px 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(1, 66, 106, 0.2);
+    background: var(--accent-soft);
+    box-shadow: 0 1px 2px rgba(12, 40, 68, 0.06);
+    transition:
+      color 0.18s ease,
+      background 0.18s ease,
+      border-color 0.18s ease,
+      box-shadow 0.2s ease,
+      transform 0.14s ease;
   }
   .page-header-home a:hover {
     color: var(--accent-dark);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(1, 66, 106, 0.14);
+    transform: translateY(-1px);
+  }
+  .page-header-home a:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(1, 66, 106, 0.12);
+  }
+  .page-header-home a:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(1, 66, 106, 0.28);
   }
   .rascunho-bar {
     font-size: 12px;
