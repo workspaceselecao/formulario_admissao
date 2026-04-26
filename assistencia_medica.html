@@ -549,6 +549,24 @@
   .btn-modal.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
   @media (max-width: 640px) {
     .page-header { padding: 20px; flex-direction: column; }
+    body.page-header-mobile .page-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateZ(0);
+      transition: transform 0.22s ease;
+    }
+    body.page-header-mobile {
+      padding-top: var(--page-header-h, 160px);
+      transition: padding-top 0.22s ease;
+    }
+    body.page-header-mobile.page-header--away {
+      padding-top: 0;
+    }
+    body.page-header-mobile.page-header--away .page-header {
+      transform: translateY(-100%);
+    }
     .grid-2:not(.dados-func-grid), .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: span 1; }
     .form-actions-bottom { flex-direction: column; width: 100%; }
@@ -2659,6 +2677,61 @@ window.addEventListener("pagehide", salvarRascunhoAoSair);
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "hidden") salvarRascunhoAoSair();
 });
+
+(function initPageHeaderScrollMobile() {
+  const mq = window.matchMedia("(max-width: 640px)");
+  const header = document.querySelector(".page-header");
+  if (!header) return;
+  const body = document.body;
+  const THRESH = 8;
+  let ro = null;
+
+  function scrollY() {
+    return window.pageYOffset != null
+      ? window.pageYOffset
+      : Math.max(
+          document.documentElement.scrollTop || 0,
+          document.body ? document.body.scrollTop || 0 : 0
+        );
+  }
+
+  function setHeaderH() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    const h = Math.round(header.getBoundingClientRect().height);
+    document.documentElement.style.setProperty("--page-header-h", h + "px");
+  }
+
+  function onScroll() {
+    if (!body.classList.contains("page-header-mobile")) return;
+    if (scrollY() > THRESH) body.classList.add("page-header--away");
+    else body.classList.remove("page-header--away");
+  }
+
+  function applyMode() {
+    if (mq.matches) {
+      body.classList.add("page-header-mobile");
+      setHeaderH();
+      onScroll();
+      if (!ro) {
+        ro = new ResizeObserver(() => setHeaderH());
+        ro.observe(header);
+      }
+    } else {
+      body.classList.remove("page-header-mobile", "page-header--away");
+      document.documentElement.style.removeProperty("--page-header-h");
+      if (ro) {
+        ro.disconnect();
+        ro = null;
+      }
+    }
+  }
+
+  applyMode();
+  if (typeof mq.addEventListener === "function") mq.addEventListener("change", applyMode);
+  else if (typeof mq.addListener === "function") mq.addListener(applyMode);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("load", setHeaderH);
+})();
 </script>
 </body>
 </html>
