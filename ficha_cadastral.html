@@ -867,8 +867,8 @@
           <input type="text" id="bairro" placeholder="Bairro">
         </div>
         <div class="field address-cidade">
-          <label>Cidade <span class="req">*</span></label>
-          <input type="text" id="cidade" placeholder="Cidade">
+          <label>Cidade - UF <span class="req">*</span></label>
+          <input type="text" id="cidade" placeholder="Cidade - UF">
         </div>
       </div>
       <div class="section-progress">
@@ -1133,7 +1133,12 @@ function preencherEnderecoPorCep(dados){
   const cidadeEl = document.getElementById("cidade");
   if (enderecoEl && dados.logradouro) enderecoEl.value = normalizarTextoEndereco(dados.logradouro);
   if (bairroEl && dados.bairro) bairroEl.value = normalizarTextoEndereco(dados.bairro);
-  if (cidadeEl && dados.cidade) cidadeEl.value = normalizarTextoEndereco(dados.cidade);
+  if (cidadeEl) {
+    const c = String(dados.cidade || "").trim();
+    const u = String(dados.uf || "").trim();
+    if (c && u) cidadeEl.value = normalizarTextoEndereco(`${c} - ${u}`);
+    else if (c) cidadeEl.value = normalizarTextoEndereco(c);
+  }
 }
 async function consultarCep(cep){
   if (cepCache.has(cep)) return cepCache.get(cep);
@@ -1554,17 +1559,19 @@ const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = "ficha_cadastral_nao_perguntar_copia_
 /** Payload montado após o PDF, antes de limpar o formulário (usado no modal e no redirecionamento). */
 let payloadPosPdfAssistenciaPendente = null;
 
-/** Formato esperado em assistencia_medica: "CIDADE / UF" para preencher UF e município (IBGE). */
+/** Envia para assistencia_medica o mesmo padrão da ficha: "CIDADE - UF" (import aceita também "CIDADE / UF"). */
 function montarCidadeUfParaCopiaAssistencia() {
   const c = (id) => (document.getElementById(id)?.value || "").trim();
   const cidade = c("cidade");
   if (!cidade) return "";
-  if (/\s\/\s*[A-Z]{2}$/i.test(cidade)) return cidade;
+  if (/\s\/\s*[A-Z]{2}$/i.test(cidade) || /\s-\s[A-Z]{2}$/i.test(cidade)) {
+    return cidade.toLocaleUpperCase("pt-BR");
+  }
   const cep = c("cep").replace(/\D/g, "").slice(0, 8);
   if (cep.length === 8) {
     const cached = cepCache.get(cep);
     if (cached && cached.uf) {
-      return `${cidade} / ${String(cached.uf).trim()}`.toLocaleUpperCase("pt-BR");
+      return `${cidade} - ${String(cached.uf).trim()}`.toLocaleUpperCase("pt-BR");
     }
   }
   return cidade;
@@ -1987,7 +1994,7 @@ function validarCamposObrigatorios(){
     { id: 'email', nome: 'E-mail' },
     { id: 'estadoCivil', nome: 'Estado Civil' },
     { id: 'endereco', nome: 'Endereço' },
-    { id: 'cidade', nome: 'Cidade' },
+    { id: 'cidade', nome: 'Cidade - UF' },
     { id: 'cpf', nome: 'CPF' }
   ];
   const faltantes = [];

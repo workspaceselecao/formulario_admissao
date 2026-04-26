@@ -2344,7 +2344,8 @@ function tentarAplicarCopiaFichaCadastral() {
     ignorarSalvarRascunho = false;
   }
   const cu = c.cidadeuf ? String(c.cidadeuf).trim().toLocaleUpperCase("pt-BR") : "";
-  const parsedCu = cu.match(/^(.+?)\s*\/\s*([A-Z]{2})$/);
+  const parsedCu =
+    cu.match(/^(.+?)\s*\/\s*([A-Z]{2})$/) || cu.match(/^(.+?)\s+-\s+([A-Z]{2})$/);
   if (parsedCu) {
     void (async () => {
       ignorarSalvarRascunho = true;
