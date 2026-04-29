@@ -167,6 +167,17 @@
     flex-direction: column;
     gap: 10px;
   }
+  .header-nav-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .header-nav-row .header-nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+  }
   .header-nav-item {
     display: inline-flex;
     align-items: center;
@@ -981,11 +992,13 @@
 <div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
 <nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-label="Menu do formulário" aria-hidden="true">
   <div class="header-nav-panel-inner">
-    <a href="index.html" class="header-nav-item">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Início
-    </a>
-    <button type="button" class="header-nav-item rascunho-descartar" id="btnDescartarRascunho">Descartar rascunho</button>
+    <div class="header-nav-row">
+      <a href="index.html" class="header-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Início
+      </a>
+      <button type="button" class="header-nav-item rascunho-descartar" id="btnDescartarRascunho">Descartar rascunho</button>
+    </div>
     <button type="button" class="header-nav-item btn-download-empty header-nav-download" onclick="baixarFichaVazia()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
