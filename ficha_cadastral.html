@@ -20,6 +20,7 @@
     --text-light: #7a756e;
     --label: #5a554e;
     --success: #2d7a4a;
+    --input-focus-border: #efa27f;
     --radius: 10px;
     --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
@@ -388,26 +389,26 @@
     font-size: 14px;
     color: var(--text);
     outline: none;
-    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    transition: border-color 0.18s, background 0.18s;
     width: 100%;
     appearance: none;
     -webkit-appearance: none;
   }
   .field input:focus,
   .field select:focus {
-    border-color: var(--accent);
+    border-color: var(--input-focus-border);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(1,66,106,0.12);
+    box-shadow: none;
   }
   .field input.invalid {
     border-color: #d1432f;
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
+    box-shadow: none;
   }
   .field select.invalid {
     border-color: #d1432f;
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(209,67,47,0.14);
+    box-shadow: none;
   }
 
   .signature-pad-wrap { margin-bottom: 20px; }
@@ -424,7 +425,7 @@
     background: #fff;
     max-width: 100%;
   }
-  .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: 0 0 0 3px rgba(209,67,47,0.14); }
+  .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: none; }
   #assinaturaCanvas {
     display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280;
     max-height: 200px; touch-action: none; cursor: crosshair;
@@ -582,9 +583,9 @@
     color: var(--text);
     outline: none;
     width: 100%;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    transition: border-color 0.18s;
   }
-  .dep-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(1,66,106,0.10); }
+  .dep-table input:focus { border-color: var(--input-focus-border); box-shadow: none; }
   .dep-table input::placeholder { color: var(--text-light); }
   .dep-table input[type="date"] {
     min-height: 40px;
@@ -655,9 +656,9 @@
     outline: none;
     width: 80px;
     text-align: center;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    transition: border-color 0.18s;
   }
-  .vt-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(1,66,106,0.10); }
+  .vt-table input:focus { border-color: var(--input-focus-border); box-shadow: none; }
   .vt-table input::placeholder { color: var(--text-light); }
 
   /* ── AVISO ── */
