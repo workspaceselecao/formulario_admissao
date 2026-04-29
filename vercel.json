@@ -3,12 +3,12 @@
   "redirects": [
     {
       "source": "/politica-de-privacidade",
-      "destination": "/Docs/privacy-policy.md",
+      "destination": "/Docs/privacy-policy.html",
       "permanent": true
     },
     {
       "source": "/termos-de-uso",
-      "destination": "/Docs/terms-of-use.md",
+      "destination": "/Docs/terms-of-use.html",
       "permanent": true
     },
     {
@@ -18,12 +18,12 @@
     },
     {
       "source": "/privacy-policy.md",
-      "destination": "/Docs/privacy-policy.md",
+      "destination": "/Docs/privacy-policy.html",
       "permanent": true
     },
     {
       "source": "/terms-of-use.md",
-      "destination": "/Docs/terms-of-use.md",
+      "destination": "/Docs/terms-of-use.html",
       "permanent": true
     },
     {

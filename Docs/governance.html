@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Governança de privacidade — princípios, diretrizes, papéis e revisões dos documentos da ferramenta.">
+  <title>Governança | Formulários Atento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/Docs/doc-page.css">
+</head>
+<body>
+  <a class="doc-skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="doc-shell-header">
+    <div class="doc-shell-inner">
+      <nav class="doc-breadcrumb" aria-label="Navegação">
+        <a href="/index.html">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/Docs/index.html">Privacidade e segurança</a>
+        <span aria-hidden="true">/</span>
+        <span class="doc-breadcrumb-current">Governança</span>
+      </nav>
+      <h1 id="conteudo">Governança de Privacidade</h1>
+    </div>
+  </header>
+  <article class="doc-shell-main doc-prose">
+    <h2>Princípios</h2>
+    <ul>
+      <li><strong>Privacy by Design</strong> — privacidade considerada desde o desenho da solução e dos processos;</li>
+      <li><strong>Minimização de dados</strong> — apenas o necessário ao preenchimento e à geração do PDF (e rascunho local, quando existir, estritamente para esse fim);</li>
+      <li><strong>Transparência</strong> — políticas e comunicações na aplicação (<a href="/Docs/privacy-policy.html">Política de Privacidade</a>, modais, termos).</li>
+    </ul>
+
+    <h2>Diretrizes</h2>
+    <ul>
+      <li>Não coletar dados desnecessários para além dos campos dos formulários institucionais;</li>
+      <li>Não armazenar dados em <strong>servidor desta aplicação</strong> para fins de cadastro web centralizado dos formulários;</li>
+      <li>Garantir segurança no processamento conforme <a href="/Docs/security-baseline.html">Baseline de segurança</a>;</li>
+      <li>Manter documentação em <code>/Docs</code> alinhada à versão implantada da aplicação;</li>
+      <li>Coordenação entre <strong>Privacidade (DPO)</strong>, <strong>Jurídico</strong>, <strong>Segurança da Informação</strong> e <strong>TI</strong> para alterações que afetem dados pessoais ou risco.</li>
+    </ul>
+
+    <h2>Papéis (resumo)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Papel</th>
+          <th>Função</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Responsável pelo tratamento</td>
+          <td>Definição das finalidades institucionais (corporativo ATENTO)</td>
+        </tr>
+        <tr>
+          <td>DPO / Privacidade</td>
+          <td>Supervisão LGPD, interfaces com titulares e órgão fiscalizador</td>
+        </tr>
+        <tr>
+          <td>Jurídico</td>
+          <td>Validade de termos, bases legais e contratos</td>
+        </tr>
+        <tr>
+          <td>Segurança da Informação</td>
+          <td>Baseline, incidentes, exceções</td>
+        </tr>
+        <tr>
+          <td>TI / DevOps</td>
+          <td>Pipeline, hospedagem, permissões de repositório</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Revisões</h2>
+    <ul>
+      <li>Documentação revisada <strong>periodicamente</strong> e <strong>ad hoc</strong> quando houver:
+        <ul>
+          <li>nova versão da aplicação com mudança de fluxo de dados;</li>
+          <li>alteração legal ou orientação da ANPD;</li>
+          <li>incidente com lições aprendidas relevantes.</li>
+        </ul>
+      </li>
+    </ul>
+    <p>Registar datas de aprovação nas versões dos documentos ou em registo interno de governança.</p>
+
+    <h2>Documentação de referência</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Uso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="/Docs/privacy-policy.html">Política de Privacidade</a></td>
+          <td>Transparência ao usuário/titular</td>
+        </tr>
+        <tr>
+          <td><a href="/Docs/terms-of-use.html">Termos de Uso</a></td>
+          <td>Regras de uso da ferramenta</td>
+        </tr>
+        <tr>
+          <td><a href="/Docs/data-flow.html">Fluxo de dados</a></td>
+          <td>Base técnica e RIPD</td>
+        </tr>
+        <tr>
+          <td><a href="/Docs/legal-basis.html">Base legal (LGPD)</a></td>
+          <td>Fundamentos normativos</td>
+        </tr>
+        <tr>
+          <td><a href="/Docs/security-baseline.html">Baseline de segurança</a></td>
+          <td>Controles mínimos</td>
+        </tr>
+        <tr>
+          <td><a href="/Docs/incident-response.html">Resposta a incidentes</a></td>
+          <td>Resposta a incidentes</td>
+        </tr>
+        <tr>
+          <td><a href="/Docs/ripd.html">RIPD</a></td>
+          <td>Avaliação de impacto</td>
+        </tr>
+      </tbody>
+    </table>
+  </article>
+  <footer class="doc-shell-footer">
+    <a href="/Docs/index.html">← Ver todos os documentos</a>
+  </footer>
+</body>
+</html>

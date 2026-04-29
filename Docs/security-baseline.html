@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Baseline de segurança da plataforma de formulários — HTTPS, processamento local e controles de entrega.">
+  <title>Baseline de segurança | Formulários Atento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/Docs/doc-page.css">
+</head>
+<body>
+  <a class="doc-skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="doc-shell-header">
+    <div class="doc-shell-inner">
+      <nav class="doc-breadcrumb" aria-label="Navegação">
+        <a href="/index.html">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/Docs/index.html">Privacidade e segurança</a>
+        <span aria-hidden="true">/</span>
+        <span class="doc-breadcrumb-current">Baseline de segurança</span>
+      </nav>
+      <h1 id="conteudo">Baseline de Segurança</h1>
+    </div>
+  </header>
+  <article class="doc-shell-main doc-prose">
+    <h2>Arquitetura</h2>
+    <ul>
+      <li>Aplicação <strong>100% client-side</strong> para preenchimento e geração de PDF;</li>
+      <li><strong>Zero persistência centralizada</strong> dos dados do formulário em servidores desta solução;</li>
+      <li><strong>Zero transmissão obrigatória</strong> dos dados pessoais preenchidos para APIs/backend proprietário desta aplicação para conclusão do PDF.</li>
+    </ul>
+    <p><strong>Nota:</strong> versões com <strong>rascunho local</strong> utilizam armazenamento no navegador do usuário; não constitui backend remoto da aplicação. Política de uso desse recurso está em <a href="/Docs/privacy-policy.html">Política de Privacidade</a> e <a href="/Docs/data-flow.html">Fluxo de dados</a>.</p>
+
+    <h2>Medidas Implementadas</h2>
+    <ul>
+      <li><strong>HTTPS</strong> obrigatório em produção (transporte cifrado);</li>
+      <li>Processamento local dos dados no fluxo de geração do PDF;</li>
+      <li>Descarte de dados da sessão conforme fluxos da aplicação após geração do arquivo;</li>
+      <li>Ausência de envio dos campos do formulário para armazenamento remoto nos termos da arquitetura descrita.</li>
+    </ul>
+
+    <h2>Restrições Técnicas (desenvolvimento e operação)</h2>
+    <ul>
+      <li><strong>Não</strong> utilizar <code>localStorage</code> / <code>sessionStorage</code> para fins não documentados ou além do escopo de rascunho aprovado;</li>
+      <li><strong>Proibido</strong> registrar em logs de aplicação conteúdo de formulários com dados pessoais ou dados sensíveis;</li>
+      <li><strong>Proibido</strong> integrar esta camada com APIs externas para <strong>envio</strong> dos dados preenchidos sem avaliação de impacto, contrato e base legal;</li>
+      <li>Controle de alterações no repositório (pull requests revisados, permissões mínimas nos ambientes de CI/CD).</li>
+    </ul>
+
+    <h2>Camada de Entrega</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Área</th>
+          <th>Expectativa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Repositório</td>
+          <td>Apenas pessoas autorizadas; branch protection quando aplicável</td>
+        </tr>
+        <tr>
+          <td>Build/deploy</td>
+          <td>Pipeline auditável; artefatos verificáveis</td>
+        </tr>
+        <tr>
+          <td>Dependências</td>
+          <td>Inventário das bibliotecas JS (PDF, etc.); plano de atualização por CVE</td>
+        </tr>
+        <tr>
+          <td>Hospedagem</td>
+          <td>HTTPS; eventual CDN/WAF conforme política corporativa</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Risco Residual</h2>
+    <p><strong>Baixo</strong> no que respeita a exposição por armazenamento central nesta aplicação ou por transmissão obrigatória dos formulários para servidores da ferramenta — dados sob responsabilidade direta do usuário após download do PDF e, quando ativo, rascunho apenas local.</p>
+    <p>Riscos remanescentes incluem: uso de equipamento comprometido, partilha de sessão em terminal público, ou alteração maliciosa dos ficheiros estáticos servidos — mitigados por controles de CI/CD, HTTPS e resposta a incidentes (<a href="/Docs/incident-response.html">Plano de resposta a incidentes</a>).</p>
+
+    <h2>Revisão</h2>
+    <p>Revisar esta baseline quando houver mudança de hospedagem, dependências críticas ou novos fluxos de dados.</p>
+  </article>
+  <footer class="doc-shell-footer">
+    <a href="/Docs/index.html">← Ver todos os documentos</a>
+  </footer>
+</body>
+</html>

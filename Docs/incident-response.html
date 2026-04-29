@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plano de resposta a incidentes — classificação, fluxo de ações e papéis alinhados à LGPD.">
+  <title>Resposta a incidentes | Formulários Atento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/Docs/doc-page.css">
+</head>
+<body>
+  <a class="doc-skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="doc-shell-header">
+    <div class="doc-shell-inner">
+      <nav class="doc-breadcrumb" aria-label="Navegação">
+        <a href="/index.html">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/Docs/index.html">Privacidade e segurança</a>
+        <span aria-hidden="true">/</span>
+        <span class="doc-breadcrumb-current">Resposta a incidentes</span>
+      </nav>
+      <h1 id="conteudo">Plano de Resposta a Incidentes</h1>
+    </div>
+  </header>
+  <article class="doc-shell-main doc-prose">
+    <p>Documento alinhado ao modelo corporativo de referência, estruturado para integração com Segurança da Informação e Privacidade (LGPD).</p>
+
+    <h2>1. Possíveis incidentes (exemplos)</h2>
+    <ul>
+      <li><strong>Integridade da aplicação:</strong> alteração não autorizada dos ficheiros estáticos ou do repositório (supply chain / deploy);</li>
+      <li><strong>Disponibilidade:</strong> indisponibilidade prolongada da hospedagem ou CDN;</li>
+      <li><strong>Confidencialidade local:</strong> vazamento ou exposição indevida relacionada ao <strong>uso do browser ou do dispositivo</strong> (PDF descarregado, equipamento partilhado, malware local);</li>
+      <li><strong>Uso indevido:</strong> utilização da plataforma contra políticas internas ou tentativa de abuso técnico.</li>
+    </ul>
+
+    <h2>2. Classificação inicial</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nível</th>
+          <th>Descrição sumária</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Alto</td>
+          <td>Comprometimento confirmado do que é servido aos utilizadores ou da cadeia de build</td>
+        </tr>
+        <tr>
+          <td>Médio</td>
+          <td>Indisponibilidade relevante ou suspeita de alteração ainda não confirmada</td>
+        </tr>
+        <tr>
+          <td>Baixo</td>
+          <td>Eventos limitados sem impacto direto em dados ou sem alteração de conteúdo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Ações (fluxo)</h2>
+    <ol>
+      <li><strong>Identificação e registo</strong> — abrir registo de incidente; preservar evidências (hashes, commits, logs de infraestrutura permitidos).</li>
+      <li><strong>Contenção imediata</strong> — revert deploy, desativar versão comprometida, invalidar cache se aplicável.</li>
+      <li><strong>Investigação</strong> — causa raiz, alcance temporal, dados afetados (se aplicável ao âmbito LGPD).</li>
+      <li><strong>Correção e recuperação</strong> — patch, novo deploy verificado, testes.</li>
+      <li><strong>Comunicação</strong> — stakeholders internos; avaliar comunicação a titulares e à ANPD com <strong>Jurídico e DPO</strong> quando houver dados pessoais afetados (LGPD).</li>
+      <li><strong>Encerramento e melhoria</strong> — atualizar <a href="/Docs/security-baseline.html">Baseline de segurança</a>, checklist de deploy ou controles preventivos.</li>
+    </ol>
+
+    <h2>4. Observação sobre impacto</h2>
+    <p>Na ausência de <strong>base de dados centralizada nesta aplicação</strong> para os formulários, muitos cenários concentram risco no <strong>dispositivo do usuário</strong> ou na <strong>integridade do site estático</strong>. Mesmo assim, incidentes que envolvam dados pessoais (por exemplo divulgação indevisa por erro processual) devem seguir o programa de gestão de incidentes da organização.</p>
+
+    <h2>5. Responsabilidades</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Papel</th>
+          <th>Atuação típica</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Segurança da Informação</td>
+          <td>Coordenação técnica e classificação</td>
+        </tr>
+        <tr>
+          <td>DPO / Privacidade</td>
+          <td>Avaliação LGPD e comunicações obrigatórias</td>
+        </tr>
+        <tr>
+          <td>TI</td>
+          <td>Infraestrutura, reversão de deploy, logs</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>6. Contactos e escalamento</h2>
+    <p>[Preencher conforme organograma interno ATENTO — incluir canal 24x7 se existir.]</p>
+
+    <h2>7. Testes</h2>
+    <p>Realizar <strong>simulacros ou tabletop exercises</strong> periodicamente (definir cadência interna).</p>
+  </article>
+  <footer class="doc-shell-footer">
+    <a href="/Docs/index.html">← Ver todos os documentos</a>
+  </footer>
+</body>
+</html>

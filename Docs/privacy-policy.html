@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Política de Privacidade dos formulários Atento — como seus dados são tratados ao preencher e gerar PDFs no navegador.">
+  <title>Política de Privacidade | Formulários Atento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/Docs/doc-page.css">
+</head>
+<body>
+  <a class="doc-skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="doc-shell-header">
+    <div class="doc-shell-inner">
+      <nav class="doc-breadcrumb" aria-label="Navegação">
+        <a href="/index.html">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/Docs/index.html">Privacidade e segurança</a>
+        <span aria-hidden="true">/</span>
+        <span class="doc-breadcrumb-current">Política de Privacidade</span>
+      </nav>
+      <h1 id="conteudo">Política de Privacidade</h1>
+    </div>
+  </header>
+  <article class="doc-shell-main doc-prose">
+    <h2>1. Introdução</h2>
+    <p>Esta plataforma foi desenvolvida com base no princípio de Privacy by Design, priorizando a <strong>minimização</strong> e a <strong>não retenção centralizada</strong> de dados pessoais nos sistemas desta aplicação.</p>
+    <p>Trata-se de uma <strong>plataforma destinada ao uso interno da empresa ATENTO</strong>, disponibilizada como ferramenta de apoio ao preenchimento de formulários.</p>
+
+    <h2>2. Natureza do Tratamento de Dados</h2>
+    <p>Os dados inseridos pelo usuário:</p>
+    <ul>
+      <li>São processados <strong>exclusivamente no navegador</strong> (client-side), para composição do PDF;</li>
+      <li><strong>Não são enviados</strong> a servidores desta aplicação para armazenamento de formulário ou finalização obrigatória do PDF;</li>
+      <li><strong>Não são armazenados</strong> em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
+      <li><strong>Não são compartilhados</strong> com terceiros por intermédio desta aplicação no fluxo técnico descrito em <a href="/Docs/data-flow.html">Fluxo de dados</a>;</li>
+      <li>Permanecem durante o preenchimento na <strong>memória do dispositivo</strong> e, quando aplicável, em <strong>armazenamento local opcional</strong> exclusivamente no navegador (ver §7);</li>
+      <li>São <strong>eliminados da sessão de trabalho</strong> após a geração do arquivo PDF <strong>conforme</strong> os fluxos e confirmações exibidos ao usuário (incluindo modal de decisão LGPD, quando aplicável).</li>
+    </ul>
+
+    <h2>3. Dados Inseridos pelo Usuário</h2>
+    <p>O usuário poderá inserir, voluntariamente:</p>
+    <ul>
+      <li>Nome, CPF, RG</li>
+      <li>Endereço e contatos</li>
+      <li>Dados profissionais e bancários</li>
+      <li>Informações de dependentes</li>
+      <li>Demais campos previstos nos modelos de formulário institucional em uso</li>
+    </ul>
+    <p>Esses dados são utilizados exclusivamente para composição do documento PDF gerado localmente.</p>
+
+    <h2>4. Finalidade</h2>
+    <p>A finalidade do tratamento neste contexto é:</p>
+    <blockquote>
+      Gerar um arquivo PDF com base nas informações inseridas pelo próprio usuário, no âmbito dos processos de admissão e assistência médica conforme os formulários disponibilizados.
+    </blockquote>
+
+    <h2>5. Base Legal</h2>
+    <p>O tratamento ocorre com base em:</p>
+    <ul>
+      <li><strong>Execução de procedimento solicitado pelo titular</strong> (preenchimento e geração do documento solicitado pelo próprio usuário).</li>
+    </ul>
+    <p>Fundamentos adicionais ou específicos por tipo de dado devem constar do inventário corporativo de tratamentos e do documento <a href="/Docs/legal-basis.html">Base legal (LGPD)</a>.</p>
+
+    <h2>6. Compartilhamento de Dados</h2>
+    <p>Não há qualquer compartilhamento de dados <strong>por intermédio desta aplicação</strong> com terceiros para os fins de tratamento descritos nesta política.</p>
+    <p>Serviços de infraestrutura (por exemplo hospedagem estática ou CDN) podem processar metadados de acesso conforme políticas do fornecedor; não devem incluir o <strong>corpo dos formulários</strong> nos registros operacionais da aplicação.</p>
+
+    <h2>7. Armazenamento e Retenção</h2>
+    <p><strong>7.1 Ausência de base centralizada:</strong> não há armazenamento dos dados do formulário em <strong>servidor de aplicação</strong> operado por esta solução para consulta posterior típica de “cadastro web”.</p>
+    <p><strong>7.2 Descarte após geração do PDF:</strong> os dados utilizados na sessão são tratados conforme as mensagens da aplicação no momento da geração do arquivo.</p>
+    <p><strong>7.3 Rascunho local (quando ativo na versão implantada):</strong> pode existir <strong>persistência opcional no navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir retomar o preenchimento no mesmo dispositivo. Tal persistência:</p>
+    <ul>
+      <li>permanece sob controle local do usuário;</li>
+      <li>pode ser <strong>eliminada</strong> pelo usuário através da função <strong>Descartar rascunho</strong> ou equivalente;</li>
+      <li>não substitui políticas de arquivo físico ou sistemas oficiais da ATENTO.</li>
+    </ul>
+
+    <h2>8. Segurança</h2>
+    <p>A aplicação utiliza <strong>HTTPS</strong> em ambiente de produção e arquitetura que reduz persistência e transmissão desnecessárias de dados pessoais. Medidas complementares constam de <a href="/Docs/security-baseline.html">Baseline de segurança</a>.</p>
+
+    <h2>9. Direitos do Titular</h2>
+    <p>O titular pode exercer seus direitos previstos na LGPD junto aos <strong>canais institucionais</strong> da ATENTO indicados pelo responsável pelo tratamento.</p>
+    <p>Na medida em que não há base de dados centralizada desta aplicação para os dados digitados pelo usuário, parte dos direitos pode relacionar-se a informações sob <strong>custódia local</strong> do dispositivo ou a processos de RH/arquivo já existentes na empresa.</p>
+
+    <h2>10. Responsável pela Plataforma</h2>
+    <p>Plataforma destinada ao uso interno da empresa <strong>ATENTO</strong>.</p>
+
+    <h2>11. Alterações</h2>
+    <p>Esta política pode ser atualizada a qualquer momento para refletir mudanças legais, organizacionais ou de versão da aplicação.</p>
+  </article>
+  <footer class="doc-shell-footer">
+    <a href="/Docs/index.html">← Ver todos os documentos</a>
+  </footer>
+</body>
+</html>

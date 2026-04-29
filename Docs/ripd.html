@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RIPD — relatório de impacto à proteção de dados para a ferramenta de PDF no navegador (LGPD arts. 38 e seguintes).">
+  <title>RIPD — Impacto na privacidade | Formulários Atento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/Docs/doc-page.css">
+</head>
+<body>
+  <a class="doc-skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="doc-shell-header">
+    <div class="doc-shell-inner">
+      <nav class="doc-breadcrumb" aria-label="Navegação">
+        <a href="/index.html">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/Docs/index.html">Privacidade e segurança</a>
+        <span aria-hidden="true">/</span>
+        <span class="doc-breadcrumb-current">RIPD</span>
+      </nav>
+      <h1 id="conteudo">RIPD — Relatório de Impacto à Proteção de Dados</h1>
+    </div>
+  </header>
+  <article class="doc-shell-main doc-prose">
+    <p>Referência: Lei nº 13.709/2018 (LGPD), arts. 38 e seguintes. Modelo alinhado ao relatório corporativo de referência, passível de complementação pelo DPO.</p>
+
+    <h2>1. Descrição</h2>
+    <p>Ferramenta de geração de PDF com <strong>processamento local no navegador</strong>, destinada ao uso interno ATENTO para suporte aos formulários de admissão e assistência médica conforme versões implantadas.</p>
+
+    <h2>2. Natureza do Tratamento</h2>
+    <ul>
+      <li>Dados inseridos voluntariamente pelo usuário nos formulários;</li>
+      <li>Processamento temporário em memória durante preenchimento e geração do PDF;</li>
+      <li><strong>Ausência de armazenamento centralizado</strong> dos dados do formulário em servidores desta aplicação;</li>
+      <li>Opcionalmente, <strong>rascunho apenas no navegador</strong> (quando a versão assim previr), com função de descarte pelo usuário.</li>
+    </ul>
+
+    <h2>3. Riscos Identificados</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Risco</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Exposição local</td>
+          <td>PDF ou sessão em dispositivo partilhado ou comprometido</td>
+        </tr>
+        <tr>
+          <td>Uso indevido</td>
+          <td>Informações falsas ou utilização contra políticas internas</td>
+        </tr>
+        <tr>
+          <td>Integridade da entrega</td>
+          <td>Alteração maliciosa dos artefatos estáticos ou cadência de deploy</td>
+        </tr>
+        <tr>
+          <td>Dependências</td>
+          <td>Vulnerabilidades em bibliotecas JS de terceiros</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Medidas de Mitigação</h2>
+    <ul>
+      <li><strong>Não persistência central</strong> nos termos da arquitetura atual da ferramenta;</li>
+      <li>Processamento local para geração do PDF;</li>
+      <li>Uso de <strong>HTTPS</strong> em produção;</li>
+      <li>Baseline de segurança e gestão de dependências (<a href="/Docs/security-baseline.html">Baseline de segurança</a>);</li>
+      <li>Comunicações na UI (ex.: decisões LGPD na geração do PDF);</li>
+      <li>Função de <strong>descarte de rascunho</strong> quando aplicável.</li>
+    </ul>
+
+    <h2>5. Avaliação de risco</h2>
+    <p><strong>Risco BAIXO a MÉDIO-BAIXO</strong> no que respeita a tratamentos remotos centralizados por esta app, considerando:</p>
+    <ul>
+      <li>Não há retenção em bases remotas desta solução para os dados digitados no formulário;</li>
+      <li>Não há compartilhamento por esta camada com terceiros para fins descritos na política;</li>
+      <li>Tráfego obrigatório dos campos do formulário para servidores próprios da aplicação <strong>não</strong> faz parte do fluxo de conclusão do PDF.</li>
+    </ul>
+    <p>Riscos residuais concentram-se em <strong>ambiente do usuário</strong>, <strong>integridade do deploy</strong> e <strong>cadeia de dependências</strong> — ver mitigações acima.</p>
+
+    <h2>6. Conclusão</h2>
+    <p>A solução, adequadamente documentada e operada, tende a ser compatível com os princípios da LGPD:</p>
+    <ul>
+      <li>Necessidade</li>
+      <li>Minimização</li>
+      <li>Segurança</li>
+      <li>Prevenção</li>
+    </ul>
+    <p>Homologação final compete ao <strong>DPO</strong> e áreas envolvidas após preenchimento de dados identificação do tratamento, bases legais completas no ROPA e revisões periódicas.</p>
+
+    <h2>7. Histórico de revisão</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Versão</th>
+          <th>Data</th>
+          <th>Responsável</th>
+          <th>Notas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>[ ]</td>
+          <td>[ ]</td>
+          <td>[ ]</td>
+          <td>Alinhamento ao modelo corporativo e <code>/Docs</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </article>
+  <footer class="doc-shell-footer">
+    <a href="/Docs/index.html">← Ver todos os documentos</a>
+  </footer>
+</body>
+</html>

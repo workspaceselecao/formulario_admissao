@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Fluxo de dados técnico da ferramenta de formulários — navegador, PDF local e rascunho opcional.">
+  <title>Fluxo de dados | Formulários Atento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/Docs/doc-page.css">
+</head>
+<body>
+  <a class="doc-skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="doc-shell-header">
+    <div class="doc-shell-inner">
+      <nav class="doc-breadcrumb" aria-label="Navegação">
+        <a href="/index.html">Início</a>
+        <span aria-hidden="true">/</span>
+        <a href="/Docs/index.html">Privacidade e segurança</a>
+        <span aria-hidden="true">/</span>
+        <span class="doc-breadcrumb-current">Fluxo de dados</span>
+      </nav>
+      <h1 id="conteudo">Fluxo de dados</h1>
+    </div>
+  </header>
+  <article class="doc-shell-main doc-prose">
+    <p>Este documento descreve o fluxo de dados da ferramenta de formulários e PDF <strong>na perspectiva técnica</strong>, alinhado ao modelo corporativo e complementado com o comportamento das versões que disponibilizam rascunho local.</p>
+
+    <h2>Entrada</h2>
+    <p>Usuário insere dados manualmente nos formulários HTML servidos estaticamente.</p>
+
+    <h2>Processamento</h2>
+    <ul>
+      <li>Processamento ocorre exclusivamente no navegador.</li>
+      <li>Dados mantidos em <strong>memória (RAM)</strong> durante a sessão de preenchimento e geração do PDF.</li>
+    </ul>
+    <p><strong>Modelo corporativo original (minimização máxima):</strong> ausência de uso de <code>localStorage</code>, <code>sessionStorage</code> ou <code>IndexedDB</code> para dados pessoais — estado puramente efêmero.</p>
+    <p><strong>Versões implantadas com recurso de rascunho:</strong> pode existir uso <strong>controlado</strong> de <code>localStorage</code> (ou equivalente) <strong>apenas</strong> para permitir retomar o preenchimento no mesmo navegador/dispositivo, com:</p>
+    <ul>
+      <li>eliminação disponível via <strong>Descartar rascunho</strong>;</li>
+      <li>finalidade limitada à conveniência do usuário até gerar o PDF ou descartar;</li>
+      <li><strong>sem</strong> envio desses dados ao servidor da aplicação para armazenamento remoto do formulário.</li>
+    </ul>
+
+    <h2>Geração</h2>
+    <ul>
+      <li>Biblioteca JavaScript gera o PDF localmente no dispositivo.</li>
+    </ul>
+
+    <h2>Saída</h2>
+    <ul>
+      <li>Download direto para o dispositivo do usuário.</li>
+    </ul>
+
+    <h2>Descarte</h2>
+    <ul>
+      <li>Dados removidos da memória de trabalho após a geração, <strong>conforme</strong> fluxos de UI e confirmações (ex.: modal LGPD).</li>
+      <li>Rascunho local removido quando o usuário aciona <strong>Descartar rascunho</strong> ou quando a lógica da versão elimina após conclusão.</li>
+    </ul>
+
+    <h2>Observação — O que não há (por desenho)</h2>
+    <p>Não há, nos termos desta solução:</p>
+    <ul>
+      <li>Backend aplicacional obrigatório para guardar o formulário completo nos servidores desta app;</li>
+      <li>API própria para receber os campos preenchidos para conclusão do PDF;</li>
+      <li>Banco de dados central nesta aplicação para os dados digitados no formulário;</li>
+      <li>Envio obrigatório dos dados do formulário para servidores para gerar o PDF;</li>
+      <li>Logs de aplicação contendo <strong>payload</strong> de formulários com dados pessoais.</li>
+    </ul>
+    <p>Infraestrutura de hospedagem/CDN pode gerar logs operacionais sem conteúdo do formulário — devem ser considerados no inventário de tratamentos quando aplicável.</p>
+
+    <h2>Diagrama (texto)</h2>
+<pre class="doc-pre">                    ┌─────────────────────┐
+[Usuário] ────────► │ Formulário (browser)│ ──► [PDF local] ──► [Dispositivo]
+                    └──────────┬──────────┘
+                               │ opcional (versão com rascunho)
+                               ▼
+                    [ Rascunho só no navegador ]</pre>
+  </article>
+  <footer class="doc-shell-footer">
+    <a href="/Docs/index.html">← Ver todos os documentos</a>
+  </footer>
+</body>
+</html>

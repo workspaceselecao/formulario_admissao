@@ -1,0 +1,230 @@
+/* Páginas de documentação legível — Formulários Atento */
+:root {
+  --bg: #f0ede8;
+  --card: #ffffff;
+  --border: #d4cfc8;
+  --accent: #01426a;
+  --accent-dark: #013756;
+  --accent-soft: #e8f0f5;
+  --text: #1a1714;
+  --text-mid: #4a453f;
+  --text-light: #7a756e;
+  --radius: 14px;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+html {
+  scroll-padding-top: 12px;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: "Poppins", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.doc-skip {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.doc-skip:focus {
+  left: 12px;
+  top: 12px;
+  width: auto;
+  height: auto;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  z-index: 9999;
+}
+.doc-shell-header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 22px 20px 28px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+.doc-shell-inner {
+  max-width: 768px;
+  margin: 0 auto;
+}
+.doc-breadcrumb {
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-mid);
+}
+.doc-breadcrumb a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.doc-breadcrumb a:hover {
+  text-decoration: underline;
+  color: var(--accent-dark);
+}
+.doc-breadcrumb-current {
+  color: var(--text-light);
+  font-weight: 500;
+}
+.doc-shell-inner > h1 {
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1.25;
+  color: var(--text);
+}
+.doc-shell-main {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+.doc-prose {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 22px 32px;
+}
+@media (min-width: 640px) {
+  .doc-prose {
+    padding: 36px 40px 40px;
+  }
+}
+.doc-prose h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 28px 0 12px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+  color: var(--accent-dark);
+  scroll-margin-top: 24px;
+}
+.doc-prose h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+.doc-prose h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 18px 0 10px;
+  color: var(--text);
+}
+.doc-prose p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: var(--text-mid);
+}
+.doc-prose ul,
+.doc-prose ol {
+  margin: 0 0 16px;
+  padding-left: 1.35rem;
+  font-size: 15px;
+  color: var(--text-mid);
+}
+.doc-prose li {
+  margin-bottom: 8px;
+}
+.doc-prose li::marker {
+  color: var(--accent);
+}
+.doc-prose strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.doc-prose blockquote {
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 10px 10px 0;
+  font-size: 15px;
+  color: var(--text-mid);
+}
+.doc-prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 22px 0;
+}
+.doc-prose a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.doc-prose a:hover {
+  color: var(--accent-dark);
+}
+.doc-prose code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.88em;
+  background: rgba(1, 66, 106, 0.07);
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: var(--accent-dark);
+}
+.doc-pre {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f7f5f2;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-x: auto;
+  color: var(--text-mid);
+}
+.doc-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 20px;
+  font-size: 14px;
+}
+.doc-prose th,
+.doc-prose td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-prose thead th {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+.doc-prose tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+.doc-shell-footer {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  text-align: center;
+}
+.doc-shell-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.doc-shell-footer a:hover {
+  text-decoration: underline;
+}
