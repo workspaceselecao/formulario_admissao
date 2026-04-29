@@ -60,7 +60,7 @@ O responsável pela plataforma não se responsabiliza por:
 
 ## 7. Segurança da informação e conformidade
 
-O uso da plataforma deve observar as políticas internas da ATENTO em matéria de proteção de dados e segurança da informação. Documentação complementar encontra-se em `/Forms`, incluindo baseline de segurança e política de privacidade aplicável à versão implantada.
+O uso da plataforma deve observar as políticas internas da ATENTO em matéria de proteção de dados e segurança da informação. Documentação complementar encontra-se em `/Docs`, incluindo baseline de segurança e política de privacidade aplicável à versão implantada.
 
 ---
 

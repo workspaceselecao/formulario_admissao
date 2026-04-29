@@ -70,4 +70,4 @@ Homologação final compete ao **DPO** e áreas envolvidas após preenchimento d
 
 | Versão | Data | Responsável | Notas |
 |--------|------|-------------|-------|
-| [ ] | [ ] | [ ] | Alinhamento ao modelo corporativo e `/Forms` |
+| [ ] | [ ] | [ ] | Alinhamento ao modelo corporativo e `/Docs` |

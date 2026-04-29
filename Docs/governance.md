@@ -13,7 +13,7 @@
 - Não coletar dados desnecessários para além dos campos dos formulários institucionais;
 - Não armazenar dados em **servidor desta aplicação** para fins de cadastro web centralizado dos formulários;
 - Garantir segurança no processamento conforme `security-baseline.md`;
-- Manter documentação em `/Forms` alinhada à versão implantada da aplicação;
+- Manter documentação em `/Docs` alinhada à versão implantada da aplicação;
 - Coordenação entre **Privacidade (DPO)**, **Jurídico**, **Segurança da Informação** e **TI** para alterações que afetem dados pessoais ou risco.
 
 ---
