@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentação — Segurança e LGPD | Formulários Atento</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ede8;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+  .doc-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 24px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .doc-header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .doc-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+  .doc-back:hover { text-decoration: underline; color: var(--accent-dark); }
+  .doc-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 8px;
+  }
+  .doc-header p {
+    font-size: 14px;
+    color: var(--text-mid);
+  }
+  .doc-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 56px;
+  }
+  .doc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .doc-list li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: border-color 0.18s;
+  }
+  .doc-list li:hover { border-color: var(--accent); }
+  .doc-list a {
+    display: block;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .doc-list a:focus-visible {
+    outline: 3px solid rgba(1, 66, 106, 0.35);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+  .doc-list .doc-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .doc-list .doc-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+  }
+  .doc-note {
+    margin-top: 28px;
+    padding: 14px 16px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(1, 66, 106, 0.15);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-mid);
+  }
+</style>
+</head>
+<body>
+  <header class="doc-header">
+    <div class="doc-header-inner">
+      <a class="doc-back" href="../index.html">← Voltar aos formulários</a>
+      <h1>Segurança, privacidade e LGPD</h1>
+      <p>Documentação de referência do pacote <code>/Forms</code>. Os ficheiros estão em Markdown (.md) para revisão jurídica e versionamento.</p>
+    </div>
+  </header>
+  <main class="doc-main">
+    <ul class="doc-list">
+      <li>
+        <a href="privacy-policy.md">
+          <div class="doc-title">Política de Privacidade</div>
+          <div class="doc-desc">Transparência sobre tratamento de dados pessoais neste contexto.</div>
+        </a>
+      </li>
+      <li>
+        <a href="terms-of-use.md">
+          <div class="doc-title">Termos de Uso</div>
+          <div class="doc-desc">Regras de utilização da plataforma de formulários.</div>
+        </a>
+      </li>
+      <li>
+        <a href="data-flow.md">
+          <div class="doc-title">Fluxo de dados</div>
+          <div class="doc-desc">Descrição técnica de entradas, processamento e descarte.</div>
+        </a>
+      </li>
+      <li>
+        <a href="ripd.md">
+          <div class="doc-title">RIPD / DPIA</div>
+          <div class="doc-desc">Modelo de relatório de impacto à proteção de dados.</div>
+        </a>
+      </li>
+      <li>
+        <a href="security-baseline.md">
+          <div class="doc-title">Baseline de segurança</div>
+          <div class="doc-desc">Controlos mínimos para a aplicação e cadeia de entrega.</div>
+        </a>
+      </li>
+      <li>
+        <a href="incident-response.md">
+          <div class="doc-title">Resposta a incidentes</div>
+          <div class="doc-desc">Procedimento de contenção, comunicação e recuperação.</div>
+        </a>
+      </li>
+      <li>
+        <a href="legal-basis.md">
+          <div class="doc-title">Bases legais (LGPD)</div>
+          <div class="doc-desc">Mapa de hipóteses de tratamento — validar com Jurídico.</div>
+        </a>
+      </li>
+      <li>
+        <a href="governance.md">
+          <div class="doc-title">Governança</div>
+          <div class="doc-desc">Papéis, revisões e ciclo de vida documental.</div>
+        </a>
+      </li>
+    </ul>
+    <p class="doc-note">Os documentos incluem campos [placeholder] para complemento por Jurídico, Privacidade (DPO) e Segurança da Informação.</p>
+  </main>
+</body>
+</html>

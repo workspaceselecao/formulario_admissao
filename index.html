@@ -114,6 +114,35 @@
     line-height: 1.55;
     margin-bottom: 0;
   }
+  .home-footer {
+    margin-top: 8px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .home-footer-inner {
+    text-align: center;
+  }
+  .home-footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    font-size: 13px;
+  }
+  .home-footer-nav a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .home-footer-nav a:hover {
+    text-decoration: underline;
+    color: var(--accent-dark);
+  }
+  .home-footer-sep {
+    color: var(--text-light);
+    user-select: none;
+  }
 </style>
 </head>
 <body>
@@ -148,6 +177,17 @@
         <p>Proposta de adesão à assistência médica (Grupo NotreDame Intermédica): tipo de movimentação, dados do funcionário, dependentes e assinatura.</p>
       </a>
     </div>
+    <footer class="home-footer">
+      <div class="home-footer-inner">
+        <nav class="home-footer-nav" aria-label="Informações legais e documentação">
+          <a href="Forms/terms-of-use.md">Termos de Uso</a>
+          <span class="home-footer-sep" aria-hidden="true">·</span>
+          <a href="Forms/privacy-policy.md">Política de Privacidade</a>
+          <span class="home-footer-sep" aria-hidden="true">·</span>
+          <a href="Forms/index.html">Segurança e LGPD</a>
+        </nav>
+      </div>
+    </footer>
   </main>
 </body>
 </html>
