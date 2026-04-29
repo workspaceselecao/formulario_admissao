@@ -43,7 +43,8 @@
     padding: 28px 48px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 16px;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -69,6 +70,7 @@
   }
   .page-header-main {
     min-width: 0;
+    flex: 1;
   }
   .header-menu-btn {
     flex-shrink: 0;
@@ -916,7 +918,7 @@
       padding: 20px 20px;
       flex-direction: row;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 12px;
     }
     body.page-header-mobile .page-header {
@@ -1007,16 +1009,16 @@
 <body>
 
 <header class="page-header">
-  <div class="page-header-main">
-    <div class="brand">
-      <span class="brand-text">Ficha Cadastral</span>
-    </div>
-  </div>
   <button type="button" class="header-menu-btn" id="headerMenuBtn" aria-expanded="false" aria-controls="headerNavPanel" aria-label="Abrir menu">
     <span class="hm-line" aria-hidden="true"></span>
     <span class="hm-line" aria-hidden="true"></span>
     <span class="hm-line" aria-hidden="true"></span>
   </button>
+  <div class="page-header-main">
+    <div class="brand">
+      <span class="brand-text">Ficha Cadastral</span>
+    </div>
+  </div>
 </header>
 
 <div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
