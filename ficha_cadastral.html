@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ficha Cadastral de Admissão – Atento</title>
+<title>Ficha Cadastral – Admissão | Atento</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -141,15 +141,16 @@
   .header-nav-panel {
     position: fixed;
     top: 0;
-    right: 0;
+    left: 0;
+    right: auto;
     z-index: 12001;
     width: min(320px, 92vw);
     height: 100%;
     max-height: 100dvh;
     background: #fff;
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
-    border-left: 1px solid var(--border);
-    transform: translateX(100%);
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.12);
+    border-right: 1px solid var(--border);
+    transform: translateX(-100%);
     visibility: hidden;
     pointer-events: none;
     transition: transform 0.24s ease, visibility 0.24s ease;
@@ -164,9 +165,21 @@
   }
   .header-nav-panel-head {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+    gap: 12px;
     margin-bottom: 14px;
+  }
+  .header-nav-panel-title {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.35px;
+    line-height: 1.25;
+    color: var(--text);
+    font-family: inherit;
   }
   .header-nav-close-btn {
     display: inline-flex;
@@ -1022,9 +1035,10 @@
 </header>
 
 <div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
-<nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-label="Menu do formulário" aria-hidden="true">
+<nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-labelledby="headerNavTitle" aria-hidden="true">
   <div class="header-nav-panel-inner">
     <div class="header-nav-panel-head">
+      <h2 class="header-nav-panel-title" id="headerNavTitle">Ficha Cadastral</h2>
       <button type="button" class="header-nav-close-btn" id="headerNavCloseBtn" aria-label="Fechar menu">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       </button>
