@@ -902,7 +902,7 @@
         </div>
         <div class="field address-numero">
           <label>Número</label>
-          <input type="text" id="endNum" placeholder="Nº">
+          <input type="text" id="endNum" placeholder="Nº" inputmode="numeric" autocomplete="off">
         </div>
         <div class="field address-complemento">
           <label>Complemento</label>
@@ -937,15 +937,15 @@
         </div>
         <div class="field">
           <label>CPF <span class="req">*</span></label>
-          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
+          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
         </div>
         <div class="field" id="agenciaField" style="display:none">
           <label>Agência <span class="req">*</span></label>
-          <input type="text" id="agencia" placeholder="0000">
+          <input type="text" id="agencia" placeholder="0000" inputmode="numeric" autocomplete="off">
         </div>
         <div class="field" id="contaField" style="display:none">
           <label>Conta / Dígito <span class="req">*</span></label>
-          <input type="text" id="conta" placeholder="00000-0">
+          <input type="text" id="conta" placeholder="00000-0" inputmode="numeric" autocomplete="off">
         </div>
         <div class="field col-span-2" id="cartaBradescoField" style="display:none">
           <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
@@ -977,8 +977,8 @@
         <tbody id="dependentesBody">
           <tr data-dependente-index="1">
             <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep1Nasc"></td>
-            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14"></td>
+            <td><input type="date" id="dep1Nasc" inputmode="numeric"></td>
+            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
           </tr>
         </tbody>
       </table>
@@ -1074,7 +1074,7 @@
         </div>
         <div class="field">
           <label>Data <span class="req">*</span></label>
-          <input type="date" id="dataAssinatura">
+          <input type="date" id="dataAssinatura" inputmode="numeric">
         </div>
       </div>
       <div class="section-progress">
@@ -1608,8 +1608,8 @@ function criarLinhaDependente(indice){
   tr.dataset.dependenteIndex = String(indice);
   tr.innerHTML = `
     <td><input type="text" id="dep${indice}Nome" placeholder="Nome completo"></td>
-    <td><input type="date" id="dep${indice}Nasc"></td>
-    <td><input type="text" id="dep${indice}CPF" placeholder="000.000.000-00" maxlength="14"></td>
+    <td><input type="date" id="dep${indice}Nasc" inputmode="numeric"></td>
+    <td><input type="text" id="dep${indice}CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
   `;
   return tr;
 }
