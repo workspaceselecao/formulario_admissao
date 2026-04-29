@@ -879,6 +879,10 @@
     box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
     overflow: hidden;
   }
+  .modal-head.modal-head--atencao {
+    background: #8a4510;
+    color: #fff;
+  }
   .modal-head {
     background: var(--text);
     color: #fff;
@@ -1419,6 +1423,32 @@
   </div>
 </div>
 
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalDescartarTitulo">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalDescartarTitulo">Descartar rascunho</div>
+    <div class="modal-body">
+      O rascunho guardado neste navegador e os dados atualmente no formulário serão apagados. Esta ação não pode ser desfeita.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDescartarRascunhoCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalDescartarRascunhoConfirmar" class="btn-modal confirm">Sim, descartar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarLimparAssinatura" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalLimparAssinTitulo">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalLimparAssinTitulo">Limpar assinatura</div>
+    <div class="modal-body">
+      O traço da assinatura manuscrita será apagado da área de desenho. Deseja continuar?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalLimparAssinaturaCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalLimparAssinaturaConfirmar" class="btn-modal confirm">Sim, limpar</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 const TEMPLATE_PATH = "./F-075_37 (PR-011) Ficha Cadastral para Admissão.pdf";
@@ -1638,9 +1668,12 @@ function initAssinaturaCanvas() {
   canvas.addEventListener("pointercancel", fimTraco);
   canvas.addEventListener("pointerleave", fimTraco);
   document.getElementById("btnLimparAssinatura")?.addEventListener("click", () => {
-    limparAssinaturaCanvas();
-    agendarSalvarRascunho();
-    updateProgress();
+    const temAlgoNoCanvas = assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida();
+    if (!temAlgoNoCanvas) {
+      showToast("Não há assinatura para limpar.", true);
+      return;
+    }
+    abrirModalConfirmarLimparAssinaturaFicha();
   });
 }
 function limparAssinaturaCanvas() {
@@ -1985,9 +2018,7 @@ function abrirModalCopiaAssistencia() {
 function fecharModalCopiaAssistencia() {
   const m = document.getElementById("modalCopiaAssistencia");
   if (m) m.classList.remove("show");
-  if (!document.getElementById("lgpdModal")?.classList.contains("show")) {
-    document.body.classList.remove("modal-open");
-  }
+  sincronizarBodyModalOpenFicha();
 }
 
 function salvarPayloadCopiaAssistenciaNoStorage(payload) {
@@ -2422,10 +2453,14 @@ function abrirModalLGPD(){
     lgpdResolver = resolve;
   });
 }
+function sincronizarBodyModalOpenFicha() {
+  if (document.querySelector(".modal-overlay.show")) document.body.classList.add("modal-open");
+  else document.body.classList.remove("modal-open");
+}
 function fecharModalLGPD(decisao){
   const modal = document.getElementById('lgpdModal');
   if (modal) modal.classList.remove('show');
-  document.body.classList.remove('modal-open');
+  sincronizarBodyModalOpenFicha();
   if (lgpdResolver) {
     const resolve = lgpdResolver;
     lgpdResolver = null;
@@ -2494,6 +2529,32 @@ function descartarRascunhoEFormulario() {
   limparRascunhoLocal();
   limparDadosFormulario();
   showToast("Rascunho descartado.", true);
+}
+
+function abrirModalConfirmarDescartarRascunhoFicha() {
+  document.getElementById("modalConfirmarDescartarRascunho")?.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("btnModalDescartarRascunhoConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarDescartarRascunhoFicha() {
+  document.getElementById("modalConfirmarDescartarRascunho")?.classList.remove("show");
+  sincronizarBodyModalOpenFicha();
+}
+
+function abrirModalConfirmarLimparAssinaturaFicha() {
+  document.getElementById("modalConfirmarLimparAssinatura")?.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("btnModalLimparAssinaturaConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarLimparAssinaturaFicha() {
+  document.getElementById("modalConfirmarLimparAssinatura")?.classList.remove("show");
+  sincronizarBodyModalOpenFicha();
+}
+function confirmarLimparAssinaturaFichaExecutar() {
+  fecharModalConfirmarLimparAssinaturaFicha();
+  limparAssinaturaCanvas();
+  agendarSalvarRascunho();
+  updateProgress();
 }
 
 function clonarArrayBuffer(buffer){
@@ -2980,8 +3041,32 @@ document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) 
     fecharModalCopiaAssistRecusandoRedirecionamento();
   }
 });
+document.getElementById("btnModalDescartarRascunhoCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoFicha);
+document.getElementById("btnModalDescartarRascunhoConfirmar")?.addEventListener("click", () => {
+  fecharModalConfirmarDescartarRascunhoFicha();
+  descartarRascunhoEFormulario();
+});
+document.getElementById("modalConfirmarDescartarRascunho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarDescartarRascunho") fecharModalConfirmarDescartarRascunhoFicha();
+});
+document.getElementById("btnModalLimparAssinaturaCancelar")?.addEventListener("click", fecharModalConfirmarLimparAssinaturaFicha);
+document.getElementById("btnModalLimparAssinaturaConfirmar")?.addEventListener("click", confirmarLimparAssinaturaFichaExecutar);
+document.getElementById("modalConfirmarLimparAssinatura")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarLimparAssinatura") fecharModalConfirmarLimparAssinaturaFicha();
+});
+
 document.addEventListener('keydown', (event) => {
   if (event.key !== "Escape") return;
+  if (document.getElementById("modalConfirmarDescartarRascunho")?.classList.contains("show")) {
+    event.preventDefault();
+    fecharModalConfirmarDescartarRascunhoFicha();
+    return;
+  }
+  if (document.getElementById("modalConfirmarLimparAssinatura")?.classList.contains("show")) {
+    event.preventDefault();
+    fecharModalConfirmarLimparAssinaturaFicha();
+    return;
+  }
   if (document.getElementById('lgpdModal')?.classList.contains('show')) {
     fecharModalLGPD(false);
   }
@@ -2996,7 +3081,7 @@ window.addEventListener("pagehide", salvarRascunhoAoSair);
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "hidden") salvarRascunhoAoSair();
 });
-document.getElementById("btnDescartarRascunho")?.addEventListener("click", descartarRascunhoEFormulario);
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", abrirModalConfirmarDescartarRascunhoFicha);
 (function initHeaderNav() {
   const btn = document.getElementById("headerMenuBtn");
   const backdrop = document.getElementById("headerNavBackdrop");

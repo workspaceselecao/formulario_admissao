@@ -763,6 +763,10 @@
     border-radius: 14px;
     overflow: hidden;
   }
+  .modal-head.modal-head--atencao {
+    background: #8a4510;
+    color: #fff;
+  }
   .modal-head {
     background: var(--text);
     color: #fff;
@@ -880,7 +884,7 @@
         </button>
       </li>
       <li>
-        <button type="button" class="header-nav-link header-nav-download" onclick="baixarPdfVazio()">
+        <button type="button" class="header-nav-link header-nav-download" onclick="abrirModalAtencaoDownloadModelo()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
@@ -1144,7 +1148,7 @@
       <div id="filBloco2" class="dep-block" style="display:none">
         <div class="subsection-title-row">
           <div class="subsection-title">Filho(a) 2</div>
-          <button type="button" class="btn-excluir-filho" onclick="excluirFilhoModulo(2)" aria-label="Excluir módulo filho 2">✕ Excluir</button>
+          <button type="button" class="btn-excluir-filho" onclick="solicitarConfirmacaoExcluirFilhoModulo(2)" aria-label="Excluir módulo filho 2">✕ Excluir</button>
         </div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil2IncluirLabel">
@@ -1184,7 +1188,7 @@
       <div id="filBloco3" class="dep-block" style="display:none">
         <div class="subsection-title-row">
           <div class="subsection-title">Filho(a) 3</div>
-          <button type="button" class="btn-excluir-filho" onclick="excluirFilhoModulo(3)" aria-label="Excluir módulo filho 3">✕ Excluir</button>
+          <button type="button" class="btn-excluir-filho" onclick="solicitarConfirmacaoExcluirFilhoModulo(3)" aria-label="Excluir módulo filho 3">✕ Excluir</button>
         </div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil3IncluirLabel">
@@ -1224,7 +1228,7 @@
       <div id="filBloco4" class="dep-block" style="display:none">
         <div class="subsection-title-row">
           <div class="subsection-title">Filho(a) 4</div>
-          <button type="button" class="btn-excluir-filho" onclick="excluirFilhoModulo(4)" aria-label="Excluir módulo filho 4">✕ Excluir</button>
+          <button type="button" class="btn-excluir-filho" onclick="solicitarConfirmacaoExcluirFilhoModulo(4)" aria-label="Excluir módulo filho 4">✕ Excluir</button>
         </div>
         <div class="check-group" style="margin-bottom:14px">
           <label class="check-label" id="fil4IncluirLabel">
@@ -1328,6 +1332,56 @@
   </div>
 </div>
 
+<div id="modalAtencaoDownloadModelo" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAtencaoDownloadTitulo">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalAtencaoDownloadTitulo">ATENÇÃO</div>
+    <div class="modal-body">
+      Antes de baixar o <strong>modelo em branco</strong>, defina neste formulário o <strong>Estado (UF)</strong> e a <strong>cidade</strong> dos campos correspondentes — o arquivo PDF adequado é escolhido conforme essa localidade.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="modalAtencaoDownloadFecharBtn" class="btn-modal cancel">Fechar</button>
+      <button type="button" id="modalAtencaoDownloadContinuarBtn" class="btn-modal confirm">Prosseguir com o download</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalDescartarAssistTitulo">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalDescartarAssistTitulo">Descartar rascunho</div>
+    <div class="modal-body">
+      O rascunho guardado neste navegador e os dados atualmente no formulário serão apagados. Esta ação não pode ser desfeita.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDescartarAssistCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalDescartarAssistConfirmar" class="btn-modal confirm">Sim, descartar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarLimparAssinatura" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalLimparAssinAssistTitulo">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalLimparAssinAssistTitulo">Limpar assinatura</div>
+    <div class="modal-body">
+      O traço da assinatura manuscrita será apagado da área de desenho. Deseja continuar?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalLimparAssinAssistCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalLimparAssinAssistConfirmar" class="btn-modal confirm">Sim, limpar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarExcluirFilho" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalExcluirFilhoTitulo">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalExcluirFilhoTitulo">Excluir dependente</div>
+    <div class="modal-body" id="modalConfirmarExcluirFilhoTexto"></div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalExcluirFilhoCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalExcluirFilhoConfirmar" class="btn-modal confirm">Sim, excluir</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 /* Caminhos a partir da raiz do sítio; evitam 404 com rotas do tipo /assistencia_medica (sem e sem barra). */
@@ -1421,6 +1475,7 @@ async function carregarTemplateParaCidadeSelecionada() {
 }
 const NUM_FILHOS = 4;
 let filhosVisiveis = 1;
+let excluirFilhoModuloNumeroPendente = null;
 const PDF_FONT_TEXTO = 7;
 const PDF_FONT_EVIDENCIA = 5.5;
 let assinaturaCanvasCtx = null;
@@ -1520,6 +1575,36 @@ function excluirFilhoModulo(n) {
   atualizarBotoesFilhos();
   atualizarTodosDnvFilhos();
   agendarSalvarRascunho();
+}
+
+function solicitarConfirmacaoExcluirFilhoModulo(n) {
+  if (n < 2 || n > filhosVisiveis) return;
+  excluirFilhoModuloNumeroPendente = n;
+  const el = document.getElementById("modalConfirmarExcluirFilhoTexto");
+  if (el) {
+    let msg = `Os dados informados para o filho(a) ${n} serão removidos. Esta ação não pode ser desfeita automaticamente no formulário.`;
+    if (n < filhosVisiveis) {
+      msg += " Os dados dos dependentes seguintes nesta lista serão reorganizados.";
+    }
+    el.textContent = msg;
+  }
+  document.getElementById("modalConfirmarExcluirFilho")?.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("btnModalExcluirFilhoConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarExcluirFilhoAssistencia() {
+  document.getElementById("modalConfirmarExcluirFilho")?.classList.remove("show");
+  sincronizarBodyModalOpenAssistencia();
+}
+function cancelarModalExcluirFilhoAssistencia() {
+  excluirFilhoModuloNumeroPendente = null;
+  fecharModalConfirmarExcluirFilhoAssistencia();
+}
+function confirmarExcluirFilhoModuloAssistencia() {
+  const n = excluirFilhoModuloNumeroPendente;
+  excluirFilhoModuloNumeroPendente = null;
+  fecharModalConfirmarExcluirFilhoAssistencia();
+  if (n != null && n >= 2 && n <= filhosVisiveis) excluirFilhoModulo(n);
 }
 function adicionarFilhoExtra() {
   if (filhosVisiveis >= NUM_FILHOS) return;
@@ -1825,8 +1910,14 @@ function initAssinaturaCanvas() {
   canvas.addEventListener("pointercancel", fim);
   canvas.addEventListener("pointerleave", fim);
   document.getElementById("btnLimparAssinatura")?.addEventListener("click", () => {
-    limparAssinaturaCanvas();
-    agendarSalvarRascunho();
+    const temAlgo = assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida();
+    if (!temAlgo) {
+      showToast("Não há assinatura para limpar.", true);
+      return;
+    }
+    document.getElementById("modalConfirmarLimparAssinatura")?.classList.add("show");
+    document.body.classList.add("modal-open");
+    setTimeout(() => document.getElementById("btnModalLimparAssinAssistConfirmar")?.focus(), 0);
   });
 }
 function limparAssinaturaCanvas() {
@@ -2268,6 +2359,10 @@ function showToast(msg, ok = true) {
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 3200);
 }
+function sincronizarBodyModalOpenAssistencia() {
+  if (document.querySelector(".modal-overlay.show")) document.body.classList.add("modal-open");
+  else document.body.classList.remove("modal-open");
+}
 let lgpdResolver = null;
 function abrirModalLGPD() {
   const modal = document.getElementById("lgpdModal");
@@ -2282,7 +2377,7 @@ function abrirModalLGPD() {
 function fecharModalLGPD(decisao) {
   const modal = document.getElementById("lgpdModal");
   if (modal) modal.classList.remove("show");
-  document.body.classList.remove("modal-open");
+  sincronizarBodyModalOpenAssistencia();
   const fn = lgpdResolver;
   lgpdResolver = null;
   if (fn) fn(!!decisao);
@@ -2309,7 +2404,7 @@ function abrirModalDocsDependentes() {
 function fecharModalDocsDependentes() {
   const modal = document.getElementById("modalDocsDependentes");
   if (modal) modal.classList.remove("show");
-  document.body.classList.remove("modal-open");
+  sincronizarBodyModalOpenAssistencia();
   const fn = docsDepResolver;
   docsDepResolver = null;
   if (fn) fn();
@@ -2701,11 +2796,7 @@ function tentarRestaurarRascunho() {
   }
 }
 
-document.getElementById("btnDescartarRascunho")?.addEventListener("click", () => {
-  limparRascunhoLocal();
-  limparDadosFormulario();
-  showToast("Rascunho descartado.", true);
-});
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", abrirModalConfirmarDescartarRascunhoAssistencia);
 
 (function initHeaderNav() {
   const btn = document.getElementById("headerMenuBtn");
@@ -2909,7 +3000,22 @@ async function gerarPDF() {
   }
 }
 
-async function baixarPdfVazio() {
+function fecharModalAtencaoDownloadModelo() {
+  const modal = document.getElementById("modalAtencaoDownloadModelo");
+  if (!modal?.classList.contains("show")) return;
+  modal.classList.remove("show");
+  sincronizarBodyModalOpenAssistencia();
+}
+
+function abrirModalAtencaoDownloadModelo() {
+  const modal = document.getElementById("modalAtencaoDownloadModelo");
+  if (!modal) return;
+  modal.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("modalAtencaoDownloadContinuarBtn")?.focus(), 0);
+}
+
+async function baixarPdfVazioExecucao() {
   try {
     if (!v("uf")) {
       showToast("Selecione o estado e a cidade para baixar o modelo correto.", false);
@@ -2941,6 +3047,96 @@ async function baixarPdfVazio() {
     showToast("Não foi possível baixar o PDF vazio.", false);
   }
 }
+
+document.getElementById("modalAtencaoDownloadFecharBtn")?.addEventListener("click", fecharModalAtencaoDownloadModelo);
+document.getElementById("modalAtencaoDownloadContinuarBtn")?.addEventListener("click", async () => {
+  fecharModalAtencaoDownloadModelo();
+  await baixarPdfVazioExecucao();
+});
+document.getElementById("modalAtencaoDownloadModelo")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalAtencaoDownloadModelo") fecharModalAtencaoDownloadModelo();
+});
+
+function fecharModalConfirmarDescartarRascunhoAssistencia() {
+  document.getElementById("modalConfirmarDescartarRascunho")?.classList.remove("show");
+  sincronizarBodyModalOpenAssistencia();
+}
+function abrirModalConfirmarDescartarRascunhoAssistencia() {
+  document.getElementById("modalConfirmarDescartarRascunho")?.classList.add("show");
+  document.body.classList.add("modal-open");
+  setTimeout(() => document.getElementById("btnModalDescartarAssistConfirmar")?.focus(), 0);
+}
+function confirmarDescartarRascunhoAssistencia() {
+  fecharModalConfirmarDescartarRascunhoAssistencia();
+  limparRascunhoLocal();
+  limparDadosFormulario();
+  showToast("Rascunho descartado.", true);
+}
+
+function fecharModalConfirmarLimparAssinaturaAssistencia() {
+  document.getElementById("modalConfirmarLimparAssinatura")?.classList.remove("show");
+  sincronizarBodyModalOpenAssistencia();
+}
+function confirmarLimparAssinaturaAssistenciaExecutar() {
+  fecharModalConfirmarLimparAssinaturaAssistencia();
+  limparAssinaturaCanvas();
+  agendarSalvarRascunho();
+}
+
+document.getElementById("btnModalDescartarAssistCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoAssistencia);
+document.getElementById("btnModalDescartarAssistConfirmar")?.addEventListener("click", confirmarDescartarRascunhoAssistencia);
+document.getElementById("modalConfirmarDescartarRascunho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarDescartarRascunho") fecharModalConfirmarDescartarRascunhoAssistencia();
+});
+
+document.getElementById("btnModalLimparAssinAssistCancelar")?.addEventListener("click", fecharModalConfirmarLimparAssinaturaAssistencia);
+document.getElementById("btnModalLimparAssinAssistConfirmar")?.addEventListener("click", confirmarLimparAssinaturaAssistenciaExecutar);
+document.getElementById("modalConfirmarLimparAssinatura")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarLimparAssinatura") fecharModalConfirmarLimparAssinaturaAssistencia();
+});
+
+document.getElementById("btnModalExcluirFilhoCancelar")?.addEventListener("click", cancelarModalExcluirFilhoAssistencia);
+document.getElementById("btnModalExcluirFilhoConfirmar")?.addEventListener("click", confirmarExcluirFilhoModuloAssistencia);
+document.getElementById("modalConfirmarExcluirFilho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarExcluirFilho") cancelarModalExcluirFilhoAssistencia();
+});
+
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key !== "Escape") return;
+    if (document.getElementById("modalConfirmarDescartarRascunho")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalConfirmarDescartarRascunhoAssistencia();
+      return;
+    }
+    if (document.getElementById("modalConfirmarLimparAssinatura")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalConfirmarLimparAssinaturaAssistencia();
+      return;
+    }
+    if (document.getElementById("modalConfirmarExcluirFilho")?.classList.contains("show")) {
+      e.preventDefault();
+      cancelarModalExcluirFilhoAssistencia();
+      return;
+    }
+    if (document.getElementById("modalAtencaoDownloadModelo")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalAtencaoDownloadModelo();
+      return;
+    }
+    if (document.getElementById("lgpdModal")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalLGPD(false);
+      return;
+    }
+    if (document.getElementById("modalDocsDependentes")?.classList.contains("show")) {
+      e.preventDefault();
+      fecharModalDocsDependentes();
+    }
+  },
+  true
+);
 
 ["cpf", "conj_cpf", "fil1_cpf", "fil2_cpf", "fil3_cpf", "fil4_cpf"].forEach((id) => {
   const el = document.getElementById(id);
