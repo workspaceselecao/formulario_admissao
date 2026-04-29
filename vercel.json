@@ -2,6 +2,21 @@
   "cleanUrls": true,
   "redirects": [
     {
+      "source": "/politica-de-privacidade",
+      "destination": "/Docs/privacy-policy.md",
+      "permanent": true
+    },
+    {
+      "source": "/termos-de-uso",
+      "destination": "/Docs/terms-of-use.md",
+      "permanent": true
+    },
+    {
+      "source": "/privacidade-e-seguranca",
+      "destination": "/Docs/index.html",
+      "permanent": true
+    },
+    {
       "source": "/privacy-policy.md",
       "destination": "/Docs/privacy-policy.md",
       "permanent": true
