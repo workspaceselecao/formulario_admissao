@@ -472,7 +472,12 @@
     margin-top: 8px;
   }
   .btn-export {
-    background: var(--accent);
+    --btn-fill-a: #3b2447;
+    --btn-fill-b: #efa27f;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(to top right, var(--btn-fill-a), var(--btn-fill-b));
     color: #fff;
     border: none;
     padding: 12px 28px;
@@ -484,9 +489,67 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 2px 8px rgba(1,66,106,0.28);
+    transition: filter 0.2s, transform 0.12s;
+    text-shadow: 0 1px 2px rgba(30, 14, 38, 0.35);
+    animation: btn-export-spark-glow 2.5s ease-in-out infinite;
+    box-shadow:
+      0 2px 14px rgba(59, 36, 71, 0.38),
+      0 0 22px rgba(239, 162, 127, 0.28);
   }
-  .btn-export:hover { background: var(--accent-dark); }
+  .btn-export::before {
+    content: "";
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -75%;
+    width: 58%;
+    background: linear-gradient(
+      88deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.06) 62%,
+      transparent 100%
+    );
+    transform: skewX(-16deg);
+    animation: btn-export-spark-sweep 2.75s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .btn-export:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 22px rgba(59, 36, 71, 0.42),
+      0 0 32px rgba(239, 162, 127, 0.48),
+      0 0 46px rgba(255, 228, 210, 0.35);
+  }
+  .btn-export:active { transform: translateY(0); filter: brightness(0.98); }
+  .btn-export svg { width: 16px; height: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+  @keyframes btn-export-spark-glow {
+    0%, 100% {
+      box-shadow:
+        0 2px 14px rgba(59, 36, 71, 0.38),
+        0 0 20px rgba(239, 162, 127, 0.26),
+        0 0 36px rgba(239, 162, 127, 0.12);
+    }
+    50% {
+      box-shadow:
+        0 3px 18px rgba(59, 36, 71, 0.46),
+        0 0 34px rgba(239, 162, 127, 0.52),
+        0 0 52px rgba(255, 235, 220, 0.42);
+    }
+  }
+  @keyframes btn-export-spark-sweep {
+    0% { transform: skewX(-16deg) translateX(-8%); opacity: 0; }
+    8% { opacity: 1; }
+    42% { transform: skewX(-16deg) translateX(320%); opacity: 1; }
+    43%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-export { animation: none; box-shadow: 0 2px 14px rgba(59, 36, 71, 0.38); }
+    .btn-export::before { animation: none; opacity: 0; }
+  }
   .btn-download-empty {
     background: #fff;
     color: var(--accent);
