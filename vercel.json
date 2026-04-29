@@ -1,5 +1,22 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/privacy-policy.md",
+      "destination": "/Docs/privacy-policy.md",
+      "permanent": true
+    },
+    {
+      "source": "/terms-of-use.md",
+      "destination": "/Docs/terms-of-use.md",
+      "permanent": true
+    },
+    {
+      "source": "/Forms/:path*",
+      "destination": "/Docs/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/",
