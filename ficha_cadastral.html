@@ -378,6 +378,34 @@
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
 
+  /* Primeiro emprego | PIS (compacto) | Deficiência — mesma linha no desktop */
+  .emprego-def-row {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 14px 18px;
+    width: 100%;
+  }
+  .emprego-def-row > .field--primeiro-emprego {
+    flex: 0 0 auto;
+  }
+  .emprego-def-row > .field--pis {
+    flex: 0 1 auto;
+    max-width: min(11rem, 20%);
+    min-width: 8.75rem;
+  }
+  .emprego-def-row > .field--pis input {
+    width: 100%;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  .emprego-def-row > .field--deficiencia {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
   /* ── CHECKBOXES ── */
   .check-group {
     display: flex;
@@ -743,6 +771,22 @@
     .dep-table td:nth-child(3)::before { content: "CPF"; }
     .dep-actions { justify-content: stretch; }
     .btn-add-dependente { width: 100%; }
+    .emprego-def-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .emprego-def-row > .field--deficiencia {
+      margin-left: 0;
+    }
+    .emprego-def-row > .field--pis {
+      max-width: none;
+      width: 100%;
+      min-width: 0;
+    }
+    .emprego-def-row > .field--pis input {
+      font-size: 14px;
+      padding: 10px 14px;
+    }
   }
 </style>
 </head>
@@ -803,23 +847,25 @@
             <option>SEPARADO(A)</option>
           </select>
         </div>
-        <div class="field">
-          <label>Primeiro Emprego?</label>
-          <div class="radio-inline" style="margin-top:4px">
-            <label class="radio-label"><input type="radio" name="primeiroEmprego" value="sim" onchange="togglePIS(this)"> Sim</label>
-            <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
+        <div class="col-span-2 emprego-def-row">
+          <div class="field field--primeiro-emprego">
+            <label>Primeiro Emprego?</label>
+            <div class="radio-inline" style="margin-top:4px">
+              <label class="radio-label"><input type="radio" name="primeiroEmprego" value="sim" onchange="togglePIS(this)"> Sim</label>
+              <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
+            </div>
           </div>
-        </div>
-        <div class="field">
-          <label>Possui Deficiência?</label>
-          <div class="radio-inline" style="margin-top:4px">
-            <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
-            <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
+          <div class="field field--pis" id="pisField" style="display:none">
+            <label>PIS <span class="req">*</span></label>
+            <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
           </div>
-        </div>
-        <div class="field col-span-2" id="pisField" style="display:none">
-          <label>PIS <span class="req">*</span></label>
-          <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
+          <div class="field field--deficiencia">
+            <label>Possui Deficiência?</label>
+            <div class="radio-inline" style="margin-top:4px">
+              <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
+              <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1509,7 +1555,7 @@ function togglePIS(el){
   const precisaPis = el.value === 'nao';
   const pisField = document.getElementById('pisField');
   const pisEl = document.getElementById('pis');
-  if (pisField) pisField.style.display = precisaPis ? 'block' : 'none';
+  if (pisField) pisField.style.display = precisaPis ? "" : "none";
   if (pisEl) {
     pisEl.required = precisaPis;
     if (!precisaPis) pisEl.classList.remove('invalid');
