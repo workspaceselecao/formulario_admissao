@@ -794,13 +794,13 @@
         <div class="field">
           <label>Estado Civil <span class="req">*</span></label>
           <select id="estadoCivil">
-            <option value="">Selecione...</option>
-            <option>Solteiro(a)</option>
-            <option>Casado(a)</option>
-            <option>Divorciado(a)</option>
-            <option>Viúvo(a)</option>
-            <option>União Estável</option>
-            <option>Separado(a)</option>
+            <option value="">SELECIONE...</option>
+            <option>SOLTEIRO(A)</option>
+            <option>CASADO(A)</option>
+            <option>DIVORCIADO(A)</option>
+            <option>VIÚVO(A)</option>
+            <option>UNIÃO ESTÁVEL</option>
+            <option>SEPARADO(A)</option>
           </select>
         </div>
         <div class="field">
@@ -819,7 +819,7 @@
         </div>
         <div class="field col-span-2" id="pisField" style="display:none">
           <label>PIS <span class="req">*</span></label>
-          <input type="text" id="pis" placeholder="000.00000.00-0">
+          <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
         </div>
       </div>
 
@@ -1119,6 +1119,38 @@ function maskCPF(el) {
   el.value=v;
 }
 function maskCPFInput(el){ maskCPF(el); }
+/** PIS/NIS: 000.00000.00-0 (11 dígitos). Sempre limita a 11 dígitos na origem. */
+function maskPIS(el) {
+  if (!el) return;
+  const d = String(el.value ?? "")
+    .normalize("NFKC")
+    .replace(/\D/g, "")
+    .slice(0, 11);
+  let v = "";
+  if (d.length <= 3) {
+    v = d;
+  } else if (d.length <= 8) {
+    v = `${d.slice(0, 3)}.${d.slice(3)}`;
+  } else if (d.length <= 10) {
+    v = `${d.slice(0, 3)}.${d.slice(3, 8)}.${d.slice(8)}`;
+  } else {
+    v = `${d.slice(0, 3)}.${d.slice(3, 8)}.${d.slice(8, 10)}-${d.slice(10)}`;
+  }
+  el.value = v;
+}
+/** Listeners dedicados: máscara não depende do handler inline e corre na fase capture antes de outros listeners. */
+function initPisMask() {
+  const pisEl = document.getElementById("pis");
+  if (!pisEl) return;
+  pisEl.setAttribute("maxlength", "14");
+  pisEl.maxLength = 14;
+  const aplicar = () => maskPIS(pisEl);
+  pisEl.addEventListener("input", aplicar, true);
+  pisEl.addEventListener("blur", aplicar);
+  pisEl.addEventListener("paste", () => queueMicrotask(aplicar));
+  pisEl.addEventListener("compositionend", aplicar);
+  aplicar();
+}
 function maskCep(el){
   let v=el.value.replace(/\D/g,'').slice(0,8);
   if(v.length>5) v=v.replace(/(\d{5})(\d{0,3})/,'$1-$2');
@@ -1746,6 +1778,8 @@ function aplicarEstadoRascunho(obj) {
     const el = document.getElementById(id);
     if (el && el.value) maskMoeda(el);
   });
+  const pisRestaurado = document.getElementById("pis");
+  if (pisRestaurado && pisRestaurado.value) maskPIS(pisRestaurado);
 
   const rad = obj.radios || {};
   marcarRadioRestaurar("primeiroEmprego", rad.primeiroEmprego);
@@ -2526,9 +2560,10 @@ if (!tentarRestaurarRascunho()) {
   }
 });
 document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((el) => {
-  if (["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].includes(el.id)) return;
+  if (["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal", "pis"].includes(el.id)) return;
   el.addEventListener("input", () => aplicarMaiusculas(el));
 });
+initPisMask();
 ["vtOnibusVal", "vtMetroVal", "vtInterVal", "vtIntegracaoVal"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {

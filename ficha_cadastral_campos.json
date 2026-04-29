@@ -54,7 +54,7 @@
           "pagina": 1,
           "coordenadas": { "x": 19, "y": 608, "largura": 378, "altura": 12 },
           "obrigatorio": false,
-          "opcoes": ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)", "União Estável"]
+          "opcoes": ["SOLTEIRO(A)", "CASADO(A)", "DIVORCIADO(A)", "VIÚVO(A)", "UNIÃO ESTÁVEL", "SEPARADO(A)"]
         },
         "primeiro_emprego": {
           "label": "Primeiro Emprego",
