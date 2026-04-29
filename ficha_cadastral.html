@@ -122,7 +122,8 @@
   .header-nav-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 190;
+    /* Acima do .page-header (z-index 100) para cobrir toda a viewport */
+    z-index: 12000;
     background: rgba(10, 10, 10, 0.45);
     backdrop-filter: blur(2px);
     opacity: 0;
@@ -139,7 +140,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 195;
+    z-index: 12001;
     width: min(320px, 92vw);
     height: 100%;
     max-height: 100dvh;
@@ -151,7 +152,7 @@
     pointer-events: none;
     transition: transform 0.24s ease, visibility 0.24s ease;
     overflow: auto;
-    padding: 72px 18px 28px;
+    padding: 16px 18px 28px;
     box-sizing: border-box;
   }
   body.header-nav-open .header-nav-panel {
@@ -159,8 +160,44 @@
     visibility: visible;
     pointer-events: auto;
   }
-  body.header-nav-open .page-header {
-    z-index: 200;
+  .header-nav-panel-head {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .header-nav-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 10px;
+    border: 1.5px solid rgba(1, 66, 106, 0.2);
+    background: var(--accent-soft);
+    box-shadow: 0 1px 2px rgba(12, 40, 68, 0.06);
+    cursor: pointer;
+    color: var(--accent);
+    transition: background 0.18s, border-color 0.18s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+    font: inherit;
+  }
+  .header-nav-close-btn:hover {
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(1, 66, 106, 0.14);
+  }
+  .header-nav-close-btn:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(1, 66, 106, 0.28);
+  }
+  .header-nav-close-btn svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
   }
   .header-nav-panel-inner {
     display: flex;
@@ -992,6 +1029,11 @@
 <div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
 <nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-label="Menu do formulário" aria-hidden="true">
   <div class="header-nav-panel-inner">
+    <div class="header-nav-panel-head">
+      <button type="button" class="header-nav-close-btn" id="headerNavCloseBtn" aria-label="Fechar menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
     <div class="header-nav-row">
       <a href="index.html" class="header-nav-item">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -2942,6 +2984,7 @@ document.getElementById("btnDescartarRascunho")?.addEventListener("click", desca
     toggleMenu();
   });
   backdrop.addEventListener("click", closeMenu);
+  document.getElementById("headerNavCloseBtn")?.addEventListener("click", closeMenu);
 
   panel.querySelectorAll('a[href]').forEach((a) => {
     a.addEventListener("click", closeMenu);
@@ -2949,12 +2992,17 @@ document.getElementById("btnDescartarRascunho")?.addEventListener("click", desca
   document.getElementById("btnDescartarRascunho")?.addEventListener("click", closeMenu);
   panel.querySelector(".header-nav-download")?.addEventListener("click", closeMenu);
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (!body.classList.contains("header-nav-open")) return;
-    closeMenu();
-    btn.focus();
-  });
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape") return;
+      if (!body.classList.contains("header-nav-open")) return;
+      e.preventDefault();
+      closeMenu();
+      btn.focus();
+    },
+    true
+  );
 })();
 updateProgress();
 carregarCamposSchema();
