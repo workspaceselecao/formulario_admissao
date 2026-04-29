@@ -310,21 +310,13 @@
   .signature-pad-tools { display: flex; justify-content: flex-end; margin-top: 8px; gap: 10px; flex-wrap: wrap; }
   .btn-signature-clear { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
-  .data-triple {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
+  .field input[type="date"] {
+    width: 100%;
+    min-height: 42px;
+    appearance: auto;
+    -webkit-appearance: auto;
   }
-  .data-triple input {
-    width: auto;
-    min-width: 0;
-  }
-  .data-triple .sep {
-    color: var(--text-light);
-    font-weight: 600;
-    user-select: none;
-  }
+
   .radio-inline {
     display: flex;
     flex-wrap: wrap;
@@ -719,23 +711,11 @@
         <div class="dados-datas">
           <div class="field" style="min-width:0">
             <label>Data de Nascimento</label>
-            <div class="data-triple">
-              <input type="text" id="dn_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-              <span class="sep">/</span>
-              <input type="text" id="dn_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-              <span class="sep">/</span>
-              <input type="text" id="dn_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-            </div>
+            <input type="date" id="dataNascimentoFunc" autocomplete="off">
           </div>
           <div class="field" style="min-width:0">
             <label>Data de Admissão</label>
-            <div class="data-triple">
-              <input type="text" id="adm_dia" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-              <span class="sep">/</span>
-              <input type="text" id="adm_mes" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-              <span class="sep">/</span>
-              <input type="text" id="adm_ano" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-            </div>
+            <input type="date" id="dataAdmissaoFunc" autocomplete="off">
           </div>
         </div>
         <div class="dados-cargo-site-tel">
@@ -818,13 +798,7 @@
             </div>
             <div class="field">
               <label>Data de Nascimento <span class="req conj-req">*</span></label>
-              <div class="data-triple">
-                <input type="text" id="conj_d" class="conj-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="conj_m" class="conj-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="conj_y" class="conj-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-              </div>
+              <input type="date" id="conj_nasc" class="conj-field" autocomplete="off">
             </div>
             <div class="field">
               <label>Nº Cartão SUS <span class="req conj-req">*</span></label>
@@ -857,13 +831,7 @@
             </div>
             <div class="field">
               <label>Data de Nascimento <span class="req fil1-req">*</span></label>
-              <div class="data-triple">
-                <input type="text" id="fil1_d" class="fil1-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil1_m" class="fil1-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil1_y" class="fil1-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-              </div>
+              <input type="date" id="fil1_nasc" class="fil1-field" autocomplete="off">
             </div>
             <div class="field">
               <label>Nº Cartão SUS <span class="req fil1-req">*</span></label>
@@ -907,13 +875,7 @@
             </div>
             <div class="field">
               <label>Data de Nascimento <span class="req fil2-req">*</span></label>
-              <div class="data-triple">
-                <input type="text" id="fil2_d" class="fil2-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil2_m" class="fil2-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil2_y" class="fil2-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-              </div>
+              <input type="date" id="fil2_nasc" class="fil2-field" autocomplete="off">
             </div>
             <div class="field">
               <label>Nº Cartão SUS <span class="req fil2-req">*</span></label>
@@ -953,13 +915,7 @@
             </div>
             <div class="field">
               <label>Data de Nascimento <span class="req fil3-req">*</span></label>
-              <div class="data-triple">
-                <input type="text" id="fil3_d" class="fil3-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil3_m" class="fil3-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil3_y" class="fil3-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-              </div>
+              <input type="date" id="fil3_nasc" class="fil3-field" autocomplete="off">
             </div>
             <div class="field">
               <label>Nº Cartão SUS <span class="req fil3-req">*</span></label>
@@ -999,13 +955,7 @@
             </div>
             <div class="field">
               <label>Data de Nascimento <span class="req fil4-req">*</span></label>
-              <div class="data-triple">
-                <input type="text" id="fil4_d" class="fil4-field" inputmode="numeric" maxlength="2" placeholder="DD" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil4_m" class="fil4-field" inputmode="numeric" maxlength="2" placeholder="MM" style="max-width:72px">
-                <span class="sep">/</span>
-                <input type="text" id="fil4_y" class="fil4-field" inputmode="numeric" maxlength="4" placeholder="AAAA" style="max-width:96px">
-              </div>
+              <input type="date" id="fil4_nasc" class="fil4-field" autocomplete="off">
             </div>
             <div class="field">
               <label>Nº Cartão SUS <span class="req fil4-req">*</span></label>
@@ -1045,7 +995,7 @@
         </div>
         <div class="field">
           <label>Data <span class="req">*</span></label>
-          <input type="date" id="dataAssinatura" inputmode="numeric">
+          <input type="date" id="dataAssinatura" autocomplete="off">
         </div>
       </div>
     </div>
@@ -1197,15 +1147,13 @@ const NEONATO_ATE_DIAS_VIDA = 28;
  * Diferença em dias (calendário local) entre a data de nascimento e hoje, ou `null` se a data for inválida.
  */
 function idadeFilhoEmDiasAteHoje(n) {
-  const d = v(`fil${n}_d`);
-  const m = v(`fil${n}_m`);
-  const y = v(`fil${n}_y`);
-  if (!d || !m || !y) return null;
-  const di = parseInt(d, 10);
-  const mi = parseInt(m, 10);
-  const yi = parseInt(y, 10);
+  const iso = v(`fil${n}_nasc`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const [ys, ms, ds] = iso.split("-");
+  const yi = parseInt(ys, 10);
+  const mi = parseInt(ms, 10);
+  const di = parseInt(ds, 10);
   if (Number.isNaN(di) || Number.isNaN(mi) || Number.isNaN(yi)) return null;
-  if (mi < 1 || mi > 12 || di < 1 || di > 31) return null;
   const birth = new Date(yi, mi - 1, di);
   if (birth.getFullYear() !== yi || birth.getMonth() !== mi - 1 || birth.getDate() !== di) return null;
   const today = new Date();
@@ -1248,9 +1196,7 @@ function idsCamposFilho(n) {
   return [
     `fil${n}_nome`,
     `fil${n}_cpf`,
-    `fil${n}_d`,
-    `fil${n}_m`,
-    `fil${n}_y`,
+    `fil${n}_nasc`,
     `fil${n}_sus`,
     `fil${n}_nomemae`,
     `fil${n}_nascvivo`
@@ -1529,12 +1475,6 @@ async function buscarEnderecoPorCep() {
     showToast("Não foi possível consultar o CEP. Verifique a conexão e tente de novo.", false);
   }
 }
-function maskDigitos2(el) {
-  el.value = el.value.replace(/\D/g, "").slice(0, 2);
-}
-function maskDigitos4(el) {
-  el.value = el.value.replace(/\D/g, "").slice(0, 4);
-}
 function aplicarMaiusculas(el) {
   const o = el.value;
   const u = o.toLocaleUpperCase("pt-BR");
@@ -1779,6 +1719,45 @@ function preencherDataSegmentada(page, font, campoSchema, dia, mes, ano) {
   if (y) escreverTextoCampoCoord(page, font, s.ano.coordenadas, y);
 }
 
+/** DD/MM/AAAA legados → yyyy-mm-dd para `<input type="date">` */
+function isoDesdeSegmentado(dia, mes, ano) {
+  const dd = String(dia ?? "").replace(/\D/g, "").padStart(2, "0").slice(0, 2);
+  const mm = String(mes ?? "").replace(/\D/g, "").padStart(2, "0").slice(0, 2);
+  const yy = String(ano ?? "").replace(/\D/g, "").slice(0, 4);
+  if (dd.length !== 2 || mm.length !== 2 || yy.length !== 4) return "";
+  const di = parseInt(dd, 10);
+  const mi = parseInt(mm, 10);
+  const yi = parseInt(yy, 10);
+  if (Number.isNaN(di) || Number.isNaN(mi) || Number.isNaN(yi)) return "";
+  if (mi < 1 || mi > 12 || di < 1 || di > 31) return "";
+  const test = new Date(yi, mi - 1, di);
+  if (test.getFullYear() !== yi || test.getMonth() !== mi - 1 || test.getDate() !== di) return "";
+  return `${yy}-${mm}-${dd}`;
+}
+
+/** yyyy-mm-dd → dia/mês/ano para preencherDataSegmentada (PDF) */
+function isoParaPartesPdf(isoStr) {
+  const s = String(isoStr || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return { dia: "", mes: "", ano: "" };
+  const [y, m, d] = s.split("-");
+  return { dia: d, mes: m, ano: y };
+}
+
+/** Migra rascunhos v4 (dia/mês/ano separados) para os ids únicos */
+function migrarCamposDataIsoAntigos(c) {
+  if (!c || typeof c !== "object") return;
+  const mig = (isoId, dk, mk, ak) => {
+    if (c[isoId]) return;
+    if (c[dk] == null && c[mk] == null && c[ak] == null) return;
+    const iso = isoDesdeSegmentado(c[dk], c[mk], c[ak]);
+    if (iso) c[isoId] = iso;
+  };
+  mig("dataNascimentoFunc", "dn_dia", "dn_mes", "dn_ano");
+  mig("dataAdmissaoFunc", "adm_dia", "adm_mes", "adm_ano");
+  mig("conj_nasc", "conj_d", "conj_m", "conj_y");
+  for (let n = 1; n <= 4; n += 1) mig(`fil${n}_nasc`, `fil${n}_d`, `fil${n}_m`, `fil${n}_y`);
+}
+
 function v(id) {
   return (document.getElementById(id)?.value || "").trim();
 }
@@ -1869,7 +1848,7 @@ async function validarCamposObrigatorios() {
     if (vazio) faltantes.push({ id, nome });
   };
 
-  ["conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae"].forEach((id) => marcarCampoInvalido(id, false));
+  ["conj_nome", "conj_cpf", "conj_nasc", "conj_sus", "conj_nomemae"].forEach((id) => marcarCampoInvalido(id, false));
   for (let fn = 1; fn <= NUM_FILHOS; fn++) {
     [
       `fil${fn}_nome`,
@@ -1922,9 +1901,9 @@ async function validarCamposObrigatorios() {
     if (document.getElementById("conj_incluir")?.checked) {
       add("conj_nome", "Nome do cônjuge");
       add("conj_cpf", "CPF do cônjuge");
-      const dnCOk = !!(v("conj_d") && v("conj_m") && v("conj_y"));
-      ["conj_d", "conj_m", "conj_y"].forEach((id) => marcarCampoInvalido(id, !dnCOk));
-      if (!dnCOk) faltantes.push({ id: "conj_d", nome: "Data de nascimento do cônjuge" });
+      const dnCOk = !!v("conj_nasc");
+      marcarCampoInvalido("conj_nasc", !dnCOk);
+      if (!dnCOk) faltantes.push({ id: "conj_nasc", nome: "Data de nascimento do cônjuge" });
       add("conj_sus", "SUS do cônjuge");
       add("conj_nomemae", "Nome da mãe do cônjuge");
       if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
@@ -1942,9 +1921,9 @@ async function validarCamposObrigatorios() {
       const rot = `filho(a) ${fn}`;
       add(`fil${fn}_nome`, `Nome (${rot})`);
       add(`fil${fn}_cpf`, `CPF (${rot})`);
-      const dnFOk = !!(v(`fil${fn}_d`) && v(`fil${fn}_m`) && v(`fil${fn}_y`));
-      [`fil${fn}_d`, `fil${fn}_m`, `fil${fn}_y`].forEach((id) => marcarCampoInvalido(id, !dnFOk));
-      if (!dnFOk) faltantes.push({ id: `fil${fn}_d`, nome: `Data de nascimento (${rot})` });
+      const dnFOk = !!v(`fil${fn}_nasc`);
+      marcarCampoInvalido(`fil${fn}_nasc`, !dnFOk);
+      if (!dnFOk) faltantes.push({ id: `fil${fn}_nasc`, nome: `Data de nascimento (${rot})` });
       add(`fil${fn}_sus`, `SUS (${rot})`);
       add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
       if (filhoDeveExibirCampoDnv(fn)) {
@@ -2110,17 +2089,17 @@ function limparDadosFormulario() {
   limparAssinaturaCanvas();
 }
 
-const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v4";
+const RASCUNHO_STORAGE_KEY = "assistencia_medica_rascunho_v5";
 const RASCUNHO_IDS = [
   "uf", "cidade", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
-  "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
+  "dataNascimentoFunc", "dataAdmissaoFunc",
   "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
   "telefone",
-  "conj_nome", "conj_cpf", "conj_d", "conj_m", "conj_y", "conj_sus", "conj_nomemae",
-  "fil1_nome", "fil1_cpf", "fil1_d", "fil1_m", "fil1_y", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
-  "fil2_nome", "fil2_cpf", "fil2_d", "fil2_m", "fil2_y", "fil2_sus", "fil2_nomemae", "fil2_nascvivo",
-  "fil3_nome", "fil3_cpf", "fil3_d", "fil3_m", "fil3_y", "fil3_sus", "fil3_nomemae", "fil3_nascvivo",
-  "fil4_nome", "fil4_cpf", "fil4_d", "fil4_m", "fil4_y", "fil4_sus", "fil4_nomemae", "fil4_nascvivo",
+  "conj_nome", "conj_cpf", "conj_nasc", "conj_sus", "conj_nomemae",
+  "fil1_nome", "fil1_cpf", "fil1_nasc", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
+  "fil2_nome", "fil2_cpf", "fil2_nasc", "fil2_sus", "fil2_nomemae", "fil2_nascvivo",
+  "fil3_nome", "fil3_cpf", "fil3_nasc", "fil3_sus", "fil3_nomemae", "fil3_nascvivo",
+  "fil4_nome", "fil4_cpf", "fil4_nasc", "fil4_sus", "fil4_nomemae", "fil4_nascvivo",
   "assinaturaName", "dataAssinatura"
 ];
 let rascunhoSalvarTimer = null;
@@ -2148,7 +2127,7 @@ function coletarEstadoRascunho() {
     assinaturaCanvasPng = null;
   }
   return {
-    v: 4,
+    v: 5,
     t: Date.now(),
     campos,
     assinaturaCanvasPng,
@@ -2163,7 +2142,9 @@ function coletarEstadoRascunho() {
 }
 
 function aplicarEstadoRascunho(obj) {
-  const c = obj.campos || {};
+  const src = obj.campos || {};
+  const c = { ...src };
+  migrarCamposDataIsoAntigos(c);
   RASCUNHO_IDS.forEach((id) => {
     if (c[id] === undefined) return;
     const el = document.getElementById(id);
@@ -2334,9 +2315,8 @@ function tentarAplicarCopiaFichaCadastral() {
             maskCPF(cfp);
           }
         }
-        if (dep.d) setIf(`fil${fn}_d`, String(dep.d).replace(/\D/g, "").padStart(2, "0").slice(0, 2));
-        if (dep.m) setIf(`fil${fn}_m`, String(dep.m).replace(/\D/g, "").padStart(2, "0").slice(0, 2));
-        if (dep.y) setIf(`fil${fn}_y`, String(dep.y).replace(/\D/g, "").slice(0, 4));
+        const isoFil = isoDesdeSegmentado(dep.d, dep.m, dep.y);
+        if (isoFil) setIf(`fil${fn}_nasc`, isoFil);
       });
     }
     atualizarTodosDnvFilhos();
@@ -2403,7 +2383,7 @@ function tentarRestaurarRascunho() {
     const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
-    if (!obj || (obj.v !== 1 && obj.v !== 2 && obj.v !== 3 && obj.v !== 4) || !obj.campos) return false;
+    if (!obj || ![1, 2, 3, 4, 5].includes(obj.v) || !obj.campos) return false;
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
@@ -2471,8 +2451,10 @@ async function gerarPDF() {
     escreverTextoCampoCoord(page, font, df.sus.coordenadas, v("sus"));
     escreverTextoCampoCoord(page, font, df.rg.coordenadas, v("rg"));
     escreverTextoCampoCoord(page, font, df.cpf.coordenadas, v("cpf"));
-    preencherDataSegmentada(page, font, df.datanasc, v("dn_dia"), v("dn_mes"), v("dn_ano"));
-    preencherDataSegmentada(page, font, df.dataadm, v("adm_dia"), v("adm_mes"), v("adm_ano"));
+    const partesDn = isoParaPartesPdf(v("dataNascimentoFunc"));
+    preencherDataSegmentada(page, font, df.datanasc, partesDn.dia, partesDn.mes, partesDn.ano);
+    const partesAdm = isoParaPartesPdf(v("dataAdmissaoFunc"));
+    preencherDataSegmentada(page, font, df.dataadm, partesAdm.dia, partesAdm.mes, partesAdm.ano);
     escreverTextoCampoCoord(page, font, df.cargo.coordenadas, v("cargo"));
     escreverTextoCampoCoord(page, font, df.site.coordenadas, v("site"));
 
@@ -2493,7 +2475,8 @@ async function gerarPDF() {
       if (incluirConj) {
         escreverTextoCampoCoord(page, font, conj.nome.coordenadas, v("conj_nome"));
         escreverTextoCampoCoord(page, font, conj.cpf.coordenadas, v("conj_cpf"));
-        preencherDataSegmentada(page, font, conj.dtnasc, v("conj_d"), v("conj_m"), v("conj_y"));
+        const pc = isoParaPartesPdf(v("conj_nasc"));
+        preencherDataSegmentada(page, font, conj.dtnasc, pc.dia, pc.mes, pc.ano);
         escreverTextoCampoCoord(page, font, conj.sus.coordenadas, v("conj_sus"));
         escreverTextoCampoCoord(page, font, conj.nomemae.coordenadas, v("conj_nomemae"));
       }
@@ -2508,7 +2491,8 @@ async function gerarPDF() {
         if (!incluirFil) return;
         escreverTextoCampoCoord(page, font, fil.nome.coordenadas, v(`fil${n}_nome`));
         escreverTextoCampoCoord(page, font, fil.cpf.coordenadas, v(`fil${n}_cpf`));
-        preencherDataSegmentada(page, font, fil.dtnasc, v(`fil${n}_d`), v(`fil${n}_m`), v(`fil${n}_y`));
+        const pfn = isoParaPartesPdf(v(`fil${n}_nasc`));
+        preencherDataSegmentada(page, font, fil.dtnasc, pfn.dia, pfn.mes, pfn.ano);
         escreverTextoCampoCoord(page, font, fil.sus.coordenadas, v(`fil${n}_sus`));
         escreverTextoCampoCoord(page, font, fil.nomemae.coordenadas, v(`fil${n}_nomemae`));
         const dnvTexto = filhoDeveExibirCampoDnv(n) ? v(`fil${n}_nascvivo`) : "";
@@ -2638,21 +2622,10 @@ if (elCep) {
     void buscarEnderecoPorCep();
   });
 }
-["dn_dia", "dn_mes", "adm_dia", "adm_mes", "conj_d", "conj_m", "fil1_d", "fil1_m", "fil2_d", "fil2_m", "fil3_d", "fil3_m", "fil4_d", "fil4_m"].forEach((id) => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener("input", () => maskDigitos2(el));
-});
-["dn_ano", "adm_ano", "conj_y", "fil1_y", "fil2_y", "fil3_y", "fil4_y"].forEach((id) => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener("input", () => maskDigitos4(el));
-});
-
 document.querySelectorAll('input[type="text"]').forEach((el) => {
   if (
     [
-      "telefone", "cep", "dn_dia", "dn_mes", "dn_ano", "adm_dia", "adm_mes", "adm_ano",
-      "conj_d", "conj_m", "conj_y", "fil1_d", "fil1_m", "fil1_y", "fil2_d", "fil2_m", "fil2_y",
-      "fil3_d", "fil3_m", "fil3_y", "fil4_d", "fil4_m", "fil4_y",
+      "telefone", "cep",
       "sus", "conj_sus", "fil1_sus", "fil2_sus", "fil3_sus", "fil4_sus",
       "cpf", "conj_cpf", "fil1_cpf", "fil2_cpf", "fil3_cpf", "fil4_cpf"
     ].includes(el.id)
@@ -2672,15 +2645,14 @@ atualizarBotoesFilhos();
 atualizarVisibilidadeModuloDependentes();
 atualizarTodosDnvFilhos();
 
-for (let n = 1; n <= NUM_FILHOS; n++) {
-  ["_d", "_m", "_y"].forEach((s) => {
-    const el = document.getElementById(`fil${n}${s}`);
-    if (!el) return;
-    const run = () => atualizarVisibilidadeDnvFilho(n);
-    el.addEventListener("input", run);
-    el.addEventListener("change", run);
-  });
-}
+["fil1_nasc", "fil2_nasc", "fil3_nasc", "fil4_nasc"].forEach((id, idx) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const n = idx + 1;
+  const run = () => atualizarVisibilidadeDnvFilho(n);
+  el.addEventListener("input", run);
+  el.addEventListener("change", run);
+});
 
 const elUfSelect = document.getElementById("uf");
 function onUfAlteradoAssistencia() {
