@@ -1,85 +1,100 @@
 # Política de Privacidade
 
-**Escopo:** tratamento de dados pessoais no contexto dos formulários web de admissão e assistência médica (processamento essencialmente local no navegador).
-
-**Última atualização:** documento-guia; alinhar ao inventário de tratamentos e DPIA/RIPD vigentes.
-
----
-
 ## 1. Introdução
 
-Esta solução foi concebida com princípios de **minimização de dados** e **Privacy by Design**, limitando a recolha e retenção ao estritamente necessário ao preenchimento e à geração do PDF pelo próprio utilizador.
+Esta plataforma foi desenvolvida com base no princípio de Privacy by Design, priorizando a **minimização** e a **não retenção centralizada** de dados pessoais nos sistemas desta aplicação.
 
-A plataforma destina-se ao uso no âmbito dos processos de **admissão** e **assistência médica** da ATENTO, conforme os formulários disponibilizados.
-
----
-
-## 2. Responsável pelo tratamento
-
-[Definir com Privacidade/DPO: identificação da ATENTO como responsável, dados de contacto e canal do titular.]
+Trata-se de uma **plataforma destinada ao uso interno da empresa ATENTO**, disponibilizada como ferramenta de apoio ao preenchimento de formulários.
 
 ---
 
-## 3. Que dados podem ser tratados
+## 2. Natureza do Tratamento de Dados
 
-Consoante o formulário selecionado, o utilizador pode introduzir dados como identificação, contactos, dados profissionais, dados de dependentes, dados de saúde quando aplicável ao fluxo de assistência médica, e outros campos previstos nos PDF de referência.
+Os dados inseridos pelo usuário:
 
-Os dados são tratados **no contexto do dispositivo e navegador** para compor o documento pretendido.
-
----
-
-## 4. Finalidades
-
-- Permitir o preenchimento guiado dos formulários institucionais;
-- Gerar o respetivo PDF no dispositivo do utilizador;
-- Opcionalmente, **guardar rascunho localmente** no navegador para continuar o preenchimento (sem substituir a política de arquivo ou arquivo físico definido pela empresa).
+- São processados **exclusivamente no navegador** (client-side), para composição do PDF;
+- **Não são enviados** a servidores desta aplicação para armazenamento de formulário ou finalização obrigatória do PDF;
+- **Não são armazenados** em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;
+- **Não são compartilhados** com terceiros por intermédio desta aplicação no fluxo técnico descrito em `data-flow.md`;
+- Permanecem durante o preenchimento na **memória do dispositivo** e, quando aplicável, em **armazenamento local opcional** exclusivamente no navegador (ver §7);
+- São **eliminados da sessão de trabalho** após a geração do arquivo PDF **conforme** os fluxos e confirmações exibidos ao usuário (incluindo modal de decisão LGPD, quando aplicável).
 
 ---
 
-## 5. Base legal (LGPD)
+## 3. Dados Inseridos pelo Usuário
 
-[Referenciar documento `legal-basis.md` e lista de bases aplicáveis ao tratamento — execução de procedimentos, obrigação legal, legítimo interesse onde aplicável e hipóteses sensíveis quando aplicável — sempre validado por Jurídico/Privacidade.]
+O usuário poderá inserir, voluntariamente:
 
----
+- Nome, CPF, RG  
+- Endereço e contatos  
+- Dados profissionais e bancários  
+- Informações de dependentes  
+- Demais campos previstos nos modelos de formulário institucional em uso  
 
-## 6. Cookies e tecnologias semelhantes
-
-[Definir se a hospedagem ou ferramentas auxiliares utilizam cookies estritamente necessários ou analíticos; link para preferências se existirem.]
-
----
-
-## 7. Armazenamento local (rascunho)
-
-Pode existir armazenamento de **rascunho** em `localStorage` ou memória do navegador, apenas para conveniência do utilizador no mesmo dispositivo/navegador, até:
-
-- geração do PDF (com política de eliminação definida na aplicação), ou  
-- **descarte explícito** pelo utilizador, ou  
-- limpeza manual do utilizador nos dados do navegador.
-
-Este armazenamento **não substitui** bases ou registos corporativos obrigatórios nem controlo de arquivo oficial.
+Esses dados são utilizados exclusivamente para composição do documento PDF gerado localmente.
 
 ---
 
-## 8. Transferências internacionais
+## 4. Finalidade
 
-[Definir: se não há transferência para fora do Brasil, declarar; caso a hospedagem/CDN implique transferência, fundamentar garantias aplicáveis.]
+A finalidade do tratamento neste contexto é:
 
----
-
-## 9. Direitos dos titulares
-
-Os titulares podem exercer os direitos previstos na LGPD (confirmação, acesso, correção, anonimização, eliminação, portabilidade, informação sobre partilhas, revogação de consentimento quando aplicável, etc.), mediante canal institucional indicado pelo responsável pelo tratamento.
-
-**Nota técnica:** na medida em que não há base de dados centralizada desta aplicação para consulta posterior dos dados introduzidos pelo utilizador, parte dos direitos poderá traduzir-se em orientações sobre dados sob controlo local do dispositivo.
+> Gerar um arquivo PDF com base nas informações inseridas pelo próprio usuário, no âmbito dos processos de admissão e assistência médica conforme os formulários disponibilizados.
 
 ---
 
-## 10. Segurança
+## 5. Base Legal
 
-Consultar `security-baseline.md` e medidas complementares de TI/Segurança da Informação.
+O tratamento ocorre com base em:
+
+- **Execução de procedimento solicitado pelo titular** (preenchimento e geração do documento solicitado pelo próprio usuário).
+
+Fundamentos adicionais ou específicos por tipo de dado devem constar do inventário corporativo de tratamentos e do documento `legal-basis.md`.
+
+---
+
+## 6. Compartilhamento de Dados
+
+Não há qualquer compartilhamento de dados **por intermédio desta aplicação** com terceiros para os fins de tratamento descritos nesta política.
+
+Serviços de infraestrutura (por exemplo hospedagem estática ou CDN) podem processar metadados de acesso conforme políticas do fornecedor; não devem incluir o **corpo dos formulários** nos registos operacionais da aplicação.
+
+---
+
+## 7. Armazenamento e Retenção
+
+**7.1 Ausência de base centralizada:** não há armazenamento dos dados do formulário em **servidor de aplicação** operado por esta solução para consulta posterior típica de “cadastro web”.
+
+**7.2 Descarte após geração do PDF:** os dados utilizados na sessão são tratados conforme as mensagens da aplicação no momento da geração do arquivo.
+
+**7.3 Rascunho local (quando ativo na versão implantada):** pode existir **persistência opcional no navegador** (por exemplo `localStorage`) apenas para permitir retomar o preenchimento no mesmo dispositivo. Tal persistência:
+- permanece sob controlo local do usuário;
+- pode ser **eliminada** pelo usuário através da função **Descartar rascunho** ou equivalente;
+- não substitui políticas de arquivo físico ou sistemas oficiais da ATENTO.
+
+---
+
+## 8. Segurança
+
+A aplicação utiliza **HTTPS** em ambiente de produção e arquitetura que reduz persistência e transmissão desnecessárias de dados pessoais. Medidas complementares constam de `security-baseline.md`.
+
+---
+
+## 9. Direitos do Titular
+
+O titular pode exercer seus direitos previstos na LGPD junto aos **canais institucionais** da ATENTO indicados pelo responsável pelo tratamento.
+
+Na medida em que não há base de dados centralizada desta aplicação para os dados digitados pelo usuário, parte dos direitos pode relacionar-se a informações sob **custódia local** do dispositivo ou a processos de RH/arquivo já existentes na empresa.
+
+---
+
+## 10. Responsável pela Plataforma
+
+Plataforma destinada ao uso interno da empresa **ATENTO**.  
+[Dados de contato do encarregado/DPO e canal do titular — completar conforme governança corporativa.]
 
 ---
 
 ## 11. Alterações
 
-Esta política pode ser atualizada para refletir mudanças legais, organizacionais ou técnicas.
+Esta política pode ser atualizada a qualquer momento para refletir mudanças legais, organizacionais ou de versão da aplicação.

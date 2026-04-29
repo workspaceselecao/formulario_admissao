@@ -1,44 +1,31 @@
-# Mapa de bases legais (LGPD)
+# Base Legal (LGPD)
 
-**Objetivo:** consolidar as hipóteses de tratamento de dados pessoais aplicáveis aos fluxos dos formulários web e documentação associada.
+## Fundamentação
 
-**Nota:** texto substantivo deve ser validado por **Jurídico** e **Privacidade**.
+O tratamento ocorre com base em:
 
----
+- **Execução de procedimento solicitado pelo titular** — o próprio usuário inicia o preenchimento e solicita, pela utilização da ferramenta, a geração do documento PDF com os dados por si indicados.
 
-## 1. Referência legal
-
-Lei nº 13.709/2018 — arts. 7º (dados não sensíveis) e 11º (dados sensíveis), quando aplicável.
+Tratamentos adicionais no âmbito organizacional (ex.: arquivo de admissão em sistemas corporativos **fora** desta aplicação client-side) devem constar do inventário de tratamentos (ROPA) com bases próprias.
 
 ---
 
-## 2. Tratamentos típicos neste contexto
+## Justificativa
 
-| Finalidade | Base legal típica | Observação |
-|------------|-------------------|------------|
-| Preenchimento e geração local do PDF solicitado pelo titular | Art. 7º, I — consentimento **ou** execução de procedimentos [ajustar conforme modelo jurídico] | Alinhar ao texto dos modais na aplicação |
-| Cumprimento de obrigações legais/regulamentares aplicáveis ao empregador | Art. 7º, II | Quando o arquivo/tramitação derivada implicar obrigação legal |
-| Legítimo interesse | Art. 7º, IX | Apenas se aplicável e após teste de proporcionalidade documentado |
-| Dados sensíveis (ex.: saúde em fluxos específicos) | Art. 11º — hipóteses específicas | Avaliação obrigatória caso a caso |
+- Usuário insere dados voluntariamente;
+- Dados usados para composição local do PDF e, quando existir, apenas para manter **rascunho opcional** no próprio navegador até decisão do usuário ou conclusão do fluxo;
+- **Não há** armazenamento centralizado dos dados do formulário nos servidores desta aplicação para fins descritos na Política de Privacidade aplicável à ferramenta web estática.
 
 ---
 
-## 3. Consentimento
+## Hipóteses adicionais (referência normativa)
 
-Quando a base for consentimento:
-
-- Deve ser livre, informado, inequívoco e destacado quando exigido.
-- O titular pode revogar, observadas consequências jurídicas legítimas.
+Conforme análise jurídica caso a caso, podem aplicar-se outras hipóteses do art. 7º ou, para dados sensíveis, art. 11º da Lei nº 13.709/2018 — vide inventário corporativo e parecer jurídico. O documento `privacy-policy.md` e os fluxos de assistência médica podem envolver dados cuja base legal exige avaliação específica.
 
 ---
 
-## 4. Registo de decisões
+## Conclusão
 
-Manter evidências de escolha de base legal por tratamento no inventário corporativo de tratamentos (ROPA).
+Tratamento **compatível com LGPD** quando observadas minimização, transparência (incluindo comunicações na própria aplicação), segurança conforme `security-baseline.md` e governança em `governance.md`.
 
----
-
-## 5. Encaminhamentos
-
-- Cruzar com `privacy-policy.md` e `ripd.md`.  
-- Atualizar quando houver novo formulário ou novo fluxo.
+**Revisão:** validar periodicamente com Jurídico e Privacidade sempre que mudar a versão da aplicação ou o fluxo de dados.

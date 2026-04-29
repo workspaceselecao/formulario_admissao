@@ -1,72 +1,75 @@
 # Termos de Uso
 
-**Escopo:** formulários de admissão disponibilizados como aplicação web (processamento no navegador).
-
-**Última atualização:** documento-guia; revisar periodicamente com Jurídico e Privacidade.
-
----
-
 ## 1. Aceitação
 
-Ao utilizar esta plataforma, o utilizador declara tomar conhecimento e concordar com os presentes Termos de Uso.
+Ao utilizar esta plataforma, o usuário declara estar ciente e de acordo com os presentes Termos de Uso.
 
 ---
 
-## 2. Natureza da plataforma
+## 2. Natureza da Plataforma
 
-A plataforma é uma ferramenta digital destinada ao preenchimento de formulários e geração de ficheiros PDF.
+A plataforma consiste em uma ferramenta digital destinada ao preenchimento de formulários e geração de arquivos PDF.
 
-Trata-se de uma solução destinada ao **uso no âmbito institucional da ATENTO**, nos fluxos de admissão e assistência médica conforme os formulários disponibilizados.
-
----
-
-## 3. Funcionamento técnico (resumo)
-
-- A aplicação opera no navegador do utilizador (lado cliente).
-- Não há envio obrigatório dos dados preenchidos para servidores da aplicação para conclusão do PDF.
-- O ficheiro PDF é gerado localmente no dispositivo.
-- Pode existir **armazenamento local opcional de rascunho** no próprio navegador (ver Política de Privacidade e documentação de fluxo de dados), destinado apenas a facilitar o preenchimento até à geração do documento ou descarte explícito.
+Trata-se de uma **plataforma destinada ao uso interno da empresa ATENTO**.
 
 ---
 
-## 4. Responsabilidade do utilizador
+## 3. Funcionamento
 
-O utilizador é responsável por:
+A aplicação:
 
-- A veracidade e exatidão das informações inseridas;
-- O uso adequado e conforme ao normativo interno do documento gerado;
-- A custódia e proteção do ficheiro após transferência para o dispositivo.
+- Opera exclusivamente no navegador do usuário;
+- **Não envia** os dados do formulário para servidores da aplicação para fins de conclusão ou armazenamento centralizado do preenchimento;
+- **Não realiza**, nos termos desta arquitetura, persistência em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;
+- Elimina da sessão os dados utilizados na geração do PDF **conforme os fluxos e avisos apresentados ao usuário** (incluindo confirmações de política no momento da geração).
 
----
-
-## 5. Limitação de responsabilidade
-
-Na medida permitida pela lei aplicável, não se responsabiliza por:
-
-- Erros ou omissões nas informações inseridas pelo utilizador;
-- Uso indevido ou não autorizado dos documentos gerados;
-- Danos indiretos decorrentes da utilização da ferramenta, salvo dolo ou culpa grave na medida em que legalmente imputável.
+**Nota sobre rascunho:** versões da ferramenta podem disponibilizar **armazenamento local opcional no próprio navegador** (por exemplo `localStorage`) apenas para permitir continuar o preenchimento no mesmo dispositivo. Esse recurso não substitui arquivo institucional nem transfere dados para servidores da aplicação; o usuário pode **descartar o rascunho** a qualquer momento pelos controles indicados na interface.
 
 ---
 
-## 6. Uso proibido
+## 4. Responsabilidade do Usuário
+
+O usuário é integralmente responsável por:
+
+- A veracidade das informações inseridas;
+- O uso adequado do documento gerado;
+- A guarda e proteção do arquivo após download;
+- O uso de equipamentos adequados e a gestão de sessões em ambientes partilhados (especialmente quando existir rascunho local).
+
+---
+
+## 5. Limitação de Responsabilidade
+
+O responsável pela plataforma não se responsabiliza por:
+
+- Informações incorretas inseridas pelo usuário;
+- Uso indevido dos documentos gerados;
+- Danos indiretos decorrentes da utilização da ferramenta.
+
+---
+
+## 6. Uso Indevido
 
 É proibido:
 
-- Inserir dados falsos, enganosos ou fraudulentos;
-- Utilizar a plataforma para fins ilícitos ou não autorizados;
-- Tentar comprometer a segurança, disponibilidade ou integridade da aplicação.
+- Inserir informações falsas ou fraudulentas;
+- Utilizar a plataforma para fins ilícitos;
+- Tentar comprometer a segurança da aplicação.
 
 ---
 
-## 7. Disponibilidade e alterações
+## 7. Segurança da informação e conformidade
 
-A plataforma pode ser modificada, suspensa ou descontinuada, no todo ou em parte.
-
-Estes termos podem ser atualizados; recomenda-se consultar a versão vigente periodicamente.
+O uso da plataforma deve observar as políticas internas da ATENTO em matéria de proteção de dados e segurança da informação. Documentação complementar encontra-se em `/Forms`, incluindo baseline de segurança e política de privacidade aplicável à versão implantada.
 
 ---
 
-## 8. Lei aplicável e foro
+## 8. Disponibilidade
 
-[Definir com Jurídico: lei aplicável, jurisdição competente e canal de contacto institucional.]
+A plataforma pode ser modificada, suspensa ou descontinuada a qualquer momento.
+
+---
+
+## 9. Alterações
+
+Estes termos podem ser atualizados a qualquer momento. Recomenda-se a consulta periódica à versão vigente.

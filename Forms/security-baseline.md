@@ -1,66 +1,52 @@
-# Baseline de segurança da aplicação
+# Baseline de Segurança
 
-**Objetivo:** definir o nível mínimo de controlos aplicável ao conjunto de formulários web estáticos e à sua cadeia de entrega.
+## Arquitetura
 
----
+- Aplicação **100% client-side** para preenchimento e geração de PDF;
+- **Zero persistência centralizada** dos dados do formulário em servidores desta solução;
+- **Zero transmissão obrigatória** dos dados pessoais preenchidos para APIs/backend proprietário desta aplicação para conclusão do PDF.
 
-## 1. Princípios
-
-- **Confidencialidade:** não expor dados preenchidos além do controlo do utilizador e dos fluxos institucionais definidos.
-- **Integridade:** preservar o código servido e os artefactos estáticos contra alterações não autorizadas.
-- **Disponibilidade:** manter a página acessível dentro dos SLAs da hospedagem.
+**Nota:** versões com **rascunho local** utilizam armazenamento no navegador do usuário; não constitui backend remoto da aplicação. Política de uso desse recurso está em `privacy-policy.md` e `data-flow.md`.
 
 ---
 
-## 2. Arquitetura relevante
+## Medidas Implementadas
 
-- Aplicação predominantemente **client-side** para preenchimento e geração de PDF.
-- Sem backend obrigatório desta app para conclusão do PDF.
-
----
-
-## 3. Controles técnicos recomendados
-
-| Área | Medida |
-|------|--------|
-| Transporte | HTTPS obrigatório em produção |
-| Conteúdo estático | Integridade de deploy (CI/CD, revisão de PRs, permissões de repositório) |
-| Dependências | Inventário e atualização periódica de bibliotecas JS utilizadas |
-| Segredos | Não embutir credenciais ou chaves no frontend |
+- **HTTPS** obrigatório em produção (transporte cifrado);
+- Processamento local dos dados no fluxo de geração do PDF;
+- Descarte de dados da sessão conforme fluxos da aplicação após geração do arquivo;
+- Ausência de envio dos campos do formulário para armazenamento remoto nos termos da arquitetura descrita.
 
 ---
 
-## 4. Dados sensíveis no navegador
+## Restrições Técnicas (desenvolvimento e operação)
 
-- Evitar persistência desnecessária; onde existir rascunho local, documentar finalidade e ciclo de vida (ver `data-flow.md`).
-- Orientar o utilizador sobre partilha de equipamentos.
-
----
-
-## 5. Logging
-
-- Não registar no código campos de formulário completos em consola ou telemetria inadvertida.
-- Logs de infraestrutura (CDN/WAF) sem payload de corpo de formulário quando aplicável.
+- **Não** utilizar `localStorage` / `sessionStorage` para fins não documentados ou além do escopo de rascunho aprovado;
+- **Proibido** registrar em logs de aplicação conteúdo de formulários com dados pessoais ou dados sensíveis;
+- **Proibido** integrar esta camada com APIs externas para **envio** dos dados preenchidos sem avaliação de impacto, contrato e base legal;
+- Controlo de alterações no repositório (pull requests revisados, permissões mínimas nos ambientes de CI/CD).
 
 ---
 
-## 6. Gestão de vulnerabilidades
+## Camada de Entrega
 
-- Monitorização de CVE em dependências front-end.
-- Processo de correção alinhado ao `incident-response.md`.
-
----
-
-## 7. Papéis e responsabilidades
-
-| Função | Responsabilidade |
-|--------|------------------|
-| TI / DevOps | Pipeline, HTTPS, permissões |
-| Segurança da Informação | Baseline, exceções aprovadas |
-| Privacidade | Alinhamento LGPD com medidas técnicas |
+| Área | Expectativa |
+|------|-------------|
+| Repositório | Apenas pessoas autorizadas; branch protection quando aplicável |
+| Build/deploy | Pipeline auditável; artefactos verificáveis |
+| Dependências | Inventário das bibliotecas JS (PDF, etc.); plano de atualização por CVE |
+| Hospedagem | HTTPS; eventual CDN/WAF conforme política corporativa |
 
 ---
 
-## 8. Revisão
+## Risco Residual
 
-Revisar esta baseline quando houver mudança relevante de hospedagem, bibliotecas ou fluxo de dados.
+**Baixo** no que respeita a exposição por armazenamento central nesta aplicação ou por transmissão obrigatória dos formulários para servidores da ferramenta — dados sob responsabilidade direta do usuário após download do PDF e, quando ativo, rascunho apenas local.
+
+Riscos remanescentes incluem: uso de equipamento comprometido, partilha de sessão em terminal público, ou alteração maliciosa dos ficheiros estáticos servidos — mitigados por controles de CI/CD, HTTPS e resposta a incidentes (`incident-response.md`).
+
+---
+
+## Revisão
+
+Revisar esta baseline quando houver mudança de hospedagem, dependências críticas ou novos fluxos de dados.

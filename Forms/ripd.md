@@ -1,77 +1,73 @@
-# Relatório de Impacto à Proteção de Dados (RIPD / DPIA)
+# RIPD — Relatório de Impacto à Proteção de Dados
 
-**Referência:** Lei nº 13.709/2018 (LGPD), arts. 38 e seguintes.
-
-**Estado:** modelo para elaboração e registro pela área de Privacidade.
+Referência: Lei nº 13.709/2018 (LGPD), arts. 38 e seguintes. Modelo alinhado ao relatório corporativo de referência, passível de complementação pelo DPO.
 
 ---
 
-## 1. Identificação do tratamento
+## 1. Descrição
 
-| Campo | Descrição |
-|--------|-----------|
-| Nome do tratamento | Formulários web de admissão e assistência médica (geração local de PDF) |
-| Responsável | [ATENTO — completar] |
-| Encarregado (DPO) | [Contacto — completar] |
-| Sistemas envolvidos | [Repositório estático, hospedagem, CDN — completar] |
+Ferramenta de geração de PDF com **processamento local no navegador**, destinada ao uso interno ATENTO para suporte aos formulários de admissão e assistência médica conforme versões implantadas.
 
 ---
 
-## 2. Finalidades
+## 2. Natureza do Tratamento
 
-- Suporte ao preenchimento de formulários institucionais;
-- Geração local de PDF para arquivo e tramitação conforme processos internos.
-
----
-
-## 3. Categorias de titulares e dados
-
-- Titulares: candidatos/colaboradores e dependentes conforme formulários.
-- Dados: identificação, contactos, dados profissionais, eventualmente dados sensíveis em fluxos específicos de assistência médica.
+- Dados inseridos voluntariamente pelo usuário nos formulários;
+- Processamento temporário em memória durante preenchimento e geração do PDF;
+- **Ausência de armazenamento centralizado** dos dados do formulário em servidores desta aplicação;
+- Opcionalmente, **rascunho apenas no navegador** (quando a versão assim previr), com função de descarte pelo usuário.
 
 ---
 
-## 4. Base legal
+## 3. Riscos Identificados
 
-Ver `legal-basis.md` e parecer jurídico.
-
----
-
-## 5. Fluxo de dados
-
-Ver `data-flow.md`.
-
----
-
-## 6. Necessidade e proporcionalidade
-
-[Descrever por que solução client-side é proporcional; alternativas consideradas.]
+| Risco | Descrição |
+|-------|-----------|
+| Exposição local | PDF ou sessão em dispositivo partilhado ou comprometido |
+| Uso indevido | Informações falsas ou utilização contra políticas internas |
+| Integridade da entrega | Alteração maliciosa dos artefactos estáticos ou cadência de deploy |
+| Dependências | Vulnerabilidades em bibliotecas JS de terceiros |
 
 ---
 
-## 7. Riscos aos direitos dos titulares
+## 4. Medidas de Mitigação
 
-| Risco | Mitigação |
-|--------|-----------|
-| Perda ou extração de PDF no dispositivo do utilizador | Políticas internas de arquivo; orientação ao utilizador |
-| Rascunho local em equipamento partilhado | Funcionalidade de descarte; comunicação clara |
-| Indisponibilidade da página estática | Gestão de hospedagem e continuidade |
-
----
-
-## 8. Medidas de segurança
-
-Ver `security-baseline.md` e `incident-response.md`.
+- **Não persistência central** nos termos da arquitetura atual da ferramenta;
+- Processamento local para geração do PDF;
+- Uso de **HTTPS** em produção;
+- Baseline de segurança e gestão de dependências (`security-baseline.md`);
+- Comunicações na UI (ex.: decisões LGPD na geração do PDF);
+- Função de **descarte de rascunho** quando aplicável.
 
 ---
 
-## 9. Consultas e pareceres
+## 5. Avaliação de risco
 
-[Registar envolvimento do DPO e stakeholders antes da homologação.]
+**Risco BAIXO a MÉDIO-BAIXO** no que respeita a tratamentos remotos centralizados por esta app, considerando:
+
+- Não há retenção em bases remotas desta solução para os dados digitados no formulário;
+- Não há compartilhamento por esta camada com terceiros para fins descritos na política;
+- Tráfego obrigatório dos campos do formulário para servidores próprios da aplicação **não** faz parte do fluxo de conclusão do PDF.
+
+Riscos residuais concentram-se em **ambiente do usuário**, **integridade do deploy** e **cadeia de dependências** — ver mitigações acima.
 
 ---
 
-## 10. Conclusão e revisão
+## 6. Conclusão
 
-- Data da primeira aprovação: [ ]  
-- Próxima revisão periódica: [ ]  
+A solução, adequadamente documentada e operada, tende a ser compatível com os princípios da LGPD:
+
+- Necessidade  
+- Minimização  
+- Segurança  
+- Prevenção  
+
+Homologação final compete ao **DPO** e áreas envolvidas após preenchimento de dados identificação do tratamento, bases legais completas no ROPA e revisões periódicas.
+
+---
+
+## 7. Histórico de revisão
+
+| Versão | Data | Responsável | Notas |
+|--------|------|-------------|-------|
+| [ ] | [ ] | [ ] | Alinhamento ao modelo corporativo e `/Forms` |
