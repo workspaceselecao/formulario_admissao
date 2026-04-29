@@ -377,6 +377,13 @@
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
+  /* Date picker nativo (mobile/desktop): não herdar appearance:none dos inputs de texto */
+  .field input[type="date"] {
+    width: 100%;
+    min-height: 42px;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
 
   /* Primeiro emprego | PIS (compacto) | Deficiência — mesma linha no desktop */
   .emprego-def-row {
@@ -519,6 +526,11 @@
   }
   .dep-table input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(1,66,106,0.10); }
   .dep-table input::placeholder { color: var(--text-light); }
+  .dep-table input[type="date"] {
+    min-height: 40px;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
   .dep-actions {
     margin-top: 12px;
     display: flex;
@@ -977,7 +989,7 @@
         <tbody id="dependentesBody">
           <tr data-dependente-index="1">
             <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep1Nasc" inputmode="numeric"></td>
+            <td><input type="date" id="dep1Nasc" autocomplete="off"></td>
             <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
           </tr>
         </tbody>
@@ -1074,7 +1086,7 @@
         </div>
         <div class="field">
           <label>Data <span class="req">*</span></label>
-          <input type="date" id="dataAssinatura" inputmode="numeric">
+          <input type="date" id="dataAssinatura" autocomplete="off">
         </div>
       </div>
       <div class="section-progress">
@@ -1608,7 +1620,7 @@ function criarLinhaDependente(indice){
   tr.dataset.dependenteIndex = String(indice);
   tr.innerHTML = `
     <td><input type="text" id="dep${indice}Nome" placeholder="Nome completo"></td>
-    <td><input type="date" id="dep${indice}Nasc" inputmode="numeric"></td>
+    <td><input type="date" id="dep${indice}Nasc" autocomplete="off"></td>
     <td><input type="text" id="dep${indice}CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
   `;
   return tr;
