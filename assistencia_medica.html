@@ -70,7 +70,8 @@
     align-self: flex-start;
     padding-top: 4px;
   }
-  .page-header-home a {
+  .page-header-home a,
+  .rascunho-bar .rascunho-descartar {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -89,19 +90,27 @@
       border-color 0.18s ease,
       box-shadow 0.2s ease,
       transform 0.14s ease;
+    font-family: inherit;
+    line-height: 1.25;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
   }
-  .page-header-home a:hover {
+  .page-header-home a:hover,
+  .rascunho-bar .rascunho-descartar:hover {
     color: var(--accent-dark);
     background: #fff;
     border-color: var(--accent);
     box-shadow: 0 4px 16px rgba(1, 66, 106, 0.14);
     transform: translateY(-1px);
   }
-  .page-header-home a:active {
+  .page-header-home a:active,
+  .rascunho-bar .rascunho-descartar:active {
     transform: translateY(0);
     box-shadow: 0 1px 4px rgba(1, 66, 106, 0.12);
   }
-  .page-header-home a:focus-visible {
+  .page-header-home a:focus-visible,
+  .rascunho-bar .rascunho-descartar:focus-visible {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(1, 66, 106, 0.28);
@@ -117,18 +126,6 @@
     margin: 12px 0 0;
     max-width: 520px;
     line-height: 1.5;
-  }
-  .rascunho-descartar {
-    background: none;
-    border: none;
-    padding: 0;
-    margin-left: 6px;
-    font: inherit;
-    font-weight: 600;
-    color: var(--accent);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
   }
   .container {
     max-width: 860px;
@@ -675,9 +672,9 @@
     <div class="brand">
       <span>Assistência Médica</span>
     </div>
-    <p class="rascunho-bar" id="rascunhoBar">
+    <div class="rascunho-bar" id="rascunhoBar">
       <button type="button" class="rascunho-descartar" id="btnDescartarRascunho">Descartar rascunho</button>
-    </p>
+    </div>
   </div>
   <div class="page-header-home">
     <a href="index.html">
