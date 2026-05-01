@@ -366,7 +366,6 @@
 
   <script>
     (function () {
-      var STORAGE_KEY = "atento_form_instructions_ack_v1";
       var overlay = document.getElementById("instr-modal-overlay");
       var dialogEl = overlay && overlay.querySelector(".instr-modal");
       var check = document.getElementById("instr-modal-check");
@@ -374,6 +373,8 @@
       if (!overlay || !check || !btn) return;
 
       function openModal() {
+        check.checked = false;
+        btn.disabled = true;
         overlay.hidden = false;
         overlay.removeAttribute("hidden");
         overlay.classList.add("is-open");
@@ -391,13 +392,7 @@
         document.body.classList.remove("instr-modal-open");
       }
 
-      try {
-        if (!localStorage.getItem(STORAGE_KEY)) {
-          openModal();
-        }
-      } catch (_) {
-        openModal();
-      }
+      openModal();
 
       check.addEventListener("change", function () {
         btn.disabled = !check.checked;
@@ -405,9 +400,6 @@
 
       btn.addEventListener("click", function () {
         if (!check.checked) return;
-        try {
-          localStorage.setItem(STORAGE_KEY, "1");
-        } catch (_) {}
         closeModal();
       });
     })();
