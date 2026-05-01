@@ -143,6 +143,127 @@
     color: var(--text-light);
     user-select: none;
   }
+  body.instr-modal-open {
+    overflow: hidden;
+  }
+  .instr-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(26, 23, 20, 0.55);
+    backdrop-filter: blur(3px);
+  }
+  .instr-modal-overlay.is-open {
+    display: flex;
+  }
+  .instr-modal {
+    width: min(560px, 100%);
+    max-height: min(90vh, 720px);
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .instr-modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--accent-soft), var(--card));
+  }
+  .instr-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .instr-modal-sub {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 14px;
+  }
+  .instr-modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.58;
+    color: var(--text-mid);
+  }
+  .instr-modal-body ol {
+    margin: 14px 0 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .instr-modal-body ol li::marker {
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .instr-modal-body a {
+    color: var(--accent);
+    word-break: break-all;
+    font-weight: 600;
+  }
+  .instr-modal-footer {
+    padding: 16px 24px 22px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .instr-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .instr-checkbox-label input {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .instr-modal-btn {
+    align-self: flex-end;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.18s, opacity 0.18s;
+  }
+  .instr-modal-btn.primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .instr-modal-btn.primary:hover:not(:disabled) {
+    background: var(--accent-dark);
+  }
+  .instr-modal-btn.primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .instr-modal-btn:focus-visible {
+    outline: 3px solid rgba(1, 66, 106, 0.35);
+    outline-offset: 2px;
+  }
 </style>
 </head>
 <body>
@@ -189,5 +310,107 @@
       </div>
     </footer>
   </main>
+
+  <div
+    id="instr-modal-overlay"
+    class="instr-modal-overlay"
+    role="presentation"
+    hidden
+    aria-hidden="true"
+  >
+    <div
+      class="instr-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="instr-modal-heading"
+      aria-describedby="instr-modal-intro"
+      tabindex="-1"
+    >
+      <div class="instr-modal-header">
+        <p id="instr-modal-heading" class="instr-modal-title">Instruções ao candidato</p>
+        <p id="instr-modal-intro" class="instr-modal-sub">
+          Atenção: este formulário serve apenas para preencher o arquivo PDF das fichas solicitadas pela ATENTO.
+        </p>
+      </div>
+      <div class="instr-modal-body">
+        <p><strong>O que você deve fazer:</strong></p>
+        <ol>
+          <li>Preencha <strong>todos os campos</strong>. Leia com atenção o que é solicitado;</li>
+          <li>
+            <strong>Assine</strong> as fichas usando o dedo (celular) ou o mouse (computador), no campo disponível no final do
+            formulário;
+          </li>
+          <li>Se informar <strong>dependentes</strong>, deve apresentar a documentação deles conforme for solicitado;</li>
+          <li>
+            Salve e baixe o arquivo PDF gerado, clicando no botão no final da página;
+          </li>
+          <li>
+            Encaminhe o arquivo PDF salvo no seu Portal do Candidato em:
+            <a href="https://candidatos.atento.com.br" target="_blank" rel="noopener noreferrer">candidatos.atento.com.br</a>, na
+            área de Ficha Única Cadastral e Ficha de Assistência Médica;
+          </li>
+          <li>Aguarde a aprovação das informações feita pela área de Recrutamento &amp; Seleção da ATENTO.</li>
+        </ol>
+      </div>
+      <div class="instr-modal-footer">
+        <label class="instr-checkbox-label">
+          <input type="checkbox" id="instr-modal-check" autocomplete="off" />
+          <span>LI E ENTENDI AS INSTRUÇÕES DE USO E PREENCHIMENTO DAS FICHAS.</span>
+        </label>
+        <button type="button" class="instr-modal-btn primary" id="instr-modal-continue" disabled>
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = "atento_form_instructions_ack_v1";
+      var overlay = document.getElementById("instr-modal-overlay");
+      var dialogEl = overlay && overlay.querySelector(".instr-modal");
+      var check = document.getElementById("instr-modal-check");
+      var btn = document.getElementById("instr-modal-continue");
+      if (!overlay || !check || !btn) return;
+
+      function openModal() {
+        overlay.hidden = false;
+        overlay.removeAttribute("hidden");
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.classList.add("instr-modal-open");
+        if (dialogEl) {
+          dialogEl.focus();
+        }
+      }
+
+      function closeModal() {
+        overlay.classList.remove("is-open");
+        overlay.hidden = true;
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("instr-modal-open");
+      }
+
+      try {
+        if (!localStorage.getItem(STORAGE_KEY)) {
+          openModal();
+        }
+      } catch (_) {
+        openModal();
+      }
+
+      check.addEventListener("change", function () {
+        btn.disabled = !check.checked;
+      });
+
+      btn.addEventListener("click", function () {
+        if (!check.checked) return;
+        try {
+          localStorage.setItem(STORAGE_KEY, "1");
+        } catch (_) {}
+        closeModal();
+      });
+    })();
+  </script>
 </body>
 </html>
