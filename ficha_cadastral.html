@@ -1712,41 +1712,36 @@ function sincronizarCheckLabelVtNaoOptante() {
   cb.closest(".check-label")?.classList.toggle("active", cb.checked);
 }
 
-function obterRetanguloValeTransportePdf(camposRaiz) {
-  const itens = camposRaiz?.vale_transporte?.itens;
-  if (!itens || typeof itens !== "object") return null;
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  Object.values(itens).forEach((item) => {
-    if (!item || typeof item !== "object") return;
-    ["quantidade", "valor_unitario"].forEach((sub) => {
-      const c = item[sub]?.coordenadas;
-      if (!c) return;
-      const x = Number(c.x);
-      const y = Number(c.y);
-      const w = Number(c.largura ?? c.width ?? 0);
-      const h = Number(c.altura ?? c.height ?? 0);
-      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x + w);
-      maxY = Math.max(maxY, y + h);
-    });
-  });
-  if (!Number.isFinite(minX) || minX === Infinity) return null;
-  const width = maxX - minX;
-  const height = maxY - minY;
+function obterSegmentoDiagonalNaoOptanteVt(camposRaiz) {
+  const qi = camposRaiz?.vale_transporte?.itens?.integracao?.quantidade?.coordenadas;
+  const vo = camposRaiz?.vale_transporte?.itens?.onibus?.valor_unitario?.coordenadas;
+  if (!qi || !vo) return null;
+  const sx = Number(qi.x) || 0;
+  const sy = Number(qi.y) || 0;
+  const sw = Number(qi.largura ?? qi.width ?? 0);
+  const sh = Number(qi.altura ?? qi.height ?? 0);
+  const ex = Number(vo.x) || 0;
+  const ey = Number(vo.y) || 0;
+  const ew = Number(vo.largura ?? vo.width ?? 0);
+  const eh = Number(vo.altura ?? vo.height ?? 0);
+  const x0 = sx + sw / 2;
+  const y0 = sy + sh / 2;
+  const x1 = ex + ew / 2;
+  const y1 = ey + eh / 2;
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const comprimento = Math.hypot(dx, dy);
+  if (!(comprimento > 1)) return null;
   return {
-    minX,
-    minY,
-    maxX,
-    maxY,
-    cx: minX + width / 2,
-    cy: minY + height / 2,
-    width,
-    height
+    x0,
+    y0,
+    x1,
+    y1,
+    dx,
+    dy,
+    comprimento,
+    mx: (x0 + x1) / 2,
+    my: (y0 + y1) / 2
   };
 }
 
@@ -1757,19 +1752,19 @@ function grausParaRotacaoPdf(gra) {
   return (gra * Math.PI) / 180;
 }
 
-function desenharMarcaDaguaNaoOptanteValeTransporte(page, font, bbox) {
-  if (!page || !font || !bbox) return;
+function desenharMarcaDaguaNaoOptanteValeTransporte(page, font, camposRaiz) {
+  const seg = obterSegmentoDiagonalNaoOptanteVt(camposRaiz);
+  if (!page || !font || !seg) return;
   const texto = "NÃO OPTANTE";
-  const diag = Math.hypot(Number(bbox.width) || 0, Number(bbox.height) || 0);
-  const size = Math.min(36, Math.max(20, diag / 8.5));
+  const angRad = Math.atan2(seg.dy, seg.dx);
+  const rotDeg = (angRad * 180) / Math.PI;
+  const size = Math.min(38, Math.max(18, seg.comprimento / 6.8));
   const tw = font.widthOfTextAtSize(texto, size);
-  const rotDeg = -36;
-  const rad = (rotDeg * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  const { cx, cy } = bbox;
-  const x = cx - (tw / 2) * cos + (size * 0.32) * sin;
-  const y = cy - (tw / 2) * sin - (size * 0.32) * cos;
+  const cos = Math.cos(angRad);
+  const sin = Math.sin(angRad);
+  const k = size * 0.32;
+  const x = seg.mx - (tw / 2) * cos + k * sin;
+  const y = seg.my - (tw / 2) * sin - k * cos;
   const opc = typeof PDFLib !== "undefined" && PDFLib.rgb
     ? { color: PDFLib.rgb(0.4, 0.4, 0.4), opacity: 0.09 }
     : { opacity: 0.09 };
@@ -2760,8 +2755,7 @@ async function gerarPDF(){
 
     const vt = C.vale_transporte.itens;
     if (vtNaoOptanteMarcado) {
-      const bbVt = obterRetanguloValeTransportePdf(C);
-      if (bbVt) desenharMarcaDaguaNaoOptanteValeTransporte(page, font, bbVt);
+      desenharMarcaDaguaNaoOptanteValeTransporte(page, font, C);
     } else if (vt) {
       if (!valeTransporteLinhaTodaZero(data.onibusQtd, data.onibusValor) && vt?.onibus) {
         escreverTextoCampoCoord(page, font, vt.onibus.quantidade.coordenadas, data.onibusQtd);
