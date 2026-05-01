@@ -1139,8 +1139,8 @@
   <div class="modal-card">
     <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
     <div class="modal-body">
-      O rascunho do preenchimento fica apenas neste aparelho (navegador) até você gerar o PDF.<br>
-      Os dados informados serão apagados automaticamente após a geração do PDF.<br>
+      O preenchimento pode ser guardado como rascunho neste aparelho (navegador) para você retomar depois.<br>
+      Após gerar o PDF, os dados continuam no formulário e no rascunho local; para apagá-los de vez, use <strong>Descartar rascunho</strong> no menu.<br>
       A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
       <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
       Deseja continuar com a geração do PDF?
@@ -1756,7 +1756,7 @@ function adicionarDependente(){
 }
 
 // ── Cópia para Assistência Médica (modal após PDF; consome em assistencia_medica.html) ──
-/** Payload montado após o PDF, antes de limpar o formulário (usado no modal e no redirecionamento). */
+/** Payload montado após o PDF (cópia para Assistência Médica — modal ou redirecionamento). */
 let payloadPosPdfAssistenciaPendente = null;
 
 /** Envia para assistencia_medica o mesmo padrão da ficha: "CIDADE - UF" (import aceita também "CIDADE / UF"). */
@@ -1852,7 +1852,7 @@ function oferecerIrParaAssistenciaAposPdf(payload) {
   }, 0);
 }
 
-// ── RASCUNHO LOCAL (navegador; removido após gerar PDF) ──
+// ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
 const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
   "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
@@ -2686,8 +2686,7 @@ async function gerarPDF(){
     link.click();
     URL.revokeObjectURL(url);
     const payloadCopiaAssistencia = construirPayloadCopiaParaAssistencia();
-    limparDadosFormulario();
-    limparRascunhoLocal();
+    salvarRascunhoLocalSincrono();
     showToast("PDF gerado com sucesso!");
     oferecerIrParaAssistenciaAposPdf(payloadCopiaAssistencia);
   } catch (error) {

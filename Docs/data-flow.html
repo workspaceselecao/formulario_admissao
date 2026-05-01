@@ -37,7 +37,7 @@
     <p><strong>Versões implantadas com recurso de rascunho:</strong> pode existir uso <strong>controlado</strong> de <code>localStorage</code> (ou equivalente) <strong>apenas</strong> para permitir retomar o preenchimento no mesmo navegador/dispositivo, com:</p>
     <ul>
       <li>eliminação disponível via <strong>Descartar rascunho</strong>;</li>
-      <li>finalidade limitada à conveniência do usuário até gerar o PDF ou descartar;</li>
+      <li>finalidade limitada à conveniência do usuário no mesmo dispositivo, até eliminação por <strong>Descartar rascunho</strong> ou limpeza local do navegador;</li>
       <li><strong>sem</strong> envio desses dados ao servidor da aplicação para armazenamento remoto do formulário.</li>
     </ul>
 
@@ -53,8 +53,8 @@
 
     <h2>Descarte</h2>
     <ul>
-      <li>Dados removidos da memória de trabalho após a geração, <strong>conforme</strong> fluxos de UI e confirmações (ex.: modal LGPD).</li>
-      <li>Rascunho local removido quando o usuário aciona <strong>Descartar rascunho</strong> ou quando a lógica da versão elimina após conclusão.</li>
+      <li>Persistência do preenchimento e do rascunho local segue os fluxos da aplicação atual: dados permanecem após gerar o PDF até ação explícita do usuário (ex.: <strong>Descartar rascunho</strong>), limpeza de armazenamento local ou nova sessão, conforme o navegador.</li>
+      <li>Rascunho local é removido quando o usuário aciona <strong>Descartar rascunho</strong>.</li>
     </ul>
 
     <h2>Observação — O que não há (por desenho)</h2>

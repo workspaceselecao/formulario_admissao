@@ -15,7 +15,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
 | `vercel.json` | Redireciona `/` → `index.html` na Vercel. |
 
-Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. Após **gerar o PDF** com sucesso, o fluxo de **LGPD** apaga o preenchimento e o rascunho no `localStorage` (ver §8).
+Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. Após gerar o PDF com sucesso, preenchimento e rascunho no `localStorage` **permanecem** no dispositivo até o uso de **Descartar rascunho** no menu ou limpeza manual do armazenamento do navegador (ver §7 e §8).
 
 ---
 
@@ -157,7 +157,7 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 ### 7.4 LGPD
 
-- Antes de exportar, modal de confirmação. Após sucesso, limpeza de formulário e rascunho, conforme implementação em `gerarPDF()` / equivalente na ficha.
+- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`); formulário não é zerado automaticamente — limpeza explícita em **Descartar rascunho**.
 
 ---
 

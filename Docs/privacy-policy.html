@@ -35,7 +35,7 @@
       <li><strong>Não são armazenados</strong> em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
       <li><strong>Não são compartilhados</strong> com terceiros por intermédio desta aplicação no fluxo técnico descrito em <a href="/Docs/data-flow.html">Fluxo de dados</a>;</li>
       <li>Permanecem durante o preenchimento na <strong>memória do dispositivo</strong> e, quando aplicável, em <strong>armazenamento local opcional</strong> exclusivamente no navegador (ver §7);</li>
-      <li>São <strong>eliminados da sessão de trabalho</strong> após a geração do arquivo PDF <strong>conforme</strong> os fluxos e confirmações exibidos ao usuário (incluindo modal de decisão LGPD, quando aplicável).</li>
+      <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) até o usuário acionar <strong>Descartar rascunho</strong>, limpar o armazenamento do navegador ou encerrar o uso pretendido neste fluxo;</li>
     </ul>
 
     <h2>3. Dados Inseridos pelo Usuário</h2>
@@ -68,7 +68,7 @@
 
     <h2>7. Armazenamento e Retenção</h2>
     <p><strong>7.1 Ausência de base centralizada:</strong> não há armazenamento dos dados do formulário em <strong>servidor de aplicação</strong> operado por esta solução para consulta posterior típica de “cadastro web”.</p>
-    <p><strong>7.2 Descarte após geração do PDF:</strong> os dados utilizados na sessão são tratados conforme as mensagens da aplicação no momento da geração do arquivo.</p>
+    <p><strong>7.2 Após a geração do PDF:</strong> o formulário e o rascunho local opcional permanecem no dispositivo para permitir revisão, correções ou nova geração do arquivo até o usuário utilizar <strong>Descartar rascunho</strong>, limpar o navegador ou outra ação equivalente sob seu controle.</p>
     <p><strong>7.3 Rascunho local (quando ativo na versão implantada):</strong> pode existir <strong>persistência opcional no navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir retomar o preenchimento no mesmo dispositivo. Tal persistência:</p>
     <ul>
       <li>permanece sob controle local do usuário;</li>

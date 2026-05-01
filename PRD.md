@@ -9,7 +9,7 @@
 
 ## 1. Resumo executivo
 
-O site é uma **aplicação web estática** que permite ao candidato ou ao RH preencher dois formulários oficiais de admissão no navegador e **gerar o PDF preenchido** sobre os modelos corporativos (F-075 e F-089), sem servidor de aplicação nem base de dados. Os dados permanecem no dispositivo até a exportação; após gerar o PDF com sucesso, o fluxo de **LGPD** limpa o formulário e o rascunho local.
+O site é uma **aplicação web estática** que permite ao candidato ou ao RH preencher dois formulários oficiais de admissão no navegador e **gerar o PDF preenchido** sobre os modelos corporativos (F-075 e F-089), sem servidor de aplicação nem base de dados. Os dados e o **rascunho local opcional** permanecem no dispositivo também após gerar o PDF até o usuário acionar **Descartar rascunho** (ou limpar o armazenamento do navegador); a modal LGPD comunica esse comportamento.
 
 **Proposta de valor:** reduzir fricção no preenchimento, manter aderência aos PDFs oficiais, operar com custo baixo (hospedagem estática) e privacidade por desenho (processamento no cliente).
 
@@ -22,7 +22,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | Permitir conclusão do preenchimento e download do PDF sem instalação de software | Taxa de conclusão até “download iniciado” (se instrumentado) |
 | Garantir correspondência visual com os templates oficiais | Zero desvios não documentados em revisão de amostras |
 | Minimizar perda de dados durante o preenchimento | Uso de rascunho em `localStorage` + recuperação ao reabrir |
-| Cumprir expectativa de privacidade pós-entrega | Limpeza automática após exportação bem-sucedida + confirmação LGPD pré-export |
+| Cumprir expectativa de privacidade e gestão dos dados locais | Rascunho em `localStorage` + recuperação ao reabrir + descarte apenas por **Descartar rascunho** (mensagens LGPD antes de exportar) |
 | Funcionar em desktop e mobile (incluindo assinatura e teclado) | Testes manuais / dispositivos reais nas principais combinações SO+navegador |
 
 ---
@@ -46,7 +46,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 - **CEP:** ViaCEP (e fallback Brasil API na ficha, conforme implementação).
 - **Rascunho** por formulário em `localStorage` (chaves versionadas).
 - **Cópia de dados** da ficha para a assistência (payload em `localStorage`, fluxo com modal e opção de não perguntar novamente).
-- **LGPD:** modal antes de exportar; após sucesso, limpeza de campos e rascunho.
+- **LGPD:** modal antes de exportar; **Descartar rascunho** apaga formulário + rascunho local quando o utilizador escolher.
 - **UX mobile:** cabeçalho recolhível ao scroll (retrato e paisagem em dispositivos touch), layout responsivo.
 - **Deploy:** Vercel (`vercel.json`), site estático.
 
@@ -80,7 +80,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | RF-13 | Dependentes dinâmicos até limite máximo definido no código | Must |
 | RF-14 | Capturar assinatura desenhada e incluir no PDF | Must |
 | RF-15 | Oferecer download opcional de carta Bradesco (`.docx`) quando aplicável ao fluxo de conta | Should |
-| RF-16 | Após PDF gerado com sucesso: executar limpeza LGPD (form + rascunho) | Must |
+| RF-16 | Após PDF gerado com sucesso: persistir rascunho local e manter o formulário preenchido até **Descartar rascunho** | Must |
 | RF-17 | Opcional: sugerir cópia de dados para fluxo de Assistência Médica | Should |
 
 ### 5.3 Assistência médica
@@ -108,7 +108,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | ID | Requisito | Prioridade |
 |----|-----------|------------|
 | RF-40 | Modal LGPD antes da exportação; cancelar interrompe a geração | Must |
-| RF-41 | Limpar dados locais após exportação bem-sucedida | Must |
+| RF-41 | Dados só são apagados do formulário e do `localStorage` quando o utilizador aciona **Descartar rascunho** (ou limpa o navegador) | Must |
 | RF-42 | Chaves `localStorage` documentadas; versão incrementada quando o schema de rascunho quebrar compatibilidade | Should |
 
 ---
@@ -119,7 +119,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 |----|-----------|-----------|
 | RNF-01 | Disponibilidade | Dependência de CDN (pdf-lib), APIs (CEP, cidades, IP) e hospedagem estática; falhas devem surfaced via UI (toasts) |
 | RNF-02 | Performance | PDF gerado no cliente; templates carregados por pedido HTTP; evitar bloqueio prolongado da UI (async) |
-| RNF-03 | Segurança | Sem credenciais no cliente; dados sensíveis apenas em memória/`localStorage` até limpeza |
+| RNF-03 | Segurança | Sem credenciais no cliente; dados sensíveis em memória/`localStorage` até o utilizador descartar o rascunho ou limpar o armazenamento |
 | RNF-04 | Compatibilidade | Navegadores modernos com ES modules / fetch / canvas; testar Safari iOS e Chrome Android |
 | RNF-05 | Manutenibilidade | JSON de campos + `MANUTENCAO.md` como fonte de verdade operacional |
 | RNF-06 | Acessibilidade | Melhor esforço: foco em modais, labels, contrastes; não há auditoria WCAG formal no escopo atual |
@@ -136,7 +136,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 4. Validar; corrigir erros destacados.  
 5. Confirmar LGPD.  
 6. Gerar PDF → download.  
-7. Limpeza do formulário e rascunho.  
+7. Formulário e rascunho **permanecem** preenchidos (corrigir dados e gerar novamente sem recomeçar).  
 8. (Opcional) Modal para copiar dados para Assistência Médica.
 
 ### 7.2 Assistência médica → PDF
@@ -147,7 +147,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 4. Carregar template associado; preencher campos e dependentes se optante.  
 5. Assinatura.  
 6. LGPD → gerar PDF → download.  
-7. Limpeza conforme implementação.
+7. Dados continuam na página até **Descartar rascunho** (mesmo comportamento na ficha).
 
 ### 7.3 Descarte de rascunho
 
@@ -210,8 +210,8 @@ O produto atual **não exige** analytics no PRD; para evolução:
 
 - **Template PDF:** ficheiro oficial não modificado em disco; o desenho é composto na exportação.  
 - **Coordenadas:** retângulos em pontos PDF definidos no `*_campos.json`.  
-- **Rascunho:** serialização local do estado do formulário até geração ou descarte.  
-- **LGPD (fluxo UI):** confirmação explícita antes de gerar o documento e limpeza pós-sucesso.
+- **Rascunho:** serialização local do estado do formulário; eliminação explícita com **Descartar rascunho** ou limpeza do navegador.  
+- **LGPD (fluxo UI):** confirmação explícita antes de gerar o documento; texto alinhado à retenção local até descarte pelo utilizador.
 
 ---
 

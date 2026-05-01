@@ -30,4 +30,4 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 3. Preset: **Other** (ou automático).
 4. **Deploy**.
 
-O template PDF não é alterado no disco; os dados são desenhados por cima na exportação. Após gerar o PDF, o formulário é limpo (fluxo LGPD).
+O template PDF não é alterado no disco; os dados são desenhados por cima na exportação. Após gerar o PDF com sucesso, o formulário e o rascunho local continuam preenchidos; use **Descartar rascunho** para apagar tudo.

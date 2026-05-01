@@ -36,7 +36,7 @@
       <li>Opera exclusivamente no navegador do usuário;</li>
       <li><strong>Não envia</strong> os dados do formulário para servidores da aplicação para fins de conclusão ou armazenamento centralizado do preenchimento;</li>
       <li><strong>Não realiza</strong>, nos termos desta arquitetura, persistência em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
-      <li>Elimina da sessão os dados utilizados na geração do PDF <strong>conforme os fluxos e avisos apresentados ao usuário</strong> (incluindo confirmações de política no momento da geração).</li>
+      <li>Após gerar o PDF, mantém os dados no formulário e no rascunho local (quando ativo) até o usuário acionar <strong>Descartar rascunho</strong> ou limpar o armazenamento do navegador, conforme comunicado na modal de política no momento da geração;</li>
     </ul>
     <p><strong>Nota sobre rascunho:</strong> versões da ferramenta podem disponibilizar <strong>armazenamento local opcional no próprio navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir continuar o preenchimento no mesmo dispositivo. Esse recurso não substitui arquivo institucional nem transfere dados para servidores da aplicação; o usuário pode <strong>descartar o rascunho</strong> a qualquer momento pelos controles indicados na interface.</p>
 

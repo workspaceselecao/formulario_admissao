@@ -1053,7 +1053,8 @@
   <div class="modal-card">
     <div class="modal-head" id="lgpdTitulo">Privacidade e dados pessoais</div>
     <div class="modal-body">
-      Os dados informados serão apagados automaticamente após a geração do PDF.<br>
+      O preenchimento pode ser guardado como rascunho neste aparelho (navegador) para você retomar depois.<br>
+      Após gerar o PDF, os dados continuam no formulário e no rascunho local; para apagá-los de vez, use <strong>Descartar rascunho</strong> no menu.<br>
       A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
       <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
       Deseja continuar com a geração do PDF?
@@ -2278,6 +2279,7 @@ function limparDadosFormulario() {
   limparAssinaturaCanvas();
 }
 
+// ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
 const RASCUNHO_IDS = [
   "uf", "cidade", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dataNascimentoFunc", "dataAdmissaoFunc",
@@ -2792,8 +2794,7 @@ async function gerarPDF() {
     link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
-    limparDadosFormulario();
-    limparRascunhoLocal();
+    salvarRascunhoLocalSincrono();
     showToast("PDF gerado com sucesso!");
   } catch (error) {
     console.error(error);
