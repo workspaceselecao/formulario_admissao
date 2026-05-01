@@ -1463,6 +1463,24 @@ const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
 const PDF_FONT_EVIDENCIA = 5.5;
+
+/** Primeiro token do nome; seguro para nome de arquivo. */
+function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
+  const token = String(nomeCompleto || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)[0];
+  const raw = token || "candidato";
+  return raw.replace(/[\\/:*?"<>|]/g, "").trim() || "candidato";
+}
+
+function sanitizarSegmentoNomeArquivo(s) {
+  return String(s || "")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Só para texto preenchido: desce ~1 linha no PDF (y menor). Boxes/radios não usam isto. */
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
 let assinaturaCanvasCtx = null;
@@ -2877,12 +2895,9 @@ async function gerarPDF(){
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const nomeBaseArquivo = "F-075 (PR-011) Ficha Cadastral de Admissão Operacional e Administrativo";
-    const nomeUsuario = (data.nomeCompleto || "candidato")
-      .replace(/[\\/:*?"<>|]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    link.download = `${nomeBaseArquivo} - ${nomeUsuario}.pdf`;
+    const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Ficha Cadastral para Admissão");
+    const primeiroNome = primeiroNomeUsuarioParaArquivo(data.nomeCompleto);
+    link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
     const payloadCopiaAssistencia = construirPayloadCopiaParaAssistencia();

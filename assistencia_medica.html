@@ -3010,13 +3010,9 @@ async function gerarPDF() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const tipoFicha = resolverTipoFichaPorCidadeNome(v("cidade"));
-    const nomeFicha =
-      sanitizarSegmentoNomeArquivo(tipoFicha) ||
-      sanitizarSegmentoNomeArquivo((resolverArquivoPdfPorCidadeNome(v("cidade")) || "").replace(/\.pdf$/i, "")) ||
-      "Assistencia_medica";
+    const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Ficha de Assistencia Medica");
     const primeiroNome = primeiroNomeUsuarioParaArquivo(v("funcionario"));
-    link.download = `${nomeFicha} ${primeiroNome}.pdf`;
+    link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
     limparDadosFormulario();
