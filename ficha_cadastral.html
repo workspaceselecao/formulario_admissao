@@ -568,6 +568,10 @@
   }
   .vt-table input:focus { border-color: var(--input-focus-border); box-shadow: none; }
   .vt-table input::placeholder { color: var(--text-light); }
+  .vt-table.vt-desativada { opacity: 0.68; }
+  .vt-nao-optante-label {
+    margin-top: 14px;
+  }
 
   /* ── AVISO ── */
   .aviso-box {
@@ -1067,6 +1071,10 @@
           </tr>
         </tbody>
       </table>
+      <label class="check-label vt-nao-optante-label">
+        <input type="checkbox" id="vtNaoOptante" name="vtNaoOptante" autocomplete="off">
+        NÃO OPTANTE
+      </label>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressTransporte"></div></div>
       </div>
@@ -1683,6 +1691,98 @@ function valeTransporteLinhaTodaZero(qtd, valorFormatado) {
   return quantidadeVtEhZero(qtd) && valorMoedaPdfEhZero(valorFormatado);
 }
 
+const VT_INPUT_IDS_NA_OPTANTE = [
+  "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal",
+  "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
+];
+
+function atualizarUiValeTransporteNaoOptante() {
+  const cb = document.getElementById("vtNaoOptante");
+  const ativo = !!(cb && cb.checked);
+  VT_INPUT_IDS_NA_OPTANTE.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = ativo;
+  });
+  document.querySelector(".vt-table")?.classList.toggle("vt-desativada", ativo);
+}
+
+function sincronizarCheckLabelVtNaoOptante() {
+  const cb = document.getElementById("vtNaoOptante");
+  if (!cb) return;
+  cb.closest(".check-label")?.classList.toggle("active", cb.checked);
+}
+
+function obterRetanguloValeTransportePdf(camposRaiz) {
+  const itens = camposRaiz?.vale_transporte?.itens;
+  if (!itens || typeof itens !== "object") return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  Object.values(itens).forEach((item) => {
+    if (!item || typeof item !== "object") return;
+    ["quantidade", "valor_unitario"].forEach((sub) => {
+      const c = item[sub]?.coordenadas;
+      if (!c) return;
+      const x = Number(c.x);
+      const y = Number(c.y);
+      const w = Number(c.largura ?? c.width ?? 0);
+      const h = Number(c.altura ?? c.height ?? 0);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + w);
+      maxY = Math.max(maxY, y + h);
+    });
+  });
+  if (!Number.isFinite(minX) || minX === Infinity) return null;
+  const width = maxX - minX;
+  const height = maxY - minY;
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    cx: minX + width / 2,
+    cy: minY + height / 2,
+    width,
+    height
+  };
+}
+
+function grausParaRotacaoPdf(gra) {
+  if (typeof PDFLib !== "undefined" && typeof PDFLib.degrees === "function") {
+    return PDFLib.degrees(gra);
+  }
+  return (gra * Math.PI) / 180;
+}
+
+function desenharMarcaDaguaNaoOptanteValeTransporte(page, font, bbox) {
+  if (!page || !font || !bbox) return;
+  const texto = "NÃO OPTANTE";
+  const diag = Math.hypot(Number(bbox.width) || 0, Number(bbox.height) || 0);
+  const size = Math.min(36, Math.max(20, diag / 8.5));
+  const tw = font.widthOfTextAtSize(texto, size);
+  const rotDeg = -36;
+  const rad = (rotDeg * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const { cx, cy } = bbox;
+  const x = cx - (tw / 2) * cos + (size * 0.32) * sin;
+  const y = cy - (tw / 2) * sin - (size * 0.32) * cos;
+  const opc = typeof PDFLib !== "undefined" && PDFLib.rgb
+    ? { color: PDFLib.rgb(0.4, 0.4, 0.4), opacity: 0.09 }
+    : { opacity: 0.09 };
+  page.drawText(texto, {
+    x,
+    y,
+    size,
+    font,
+    rotate: grausParaRotacaoPdf(rotDeg),
+    ...opc
+  });
+}
+
 // ── TOGGLE ──
 function togglePIS(el){
   const precisaPis = el.value === 'nao';
@@ -1896,10 +1996,11 @@ function coletarEstadoRascunho() {
     assinaturaCanvasPng = null;
   }
   return {
-    v: 2,
+    v: 3,
     t: Date.now(),
     campos,
     assinaturaCanvasPng,
+    vtNaoOptante: document.getElementById("vtNaoOptante")?.checked === true,
     radios: {
       primeiroEmprego: radio("primeiroEmprego"),
       deficiencia: radio("deficiencia"),
@@ -1962,6 +2063,13 @@ function aplicarEstadoRascunho(obj) {
   marcarRadioRestaurar("valeRef", rad.valeRef);
 
   aplicarTipoDeficienciaSalvos(obj.tipoDeficiencia);
+
+  const vtCb = document.getElementById("vtNaoOptante");
+  if (vtCb) {
+    vtCb.checked = obj.vtNaoOptante === true;
+    sincronizarCheckLabelVtNaoOptante();
+  }
+  atualizarUiValeTransporteNaoOptante();
 
   const deps = Array.isArray(obj.dependentes) && obj.dependentes.length ? obj.dependentes : [{ nome: "", nascimento: "", cpf: "" }];
   const n = Math.min(deps.length, MAX_DEPENDENTES);
@@ -2032,7 +2140,7 @@ function tentarRestaurarRascunho() {
     const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
-    if (!obj || (obj.v !== 1 && obj.v !== 2) || !obj.campos) return false;
+    if (!obj || (obj.v !== 1 && obj.v !== 2 && obj.v !== 3) || !obj.campos) return false;
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
@@ -2102,12 +2210,15 @@ function updateProgress(){
   ]);
   const dependentesPct = calcPct(dependentesChecks);
 
-  const transportePct = calcPct([
-    () => hasValue('vtOnibusQtd'), () => hasMoney('vtOnibusVal'),
-    () => hasValue('vtMetroQtd'), () => hasMoney('vtMetroVal'),
-    () => hasValue('vtInterQtd'), () => hasMoney('vtInterVal'),
-    () => hasValue('vtIntegracaoQtd'), () => hasMoney('vtIntegracaoVal')
-  ]);
+  const transportePct =
+    document.getElementById("vtNaoOptante")?.checked === true
+      ? 100
+      : calcPct([
+          () => hasValue('vtOnibusQtd'), () => hasMoney('vtOnibusVal'),
+          () => hasValue('vtMetroQtd'), () => hasMoney('vtMetroVal'),
+          () => hasValue('vtInterQtd'), () => hasMoney('vtInterVal'),
+          () => hasValue('vtIntegracaoQtd'), () => hasMoney('vtIntegracaoVal')
+        ]);
 
   const refeicaoPct = calcPct([
     () => ['va', 'vr', 'flex'].includes(radio('valeRef'))
@@ -2363,6 +2474,8 @@ function limparDadosFormulario(){
   limparAssinaturaCanvas();
   document.getElementById('dataAssinatura').valueAsDate = new Date();
   atualizarEstadoBotaoDependente();
+  sincronizarCheckLabelVtNaoOptante();
+  atualizarUiValeTransporteNaoOptante();
   updateProgress();
 }
 
@@ -2548,6 +2661,7 @@ async function gerarPDF(){
     const primeiroEmpregoSelecionado = radio("primeiroEmprego");
     const possuiDeficienciaSelecionada = radio("deficiencia");
     const valeSelecionado = radio("valeRef");
+    const vtNaoOptanteMarcado = document.getElementById("vtNaoOptante")?.checked === true;
     const data = {
       nomeCompleto: v("nomeCompleto"),
       nomeSocial: v("nomeSocial"),
@@ -2645,21 +2759,26 @@ async function gerarPDF(){
     });
 
     const vt = C.vale_transporte.itens;
-    if (vt?.onibus && !valeTransporteLinhaTodaZero(data.onibusQtd, data.onibusValor)) {
-      escreverTextoCampoCoord(page, font, vt.onibus.quantidade.coordenadas, data.onibusQtd);
-      escreverTextoCampoCoord(page, font, vt.onibus.valor_unitario.coordenadas, data.onibusValor);
-    }
-    if (vt?.metro_trem && !valeTransporteLinhaTodaZero(data.metroQtd, data.metroValor)) {
-      escreverTextoCampoCoord(page, font, vt.metro_trem.quantidade.coordenadas, data.metroQtd);
-      escreverTextoCampoCoord(page, font, vt.metro_trem.valor_unitario.coordenadas, data.metroValor);
-    }
-    if (vt?.intermunicipal && !valeTransporteLinhaTodaZero(data.interQtd, data.interValor)) {
-      escreverTextoCampoCoord(page, font, vt.intermunicipal.quantidade.coordenadas, data.interQtd);
-      escreverTextoCampoCoord(page, font, vt.intermunicipal.valor_unitario.coordenadas, data.interValor);
-    }
-    if (vt?.integracao && !valeTransporteLinhaTodaZero(data.integracaoQtd, data.integracaoValor)) {
-      escreverTextoCampoCoord(page, font, vt.integracao.quantidade.coordenadas, data.integracaoQtd);
-      escreverTextoCampoCoord(page, font, vt.integracao.valor_unitario.coordenadas, data.integracaoValor);
+    if (vtNaoOptanteMarcado) {
+      const bbVt = obterRetanguloValeTransportePdf(C);
+      if (bbVt) desenharMarcaDaguaNaoOptanteValeTransporte(page, font, bbVt);
+    } else if (vt) {
+      if (!valeTransporteLinhaTodaZero(data.onibusQtd, data.onibusValor) && vt?.onibus) {
+        escreverTextoCampoCoord(page, font, vt.onibus.quantidade.coordenadas, data.onibusQtd);
+        escreverTextoCampoCoord(page, font, vt.onibus.valor_unitario.coordenadas, data.onibusValor);
+      }
+      if (!valeTransporteLinhaTodaZero(data.metroQtd, data.metroValor) && vt?.metro_trem) {
+        escreverTextoCampoCoord(page, font, vt.metro_trem.quantidade.coordenadas, data.metroQtd);
+        escreverTextoCampoCoord(page, font, vt.metro_trem.valor_unitario.coordenadas, data.metroValor);
+      }
+      if (!valeTransporteLinhaTodaZero(data.interQtd, data.interValor) && vt?.intermunicipal) {
+        escreverTextoCampoCoord(page, font, vt.intermunicipal.quantidade.coordenadas, data.interQtd);
+        escreverTextoCampoCoord(page, font, vt.intermunicipal.valor_unitario.coordenadas, data.interValor);
+      }
+      if (!valeTransporteLinhaTodaZero(data.integracaoQtd, data.integracaoValor) && vt?.integracao) {
+        escreverTextoCampoCoord(page, font, vt.integracao.quantidade.coordenadas, data.integracaoQtd);
+        escreverTextoCampoCoord(page, font, vt.integracao.valor_unitario.coordenadas, data.integracaoValor);
+      }
     }
 
     const varf = C.vale_alimentacao_refeicao;
@@ -2781,6 +2900,7 @@ async function baixarCartaAberturaConta(){
 }
 
 initAssinaturaCanvas();
+document.getElementById("vtNaoOptante")?.addEventListener("change", atualizarUiValeTransporteNaoOptante);
 if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
@@ -2826,6 +2946,7 @@ if (dependentesBody) {
   });
 }
 atualizarEstadoBotaoDependente();
+atualizarUiValeTransporteNaoOptante();
 const bancoSelecionado = document.querySelector('input[name="tipoConta"]:checked');
 if (bancoSelecionado) {
   toggleBanco(bancoSelecionado);
