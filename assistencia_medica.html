@@ -1445,11 +1445,32 @@ async function garantirMapaCidadesBrasil() {
   }
 }
 
-function resolverArquivoPdfPorCidadeNome(nomeIbge) {
+function resolverTipoFichaPorCidadeNome(nomeIbge) {
   if (!nomeIbge || !mapaCidadeParaFichaUtilizar) return null;
-  const tipo = mapaCidadeParaFichaUtilizar.get(normalizarChaveCidade(nomeIbge));
+  return mapaCidadeParaFichaUtilizar.get(normalizarChaveCidade(nomeIbge)) || null;
+}
+
+function resolverArquivoPdfPorCidadeNome(nomeIbge) {
+  const tipo = resolverTipoFichaPorCidadeNome(nomeIbge);
   if (!tipo) return null;
   return FICHA_UTILIZAR_PARA_ARQUIVO[tipo] || null;
+}
+
+/** Primeiro token do nome (campo funcionário), seguro para nome de arquivo. */
+function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
+  const token = String(nomeCompleto || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)[0];
+  const raw = token || "funcionario";
+  return raw.replace(/[\\/:*?"<>|]/g, "").trim() || "funcionario";
+}
+
+function sanitizarSegmentoNomeArquivo(s) {
+  return String(s || "")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 async function carregarTemplatePdf(nomeArquivo) {
@@ -2989,12 +3010,13 @@ async function gerarPDF() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const nomeBase = "F-089 (PR-090) Adesão Assistência Médica";
-    const nomeUsuario = (v("funcionario") || "funcionario")
-      .replace(/[\\/:*?"<>|]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    link.download = `${nomeBase} - ${nomeUsuario}.pdf`;
+    const tipoFicha = resolverTipoFichaPorCidadeNome(v("cidade"));
+    const nomeFicha =
+      sanitizarSegmentoNomeArquivo(tipoFicha) ||
+      sanitizarSegmentoNomeArquivo((resolverArquivoPdfPorCidadeNome(v("cidade")) || "").replace(/\.pdf$/i, "")) ||
+      "Assistencia_medica";
+    const primeiroNome = primeiroNomeUsuarioParaArquivo(v("funcionario"));
+    link.download = `${nomeFicha} ${primeiroNome}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
     limparDadosFormulario();
