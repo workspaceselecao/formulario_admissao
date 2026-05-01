@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ficha Cadastral – Admissão | Atento</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-header-nav.css">
 <style>
   :root {
     --bg: #f0ede8;
@@ -36,266 +37,6 @@
     padding: 0;
   }
 
-  /* ── HEADER ── */
-  .page-header {
-    background: #fff;
-    color: var(--text);
-    padding: 28px 48px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-    border-bottom: 1px solid var(--border);
-  }
-  .page-header .brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-  .page-header .brand-text { color: var(--text); }
-  .page-header .subtitle {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--text-light);
-    margin-top: 3px;
-    font-family: 'Poppins', sans-serif;
-    letter-spacing: 0.5px;
-  }
-  .page-header-main {
-    min-width: 0;
-    flex: 1;
-  }
-  .header-menu-btn {
-    flex-shrink: 0;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 10px;
-    border: 1.5px solid rgba(1, 66, 106, 0.2);
-    background: var(--accent-soft);
-    box-shadow: 0 1px 2px rgba(12, 40, 68, 0.06);
-    cursor: pointer;
-    transition: background 0.18s, border-color 0.18s, box-shadow 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-    font: inherit;
-    color: var(--accent);
-  }
-  .header-menu-btn:hover {
-    background: #fff;
-    border-color: var(--accent);
-    box-shadow: 0 4px 16px rgba(1, 66, 106, 0.14);
-  }
-  .header-menu-btn:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(1, 66, 106, 0.28);
-  }
-  .header-menu-btn .hm-line {
-    display: block;
-    width: 20px;
-    height: 2px;
-    border-radius: 1px;
-    background: currentColor;
-    transition: transform 0.22s ease, opacity 0.18s ease;
-  }
-  body.header-nav-open .header-menu-btn .hm-line:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-  body.header-nav-open .header-menu-btn .hm-line:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  body.header-nav-open .header-menu-btn .hm-line:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-  .header-nav-backdrop {
-    position: fixed;
-    inset: 0;
-    /* Acima do .page-header (z-index 100) para cobrir toda a viewport */
-    z-index: 12000;
-    background: rgba(10, 10, 10, 0.45);
-    backdrop-filter: blur(2px);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.22s ease, visibility 0.22s ease;
-  }
-  body.header-nav-open .header-nav-backdrop {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-  }
-  .header-nav-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: auto;
-    z-index: 12001;
-    width: min(320px, 92vw);
-    height: 100%;
-    max-height: 100dvh;
-    background: #fff;
-    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.12);
-    border-right: 1px solid var(--border);
-    transform: translateX(-100%);
-    visibility: hidden;
-    pointer-events: none;
-    transition: transform 0.24s ease, visibility 0.24s ease;
-    overflow: auto;
-    padding: 16px 18px 28px;
-    box-sizing: border-box;
-  }
-  body.header-nav-open .header-nav-panel {
-    transform: translateX(0);
-    visibility: visible;
-    pointer-events: auto;
-  }
-  .header-nav-panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-  .header-nav-panel-title {
-    margin: 0;
-    flex: 1;
-    min-width: 0;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: -0.35px;
-    line-height: 1.25;
-    color: var(--text);
-    font-family: inherit;
-  }
-  .header-nav-close-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 10px;
-    border: 1.5px solid rgba(1, 66, 106, 0.2);
-    background: var(--accent-soft);
-    box-shadow: 0 1px 2px rgba(12, 40, 68, 0.06);
-    cursor: pointer;
-    color: var(--accent);
-    transition: background 0.18s, border-color 0.18s, box-shadow 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-    font: inherit;
-  }
-  .header-nav-close-btn:hover {
-    background: #fff;
-    border-color: var(--accent);
-    box-shadow: 0 4px 16px rgba(1, 66, 106, 0.14);
-  }
-  .header-nav-close-btn:focus-visible {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(1, 66, 106, 0.28);
-  }
-  .header-nav-close-btn svg {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-  }
-  .header-nav-panel-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .header-nav-links {
-    list-style: none;
-    margin: 0;
-    padding: 4px 0 0;
-    border-top: 1px solid var(--border);
-  }
-  .header-nav-links li {
-    margin: 0;
-    padding: 0;
-  }
-  .header-nav-links li + li {
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  .header-nav-links--legal {
-    margin-top: 10px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  .header-nav-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px 10px;
-    margin: 0;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.35;
-    text-align: left;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .header-nav-link:hover {
-    background: rgba(1, 66, 106, 0.07);
-    color: var(--accent-dark);
-  }
-  .header-nav-link:focus-visible {
-    outline: none;
-    background: rgba(1, 66, 106, 0.09);
-    box-shadow: inset 0 0 0 2px var(--accent);
-  }
-  .header-nav-link svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    color: var(--text-mid);
-    transition: color 0.15s ease;
-  }
-  .header-nav-link:hover svg {
-    color: var(--accent);
-  }
-  .header-nav-link--destructive {
-    color: var(--text-mid);
-  }
-  .header-nav-link--destructive:hover {
-    background: rgba(180, 60, 50, 0.08);
-    color: #a33;
-  }
-  .header-nav-link--destructive:hover svg {
-    color: #a33;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .header-menu-btn .hm-line,
-    .header-nav-backdrop,
-    .header-nav-panel {
-      transition: none;
-    }
-  }
   .btn-export {
     --btn-fill-a: #3b2447;
     --btn-fill-b: #efa27f;
@@ -1394,7 +1135,7 @@
 </div>
 
 <div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
-<div id="lgpdModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lgpdTitle">
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitle" hidden aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
     <div class="modal-body">
@@ -1410,7 +1151,7 @@
     </div>
   </div>
 </div>
-<div id="modalCopiaAssistencia" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="copiaAssistTitulo">
+<div id="modalCopiaAssistencia" class="modal-overlay" role="dialog" aria-labelledby="copiaAssistTitulo" hidden aria-hidden="true">
   <div class="modal-card" style="max-width: 440px">
     <div class="modal-head" id="copiaAssistTitulo">Assistência Médica</div>
     <div class="modal-body">
@@ -1428,7 +1169,7 @@
   </div>
 </div>
 
-<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalDescartarTitulo">
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-labelledby="modalDescartarTitulo" hidden aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head modal-head--atencao" id="modalDescartarTitulo">Descartar rascunho</div>
     <div class="modal-body">
@@ -1441,7 +1182,7 @@
   </div>
 </div>
 
-<div id="modalConfirmarLimparAssinatura" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalLimparAssinTitulo">
+<div id="modalConfirmarLimparAssinatura" class="modal-overlay" role="dialog" aria-labelledby="modalLimparAssinTitulo" hidden aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head modal-head--atencao" id="modalLimparAssinTitulo">Limpar assinatura</div>
     <div class="modal-body">
@@ -1463,6 +1204,49 @@ const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
 const PDF_FONT_EVIDENCIA = 5.5;
+
+const LS_NS = "atento.forms:v1:";
+const LS_LEGACY = {
+  crossCopy: "cross_copy_ficha_para_assistencia_v1",
+  fichaNaoPerguntar: "ficha_cadastral_nao_perguntar_copia_assistencia",
+  fichaRascunho: "ficha_cadastral_rascunho_v2"
+};
+function lsMigrateLegacy(newKey, legacyKey) {
+  try {
+    if (localStorage.getItem(newKey) != null) return;
+    const old = localStorage.getItem(legacyKey);
+    if (old == null) return;
+    localStorage.setItem(newKey, old);
+    localStorage.removeItem(legacyKey);
+  } catch (_) {}
+}
+function lsRemoveDual(newKey, legacyKey) {
+  try {
+    localStorage.removeItem(newKey);
+    localStorage.removeItem(legacyKey);
+  } catch (_) {}
+}
+const CROSS_COPY_FICHA_ASSISTENCIA_KEY = LS_NS + "cross_copy_ficha_para_assistencia";
+lsMigrateLegacy(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY.crossCopy);
+const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = LS_NS + "ficha_cadastral_nao_perguntar_copia_assistencia";
+lsMigrateLegacy(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, LS_LEGACY.fichaNaoPerguntar);
+const RASCUNHO_STORAGE_KEY = LS_NS + "ficha_cadastral_rascunho_v2";
+lsMigrateLegacy(RASCUNHO_STORAGE_KEY, LS_LEGACY.fichaRascunho);
+
+function setModalOverlayVisible(overlayEl, visible) {
+  if (!overlayEl) return;
+  if (visible) {
+    overlayEl.removeAttribute("hidden");
+    overlayEl.classList.add("show");
+    overlayEl.setAttribute("aria-hidden", "false");
+    overlayEl.setAttribute("aria-modal", "true");
+  } else {
+    overlayEl.setAttribute("hidden", "");
+    overlayEl.classList.remove("show");
+    overlayEl.setAttribute("aria-hidden", "true");
+    overlayEl.removeAttribute("aria-modal");
+  }
+}
 
 /** Primeiro token do nome; seguro para nome de arquivo. */
 function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
@@ -1972,8 +1756,6 @@ function adicionarDependente(){
 }
 
 // ── Cópia para Assistência Médica (modal após PDF; consome em assistencia_medica.html) ──
-const CROSS_COPY_FICHA_ASSISTENCIA_KEY = "cross_copy_ficha_para_assistencia_v1";
-const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = "ficha_cadastral_nao_perguntar_copia_assistencia";
 /** Payload montado após o PDF, antes de limpar o formulário (usado no modal e no redirecionamento). */
 let payloadPosPdfAssistenciaPendente = null;
 
@@ -2035,12 +1817,12 @@ function construirPayloadCopiaParaAssistencia() {
 function abrirModalCopiaAssistencia() {
   const m = document.getElementById("modalCopiaAssistencia");
   if (!m) return;
-  m.classList.add("show");
-  document.body.classList.add("modal-open");
+  setModalOverlayVisible(m, true);
+  sincronizarBodyModalOpenFicha();
 }
 function fecharModalCopiaAssistencia() {
   const m = document.getElementById("modalCopiaAssistencia");
-  if (m) m.classList.remove("show");
+  if (m) setModalOverlayVisible(m, false);
   sincronizarBodyModalOpenFicha();
 }
 
@@ -2071,7 +1853,6 @@ function oferecerIrParaAssistenciaAposPdf(payload) {
 }
 
 // ── RASCUNHO LOCAL (navegador; removido após gerar PDF) ──
-const RASCUNHO_STORAGE_KEY = "ficha_cadastral_rascunho_v2";
 const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
   "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
@@ -2084,7 +1865,7 @@ let ignorarSalvarRascunho = false;
 
 function limparRascunhoLocal() {
   try {
-    localStorage.removeItem(RASCUNHO_STORAGE_KEY);
+    lsRemoveDual(RASCUNHO_STORAGE_KEY, LS_LEGACY.fichaRascunho);
   } catch (_) {
     /* storage indisponível */
   }
@@ -2469,8 +2250,8 @@ let lgpdResolver = null;
 function abrirModalLGPD(){
   const modal = document.getElementById('lgpdModal');
   if (!modal) return Promise.resolve(false);
-  modal.classList.add('show');
-  document.body.classList.add('modal-open');
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenFicha();
   setTimeout(() => document.getElementById('lgpdContinuarBtn')?.focus(), 0);
   return new Promise((resolve) => {
     lgpdResolver = resolve;
@@ -2482,7 +2263,7 @@ function sincronizarBodyModalOpenFicha() {
 }
 function fecharModalLGPD(decisao){
   const modal = document.getElementById('lgpdModal');
-  if (modal) modal.classList.remove('show');
+  if (modal) setModalOverlayVisible(modal, false);
   sincronizarBodyModalOpenFicha();
   if (lgpdResolver) {
     const resolve = lgpdResolver;
@@ -2555,22 +2336,26 @@ function descartarRascunhoEFormulario() {
 }
 
 function abrirModalConfirmarDescartarRascunhoFicha() {
-  document.getElementById("modalConfirmarDescartarRascunho")?.classList.add("show");
-  document.body.classList.add("modal-open");
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpenFicha();
   setTimeout(() => document.getElementById("btnModalDescartarRascunhoConfirmar")?.focus(), 0);
 }
 function fecharModalConfirmarDescartarRascunhoFicha() {
-  document.getElementById("modalConfirmarDescartarRascunho")?.classList.remove("show");
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, false);
   sincronizarBodyModalOpenFicha();
 }
 
 function abrirModalConfirmarLimparAssinaturaFicha() {
-  document.getElementById("modalConfirmarLimparAssinatura")?.classList.add("show");
-  document.body.classList.add("modal-open");
+  const el = document.getElementById("modalConfirmarLimparAssinatura");
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpenFicha();
   setTimeout(() => document.getElementById("btnModalLimparAssinaturaConfirmar")?.focus(), 0);
 }
 function fecharModalConfirmarLimparAssinaturaFicha() {
-  document.getElementById("modalConfirmarLimparAssinatura")?.classList.remove("show");
+  const el = document.getElementById("modalConfirmarLimparAssinatura");
+  if (el) setModalOverlayVisible(el, false);
   sincronizarBodyModalOpenFicha();
 }
 function confirmarLimparAssinaturaFichaExecutar() {
