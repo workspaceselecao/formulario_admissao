@@ -312,6 +312,12 @@
     background: #fff;
     box-shadow: none;
   }
+  .radio-inline.group-invalid,
+  .check-group.group-invalid {
+    outline: 2px solid #d1432f;
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
 
   .signature-pad-wrap { margin-bottom: 20px; }
   .signature-pad-wrap label {
@@ -884,8 +890,8 @@
         </div>
         <div class="col-span-2 emprego-def-row">
           <div class="field field--primeiro-emprego">
-            <label>Primeiro Emprego?</label>
-            <div class="radio-inline" style="margin-top:4px">
+            <label>Primeiro Emprego? <span class="req">*</span></label>
+            <div class="radio-inline" id="grupoPrimeiroEmprego" style="margin-top:4px">
               <label class="radio-label"><input type="radio" name="primeiroEmprego" value="sim" onchange="togglePIS(this)"> Sim</label>
               <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
             </div>
@@ -895,8 +901,8 @@
             <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
           </div>
           <div class="field field--deficiencia">
-            <label>Possui Deficiência?</label>
-            <div class="radio-inline" style="margin-top:4px">
+            <label>Possui Deficiência? <span class="req">*</span></label>
+            <div class="radio-inline" id="grupoDeficiencia" style="margin-top:4px">
               <label class="radio-label"><input type="radio" name="deficiencia" value="sim" onchange="toggleDef(this)"> Sim</label>
               <label class="radio-label"><input type="radio" name="deficiencia" value="nao" onchange="toggleDef(this)"> Não</label>
             </div>
@@ -1071,7 +1077,10 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Vale Refeição / Alimentação</div>
     <div class="section-body">
-      <div class="check-group">
+      <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:var(--label);letter-spacing:0.5px;text-transform:uppercase;font-family:'Poppins',sans-serif">
+        Escolha uma opção <span class="req">*</span>
+      </p>
+      <div class="check-group" id="grupoValeRef">
         <label class="radio-label"><input type="radio" name="valeRef" value="va"> 100% Vale Alimentação</label>
         <label class="radio-label"><input type="radio" name="valeRef" value="vr"> 100% Vale Refeição</label>
         <label class="radio-label"><input type="radio" name="valeRef" value="flex"> Flexibilizado (50% VR e 50% VA)</label>
@@ -2063,11 +2072,13 @@ function updateProgress(){
     () => hasValue('celular'),
     () => hasValue('email'),
     () => hasValue('estadoCivil'),
+    () => !!radio('primeiroEmprego'),
     () => {
       const pe = radio('primeiroEmprego');
       if (!pe) return false;
       return pe === 'nao' ? hasValue('pis') : true;
-    }
+    },
+    () => !!radio('deficiencia')
   ]);
 
   const enderecoPct = calcPct([
@@ -2131,6 +2142,11 @@ document.querySelectorAll('.check-label input, .radio-label input').forEach(inpu
       input.closest('.check-label')?.classList.add('active');
     } else {
       input.closest('.check-label')?.classList.remove('active');
+    }
+    if (input.type === 'radio') {
+      if (input.name === 'primeiroEmprego') document.getElementById('grupoPrimeiroEmprego')?.classList.remove('group-invalid');
+      if (input.name === 'deficiencia') document.getElementById('grupoDeficiencia')?.classList.remove('group-invalid');
+      if (input.name === 'valeRef') document.getElementById('grupoValeRef')?.classList.remove('group-invalid');
     }
   });
 });
@@ -2205,6 +2221,21 @@ function validarCamposObrigatorios(){
 
   obrigatoriosBase.forEach(validarCampo);
 
+  const gruposRadioObrigatorios = [
+    { name: 'primeiroEmprego', label: 'Primeiro Emprego', elId: 'grupoPrimeiroEmprego' },
+    { name: 'deficiencia', label: 'Possui Deficiência', elId: 'grupoDeficiencia' },
+    { name: 'valeRef', label: 'Vale Refeição / Alimentação', elId: 'grupoValeRef' }
+  ];
+  gruposRadioObrigatorios.forEach(({ name, label, elId }) => {
+    const gr = document.getElementById(elId);
+    if (!radio(name)) {
+      faltantes.push({ id: `__radio_${name}__`, nome: label });
+      gr?.classList.add('group-invalid');
+    } else {
+      gr?.classList.remove('group-invalid');
+    }
+  });
+
   const precisaPis = radio('primeiroEmprego') === 'nao';
   const pisEl = document.getElementById('pis');
   if (pisEl) pisEl.required = precisaPis;
@@ -2226,7 +2257,10 @@ function validarCamposObrigatorios(){
   if (faltantes.length > 0) {
     const listaCampos = faltantes.map((campo) => campo.nome).join(', ');
     showToast(`Preencha os campos obrigatórios: ${listaCampos}.`, false);
-    document.getElementById(faltantes[0].id)?.focus();
+    const first = faltantes[0];
+    const m = /^__radio_(\w+)__$/.exec(first.id);
+    if (m) document.querySelector(`input[name="${m[1]}"]`)?.focus();
+    else document.getElementById(first.id)?.focus();
     return false;
   }
   if (!isAssinaturaManuscritaPreenchida()) {
@@ -2323,6 +2357,9 @@ function limparDadosFormulario(){
   document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
     el.classList.remove('invalid');
   });
+  document.querySelectorAll('#grupoPrimeiroEmprego, #grupoDeficiencia, #grupoValeRef').forEach((el) =>
+    el.classList.remove('group-invalid')
+  );
   limparAssinaturaCanvas();
   document.getElementById('dataAssinatura').valueAsDate = new Date();
   atualizarEstadoBotaoDependente();
