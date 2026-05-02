@@ -282,6 +282,19 @@
   .col-span-3 { grid-column: span 3; }
   .col-span-4 { grid-column: span 4; }
 
+  /* Bradesco (desktop): CPF, agência e conta na mesma linha; mentore: CPF largura total */
+  .banco-cpf-agencia-conta {
+    display: grid;
+    grid-column: span 2;
+    gap: 18px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 641px) {
+    .banco-cpf-agencia-conta--bradesco {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   /* ── FIELDS ── */
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
@@ -993,17 +1006,19 @@
             <label class="radio-label"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore Bank</label>
           </div>
         </div>
-        <div class="field">
-          <label>CPF <span class="req">*</span></label>
-          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
-        </div>
-        <div class="field" id="agenciaField" style="display:none">
-          <label>Agência <span class="req">*</span></label>
-          <input type="text" id="agencia" placeholder="0000" inputmode="numeric" autocomplete="off">
-        </div>
-        <div class="field" id="contaField" style="display:none">
-          <label>Conta / Dígito <span class="req">*</span></label>
-          <input type="text" id="conta" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+        <div class="banco-cpf-agencia-conta" id="bancoCpfAgenciaContaWrap">
+          <div class="field">
+            <label>CPF <span class="req">*</span></label>
+            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
+          </div>
+          <div class="field" id="agenciaField" style="display:none">
+            <label>Agência <span class="req">*</span></label>
+            <input type="text" id="agencia" placeholder="0000" inputmode="numeric" autocomplete="off">
+          </div>
+          <div class="field" id="contaField" style="display:none">
+            <label>Conta / Dígito <span class="req">*</span></label>
+            <input type="text" id="conta" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+          </div>
         </div>
         <div class="field col-span-2" id="cartaBradescoField" style="display:none">
           <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
@@ -1838,6 +1853,8 @@ function toggleBanco(el){
   const b = el.value==='bradesco';
   document.getElementById('agenciaField').style.display = b?'block':'none';
   document.getElementById('contaField').style.display = b?'block':'none';
+  const wrap = document.getElementById('bancoCpfAgenciaContaWrap');
+  if (wrap) wrap.classList.toggle('banco-cpf-agencia-conta--bradesco', b);
   const cartaBradescoField = document.getElementById('cartaBradescoField');
   if (cartaBradescoField) cartaBradescoField.style.display = b ? 'block' : 'none';
   const agenciaEl = document.getElementById('agencia');
@@ -2486,6 +2503,8 @@ function limparDadosFormulario(){
   if (agenciaField) agenciaField.style.display = 'none';
   if (contaField) contaField.style.display = 'none';
   if (cartaBradescoField) cartaBradescoField.style.display = 'none';
+  const bancoWrap = document.getElementById('bancoCpfAgenciaContaWrap');
+  if (bancoWrap) bancoWrap.classList.remove('banco-cpf-agencia-conta--bradesco');
 
   const agenciaEl = document.getElementById('agencia');
   const contaEl = document.getElementById('conta');
