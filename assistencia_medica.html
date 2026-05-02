@@ -90,94 +90,40 @@
   .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
   .col-span-2 { grid-column: span 2; }
   .col-span-3 { grid-column: span 3; }
-  .endereco-cep-rua-num {
+
+  /* ── GRELHA 12 COL (igual à Ficha Cadastral) ── */
+  .address-grid {
     display: grid;
-    grid-template-columns: minmax(100px, 140px) 1fr minmax(72px, 100px);
-    gap: 18px;
-    width: 100%;
-    align-items: end;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
   }
-  .endereco-compl-bairro-cid {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr 1fr;
-    gap: 18px;
-    width: 100%;
+  .address-grid:last-child {
+    margin-bottom: 0;
   }
-  .dados-sus-rg-cpf {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 18px;
-    width: 100%;
-  }
-  .dados-func-grid .dados-sus-rg-cpf,
-  .dados-func-grid .dados-datas,
-  .dados-func-grid .dados-cargo-site-tel {
-    grid-column: span 2;
-  }
-  /* Matrícula ~40% da largura de uma coluna “igual” (redução de 60%); Estado e Cidade com mais espaço. */
-  .estado-cidade-matricula-row {
-    display: grid;
-    grid-template-columns: minmax(112px, 1.45fr) minmax(160px, 1.55fr) minmax(56px, 0.4fr);
-    gap: 18px;
-    width: 100%;
-    align-items: end;
-  }
-  .nome-mae-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    width: 100%;
-    align-items: end;
-  }
-  .dados-datas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    width: 100%;
-    align-items: end;
-  }
-  .dados-cargo-site-tel {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 18px;
-    width: 100%;
-  }
-  @media (max-width: 768px) {
-    .dados-func-grid {
-      grid-template-columns: 1fr !important;
-    }
-    .dados-func-grid .col-span-2 {
-      grid-column: 1 / -1;
-    }
-    .dados-func-grid .estado-cidade-matricula-row,
-    .dados-func-grid .nome-mae-row,
-    .dados-func-grid .dados-sus-rg-cpf,
-    .dados-func-grid .dados-datas,
-    .dados-func-grid .dados-cargo-site-tel {
-      grid-column: 1 / -1;
-      width: 100%;
-      min-width: 0;
-      max-width: 100%;
-    }
-    .dados-func-grid .field {
-      min-width: 0;
-    }
-    .dados-func-grid .field input {
-      min-width: 0;
-      width: 100%;
-    }
-  }
-  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
-    .endereco-cep-rua-num { grid-template-columns: 1fr; }
-    .endereco-compl-bairro-cid { grid-template-columns: 1fr; }
-    .dados-sus-rg-cpf { grid-template-columns: 1fr; }
-    .dados-sus-rg-cpf .field--rg input,
-    .dados-sus-rg-cpf .field--cpf input,
-    .dados-sus-rg-cpf .field--sus input { max-width: 100%; }
-    .estado-cidade-matricula-row,
-    .nome-mae-row { grid-template-columns: 1fr; }
-    .dados-datas { grid-template-columns: 1fr; }
-    .dados-cargo-site-tel { grid-template-columns: 1fr; }
+  .address-cep { grid-column: span 2; }
+  .address-endereco { grid-column: span 5; }
+  .address-numero { grid-column: span 1; }
+  .address-complemento { grid-column: span 4; }
+  .address-bairro { grid-column: span 4; }
+  .address-cidade { grid-column: span 6; }
+  .address-cidade-uf { grid-column: span 4; }
+  /* Dados do funcionário — alinhamento vertical entre linhas */
+  .dados-func-uf { grid-column: span 2; }
+  .dados-func-cidade { grid-column: span 6; }
+  .dados-func-matricula { grid-column: span 4; }
+  .dados-func-nome { grid-column: span 6; }
+  .dados-func-nomemae { grid-column: span 6; }
+  .dados-func-sus { grid-column: span 4; }
+  .dados-func-rg { grid-column: span 4; }
+  .dados-func-cpf { grid-column: span 4; }
+  .dados-func-dnasc { grid-column: span 6; }
+  .dados-func-dadm { grid-column: span 6; }
+  .dados-func-cargo { grid-column: span 4; }
+  .dados-func-site { grid-column: span 4; }
+  .dados-func-tel { grid-column: span 4; }
+  .address-grid > .field {
+    min-width: 0;
   }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
@@ -200,7 +146,9 @@
     outline: none;
     transition: border-color 0.18s, background 0.18s;
     width: 100%;
+    min-width: 0;
     appearance: none;
+    -webkit-appearance: none;
   }
   .field input:focus, .field select:focus {
     border-color: var(--input-focus-border);
@@ -214,6 +162,7 @@
     box-shadow: none;
   }
   .field input::placeholder { color: var(--text-light); }
+  .field select { cursor: pointer; }
   .signature-pad-wrap { margin-bottom: 20px; }
   .signature-pad-wrap > label { font-size: 11px; font-weight: 600; color: var(--label); letter-spacing: 0.6px; text-transform: uppercase; font-family: "Poppins", sans-serif; display: block; margin-bottom: 8px; }
   .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
@@ -232,45 +181,42 @@
 
   .radio-inline {
     display: flex;
+    align-items: center;
+    gap: 10px;
     flex-wrap: wrap;
-    gap: 10px;
-    align-items: flex-start;
-    margin-top: 6px;
-  }
-  .radio-inline.tipo-adesao-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    align-items: stretch;
-  }
-  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
-    .radio-inline.tipo-adesao-grid {
-      grid-template-columns: 1fr;
-    }
   }
   .radio-label {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    gap: 7px;
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-mid);
-    padding: 8px 14px;
+    padding: 7px 16px;
     border-radius: 8px;
     border: 1.5px solid var(--border);
     background: var(--surface);
-    max-width: 100%;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-label:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
   }
   .radio-label input {
-    margin-top: 2px;
     accent-color: var(--accent);
-    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
   }
   .radio-label.active {
     border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--accent-dark);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(1, 66, 106, 0.28);
+  }
+  .radio-label.active input {
+    accent-color: #fff;
   }
   .check-group {
     display: flex;
@@ -577,7 +523,34 @@
     body.page-header-mobile.page-header--away .page-header {
       transform: translateY(-100%);
     }
-    .grid-2:not(.dados-func-grid), .grid-3 { grid-template-columns: 1fr; }
+    .container { padding: 24px 16px 60px; }
+    .section-body { padding: 20px 16px 16px; }
+    .address-grid {
+      grid-template-columns: 1fr;
+    }
+    .address-cep,
+    .address-endereco,
+    .address-numero,
+    .address-complemento,
+    .address-bairro,
+    .address-cidade,
+    .address-cidade-uf,
+    .dados-func-uf,
+    .dados-func-cidade,
+    .dados-func-matricula,
+    .dados-func-nome,
+    .dados-func-nomemae,
+    .dados-func-sus,
+    .dados-func-rg,
+    .dados-func-cpf,
+    .dados-func-dnasc,
+    .dados-func-dadm,
+    .dados-func-cargo,
+    .dados-func-site,
+    .dados-func-tel {
+      grid-column: span 1;
+    }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: span 1; }
     .form-actions-bottom { flex-direction: column; width: 100%; }
     .btn-export { width: 100%; justify-content: center; }
@@ -671,7 +644,7 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Tipo de movimentação</div>
     <div class="section-body">
-      <div class="radio-inline tipo-adesao-grid" id="tipoAdesaoGroup">
+      <div class="radio-inline" id="tipoAdesaoGroup" style="margin-top:4px">
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante"> NÃO QUERO ADERIR AO PLANO</label>
       </div>
@@ -681,99 +654,89 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
     <div class="section-body">
-      <div class="grid grid-2 dados-func-grid">
-        <div class="estado-cidade-matricula-row col-span-2">
-          <div class="field field--uf" style="min-width:0">
-            <label>Estado <span class="req">*</span></label>
-            <select id="uf">
-              <option value="">—</option>
-              <option value="AC">AC – Acre</option>
-              <option value="AL">AL – Alagoas</option>
-              <option value="AM">AM – Amazonas</option>
-              <option value="AP">AP – Amapá</option>
-              <option value="BA">BA – Bahia</option>
-              <option value="CE">CE – Ceará</option>
-              <option value="DF">DF – Distrito Federal</option>
-              <option value="ES">ES – Espírito Santo</option>
-              <option value="GO">GO – Goiás</option>
-              <option value="MA">MA – Maranhão</option>
-              <option value="MG">MG – Minas Gerais</option>
-              <option value="MS">MS – Mato Grosso do Sul</option>
-              <option value="MT">MT – Mato Grosso</option>
-              <option value="PA">PA – Pará</option>
-              <option value="PB">PB – Paraíba</option>
-              <option value="PE">PE – Pernambuco</option>
-              <option value="PI">PI – Piauí</option>
-              <option value="PR">PR – Paraná</option>
-              <option value="RJ">RJ – Rio de Janeiro</option>
-              <option value="RN">RN – Rio Grande do Norte</option>
-              <option value="RO">RO – Rondônia</option>
-              <option value="RR">RR – Roraima</option>
-              <option value="RS">RS – Rio Grande do Sul</option>
-              <option value="SC">SC – Santa Catarina</option>
-              <option value="SE">SE – Sergipe</option>
-              <option value="SP">SP – São Paulo</option>
-              <option value="TO">TO – Tocantins</option>
-            </select>
-          </div>
-          <div class="field field--cidade" style="min-width:0">
-            <label>Cidade <span class="req">*</span></label>
-            <select id="cidade" disabled>
-              <option value="">— Selecione o estado —</option>
-            </select>
-          </div>
-          <div class="field field--matricula" style="min-width:0">
-            <label>Matrícula <span class="req">*</span></label>
-            <input type="text" id="matricula" placeholder="" inputmode="numeric" autocomplete="off">
-          </div>
+      <div class="address-grid">
+        <div class="field field--uf dados-func-uf">
+          <label>Estado <span class="req">*</span></label>
+          <select id="uf">
+            <option value="">—</option>
+            <option value="AC">AC – Acre</option>
+            <option value="AL">AL – Alagoas</option>
+            <option value="AM">AM – Amazonas</option>
+            <option value="AP">AP – Amapá</option>
+            <option value="BA">BA – Bahia</option>
+            <option value="CE">CE – Ceará</option>
+            <option value="DF">DF – Distrito Federal</option>
+            <option value="ES">ES – Espírito Santo</option>
+            <option value="GO">GO – Goiás</option>
+            <option value="MA">MA – Maranhão</option>
+            <option value="MG">MG – Minas Gerais</option>
+            <option value="MS">MS – Mato Grosso do Sul</option>
+            <option value="MT">MT – Mato Grosso</option>
+            <option value="PA">PA – Pará</option>
+            <option value="PB">PB – Paraíba</option>
+            <option value="PE">PE – Pernambuco</option>
+            <option value="PI">PI – Piauí</option>
+            <option value="PR">PR – Paraná</option>
+            <option value="RJ">RJ – Rio de Janeiro</option>
+            <option value="RN">RN – Rio Grande do Norte</option>
+            <option value="RO">RO – Rondônia</option>
+            <option value="RR">RR – Roraima</option>
+            <option value="RS">RS – Rio Grande do Sul</option>
+            <option value="SC">SC – Santa Catarina</option>
+            <option value="SE">SE – Sergipe</option>
+            <option value="SP">SP – São Paulo</option>
+            <option value="TO">TO – Tocantins</option>
+          </select>
         </div>
-        <div class="nome-mae-row col-span-2">
-          <div class="field" style="min-width:0">
-            <label>Nome do Funcionário <span class="req">*</span></label>
-            <input type="text" id="funcionario" placeholder="Conforme Certidão de Nascimento ou Casamento">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Nome da Mãe <span class="req">*</span></label>
-            <input type="text" id="nomemae" placeholder="Nome completo da mãe (diferente do seu)">
-          </div>
+        <div class="field field--cidade dados-func-cidade">
+          <label>Cidade <span class="req">*</span></label>
+          <select id="cidade" disabled>
+            <option value="">— Selecione o estado —</option>
+          </select>
         </div>
-        <div class="dados-sus-rg-cpf">
-          <div class="field field--sus" style="min-width:0">
-            <label>Nº do Cartão SUS <span class="req">*</span></label>
-            <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
-          </div>
-          <div class="field field--rg" style="min-width:0">
-            <label>RG</label>
-            <input type="text" id="rg" placeholder="">
-          </div>
-          <div class="field field--cpf" style="min-width:0">
-            <label>CPF <span class="req">*</span></label>
-            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
-          </div>
+        <div class="field field--matricula dados-func-matricula">
+          <label>Matrícula</label>
+          <input type="text" id="matricula" placeholder="">
         </div>
-        <div class="dados-datas">
-          <div class="field" style="min-width:0">
-            <label>Data de Nascimento <span class="req">*</span></label>
-            <input type="date" id="dataNascimentoFunc" autocomplete="off">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Data de Admissão</label>
-            <input type="date" id="dataAdmissaoFunc" autocomplete="off">
-          </div>
+        <div class="field dados-func-nome">
+          <label>Nome do Funcionário <span class="req">*</span></label>
+          <input type="text" id="funcionario" placeholder="Nome completo">
         </div>
-        <div class="dados-cargo-site-tel">
-          <div class="field" style="min-width:0">
-            <label>Cargo</label>
-            <input type="text" id="cargo" placeholder="">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Site / Unidade</label>
-            <input type="text" id="site" placeholder="">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Telefone</label>
-            <input type="text" id="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="16" spellcheck="false" autocomplete="tel">
-          </div>
+        <div class="field dados-func-nomemae">
+          <label>Nome da Mãe</label>
+          <input type="text" id="nomemae" placeholder="">
+        </div>
+        <div class="field field--sus dados-func-sus">
+          <label>Nº do Cartão SUS</label>
+          <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
+        </div>
+        <div class="field field--rg dados-func-rg">
+          <label>RG</label>
+          <input type="text" id="rg" placeholder="">
+        </div>
+        <div class="field field--cpf dados-func-cpf">
+          <label>CPF <span class="req">*</span></label>
+          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field dados-func-dnasc">
+          <label>Data de Nascimento</label>
+          <input type="date" id="dataNascimentoFunc" autocomplete="off">
+        </div>
+        <div class="field dados-func-dadm">
+          <label>Data de Admissão</label>
+          <input type="date" id="dataAdmissaoFunc" autocomplete="off">
+        </div>
+        <div class="field dados-func-cargo">
+          <label>Cargo</label>
+          <input type="text" id="cargo" placeholder="">
+        </div>
+        <div class="field dados-func-site">
+          <label>Site / Unidade</label>
+          <input type="text" id="site" placeholder="">
+        </div>
+        <div class="field dados-func-tel">
+          <label>Telefone</label>
+          <input type="text" id="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="16" spellcheck="false" autocomplete="tel">
         </div>
       </div>
     </div>
@@ -782,34 +745,30 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Endereço residencial</div>
     <div class="section-body">
-      <div class="grid grid-2">
-        <div class="col-span-2 endereco-cep-rua-num">
-          <div class="field" style="min-width:0">
-            <label>CEP</label>
-            <input type="text" id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code" spellcheck="false">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Endereço (Rua/Av)</label>
-            <input type="text" id="rua" placeholder="">
-          </div>
-          <div class="field" style="min-width:0;max-width:100px">
-            <label>Número</label>
-            <input type="text" id="numero" placeholder="">
-          </div>
+      <div class="address-grid">
+        <div class="field address-cep">
+          <label>CEP</label>
+          <input type="text" id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code" spellcheck="false">
         </div>
-        <div class="col-span-2 endereco-compl-bairro-cid">
-          <div class="field" style="min-width:0">
-            <label>Complemento</label>
-            <input type="text" id="complemento" placeholder="">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Bairro</label>
-            <input type="text" id="bairro" placeholder="">
-          </div>
-          <div class="field" style="min-width:0">
-            <label>Cidade/UF</label>
-            <input type="text" id="cidadeuf" placeholder="">
-          </div>
+        <div class="field address-endereco">
+          <label>Endereço (Rua/Av)</label>
+          <input type="text" id="rua" placeholder="">
+        </div>
+        <div class="field address-numero">
+          <label>Número</label>
+          <input type="text" id="numero" placeholder="">
+        </div>
+        <div class="field address-complemento">
+          <label>Complemento</label>
+          <input type="text" id="complemento" placeholder="">
+        </div>
+        <div class="field address-bairro">
+          <label>Bairro</label>
+          <input type="text" id="bairro" placeholder="">
+        </div>
+        <div class="field address-cidade-uf">
+          <label>Cidade/UF</label>
+          <input type="text" id="cidadeuf" placeholder="">
         </div>
       </div>
     </div>
@@ -2045,7 +2004,6 @@ function atualizarVisibilidadeModuloDependentes() {
     inp.addEventListener("change", aplicar);
     inp.addEventListener("input", aplicar);
   });
-  aplicarMaxDatasFuncionario();
 })();
 
 function formatDate(d) {
@@ -2060,45 +2018,6 @@ function marcarCampoInvalido(id, invalido) {
 }
 function digitosCount(str) {
   return String(str || "").replace(/\D/g, "").length;
-}
-function normalizarNomeComparacao(s) {
-  return String(s || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleUpperCase("pt-BR")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-function dataInputParaDateLocal(id) {
-  const s = (document.getElementById(id)?.value || "").trim();
-  if (!s) return null;
-  const p = s.split("-");
-  if (p.length !== 3) return null;
-  const y = parseInt(p[0], 10);
-  const m = parseInt(p[1], 10);
-  const d = parseInt(p[2], 10);
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
-  const dt = new Date(y, m - 1, d);
-  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
-  return dt;
-}
-function inicioDiaHojeLocal() {
-  const n = new Date();
-  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
-}
-function isoHojeLocal() {
-  const n = new Date();
-  const y = n.getFullYear();
-  const m = String(n.getMonth() + 1).padStart(2, "0");
-  const d = String(n.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-function aplicarMaxDatasFuncionario() {
-  const iso = isoHojeLocal();
-  ["dataNascimentoFunc", "dataAdmissaoFunc"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.max = iso;
-  });
 }
 /** Aviso quando dependente está no plano mas CPF não foi informado (ou está incompleto). */
 const MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE =
@@ -2161,60 +2080,6 @@ async function validarCamposObrigatorios() {
     faltantes.push({ id: "cpf", nome: "CPF (11 dígitos)" });
   }
 
-  add("matricula", "Matrícula");
-  add("nomemae", "Nome da mãe");
-  const nomeFuncNorm = normalizarNomeComparacao(v("funcionario"));
-  const nomeMaeNorm = normalizarNomeComparacao(v("nomemae"));
-  if (nomeMaeNorm && nomeFuncNorm && nomeMaeNorm === nomeFuncNorm) {
-    marcarCampoInvalido("nomemae", true);
-    faltantes.push({
-      id: "nomemae",
-      nome: "Nome da mãe (deve ser diferente do nome do funcionário)"
-    });
-  }
-
-  add("sus", "Cartão SUS");
-  const susSoDigitos = v("sus").replace(/\D/g, "");
-  if (v("sus") && (susSoDigitos.length !== 15 || /^0+$/.test(susSoDigitos))) {
-    marcarCampoInvalido("sus", true);
-    faltantes.push({ id: "sus", nome: "Cartão SUS (15 dígitos válidos, não use só zeros)" });
-  }
-
-  const hoje = inicioDiaHojeLocal();
-  marcarCampoInvalido("dataNascimentoFunc", false);
-  const dn = dataInputParaDateLocal("dataNascimentoFunc");
-  if (!dn) {
-    marcarCampoInvalido("dataNascimentoFunc", true);
-    faltantes.push({ id: "dataNascimentoFunc", nome: "Data de nascimento" });
-  } else if (dn > hoje) {
-    marcarCampoInvalido("dataNascimentoFunc", true);
-    faltantes.push({
-      id: "dataNascimentoFunc",
-      nome: "Data de nascimento (não pode ser futura)"
-    });
-  } else if (dn.getFullYear() < 1900) {
-    marcarCampoInvalido("dataNascimentoFunc", true);
-    faltantes.push({ id: "dataNascimentoFunc", nome: "Data de nascimento (inválida)" });
-  }
-
-  marcarCampoInvalido("dataAdmissaoFunc", false);
-  if (v("dataAdmissaoFunc")) {
-    const da = dataInputParaDateLocal("dataAdmissaoFunc");
-    if (!da || da > hoje) {
-      marcarCampoInvalido("dataAdmissaoFunc", true);
-      faltantes.push({
-        id: "dataAdmissaoFunc",
-        nome: "Data de admissão (não pode ser futura)"
-      });
-    } else if (dn && da < dn) {
-      marcarCampoInvalido("dataAdmissaoFunc", true);
-      faltantes.push({
-        id: "dataAdmissaoFunc",
-        nome: "Data de admissão (não pode ser anterior ao nascimento)"
-      });
-    }
-  }
-
   if (radio("tipoAdesao") !== "naooptante") {
     if (document.getElementById("conj_incluir")?.checked) {
       add("conj_nome", "Nome do cônjuge");
@@ -2224,19 +2089,9 @@ async function validarCamposObrigatorios() {
       if (!dnCOk) faltantes.push({ id: "conj_nasc", nome: "Data de nascimento do cônjuge" });
       add("conj_sus", "SUS do cônjuge");
       add("conj_nomemae", "Nome da mãe do cônjuge");
-      const conjN = normalizarNomeComparacao(v("conj_nome"));
-      const conjMaeN = normalizarNomeComparacao(v("conj_nomemae"));
-      if (conjMaeN && conjN && conjMaeN === conjN) {
-        marcarCampoInvalido("conj_nomemae", true);
-        faltantes.push({
-          id: "conj_nomemae",
-          nome: "Nome da mãe do cônjuge (deve ser diferente do nome do cônjuge)"
-        });
-      }
-      const conjSusDig = v("conj_sus").replace(/\D/g, "");
-      if (v("conj_sus") && (conjSusDig.length !== 15 || /^0+$/.test(conjSusDig))) {
+      if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
         marcarCampoInvalido("conj_sus", true);
-        faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos válidos)" });
+        faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos)" });
       }
       if (v("conj_cpf") && digitosCount(v("conj_cpf")) !== 11) {
         marcarCampoInvalido("conj_cpf", true);
@@ -2254,22 +2109,12 @@ async function validarCamposObrigatorios() {
       if (!dnFOk) faltantes.push({ id: `fil${fn}_nasc`, nome: `Data de nascimento (${rot})` });
       add(`fil${fn}_sus`, `SUS (${rot})`);
       add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
-      const filNomeN = normalizarNomeComparacao(v(`fil${fn}_nome`));
-      const filMaeN = normalizarNomeComparacao(v(`fil${fn}_nomemae`));
-      if (filMaeN && filNomeN && filMaeN === filNomeN) {
-        marcarCampoInvalido(`fil${fn}_nomemae`, true);
-        faltantes.push({
-          id: `fil${fn}_nomemae`,
-          nome: `Nome da mãe (${rot}, diferente do nome do dependente)`
-        });
-      }
       if (filhoDeveExibirCampoDnv(fn)) {
         add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
       }
-      const filSusDig = v(`fil${fn}_sus`).replace(/\D/g, "");
-      if (v(`fil${fn}_sus`) && (filSusDig.length !== 15 || /^0+$/.test(filSusDig))) {
+      if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
         marcarCampoInvalido(`fil${fn}_sus`, true);
-        faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos válidos)` });
+        faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
       }
       if (v(`fil${fn}_cpf`) && digitosCount(v(`fil${fn}_cpf`)) !== 11) {
         marcarCampoInvalido(`fil${fn}_cpf`, true);
@@ -2429,7 +2274,6 @@ function limparDadosFormulario() {
   ultimoCepPreenchido = "";
   clearTimeout(cepBuscaTimer);
   limparAssinaturaCanvas();
-  aplicarMaxDatasFuncionario();
 }
 
 // ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
@@ -2549,7 +2393,6 @@ function aplicarEstadoRascunho(obj) {
   } else {
     limparAssinaturaCanvas();
   }
-  aplicarMaxDatasFuncionario();
 }
 
 function tentarAplicarCopiaFichaCadastral() {
@@ -2696,7 +2539,6 @@ function tentarAplicarCopiaFichaCadastral() {
   try {
     lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
   } catch (e2) {}
-  aplicarMaxDatasFuncionario();
   agendarSalvarRascunho();
   showToast("Dados importados da Ficha Cadastral. Revise os campos antes de concluir.", true);
 }
