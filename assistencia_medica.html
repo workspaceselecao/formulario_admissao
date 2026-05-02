@@ -191,6 +191,18 @@
     gap: 10px;
     flex-wrap: wrap;
   }
+  /* Duas opções com a mesma largura (ex.: tipo de movimentação) */
+  .radio-inline.radio-inline--fill {
+    flex-wrap: nowrap;
+    width: 100%;
+    align-items: stretch;
+  }
+  .radio-inline.radio-inline--fill .radio-label {
+    flex: 1 1 0;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
+  }
   .radio-label {
     display: flex;
     align-items: center;
@@ -558,6 +570,14 @@
     }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: span 1; }
+    .radio-inline.radio-inline--fill {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+    .radio-inline.radio-inline--fill .radio-label {
+      flex: none;
+      width: 100%;
+    }
     .form-actions-bottom { flex-direction: column; width: 100%; }
     .btn-export { width: 100%; justify-content: center; }
     /* 16px evita zoom automático do iOS ao focar; estabiliza o picker de UF/cidade. */
@@ -650,9 +670,9 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Tipo de movimentação</div>
     <div class="section-body">
-      <div class="radio-inline" id="tipoAdesaoGroup" style="margin-top:4px">
+      <div class="radio-inline radio-inline--fill" id="tipoAdesaoGroup" style="margin-top:4px">
         <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante"> NÃO QUERO ADERIR AO PLANO</label>
+        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante">NÃO QUERO ADERIR AO PLANO</label>
       </div>
     </div>
   </div>
