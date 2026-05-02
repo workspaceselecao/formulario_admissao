@@ -16,7 +16,7 @@
     --text: #1a1714;
     --text-mid: #4a453f;
     --text-light: #7a756e;
-    --radius: 14px;
+    --radius: 12px;
     --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
   }
@@ -150,14 +150,16 @@
     position: fixed;
     inset: 0;
     z-index: 1000;
-    display: none;
     align-items: center;
     justify-content: center;
     padding: 16px;
     background: rgba(26, 23, 20, 0.55);
     backdrop-filter: blur(3px);
   }
-  .instr-modal-overlay.is-open {
+  .instr-modal-overlay[aria-hidden="true"] {
+    display: none;
+  }
+  .instr-modal-overlay[aria-hidden="false"] {
     display: flex;
   }
   .instr-modal {
@@ -315,7 +317,6 @@
     id="instr-modal-overlay"
     class="instr-modal-overlay"
     role="presentation"
-    hidden
     aria-hidden="true"
   >
     <div
@@ -375,9 +376,6 @@
       function openModal() {
         check.checked = false;
         btn.disabled = true;
-        overlay.hidden = false;
-        overlay.removeAttribute("hidden");
-        overlay.classList.add("is-open");
         overlay.setAttribute("aria-hidden", "false");
         document.body.classList.add("instr-modal-open");
         if (dialogEl) {
@@ -386,8 +384,6 @@
       }
 
       function closeModal() {
-        overlay.classList.remove("is-open");
-        overlay.hidden = true;
         overlay.setAttribute("aria-hidden", "true");
         document.body.classList.remove("instr-modal-open");
       }

@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
 <style>
+  /* ── TOKENS (página) ─────────────────── */
   :root {
     --bg: #f0ede8;
     --surface: #faf9f7;
@@ -22,7 +23,19 @@
     --label: #5a554e;
     --success: #2d7a4a;
     --input-focus-border: #efa27f;
-    --radius: 10px;
+    --accent-border-subtle: rgba(1, 66, 106, 0.2);
+    --accent-border-medium: rgba(1, 66, 106, 0.28);
+    --accent-shadow-subtle: rgba(12, 40, 68, 0.06);
+    --accent-shadow-medium: rgba(1, 66, 106, 0.14);
+    --overlay-bg: rgba(10, 10, 10, 0.45);
+    --destructive: #a33;
+    --destructive-bg: rgba(180, 60, 50, 0.08);
+    --separator-subtle: rgba(0, 0, 0, 0.06);
+    --separator-medium: rgba(0, 0, 0, 0.1);
+    --accent-tap-hover: rgba(1, 66, 106, 0.07);
+    --accent-tap-focus: rgba(1, 66, 106, 0.09);
+    --accent-focus-ring: rgba(1, 66, 106, 0.28);
+    --radius: 12px;
     --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
   }
@@ -1228,20 +1241,49 @@ const LS_LEGACY = {
   fichaNaoPerguntar: "ficha_cadastral_nao_perguntar_copia_assistencia",
   fichaRascunho: "ficha_cadastral_rascunho_v2"
 };
+/** Evita falhas silenciosas (modo privado, quota, SecurityError). */
+const appStorage = {
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.getItem:", key, e);
+      }
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.setItem:", key, e);
+      }
+      return false;
+    }
+  },
+  removeItem(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.removeItem:", key, e);
+      }
+    }
+  }
+};
 function lsMigrateLegacy(newKey, legacyKey) {
-  try {
-    if (localStorage.getItem(newKey) != null) return;
-    const old = localStorage.getItem(legacyKey);
-    if (old == null) return;
-    localStorage.setItem(newKey, old);
-    localStorage.removeItem(legacyKey);
-  } catch (_) {}
+  if (appStorage.getItem(newKey) != null) return;
+  const old = appStorage.getItem(legacyKey);
+  if (old == null) return;
+  if (!appStorage.setItem(newKey, old)) return;
+  appStorage.removeItem(legacyKey);
 }
 function lsRemoveDual(newKey, legacyKey) {
-  try {
-    localStorage.removeItem(newKey);
-    localStorage.removeItem(legacyKey);
-  } catch (_) {}
+  appStorage.removeItem(newKey);
+  appStorage.removeItem(legacyKey);
 }
 const CROSS_COPY_FICHA_ASSISTENCIA_KEY = LS_NS + "cross_copy_ficha_para_assistencia";
 lsMigrateLegacy(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY.crossCopy);
@@ -1932,7 +1974,7 @@ function fecharModalCopiaAssistencia() {
 
 function salvarPayloadCopiaAssistenciaNoStorage(payload) {
   try {
-    localStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(payload));
+    appStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(payload));
   } catch (e) {
     console.warn(e);
   }
@@ -1943,7 +1985,7 @@ function salvarPayloadCopiaAssistenciaNoStorage(payload) {
  * senão, abre o modal e redireciona se confirmar.
  */
 function oferecerIrParaAssistenciaAposPdf(payload) {
-  if (localStorage.getItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST) === "1") {
+  if (appStorage.getItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST) === "1") {
     salvarPayloadCopiaAssistenciaNoStorage(payload);
     showToast("Dados da ficha prontos para a Assistência Médica. Abra o formulário no menu principal.", true);
     payloadPosPdfAssistenciaPendente = null;
@@ -2124,7 +2166,7 @@ function salvarRascunhoLocalSincrono() {
   clearTimeout(rascunhoSalvarTimer);
   rascunhoSalvarTimer = null;
   try {
-    localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
   } catch (e) {
     console.warn("Rascunho não salvo:", e);
   }
@@ -2132,7 +2174,7 @@ function salvarRascunhoLocalSincrono() {
 
 function tentarRestaurarRascunho() {
   try {
-    const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
+    const raw = appStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
     if (!obj || (obj.v !== 1 && obj.v !== 2 && obj.v !== 3) || !obj.campos) return false;
@@ -2968,7 +3010,7 @@ document.getElementById("btnCopiaAssistSim")?.addEventListener("click", () => {
   }
   if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
     try {
-      localStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
+      appStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
     } catch (_e) {}
   }
   payloadPosPdfAssistenciaPendente = null;
@@ -2981,7 +3023,7 @@ function fecharModalCopiaAssistRecusandoRedirecionamento() {
   }
   if (document.getElementById("naoPerguntarCopiaAssist")?.checked) {
     try {
-      localStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
+      appStorage.setItem(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, "1");
     } catch (_e) {}
   }
   payloadPosPdfAssistenciaPendente = null;

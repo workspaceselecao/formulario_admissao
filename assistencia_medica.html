@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
 <style>
+  /* ── TOKENS (página) ─────────────────── */
   :root {
     --bg: #f0ede8;
     --surface: #faf9f7;
@@ -21,22 +22,31 @@
     --text-light: #7a756e;
     --label: #5a554e;
     --input-focus-border: #efa27f;
-    --radius: 10px;
+    --accent-border-subtle: rgba(1, 66, 106, 0.2);
+    --accent-border-medium: rgba(1, 66, 106, 0.28);
+    --accent-shadow-subtle: rgba(12, 40, 68, 0.06);
+    --accent-shadow-medium: rgba(1, 66, 106, 0.14);
+    --overlay-bg: rgba(10, 10, 10, 0.45);
+    --destructive: #a33;
+    --destructive-bg: rgba(180, 60, 50, 0.08);
+    --separator-subtle: rgba(0, 0, 0, 0.06);
+    --separator-medium: rgba(0, 0, 0, 0.1);
+    --accent-tap-hover: rgba(1, 66, 106, 0.07);
+    --accent-tap-focus: rgba(1, 66, 106, 0.09);
+    --accent-focus-ring: rgba(1, 66, 106, 0.28);
+    --radius: 12px;
     --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── LAYOUT BASE ─────────────────────── */
   body {
     font-family: 'Poppins', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
   }
-  .container {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
+  /* ── CARDS E SEÇÕES DO FORMULÁRIO ───── */
   .section-card {
     background: var(--card);
     border-radius: 16px;
@@ -1134,20 +1144,48 @@
 const LS_NS = "atento.forms:v1:";
 const LS_LEGACY_CROSS_COPY = "cross_copy_ficha_para_assistencia_v1";
 const LS_LEGACY_RASCUNHO_ASSIST = "assistencia_medica_rascunho_v5";
+const appStorage = {
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.getItem:", key, e);
+      }
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.setItem:", key, e);
+      }
+      return false;
+    }
+  },
+  removeItem(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[atento.forms] localStorage.removeItem:", key, e);
+      }
+    }
+  }
+};
 function lsMigrateLegacy(newKey, legacyKey) {
-  try {
-    if (localStorage.getItem(newKey) != null) return;
-    const old = localStorage.getItem(legacyKey);
-    if (old == null) return;
-    localStorage.setItem(newKey, old);
-    localStorage.removeItem(legacyKey);
-  } catch (_) {}
+  if (appStorage.getItem(newKey) != null) return;
+  const old = appStorage.getItem(legacyKey);
+  if (old == null) return;
+  if (!appStorage.setItem(newKey, old)) return;
+  appStorage.removeItem(legacyKey);
 }
 function lsRemoveDual(newKey, legacyKey) {
-  try {
-    localStorage.removeItem(newKey);
-    localStorage.removeItem(legacyKey);
-  } catch (_) {}
+  appStorage.removeItem(newKey);
+  appStorage.removeItem(legacyKey);
 }
 function setModalOverlayVisible(overlayEl, visible) {
   if (!overlayEl) return;
@@ -2401,7 +2439,7 @@ function aplicarEstadoRascunho(obj) {
 function tentarAplicarCopiaFichaCadastral() {
   let raw;
   try {
-    raw = localStorage.getItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+    raw = appStorage.getItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
   } catch (_e) {
     return;
   }
@@ -2562,13 +2600,13 @@ function salvarRascunhoLocalSincrono() {
   clearTimeout(rascunhoSalvarTimer);
   rascunhoSalvarTimer = null;
   try {
-    localStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
   } catch (_) {}
 }
 
 function tentarRestaurarRascunho() {
   try {
-    const raw = localStorage.getItem(RASCUNHO_STORAGE_KEY);
+    const raw = appStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
     if (!obj || ![1, 2, 3, 4, 5].includes(obj.v) || !obj.campos) return false;
