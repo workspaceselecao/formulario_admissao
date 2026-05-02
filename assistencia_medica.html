@@ -723,23 +723,23 @@
             </select>
           </div>
           <div class="field field--matricula" style="min-width:0">
-            <label>Matrícula</label>
-            <input type="text" id="matricula" placeholder="">
+            <label>Matrícula <span class="req">*</span></label>
+            <input type="text" id="matricula" placeholder="" inputmode="numeric" autocomplete="off">
           </div>
         </div>
         <div class="nome-mae-row col-span-2">
           <div class="field" style="min-width:0">
             <label>Nome do Funcionário <span class="req">*</span></label>
-            <input type="text" id="funcionario" placeholder="Nome completo">
+            <input type="text" id="funcionario" placeholder="Conforme Certidão de Nascimento ou Casamento">
           </div>
           <div class="field" style="min-width:0">
-            <label>Nome da Mãe</label>
-            <input type="text" id="nomemae" placeholder="">
+            <label>Nome da Mãe <span class="req">*</span></label>
+            <input type="text" id="nomemae" placeholder="Nome completo da mãe (diferente do seu)">
           </div>
         </div>
         <div class="dados-sus-rg-cpf">
           <div class="field field--sus" style="min-width:0">
-            <label>Nº do Cartão SUS</label>
+            <label>Nº do Cartão SUS <span class="req">*</span></label>
             <input type="text" id="sus" inputmode="numeric" placeholder="000 0000 0000 0000" maxlength="18">
           </div>
           <div class="field field--rg" style="min-width:0">
@@ -753,7 +753,7 @@
         </div>
         <div class="dados-datas">
           <div class="field" style="min-width:0">
-            <label>Data de Nascimento</label>
+            <label>Data de Nascimento <span class="req">*</span></label>
             <input type="date" id="dataNascimentoFunc" autocomplete="off">
           </div>
           <div class="field" style="min-width:0">
@@ -2045,6 +2045,7 @@ function atualizarVisibilidadeModuloDependentes() {
     inp.addEventListener("change", aplicar);
     inp.addEventListener("input", aplicar);
   });
+  aplicarMaxDatasFuncionario();
 })();
 
 function formatDate(d) {
@@ -2059,6 +2060,45 @@ function marcarCampoInvalido(id, invalido) {
 }
 function digitosCount(str) {
   return String(str || "").replace(/\D/g, "").length;
+}
+function normalizarNomeComparacao(s) {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleUpperCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function dataInputParaDateLocal(id) {
+  const s = (document.getElementById(id)?.value || "").trim();
+  if (!s) return null;
+  const p = s.split("-");
+  if (p.length !== 3) return null;
+  const y = parseInt(p[0], 10);
+  const m = parseInt(p[1], 10);
+  const d = parseInt(p[2], 10);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+  const dt = new Date(y, m - 1, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+  return dt;
+}
+function inicioDiaHojeLocal() {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+function isoHojeLocal() {
+  const n = new Date();
+  const y = n.getFullYear();
+  const m = String(n.getMonth() + 1).padStart(2, "0");
+  const d = String(n.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+function aplicarMaxDatasFuncionario() {
+  const iso = isoHojeLocal();
+  ["dataNascimentoFunc", "dataAdmissaoFunc"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.max = iso;
+  });
 }
 /** Aviso quando dependente está no plano mas CPF não foi informado (ou está incompleto). */
 const MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE =
@@ -2121,6 +2161,60 @@ async function validarCamposObrigatorios() {
     faltantes.push({ id: "cpf", nome: "CPF (11 dígitos)" });
   }
 
+  add("matricula", "Matrícula");
+  add("nomemae", "Nome da mãe");
+  const nomeFuncNorm = normalizarNomeComparacao(v("funcionario"));
+  const nomeMaeNorm = normalizarNomeComparacao(v("nomemae"));
+  if (nomeMaeNorm && nomeFuncNorm && nomeMaeNorm === nomeFuncNorm) {
+    marcarCampoInvalido("nomemae", true);
+    faltantes.push({
+      id: "nomemae",
+      nome: "Nome da mãe (deve ser diferente do nome do funcionário)"
+    });
+  }
+
+  add("sus", "Cartão SUS");
+  const susSoDigitos = v("sus").replace(/\D/g, "");
+  if (v("sus") && (susSoDigitos.length !== 15 || /^0+$/.test(susSoDigitos))) {
+    marcarCampoInvalido("sus", true);
+    faltantes.push({ id: "sus", nome: "Cartão SUS (15 dígitos válidos, não use só zeros)" });
+  }
+
+  const hoje = inicioDiaHojeLocal();
+  marcarCampoInvalido("dataNascimentoFunc", false);
+  const dn = dataInputParaDateLocal("dataNascimentoFunc");
+  if (!dn) {
+    marcarCampoInvalido("dataNascimentoFunc", true);
+    faltantes.push({ id: "dataNascimentoFunc", nome: "Data de nascimento" });
+  } else if (dn > hoje) {
+    marcarCampoInvalido("dataNascimentoFunc", true);
+    faltantes.push({
+      id: "dataNascimentoFunc",
+      nome: "Data de nascimento (não pode ser futura)"
+    });
+  } else if (dn.getFullYear() < 1900) {
+    marcarCampoInvalido("dataNascimentoFunc", true);
+    faltantes.push({ id: "dataNascimentoFunc", nome: "Data de nascimento (inválida)" });
+  }
+
+  marcarCampoInvalido("dataAdmissaoFunc", false);
+  if (v("dataAdmissaoFunc")) {
+    const da = dataInputParaDateLocal("dataAdmissaoFunc");
+    if (!da || da > hoje) {
+      marcarCampoInvalido("dataAdmissaoFunc", true);
+      faltantes.push({
+        id: "dataAdmissaoFunc",
+        nome: "Data de admissão (não pode ser futura)"
+      });
+    } else if (dn && da < dn) {
+      marcarCampoInvalido("dataAdmissaoFunc", true);
+      faltantes.push({
+        id: "dataAdmissaoFunc",
+        nome: "Data de admissão (não pode ser anterior ao nascimento)"
+      });
+    }
+  }
+
   if (radio("tipoAdesao") !== "naooptante") {
     if (document.getElementById("conj_incluir")?.checked) {
       add("conj_nome", "Nome do cônjuge");
@@ -2130,9 +2224,19 @@ async function validarCamposObrigatorios() {
       if (!dnCOk) faltantes.push({ id: "conj_nasc", nome: "Data de nascimento do cônjuge" });
       add("conj_sus", "SUS do cônjuge");
       add("conj_nomemae", "Nome da mãe do cônjuge");
-      if (v("conj_sus") && digitosCount(v("conj_sus")) !== 15) {
+      const conjN = normalizarNomeComparacao(v("conj_nome"));
+      const conjMaeN = normalizarNomeComparacao(v("conj_nomemae"));
+      if (conjMaeN && conjN && conjMaeN === conjN) {
+        marcarCampoInvalido("conj_nomemae", true);
+        faltantes.push({
+          id: "conj_nomemae",
+          nome: "Nome da mãe do cônjuge (deve ser diferente do nome do cônjuge)"
+        });
+      }
+      const conjSusDig = v("conj_sus").replace(/\D/g, "");
+      if (v("conj_sus") && (conjSusDig.length !== 15 || /^0+$/.test(conjSusDig))) {
         marcarCampoInvalido("conj_sus", true);
-        faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos)" });
+        faltantes.push({ id: "conj_sus", nome: "SUS do cônjuge (15 dígitos válidos)" });
       }
       if (v("conj_cpf") && digitosCount(v("conj_cpf")) !== 11) {
         marcarCampoInvalido("conj_cpf", true);
@@ -2150,12 +2254,22 @@ async function validarCamposObrigatorios() {
       if (!dnFOk) faltantes.push({ id: `fil${fn}_nasc`, nome: `Data de nascimento (${rot})` });
       add(`fil${fn}_sus`, `SUS (${rot})`);
       add(`fil${fn}_nomemae`, `Nome da mãe (${rot})`);
+      const filNomeN = normalizarNomeComparacao(v(`fil${fn}_nome`));
+      const filMaeN = normalizarNomeComparacao(v(`fil${fn}_nomemae`));
+      if (filMaeN && filNomeN && filMaeN === filNomeN) {
+        marcarCampoInvalido(`fil${fn}_nomemae`, true);
+        faltantes.push({
+          id: `fil${fn}_nomemae`,
+          nome: `Nome da mãe (${rot}, diferente do nome do dependente)`
+        });
+      }
       if (filhoDeveExibirCampoDnv(fn)) {
         add(`fil${fn}_nascvivo`, `Declaração de nascido vivo (${rot})`);
       }
-      if (v(`fil${fn}_sus`) && digitosCount(v(`fil${fn}_sus`)) !== 15) {
+      const filSusDig = v(`fil${fn}_sus`).replace(/\D/g, "");
+      if (v(`fil${fn}_sus`) && (filSusDig.length !== 15 || /^0+$/.test(filSusDig))) {
         marcarCampoInvalido(`fil${fn}_sus`, true);
-        faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos)` });
+        faltantes.push({ id: `fil${fn}_sus`, nome: `SUS (${rot}, 15 dígitos válidos)` });
       }
       if (v(`fil${fn}_cpf`) && digitosCount(v(`fil${fn}_cpf`)) !== 11) {
         marcarCampoInvalido(`fil${fn}_cpf`, true);
@@ -2315,6 +2429,7 @@ function limparDadosFormulario() {
   ultimoCepPreenchido = "";
   clearTimeout(cepBuscaTimer);
   limparAssinaturaCanvas();
+  aplicarMaxDatasFuncionario();
 }
 
 // ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
@@ -2434,6 +2549,7 @@ function aplicarEstadoRascunho(obj) {
   } else {
     limparAssinaturaCanvas();
   }
+  aplicarMaxDatasFuncionario();
 }
 
 function tentarAplicarCopiaFichaCadastral() {
@@ -2580,6 +2696,7 @@ function tentarAplicarCopiaFichaCadastral() {
   try {
     lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
   } catch (e2) {}
+  aplicarMaxDatasFuncionario();
   agendarSalvarRascunho();
   showToast("Dados importados da Ficha Cadastral. Revise os campos antes de concluir.", true);
 }

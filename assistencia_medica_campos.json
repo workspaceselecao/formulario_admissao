@@ -98,7 +98,7 @@
             "largura": 166,
             "altura": 12
           },
-          "obrigatorio": false
+          "obrigatorio": true
         },
         "sus": {
           "label": "Nº do Cartão SUS",
