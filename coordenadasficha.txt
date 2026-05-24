@@ -23,8 +23,8 @@ tipodeficiencia multipla{"page":1,"x":483,"y":531,"width":9,"height":9}
 contabradesco{"page":1,"x":93,"y":510,"width":11,"height":10}
 contabradesco agencia{"page":1,"x":288,"y":504,"width":122,"height":14}
 contabradesco contadigito{"page":1,"x":418,"y":501,"width":142,"height":16}
-contamentore{"page":1,"x":93,"y":482,"width":12,"height":10}
-contamentore cpf{"page":1,"x":291,"y":476,"width":252,"height":15}
+contacorrentebradesco{"page":1,"x":93,"y":482,"width":12,"height":10}
+contacorrentebradesco cpf{"page":1,"x":291,"y":476,"width":252,"height":15}
 dependenteum{"page":1,"x":14,"y":422,"width":285,"height":17}
 dependenteum dtnasc{"page":1,"x":306,"y":422,"width":115,"height":17}
 dependenteum cpf{"page":1,"x":428,"y":422,"width":136,"height":17}

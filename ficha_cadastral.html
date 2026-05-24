@@ -282,7 +282,7 @@
   .col-span-3 { grid-column: span 3; }
   .col-span-4 { grid-column: span 4; }
 
-  /* Bradesco (desktop): CPF, agência e conta na mesma linha; mentore: CPF largura total */
+  /* Bradesco (desktop): CPF, agência e conta na mesma linha */
   .banco-cpf-agencia-conta {
     display: grid;
     grid-column: span 2;
@@ -1003,7 +1003,7 @@
           <label>Tipo de Conta</label>
           <div class="radio-inline" style="margin-top:4px">
             <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
-            <label class="radio-label"><input type="radio" name="tipoConta" value="mentore" onchange="toggleBanco(this)"> Conta Mêntore Bank</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="conta_corrente" onchange="toggleBanco(this)"> Conta Corrente Bradesco</label>
           </div>
         </div>
         <div class="banco-cpf-agencia-conta" id="bancoCpfAgenciaContaWrap">
@@ -1849,19 +1849,24 @@ function togglePIS(el){
 function toggleDef(el){
   document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
 }
+function tipoContaRequerAgenciaConta(tipo){
+  return tipo === 'bradesco' || tipo === 'conta_corrente';
+}
 function toggleBanco(el){
-  const b = el.value==='bradesco';
-  document.getElementById('agenciaField').style.display = b?'block':'none';
-  document.getElementById('contaField').style.display = b?'block':'none';
+  const tipo = el.value;
+  const precisaAgenciaConta = tipoContaRequerAgenciaConta(tipo);
+  const isSalarioBradesco = tipo === 'bradesco';
+  document.getElementById('agenciaField').style.display = precisaAgenciaConta ? 'block' : 'none';
+  document.getElementById('contaField').style.display = precisaAgenciaConta ? 'block' : 'none';
   const wrap = document.getElementById('bancoCpfAgenciaContaWrap');
-  if (wrap) wrap.classList.toggle('banco-cpf-agencia-conta--bradesco', b);
+  if (wrap) wrap.classList.toggle('banco-cpf-agencia-conta--bradesco', precisaAgenciaConta);
   const cartaBradescoField = document.getElementById('cartaBradescoField');
-  if (cartaBradescoField) cartaBradescoField.style.display = b ? 'block' : 'none';
+  if (cartaBradescoField) cartaBradescoField.style.display = isSalarioBradesco ? 'block' : 'none';
   const agenciaEl = document.getElementById('agencia');
   const contaEl = document.getElementById('conta');
-  agenciaEl.required = b;
-  contaEl.required = b;
-  if (!b) {
+  agenciaEl.required = precisaAgenciaConta;
+  contaEl.required = precisaAgenciaConta;
+  if (!precisaAgenciaConta) {
     agenciaEl.classList.remove('invalid');
     contaEl.classList.remove('invalid');
   }
@@ -2113,7 +2118,7 @@ function aplicarEstadoRascunho(obj) {
   const rad = obj.radios || {};
   marcarRadioRestaurar("primeiroEmprego", rad.primeiroEmprego);
   marcarRadioRestaurar("deficiencia", rad.deficiencia);
-  marcarRadioRestaurar("tipoConta", rad.tipoConta);
+  marcarRadioRestaurar("tipoConta", rad.tipoConta === "mentore" ? "conta_corrente" : rad.tipoConta);
   marcarRadioRestaurar("valeRef", rad.valeRef);
 
   aplicarTipoDeficienciaSalvos(obj.tipoDeficiencia);
@@ -2251,10 +2256,10 @@ function updateProgress(){
   ]);
 
   const bancarioPct = calcPct([
-    () => ['mentore', 'bradesco'].includes(radio('tipoConta')),
+    () => ['conta_corrente', 'bradesco'].includes(radio('tipoConta')),
     () => hasValue('cpf'),
-    () => (radio('tipoConta') !== 'bradesco' ? true : hasValue('agencia')),
-    () => (radio('tipoConta') !== 'bradesco' ? true : hasValue('conta'))
+    () => (tipoContaRequerAgenciaConta(radio('tipoConta')) ? hasValue('agencia') : true),
+    () => (tipoContaRequerAgenciaConta(radio('tipoConta')) ? hasValue('conta') : true)
   ]);
 
   const dependentesChecks = lerDependentesFormulario().flatMap((dep) => [
@@ -2347,7 +2352,7 @@ function marcarCampoInvalido(id, invalido){
 }
 function validarContaBradescoObrigatoria(){
   const tipoConta = radio('tipoConta');
-  if (tipoConta !== 'bradesco') return true;
+  if (!tipoContaRequerAgenciaConta(tipoConta)) return true;
 
   const agencia = v('agencia');
   const conta = v('conta');
@@ -2357,7 +2362,8 @@ function validarContaBradescoObrigatoria(){
   marcarCampoInvalido('conta', !contaOk);
 
   if (!agenciaOk || !contaOk) {
-    showToast('Para Conta Salário Bradesco, preencha Agência e Conta/Dígito.', false);
+    const rotulo = tipoConta === 'bradesco' ? 'Conta Salário Bradesco' : 'Conta Corrente Bradesco';
+    showToast(`Para ${rotulo}, preencha Agência e Conta/Dígito.`, false);
     if (!agenciaOk) {
       document.getElementById('agencia')?.focus();
     } else {
@@ -2410,8 +2416,8 @@ function validarCamposObrigatorios(){
     marcarCampoInvalido('pis', false);
   }
 
-  const precisaBancoBradesco = radio('tipoConta') === 'bradesco';
-  if (precisaBancoBradesco) {
+  const precisaAgenciaConta = tipoContaRequerAgenciaConta(radio('tipoConta'));
+  if (precisaAgenciaConta) {
     validarCampo({ id: 'agencia', nome: 'Agência' });
     validarCampo({ id: 'conta', nome: 'Conta / Dígito' });
   } else {
@@ -2732,7 +2738,7 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
-      contaMentore: radio("tipoConta") === "mentore",
+      contaCorrenteBradesco: radio("tipoConta") === "conta_corrente",
       contaSalarioBradesco: radio("tipoConta") === "bradesco",
       cpfConta: v("cpf"),
       agencia: v("agencia"),
@@ -2798,11 +2804,13 @@ async function gerarPDF(){
       marcarRadioJsonOpcao(page, font, cb.tipo_conta, "bradesco");
       escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
       escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
-      escreverTextoCampoCoord(page, font, cb.mentore_cpf.coordenadas, data.cpfConta);
+      escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
     }
-    if (data.contaMentore) {
-      marcarRadioJsonOpcao(page, font, cb.tipo_conta, "mentore");
-      escreverTextoCampoCoord(page, font, cb.mentore_cpf.coordenadas, data.cpfConta);
+    if (data.contaCorrenteBradesco) {
+      marcarRadioJsonOpcao(page, font, cb.tipo_conta, "conta_corrente");
+      escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
+      escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
+      escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
     }
 
     const itensDep = C.dependentes.itens || [];
