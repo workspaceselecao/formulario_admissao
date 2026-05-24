@@ -460,7 +460,16 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": { "x": 74, "y": 67, "largura": 219, "altura": 15 },
-          "obrigatorio": true
+          "obrigatorio": true,
+          "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
+        },
+        "nome_legivel_sem_rubrica": {
+          "label": "Nome completo legível (sem rubrica manual)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 74, "y": 28, "largura": 219, "altura": 15 },
+          "obrigatorio": false,
+          "observacao": "Usado somente quando o candidato marca 'Não assinar manualmente'"
         },
         "data": {
           "label": "Data",
