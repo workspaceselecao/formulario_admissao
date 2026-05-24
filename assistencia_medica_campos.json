@@ -919,7 +919,21 @@
             "largura": 229,
             "altura": 15
           },
-          "obrigatorio": true
+          "obrigatorio": true,
+          "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
+        },
+        "nome_legivel_sem_rubrica": {
+          "label": "Nome por extenso (sem rubrica manual)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": {
+            "x": 86,
+            "y": 88,
+            "largura": 229,
+            "altura": 15
+          },
+          "obrigatorio": false,
+          "observacao": "Usado somente quando o candidato marca 'Não assinar manualmente'"
         },
         "data": {
           "label": "Data",

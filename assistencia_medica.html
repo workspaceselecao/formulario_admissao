@@ -173,9 +173,27 @@
   .signature-pad-wrap > label { font-size: 11px; font-weight: 600; color: var(--label); letter-spacing: 0.6px; text-transform: uppercase; font-family: "Poppins", sans-serif; display: block; margin-bottom: 8px; }
   .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
   .signature-canvas-outer { position: relative; border: 1.5px solid var(--border); border-radius: 8px; background: #fff; max-width: 100%; }
+  .signature-canvas-outer.desativada {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .signature-pad-wrap.desativada .btn-signature-clear {
+    pointer-events: none;
+    opacity: 0.5;
+  }
   .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: none; }
   #assinaturaCanvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280; max-height: 200px; touch-action: none; cursor: crosshair; }
-  .signature-pad-tools { display: flex; justify-content: flex-end; margin-top: 8px; gap: 10px; flex-wrap: wrap; }
+  .signature-pad-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .signature-pad-tools .nao-assinar-manual-label {
+    margin-right: auto;
+  }
   .btn-signature-clear { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
   .field input[type="date"] {
@@ -1006,13 +1024,17 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Assinatura</div>
     <div class="section-body">
-      <div class="signature-pad-wrap">
-        <label>Assinatura manuscrita <span class="req">*</span></label>
-        <p class="signature-pad-hint">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.</p>
+      <div class="signature-pad-wrap" id="signaturePadWrap">
+        <label>Assinatura manuscrita <span class="req" id="reqAssinaturaManuscrita">*</span></label>
+        <p class="signature-pad-hint" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
         </div>
         <div class="signature-pad-tools">
+          <label class="check-label nao-assinar-manual-label">
+            <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off">
+            Não assinar manualmente
+          </label>
           <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
         </div>
       </div>
@@ -1699,6 +1721,30 @@ function obterPontoNoCanvasAss(e, canvas) {
 function marcarAssinaturaInvalidaCanvas(mostrar) {
   document.getElementById("signatureCanvasOuter")?.classList.toggle("invalid", !!mostrar);
 }
+function isNaoAssinarManualmente() {
+  return document.getElementById("naoAssinarManualmente")?.checked === true;
+}
+function sincronizarCheckLabelNaoAssinarManualmente() {
+  const cb = document.getElementById("naoAssinarManualmente");
+  if (!cb) return;
+  cb.closest(".check-label")?.classList.toggle("active", cb.checked);
+}
+function atualizarUiNaoAssinarManualmente() {
+  const ativo = isNaoAssinarManualmente();
+  const wrap = document.getElementById("signaturePadWrap");
+  const outer = document.getElementById("signatureCanvasOuter");
+  const req = document.getElementById("reqAssinaturaManuscrita");
+  const hint = document.getElementById("hintAssinaturaManuscrita");
+  wrap?.classList.toggle("desativada", ativo);
+  outer?.classList.toggle("desativada", ativo);
+  if (req) req.style.display = ativo ? "none" : "";
+  if (hint) {
+    hint.textContent = ativo
+      ? "Com esta opção, o nome por extenso será impresso no PDF no lugar da rubrica manual."
+      : "Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.";
+  }
+  if (ativo) marcarAssinaturaInvalidaCanvas(false);
+}
 function initAssinaturaCanvas() {
   const canvas = document.getElementById("assinaturaCanvas");
   if (!canvas) return;
@@ -2156,7 +2202,7 @@ async function validarCamposObrigatorios() {
   } else {
     marcarCampoInvalido("dataAssinatura", false);
   }
-  if (!isAssinaturaManuscritaPreenchida()) {
+  if (!isNaoAssinarManualmente() && !isAssinaturaManuscritaPreenchida()) {
     showToast("Desenhe a assinatura manuscrita na área indicada.", false);
     marcarAssinaturaInvalidaCanvas(true);
     return false;
@@ -2300,6 +2346,10 @@ function limparDadosFormulario() {
   ultimoCepPreenchido = "";
   clearTimeout(cepBuscaTimer);
   limparAssinaturaCanvas();
+  const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+  if (naoAssinarCb) naoAssinarCb.checked = false;
+  sincronizarCheckLabelNaoAssinarManualmente();
+  atualizarUiNaoAssinarManualmente();
 }
 
 // ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
@@ -2344,6 +2394,7 @@ function coletarEstadoRascunho() {
     t: Date.now(),
     campos,
     assinaturaCanvasPng,
+    naoAssinarManualmente: isNaoAssinarManualmente(),
     tipoAdesao: radio("tipoAdesao"),
     conj_incluir: !!document.getElementById("conj_incluir")?.checked,
     filhosVisiveis,
@@ -2419,6 +2470,12 @@ function aplicarEstadoRascunho(obj) {
   } else {
     limparAssinaturaCanvas();
   }
+  const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+  if (naoAssinarCb) {
+    naoAssinarCb.checked = obj.naoAssinarManualmente === true;
+    sincronizarCheckLabelNaoAssinarManualmente();
+  }
+  atualizarUiNaoAssinarManualmente();
 }
 
 function tentarAplicarCopiaFichaCadastral() {
@@ -2765,7 +2822,11 @@ async function gerarPDF() {
     }
 
     const ass = C.assinatura.campos;
-    const [bufPng, ipRef] = await Promise.all([canvasAssinaturaParaPngArrayBuffer(), obterIpPublicoEvidencia()]);
+    const semRubricaManual = isNaoAssinarManualmente();
+    const [bufPng, ipRef] = await Promise.all([
+      semRubricaManual ? Promise.resolve(null) : canvasAssinaturaParaPngArrayBuffer(),
+      obterIpPublicoEvidencia()
+    ]);
     if (bufPng) {
       const rubrica = ass.rubrica;
       if (rubrica?.coordenadas) {
@@ -2773,11 +2834,14 @@ async function gerarPDF() {
         desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
       }
     }
-    if (ass.nome_legivel?.coordenadas) {
+    const coordsNomeLegivel = semRubricaManual
+      ? (ass.nome_legivel_sem_rubrica?.coordenadas || ass.nome_legivel?.coordenadas)
+      : ass.nome_legivel?.coordenadas;
+    if (coordsNomeLegivel) {
       escreverTextoCampoCoord(
         page,
         font,
-        ass.nome_legivel.coordenadas,
+        coordsNomeLegivel,
         v("assinaturaName") || v("funcionario")
       );
     }
@@ -2791,7 +2855,8 @@ async function gerarPDF() {
       timeStyle: "medium"
     }).format(agora);
     const parEvid =
-      "Assinatura manuscrita no navegador. Doc. " +
+      (semRubricaManual ? "Assinatura por nome legível (sem rubrica manual). " : "Assinatura manuscrita no navegador. ") +
+      "Doc. " +
       docId +
       ". Reg.: " +
       dataHoraBr +
@@ -3004,6 +3069,11 @@ document.querySelectorAll('input[type="text"]').forEach((el) => {
 });
 
 initAssinaturaCanvas();
+document.getElementById("naoAssinarManualmente")?.addEventListener("change", () => {
+  sincronizarCheckLabelNaoAssinarManualmente();
+  atualizarUiNaoAssinarManualmente();
+  agendarSalvarRascunho();
+});
 if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
