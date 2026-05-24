@@ -372,7 +372,17 @@
     display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280;
     max-height: 200px; touch-action: none; cursor: crosshair;
   }
-  .signature-pad-tools { display: flex; justify-content: flex-end; margin-top: 8px; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .signature-pad-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .signature-pad-tools .nao-assinar-manual-label {
+    margin-right: auto;
+  }
   .btn-signature-clear {
     background: var(--surface); color: var(--text);
     border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -1149,12 +1159,12 @@
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
         </div>
         <div class="signature-pad-tools">
+          <label class="check-label nao-assinar-manual-label">
+            <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off">
+            Não assinar manualmente
+          </label>
           <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
         </div>
-        <label class="check-label nao-assinar-manual-label" style="margin-top:12px">
-          <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off">
-          Não assinar manualmente
-        </label>
         <p class="signature-pad-hint" style="font-size:11px;margin-top:10px;margin-bottom:0">
           No PDF, serão exibidos data e hora do envio, fuso horário, referência de IP (se disponível) e identificador do documento — apenas no arquivo baixado, sem armazenamento em servidor.
         </p>
