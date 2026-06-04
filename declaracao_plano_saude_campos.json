@@ -36,7 +36,7 @@
           "label": "Data da declaração",
           "tipo": "data",
           "pagina": 2,
-          "coordenadas": { "x": 383, "y": 175, "largura": 51, "altura": 11 },
+          "coordenadas": { "x": 383, "y": 173, "largura": 54, "altura": 10 },
           "obrigatorio": true,
           "mascara": "99/99/9999"
         },
