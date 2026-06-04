@@ -21,7 +21,8 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `cidades_brasil.json` — mapeia cidade → ficha PDF da assistência médica
 - `FICHA BH.pdf`, `FICHA FSA.pdf`, `FICHA GNDI.pdf`, `FICHA GOIANIA.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA SA_FO.pdf` — templates da assistência médica (conforme `cidades_brasil.json`)
 - `vercel.json` — a raiz `/` serve internamente `index.html` (home)
-- `Carta Abertura de Conta Modelo Padrão_Bradesco.docx` — download opcional (conta Bradesco, só na ficha)
+- `Carta Abertura de Conra Salario.pdf` — download opcional (conta salário Bradesco, só na ficha)
+- `DECLARACAO PLANO DE SAUDE.pdf` — modelo de declaração de plano de saúde (referência/documentação)
 
 ## Publicar na Vercel
 

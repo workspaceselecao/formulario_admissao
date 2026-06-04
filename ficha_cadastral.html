@@ -1268,7 +1268,7 @@
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 const TEMPLATE_PATH = "./F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf";
-const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
+const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conra Salario.pdf";
 const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
@@ -3033,13 +3033,11 @@ async function baixarCartaAberturaConta(){
     if (!resp.ok) throw new Error(`Falha ao baixar carta de abertura (${resp.status})`);
     const bytes = await resp.arrayBuffer();
 
-    const blob = new Blob([bytes], {
-      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    });
+    const blob = new Blob([bytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "Carta_Abertura_Conta_Bradesco.docx";
+    link.download = "Carta_Abertura_de_Conta_Salario.pdf";
     document.body.appendChild(link);
     link.click();
     link.remove();
