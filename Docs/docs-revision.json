@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-06-04T14:34:20-03:00",
-  "gitCommit": "f980160",
-  "gitSubject": "RIPD: link de download do historico de versionamento e script de geracao",
+  "ultimaValidacaoIso": "2026-06-04T14:41:36-03:00",
+  "gitCommit": "1a294c1",
+  "gitSubject": "Historico RIPD: guia publico em MD sem JSON nem detalhes tecnicos",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
