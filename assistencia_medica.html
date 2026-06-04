@@ -76,6 +76,14 @@
   body.fluxo-plano-beneficios .assinatura-hint--outros {
     display: none;
   }
+  body.fluxo-plano-beneficios #blocoTipoMovimentacao {
+    display: none !important;
+  }
+  .plano-adesao-bloco + .plano-adesao-bloco {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
   /* Não optante (cancelamento): esconde o card de dependentes. Declarativo; não depende de script. */
   html:has(#tipoAdesaoNaooptante:checked) #secaoDependentes {
     display: none !important;
@@ -695,30 +703,30 @@
 <div class="container">
 
   <div class="section-card" id="secaoTipoPlano">
-    <div class="section-header"><div class="dot"></div>Tipo de plano</div>
+    <div class="section-header"><div class="dot"></div>Plano e adesão</div>
     <div class="section-body">
-      <div class="radio-inline radio-inline--fill" id="tipoPlanoGroup" style="margin-top:4px">
-        <label class="radio-label"><input type="radio" name="tipoPlano" value="plano_beneficios" onchange="toggleTipoPlano(this)"> Plano de Benefícios</label>
-        <label class="radio-label"><input type="radio" name="tipoPlano" value="outros_planos" onchange="toggleTipoPlano(this)"> Outros Planos</label>
+      <div class="plano-adesao-bloco">
+        <div class="subsection-title">Tipo de plano</div>
+        <div class="radio-inline radio-inline--fill" id="tipoPlanoGroup" style="margin-top:8px">
+          <label class="radio-label"><input type="radio" name="tipoPlano" value="plano_beneficios" onchange="toggleTipoPlano(this)"> Plano de Benefícios</label>
+          <label class="radio-label"><input type="radio" name="tipoPlano" value="outros_planos" onchange="toggleTipoPlano(this)"> Outros Planos</label>
+        </div>
+        <p class="signature-pad-hint" style="margin-top:12px;font-size:12px;color:var(--text-mid);line-height:1.5">
+          <strong>Plano de Benefícios:</strong> declaração única (<em>DECLARACAO PLANO DE SAUDE.pdf</em>) — preencha apenas a assinatura.<br>
+          <strong>Outros Planos:</strong> ficha regional conforme a cidade (lista filtrada por região).
+        </p>
       </div>
-      <p class="signature-pad-hint" style="margin-top:12px;font-size:12px;color:var(--text-mid);line-height:1.5">
-        <strong>Plano de Benefícios:</strong> declaração única (<em>DECLARACAO PLANO DE SAUDE.pdf</em>) — preencha apenas a assinatura.<br>
-        <strong>Outros Planos:</strong> ficha regional conforme a cidade (lista filtrada por região).
-      </p>
+      <div class="plano-adesao-bloco" id="blocoTipoMovimentacao">
+        <div class="subsection-title">Tipo de movimentação</div>
+        <div class="radio-inline radio-inline--fill" id="tipoAdesaoGroup" style="margin-top:8px">
+          <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
+          <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante">NÃO QUERO ADERIR AO PLANO</label>
+        </div>
+      </div>
     </div>
   </div>
 
   <div id="fluxoOutrosPlanos">
-  <div class="section-card">
-    <div class="section-header"><div class="dot"></div>Tipo de movimentação</div>
-    <div class="section-body">
-      <div class="radio-inline radio-inline--fill" id="tipoAdesaoGroup" style="margin-top:4px">
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
-        <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante">NÃO QUERO ADERIR AO PLANO</label>
-      </div>
-    </div>
-  </div>
-
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados do funcionário</div>
     <div class="section-body">
