@@ -1393,6 +1393,8 @@ let filhosVisiveis = 1;
 let excluirFilhoModuloNumeroPendente = null;
 const PDF_FONT_TEXTO = 7;
 const PDF_FONT_EVIDENCIA = 5.5;
+const RODAPE_EVIDENCIA_MARGEM_Y_PT = 12;
+const LIMITE_Y_SEM_OFFSET_TEXTO_PT = 120;
 let assinaturaCanvasCtx = null;
 let assinaturaCanvasTemTraço = false;
 let assinaturaDesenhando = false;
@@ -1973,21 +1975,72 @@ function quebrarTextoEvidencia(font, texto, tamanho, larguraMax) {
   if (linha) linhas.push(linha);
   return linhas;
 }
+function caixaRodapeEvidenciaPdf(page, overrides = {}) {
+  const { width: pageW } = page.getSize();
+  const margemX = Number(overrides.x) || 21;
+  const margemInferior = Number(overrides.y) || RODAPE_EVIDENCIA_MARGEM_Y_PT;
+  const largura =
+    Number(overrides.largura) || Math.max(200, pageW - margemX * 2);
+  return {
+    x: margemX,
+    y: margemInferior,
+    largura,
+    altura: Number(overrides.altura) || 10
+  };
+}
+
 function desenharEvidenciaAssinatura(page, font, box, linhas) {
   if (!box || !linhas?.length) return;
   const x = (Number(box.x) || 0) + 0.5;
-  const yBase = Number(box.y) || 0;
+  const yRodape = Number(box.y) || 0;
   const tamanho = PDF_FONT_EVIDENCIA;
   const lineH = tamanho * 1.18;
+  const maxW = (Number(box.largura) || 500) - 1;
   for (let i = 0; i < linhas.length; i++) {
     page.drawText(linhas[i], {
       x,
-      y: yBase + 3 + i * lineH,
+      y: yRodape + 4 + i * lineH,
       size: tamanho,
       font,
-      maxWidth: (Number(box.largura) || 500) - 1
+      maxWidth: maxW
     });
   }
+}
+
+function montarTextoEvidenciaAssinatura(semRubricaManual, ipRef) {
+  const agora = new Date();
+  const docId =
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `doc-${agora.getTime()}`;
+  const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+  const dataHoraBr = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: fuso,
+    dateStyle: "short",
+    timeStyle: "medium"
+  }).format(agora);
+  return (
+    (semRubricaManual
+      ? "Assinatura por nome legível (sem rubrica manual). "
+      : "Assinatura manuscrita no navegador. ") +
+    "Doc. " +
+    docId +
+    ". Reg.: " +
+    dataHoraBr +
+    " (fuso " +
+    fuso +
+    "). IP: " +
+    (ipRef || "n/d") +
+    "."
+  );
+}
+
+function carimbarEvidenciaRodapePagina(page, font, overridesCoords, semRubricaManual, ipRef) {
+  const parEvid = montarTextoEvidenciaAssinatura(semRubricaManual, ipRef);
+  const caixaRodape = caixaRodapeEvidenciaPdf(page, overridesCoords);
+  const wEv = Math.max(120, (Number(caixaRodape.largura) || 550) - 2);
+  const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
+  desenharEvidenciaAssinatura(page, font, caixaRodape, linhasE);
 }
 function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
   let t = String(texto || "").trim();
@@ -2016,10 +2069,13 @@ function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
   const size = options.size ?? PDF_FONT_TEXTO;
   const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
   if (!str) return false;
-  const y =
-    baselineYNoCampo(c, size) -
-    OFFSET_Y_TEXTO_UMA_LINHA_PT +
-    (options.offsetY ?? 0);
+  const yBottom = Number(c.y) || 0;
+  const offsetLinha = options.semOffsetLinha
+    ? 0
+    : yBottom > LIMITE_Y_SEM_OFFSET_TEXTO_PT
+      ? OFFSET_Y_TEXTO_UMA_LINHA_PT
+      : 0;
+  const y = baselineYNoCampo(c, size) - offsetLinha + (options.offsetY ?? 0);
   const x = Number(c.x) || 0;
   page.drawText(str, {
     x: x + (options.offsetX ?? 0.5),
@@ -2909,7 +2965,10 @@ async function gerarPDF() {
         return;
       }
       const semRubrica = isNaoAssinarManualmente();
-      const bufPng = semRubrica ? null : await canvasAssinaturaParaPngArrayBuffer();
+      const [bufPng, ipRef] = await Promise.all([
+        semRubrica ? Promise.resolve(null) : canvasAssinaturaParaPngArrayBuffer(),
+        obterIpPublicoEvidencia()
+      ]);
       if (bufPng && ass.rubrica?.coordenadas) {
         const png = await pdfDoc.embedPng(bufPng);
         desenharPngAjustadoNoCampo(pageAss, png, ass.rubrica.coordenadas);
@@ -2917,17 +2976,32 @@ async function gerarPDF() {
       const coordsNome = semRubrica
         ? (ass.nome_legivel_sem_rubrica?.coordenadas || ass.nome_legivel?.coordenadas)
         : ass.nome_legivel?.coordenadas;
+      const optsAssinaturaPdf = { semOffsetLinha: true };
       if (coordsNome) {
-        escreverTextoCampoCoord(pageAss, font, coordsNome, v("assinaturaName"));
+        escreverTextoCampoCoord(
+          pageAss,
+          font,
+          coordsNome,
+          v("assinaturaName"),
+          optsAssinaturaPdf
+        );
       }
       if (ass.data?.coordenadas) {
         escreverTextoCampoCoord(
           pageAss,
           font,
           ass.data.coordenadas,
-          formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
+          formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"),
+          optsAssinaturaPdf
         );
       }
+      carimbarEvidenciaRodapePagina(
+        pageAss,
+        font,
+        ass.evidencia?.coordenadas,
+        semRubrica,
+        ipRef
+      );
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -3028,31 +3102,13 @@ async function gerarPDF() {
       );
     }
     escreverTextoCampoCoord(page, font, ass.data.coordenadas, formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR"));
-    const agora = new Date();
-    const docId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc-${agora.getTime()}`;
-    const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
-    const dataHoraBr = new Intl.DateTimeFormat("pt-BR", {
-      timeZone: fuso,
-      dateStyle: "short",
-      timeStyle: "medium"
-    }).format(agora);
-    const parEvid =
-      (semRubricaManual ? "Assinatura por nome legível (sem rubrica manual). " : "Assinatura manuscrita no navegador. ") +
-      "Doc. " +
-      docId +
-      ". Reg.: " +
-      dataHoraBr +
-      " (fuso " +
-      fuso +
-      "). IP: " +
-      (ipRef || "n/d") +
-      ".";
-    if (ass.evidencia?.coordenadas) {
-      const cEv = ass.evidencia.coordenadas;
-      const wEv = (Number(cEv.largura) || 550) - 2;
-      const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
-      desenharEvidenciaAssinatura(page, font, cEv, linhasE);
-    }
+    carimbarEvidenciaRodapePagina(
+      page,
+      font,
+      ass.evidencia?.coordenadas,
+      semRubricaManual,
+      ipRef
+    );
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });

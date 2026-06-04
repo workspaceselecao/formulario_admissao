@@ -36,9 +36,17 @@
           "label": "Data da declaração",
           "tipo": "data",
           "pagina": 2,
-          "coordenadas": { "x": 383, "y": 173, "largura": 119, "altura": 24 },
+          "coordenadas": { "x": 383, "y": 175, "largura": 51, "altura": 11 },
           "obrigatorio": true,
           "mascara": "99/99/9999"
+        },
+        "evidencia": {
+          "label": "Rodapé: evidência da assinatura eletrônica (página 2)",
+          "tipo": "texto",
+          "pagina": 2,
+          "coordenadas": { "x": 21, "y": 12, "largura": 564, "altura": 8 },
+          "obrigatorio": false,
+          "observacao": "Margens do rodapé; posição recalculada na geração do PDF (carimbo automático)."
         }
       }
     }

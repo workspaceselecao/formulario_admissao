@@ -48,7 +48,7 @@ Quando o número do processo (ex. F-075, PR-011, revisão 37) mudar no **documen
 - **Origem:** canto **inferior esquerdo** da página, como no pdf-lib (`y` cresce para cima).
 - Em `ficha_cadastral_campos.json` e `coordenadasficha.txt`, use **os mesmos valores** medidos na ferramenta (ficha F-075 ≈ 596×842 pt). Ex.: nome no topo do formulário tem `y` alto (≈ 687); assinatura no rodapé tem `y` baixo (≈ 21–67). **Não converter** `y` com `altura_pagina - y` — isso inverte o formulário e embaralha os campos.
 - Ao mudar o **PDF oficial**, re-medir, atualizar o `.txt` e copiar `x`/`y`/`width`/`height` para o JSON (`largura`/`altura`).
-- **Evidência técnica da assinatura** (hash/doc, data/hora, IP): em `ficha_cadastral.html`, `caixaRodapeEvidenciaPdf()` carimba o texto no **rodapé** usando a largura real da página; no JSON, `assinatura.evidencia.coordenadas` define só margens (`x`, `y` inferior, `largura`).
+- **Evidência técnica da assinatura** (hash/doc, data/hora, IP): em `ficha_cadastral.html` e `assistencia_medica.html`, `caixaRodapeEvidenciaPdf()` carimba o texto no **rodapé** da página (fluxo Outros Planos: página 1; Plano de Benefícios: página 2 da declaração). No JSON, `assinatura.evidencia.coordenadas` define só margens (`x`, `y` inferior, `largura`).
 
 Estrutura geral do JSON:
 
