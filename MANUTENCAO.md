@@ -29,7 +29,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `ficha_cadastral_campos.json` | Schema + coordenadas do template da ficha. |
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
 | `cidades_brasil.json` | Legado/referência regional (não seleciona mais o PDF da assistência). |
-| `F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Template da ficha (nome referenciado no HTML). |
+| `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Template da ficha (nome referenciado no HTML). |
 | `DECLARACAO PLANO DE SAUDE.pdf` | Declaração — fluxo **Plano de Benefícios** (assinatura na página 2). |
 | `declaracao_plano_saude_campos.json` | Coordenadas da declaração (fluxo Plano de Benefícios). |
 | `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Fichas regionais — fluxo **Outros Planos** (`cidades_brasil.json`). |
