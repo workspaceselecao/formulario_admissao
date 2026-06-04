@@ -10,7 +10,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 |------|--------|
 | `index.html` | Página inicial; links para a Ficha Cadastral e a Assistência Médica. |
 | `ficha_cadastral.html` | Formulário F-075 (PR-011) — um **único** template PDF. |
-| `assistencia_medica.html` | Formulário F-089 (PR-090) — **vários** templates PDF, escolhidos **por cidade** (ver §6). |
+| `assistencia_medica.html` | Formulário F-089 (PR-090) — **um** template PDF (`DECLARACAO PLANO DE SAUDE.pdf`) para qualquer cidade (ver §6). |
 | `*_campos.json` | Coordenadas e metadados dos campos no PDF (pontos, tamanho da fonte implícita no código). |
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
 | `vercel.json` | Redireciona `/` → `index.html` na Vercel. |
@@ -28,9 +28,10 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `assistencia_medica.html` | Fluxo assistência médica. |
 | `ficha_cadastral_campos.json` | Schema + coordenadas do template da ficha. |
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
-| `cidades_brasil.json` | **Apenas assistência:** lista de cidades com `FICHA A UTILIZAR` (mapeia para qual PDF). |
+| `cidades_brasil.json` | Legado/referência regional (não seleciona mais o PDF da assistência). |
 | `F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Template da ficha (nome referenciado no HTML). |
-| `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Templates da assistência (nomes exatos usados no código). |
+| `DECLARACAO PLANO DE SAUDE.pdf` | Template único da assistência médica (todas as cidades/UF). |
+| `Carta Abertura de Conra Salario.pdf` | Download opcional na ficha (conta salário Bradesco). |
 | `municipios_cidades_ficha_por_uf.json` | **Legado** — já **não** é usado pelo `assistencia_medica.html` (a lista de municípios vem da API; ver §6.1). Pode manter-se no repositório sem efeito no site. |
 | `coordenadasficha.txt`, `coordenadasassmedica.txt` | Notas de leitura de coordenadas (página, x, y, largura, altura) — **referência humana** para alinhar com o JSON; não são carregados pela aplicação. |
 | `scripts/gerar-municipios-cidades-ficha-por-uf.mjs`, `scripts/merge-municipios-cidades-uf.mjs` | Geram/merge do JSON de municípios; **obsoletos** para o fluxo atual (§9). |
@@ -76,9 +77,9 @@ Template único: **não** há seleção por cidade; só um `F-075_...pdf`.
 ## 5. Assistência médica — fluxo e dependências
 
 1. O usuário escolhe o **estado (UF)** e a **cidade** (select `#cidade`).
-2. A lista de cidades do estado vem da **API pública** (ver §6.1); o select mostra **apenas** cidades presentes em `cidades_brasil.json` (filtrado no cliente).
-3. O PDF a usar é resolvido por `resolverArquivoPdfPorCidadeNome(nome)` a partir de `cidades_brasil.json` e do mapa `FICHA_UTILIZAR_PARA_ARQUIVO` em `assistencia_medica.html`.
-4. O `gerarPDF()` carrega os **bytes** do template correto, desenha campos, assinatura (canvas → PNG), bloco de **evidência** (ID do documento, data/hora, fuso, IP), e inicia o download do arquivo `F-089 (PR-090) Adesão Assistência Médica - {nome}.pdf` (nomes conforme o código).
+2. A lista de cidades do estado vem da **API pública** (ver §6.1); o select mostra **todos** os municípios retornados para a UF.
+3. O PDF usado é sempre `DECLARACAO PLANO DE SAUDE.pdf` (`TEMPLATE_ASSISTENCIA_PDF` em `assistencia_medica.html`), independentemente da cidade.
+4. O `gerarPDF()` carrega os **bytes** desse template, desenha campos, assinatura (canvas → PNG), bloco de **evidência** (ID do documento, data/hora, fuso, IP), e inicia o download do arquivo `F-089 (PR-090) Adesão Assistência Médica - {nome}.pdf` (nomes conforme o código).
 5. **“Não optante”** omite a secção de dependentes (cônjuge/filhos) no desenho do PDF, conforme lógica no `gerarPDF()`.
 
 Onde o código toca o schema:
@@ -88,7 +89,7 @@ Onde o código toca o schema:
 
 ---
 
-## 6. Cidades, `cidades_brasil.json` e arquivos PDF (assistência)
+## 6. Cidades e template PDF (assistência)
 
 ### 6.1 API de municípios (lista por UF)
 
@@ -97,34 +98,19 @@ Onde o código toca o schema:
 - **CORS:** a API expõe `Access-Control-Allow-Origin: *` (pode ser chamada do browser).
 - Constante no código: `CIDADES_KSTR_API_BASE` em `assistencia_medica.html`.
 
-A lista completa devolvida é **filtrada** para o usuário: só entram cujo nome, após `normalizarChaveCidade()`, existe no mapa carregado a partir de `cidades_brasil.json`.
+A lista completa devolvida pela API é apresentada no select `#cidade` (ordenada por nome).
 
-### 6.2 Arquivo `cidades_brasil.json`
+### 6.2 Template PDF único
 
-Cada registo costuma ter:
+- Arquivo: `DECLARACAO PLANO DE SAUDE.pdf` na raiz do repositório.
+- Constante: `TEMPLATE_ASSISTENCIA_PDF` em `assistencia_medica.html`.
+- Funções: `carregarTemplateAssistencia()` / `carregarTemplateParaCidadeSelecionada()`.
 
-- `REGIONAL` — agrupamento comercial (referência; não usado no filtro técnico principal).
-- `CIDADE` — nome da cidade (o código normaliza: maiúsculas, sem acentos, espaços unificados).
-- `FICHA A UTILIZAR` — chave lógica, por exemplo: `FICHA GOIANIA`, `FICHA GNDI`, `FICHA REEMBOLSO`, `FICHA FSA`, `FICHA SAFO`, `FICHA BH`.
+**Para trocar o modelo oficial:** substituir o PDF na raiz (mantendo o nome ou atualizando a constante) e rever as coordenadas em `assistencia_medica_campos.json`.
 
-Há **correção** no código para typo `FICHA REEBOLSO` → `FICHA REEMBOLSO`.
+### 6.3 Arquivo `cidades_brasil.json` (legado)
 
-### 6.3 Mapa tipo de ficha → arquivo PDF
-
-Em `assistencia_medica.html`, o objeto `FICHA_UTILIZAR_PARA_ARQUIVO` associa o valor de `FICHA A UTILIZAR` ao arquivo na raiz, por exemplo:
-
-- `FICHA GNDI` → `FICHA GNDI.pdf`
-- `FICHA SAFO` → `FICHA SA_FO.pdf` (o nome do arquivo no disco difere ligeiramente do texto lógico)
-
-**Para adicionar um tipo de ficha completamente novo:**
-
-1. Incluir o PDF no repositório.
-2. Adicionar a entrada em `FICHA_UTILIZAR_PARA_ARQUIVO`.
-3. Preencher `FICHA A UTILIZAR` em `cidades_brasil.json` com a **mesma** chave (após o `.trim().toUpperCase()` equivalente usado no código, para tipos multi-palavra use o mesmo padrão que as entradas existentes).
-
-**Para adicionar uma cidade coberta por uma ficha existente:** basta **uma nova linha** no array de `cidades_brasil.json` com `CIDADE` = nome alinhado ao retornado pela API (o `normalizarChaveCidade` alinha com variações de acentuação/maiúsculas).
-
-**Se a cidade não aparecer no select** para um estado, mas existir no JSON, verificar se a **string** da `CIDADE` após normalização coincide com a da API (diferenças como “D’” vs `D` podem exigir ajuste no JSON).
+Mantido no repositório apenas como referência regional/histórica; **não** é mais carregado pelo fluxo da assistência médica.
 
 ### 6.4 CEP (assistência)
 
@@ -132,7 +118,7 @@ Em `assistencia_medica.html`, o objeto `FICHA_UTILIZAR_PARA_ARQUIVO` associa o v
 
 ### 6.5 Download do modelo em branco
 
-- Exige UF + cidade com ficha mapeada; o arquivo baixado replica o **nome** do template resolvido (ex. `FICHA GNDI.pdf`).
+- Disponível sem exigir UF/cidade; baixa `DECLARACAO_PLANO_DE_SAUDE.pdf` (cópia de `DECLARACAO PLANO DE SAUDE.pdf`).
 
 ---
 
@@ -192,18 +178,14 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 ## 11. Checklist rápido
 
-### Nova **cidade** na assistência (ficha PDF já existente)
+### Nova **cidade** na assistência
 
-1. Confirmar o nome exato com a API: `https://api.kstrtech.com.br/cidades/{UF}`.
-2. Adicionar em `cidades_brasil.json` com `FICHA A UTILIZAR` igual a um dos tipos já mapeados em `FICHA_UTILIZAR_PARA_ARQUIVO`.
-3. Testar no browser: UF → cidade no select → pré-visualização/gerar PDF.
+Qualquer município retornado pela API já aparece no select; não é necessário alterar `cidades_brasil.json`. Testar: UF → cidade → gerar PDF com `DECLARACAO PLANO DE SAUDE.pdf`.
 
-### Novo **tipo** de ficha (novo PDF)
+### Novo **template** da assistência (substituir PDF único)
 
-1. Adicionar o `.pdf` na raiz.
-2. Incluir em `FICHA_UTILIZAR_PARA_ARQUIVO`.
-3. Atualizar as linhas em `cidades_brasil.json` com o novo `FICHA A UTILIZAR`.
-4. Se o **layout** do form não for o mesmo, rever **todas** as coordenadas em `assistencia_medica_campos.json` (e o `gerarPDF()` se houver campos novos).
+1. Substituir `DECLARACAO PLANO DE SAUDE.pdf` na raiz (ou atualizar `TEMPLATE_ASSISTENCIA_PDF` em `assistencia_medica.html`).
+2. Rever **todas** as coordenadas em `assistencia_medica_campos.json` (e o `gerarPDF()` se houver campos novos).
 
 ### **Revisão** do PDF oficial (governo/NotreDame)
 
@@ -220,9 +202,9 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 Para o **código** exato (constantes, nomes de funções, filtros de cidade), a fonte de verdade é:
 
-- `assistencia_medica.html` — `garantirMapaCidadesBrasil`, `normalizarChaveCidade`, `FICHA_UTILIZAR_PARA_ARQUIVO`, `buscarMunicipiosPorUf`, `carregarMunicipiosIBGE`, `gerarPDF`.
+- `assistencia_medica.html` — `TEMPLATE_ASSISTENCIA_PDF`, `carregarTemplateAssistencia`, `buscarMunicipiosPorUf`, `carregarMunicipiosIBGE`, `gerarPDF`.
 - `ficha_cadastral.html` — `TEMPLATE_PATH`, carregamento de `ficha_cadastral_campos.json`, `gerarPDF` e CEP.
 
 ---
 
-*Última atualização: alinhada ao uso da API kstr para municípios e ao fluxo de `cidades_brasil.json` descrito no repositório.*
+*Última atualização: assistência com template único `DECLARACAO PLANO DE SAUDE.pdf` e municípios via API kstr.*

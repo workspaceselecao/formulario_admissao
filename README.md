@@ -18,11 +18,10 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf` — template da ficha
 - `assistencia_medica.html` — F-089 (PR-090) e geração do PDF
 - `assistencia_medica_campos.json` — coordenadas dos campos da assistência médica (pt)
-- `cidades_brasil.json` — mapeia cidade → ficha PDF da assistência médica
-- `FICHA BH.pdf`, `FICHA FSA.pdf`, `FICHA GNDI.pdf`, `FICHA GOIANIA.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA SA_FO.pdf` — templates da assistência médica (conforme `cidades_brasil.json`)
+- `DECLARACAO PLANO DE SAUDE.pdf` — template único da assistência médica (todas as cidades/UF)
+- `cidades_brasil.json` — legado/referência regional (não define mais o PDF da assistência)
 - `vercel.json` — a raiz `/` serve internamente `index.html` (home)
 - `Carta Abertura de Conra Salario.pdf` — download opcional (conta salário Bradesco, só na ficha)
-- `DECLARACAO PLANO DE SAUDE.pdf` — modelo de declaração de plano de saúde (referência/documentação)
 
 ## Publicar na Vercel
 
