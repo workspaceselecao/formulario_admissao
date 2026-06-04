@@ -224,14 +224,32 @@
           "obrigatorio": false,
           "dependencia": { "campo": "tipo_conta", "valor": ["bradesco", "conta_corrente", "poupanca_bradesco"] }
         },
+        "santander_agencia": {
+          "label": "Agência (Santander)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 288, "y": 504, "largura": 122, "altura": 14 },
+          "obrigatorio": false,
+          "dependencia": { "campo": "tipo_conta", "valor": ["santander_corrente", "santander_salario"] },
+          "observacao": "Mesmas coordenadas da agência Bradesco até medição específica no PDF F-075_38"
+        },
+        "santander_conta_digito": {
+          "label": "Conta/Dígito (Santander)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 418, "y": 504, "largura": 142, "altura": 16 },
+          "obrigatorio": false,
+          "dependencia": { "campo": "tipo_conta", "valor": ["santander_corrente", "santander_salario"] },
+          "observacao": "Mesmas coordenadas da conta Bradesco até medição específica no PDF F-075_38"
+        },
         "cpf_titular": {
-          "label": "CPF do titular (contas Bradesco)",
+          "label": "CPF do titular",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": { "x": 291, "y": 476, "largura": 252, "altura": 15 },
           "obrigatorio": false,
           "mascara": "999.999.999-99",
-          "observacao": "Mesma área no PDF: preenchida para opções Bradesco (corrente, salário ou poupança)"
+          "observacao": "Preenchido para qualquer tipo de conta (Bradesco ou Santander)"
         }
       }
     },

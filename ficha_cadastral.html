@@ -282,7 +282,48 @@
   .col-span-3 { grid-column: span 3; }
   .col-span-4 { grid-column: span 4; }
 
-  /* Bradesco (desktop): CPF, agência e conta na mesma linha */
+  .banco-colunas {
+    grid-column: span 2;
+    gap: 20px;
+    align-items: start;
+  }
+  .banco-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface, #fafbfc);
+  }
+  .banco-col-titulo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+  }
+  .banco-col .radio-inline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .banco-col .radio-label {
+    width: 100%;
+  }
+  .banco-col-detalhes {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 520px) {
+    .banco-col-detalhes {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  /* CPF, agência e conta (desktop: três colunas) */
   .banco-cpf-agencia-conta {
     display: grid;
     grid-column: span 2;
@@ -290,7 +331,7 @@
     grid-template-columns: 1fr;
   }
   @media (min-width: 641px) {
-    .banco-cpf-agencia-conta--bradesco {
+    .banco-cpf-agencia-conta--detalhes {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
@@ -1019,12 +1060,47 @@
       <div class="grid grid-2">
         <div class="field col-span-2" id="grupoTipoConta">
           <label>Tipo de Conta</label>
-          <div class="radio-inline" style="margin-top:4px;flex-wrap:wrap;gap:8px 16px">
-            <label class="radio-label"><input type="radio" name="tipoConta" value="conta_corrente" onchange="toggleBanco(this)"> Conta Corrente Bradesco</label>
-            <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
-            <label class="radio-label"><input type="radio" name="tipoConta" value="poupanca_bradesco" onchange="toggleBanco(this)"> Conta Poupança Bradesco</label>
-            <label class="radio-label"><input type="radio" name="tipoConta" value="santander_corrente" onchange="toggleBanco(this)"> Conta Corrente Santander</label>
-            <label class="radio-label"><input type="radio" name="tipoConta" value="santander_salario" onchange="toggleBanco(this)"> Conta Salário Santander</label>
+          <div class="grid grid-2 banco-colunas" style="margin-top:8px">
+            <div class="banco-col banco-col--bradesco">
+              <p class="banco-col-titulo">Bradesco</p>
+              <div class="radio-inline">
+                <label class="radio-label"><input type="radio" name="tipoConta" value="conta_corrente" onchange="toggleBanco(this)"> Conta Corrente</label>
+                <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário</label>
+                <label class="radio-label"><input type="radio" name="tipoConta" value="poupanca_bradesco" onchange="toggleBanco(this)"> Conta Poupança</label>
+              </div>
+              <div class="banco-col-detalhes" id="bradescoDetalhes" hidden>
+                <div class="field">
+                  <label>Agência <span class="req">*</span></label>
+                  <input type="text" id="agenciaBradesco" placeholder="0000" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaBradesco" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
+              </div>
+              <div id="cartaBradescoField" hidden>
+                <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
+                  Carta de Abertura de Conta
+                </button>
+              </div>
+            </div>
+            <div class="banco-col banco-col--santander">
+              <p class="banco-col-titulo">Santander</p>
+              <div class="radio-inline">
+                <label class="radio-label"><input type="radio" name="tipoConta" value="santander_corrente" onchange="toggleBanco(this)"> Conta Corrente</label>
+                <label class="radio-label"><input type="radio" name="tipoConta" value="santander_salario" onchange="toggleBanco(this)"> Conta Salário</label>
+              </div>
+              <div class="banco-col-detalhes" id="santanderDetalhes" hidden>
+                <div class="field">
+                  <label>Agência <span class="req">*</span></label>
+                  <input type="text" id="agenciaSantander" placeholder="0000" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaSantander" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="banco-cpf-agencia-conta" id="bancoCpfAgenciaContaWrap">
@@ -1032,19 +1108,6 @@
             <label>CPF <span class="req">*</span></label>
             <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
           </div>
-          <div class="field" id="agenciaField" style="display:none">
-            <label>Agência <span class="req">*</span></label>
-            <input type="text" id="agencia" placeholder="0000" inputmode="numeric" autocomplete="off">
-          </div>
-          <div class="field" id="contaField" style="display:none">
-            <label>Conta / Dígito <span class="req">*</span></label>
-            <input type="text" id="conta" placeholder="00000-0" inputmode="numeric" autocomplete="off">
-          </div>
-        </div>
-        <div class="field col-span-2" id="cartaBradescoField" style="display:none">
-          <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
-            Carta de Abertura de Conta
-          </button>
         </div>
       </div>
       <div class="section-progress">
@@ -1900,12 +1963,29 @@ function toggleDef(el){
   document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
 }
 const TIPOS_CONTA_BRADESCO = ['bradesco', 'conta_corrente', 'poupanca_bradesco'];
-const TIPOS_CONTA_VALIDOS = [...TIPOS_CONTA_BRADESCO, 'santander_corrente', 'santander_salario'];
-function tipoContaRequerAgenciaConta(tipo){
+const TIPOS_CONTA_SANTANDER = ['santander_corrente', 'santander_salario'];
+const TIPOS_CONTA_VALIDOS = [...TIPOS_CONTA_BRADESCO, ...TIPOS_CONTA_SANTANDER];
+function tipoContaEhBradesco(tipo){
   return TIPOS_CONTA_BRADESCO.includes(tipo);
 }
+function tipoContaEhSantander(tipo){
+  return TIPOS_CONTA_SANTANDER.includes(tipo);
+}
+function tipoContaRequerAgenciaConta(tipo){
+  return TIPOS_CONTA_VALIDOS.includes(tipo);
+}
 function tipoContaRequerCpfTitularPdf(tipo){
-  return TIPOS_CONTA_BRADESCO.includes(tipo);
+  return TIPOS_CONTA_VALIDOS.includes(tipo);
+}
+function idsAgenciaContaAtivos(tipo){
+  if (tipoContaEhBradesco(tipo)) return { agencia: 'agenciaBradesco', conta: 'contaBradesco' };
+  if (tipoContaEhSantander(tipo)) return { agencia: 'agenciaSantander', conta: 'contaSantander' };
+  return null;
+}
+function lerAgenciaContaFormulario(tipo){
+  const ids = idsAgenciaContaAtivos(tipo);
+  if (!ids) return { agencia: '', conta: '' };
+  return { agencia: v(ids.agencia), conta: v(ids.conta) };
 }
 function rotuloTipoConta(tipo){
   const rotulos = {
@@ -1917,25 +1997,54 @@ function rotuloTipoConta(tipo){
   };
   return rotulos[tipo] || 'Tipo de Conta';
 }
-function toggleBanco(el){
-  const tipo = el.value;
-  const precisaAgenciaConta = tipoContaRequerAgenciaConta(tipo);
-  const isSalarioBradesco = tipo === 'bradesco';
-  document.getElementById('agenciaField').style.display = precisaAgenciaConta ? 'block' : 'none';
-  document.getElementById('contaField').style.display = precisaAgenciaConta ? 'block' : 'none';
-  const wrap = document.getElementById('bancoCpfAgenciaContaWrap');
-  if (wrap) wrap.classList.toggle('banco-cpf-agencia-conta--bradesco', precisaAgenciaConta);
-  const cartaBradescoField = document.getElementById('cartaBradescoField');
-  if (cartaBradescoField) cartaBradescoField.style.display = isSalarioBradesco ? 'block' : 'none';
-  const agenciaEl = document.getElementById('agencia');
-  const contaEl = document.getElementById('conta');
-  agenciaEl.required = precisaAgenciaConta;
-  contaEl.required = precisaAgenciaConta;
-  if (!precisaAgenciaConta) {
-    agenciaEl.classList.remove('invalid');
-    contaEl.classList.remove('invalid');
+function definirVisibilidadeDetalheBanco(elDetalhes, visivel, ids){
+  if (!elDetalhes) return;
+  if (visivel) elDetalhes.removeAttribute('hidden');
+  else elDetalhes.setAttribute('hidden', '');
+  if (!ids) return;
+  const agenciaEl = document.getElementById(ids.agencia);
+  const contaEl = document.getElementById(ids.conta);
+  if (agenciaEl) {
+    agenciaEl.required = visivel;
+    if (!visivel) agenciaEl.classList.remove('invalid');
   }
-  syncRadioActive(el.name);
+  if (contaEl) {
+    contaEl.required = visivel;
+    if (!visivel) contaEl.classList.remove('invalid');
+  }
+}
+function toggleBanco(el){
+  const tipo = el?.value || radio('tipoConta');
+  const bradescoAtivo = tipoContaEhBradesco(tipo);
+  const santanderAtivo = tipoContaEhSantander(tipo);
+  const isSalarioBradesco = tipo === 'bradesco';
+  definirVisibilidadeDetalheBanco(
+    document.getElementById('bradescoDetalhes'),
+    bradescoAtivo,
+    { agencia: 'agenciaBradesco', conta: 'contaBradesco' }
+  );
+  definirVisibilidadeDetalheBanco(
+    document.getElementById('santanderDetalhes'),
+    santanderAtivo,
+    { agencia: 'agenciaSantander', conta: 'contaSantander' }
+  );
+  const cartaBradescoField = document.getElementById('cartaBradescoField');
+  if (cartaBradescoField) {
+    if (isSalarioBradesco) cartaBradescoField.removeAttribute('hidden');
+    else cartaBradescoField.setAttribute('hidden', '');
+  }
+  const wrap = document.getElementById('bancoCpfAgenciaContaWrap');
+  const temConta = TIPOS_CONTA_VALIDOS.includes(tipo);
+  if (wrap) wrap.classList.toggle('banco-cpf-agencia-conta--detalhes', temConta);
+  if (!bradescoAtivo) {
+    marcarCampoInvalido('agenciaBradesco', false);
+    marcarCampoInvalido('contaBradesco', false);
+  }
+  if (!santanderAtivo) {
+    marcarCampoInvalido('agenciaSantander', false);
+    marcarCampoInvalido('contaSantander', false);
+  }
+  if (el?.name) syncRadioActive(el.name);
 }
 const MAX_DEPENDENTES = 5;
 function listarLinhasDependentes(){
@@ -2089,7 +2198,7 @@ function oferecerIrParaAssistenciaAposPdf(payload) {
 const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
   "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
-  "cpf", "agencia", "conta",
+  "cpf", "agenciaBradesco", "contaBradesco", "agenciaSantander", "contaSantander",
   "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal",
   "assinaturaName", "dataAssinatura"
 ];
@@ -2169,6 +2278,14 @@ function aplicarTipoDeficienciaSalvos(valores) {
 
 function aplicarEstadoRascunho(obj) {
   const c = obj.campos || {};
+  if (c.agencia !== undefined && c.agenciaBradesco === undefined) {
+    c.agenciaBradesco = c.agencia;
+    c.agenciaSantander = c.agencia;
+  }
+  if (c.conta !== undefined && c.contaBradesco === undefined) {
+    c.contaBradesco = c.conta;
+    c.contaSantander = c.conta;
+  }
   RASCUNHO_IDS.forEach((id) => {
     if (c[id] === undefined) return;
     const el = document.getElementById(id);
@@ -2331,8 +2448,16 @@ function updateProgress(){
   const bancarioPct = calcPct([
     () => TIPOS_CONTA_VALIDOS.includes(radio('tipoConta')),
     () => hasValue('cpf'),
-    () => (tipoContaRequerAgenciaConta(radio('tipoConta')) ? hasValue('agencia') : true),
-    () => (tipoContaRequerAgenciaConta(radio('tipoConta')) ? hasValue('conta') : true)
+    () => {
+      const tipo = radio('tipoConta');
+      const ids = idsAgenciaContaAtivos(tipo);
+      return ids ? hasValue(ids.agencia) : true;
+    },
+    () => {
+      const tipo = radio('tipoConta');
+      const ids = idsAgenciaContaAtivos(tipo);
+      return ids ? hasValue(ids.conta) : true;
+    }
   ]);
 
   const dependentesChecks = lerDependentesFormulario().flatMap((dep) => [
@@ -2424,25 +2549,23 @@ function marcarCampoInvalido(id, invalido){
   if (!el) return;
   el.classList.toggle('invalid', !!invalido);
 }
-function validarContaBradescoObrigatoria(){
+function validarContaBancariaObrigatoria(){
   const tipoConta = radio('tipoConta');
-  if (!tipoContaRequerAgenciaConta(tipoConta)) return true;
+  const ids = idsAgenciaContaAtivos(tipoConta);
+  if (!ids) return true;
 
-  const agencia = v('agencia');
-  const conta = v('conta');
+  const agencia = v(ids.agencia);
+  const conta = v(ids.conta);
   const agenciaOk = agencia.length > 0;
   const contaOk = conta.length > 0;
-  marcarCampoInvalido('agencia', !agenciaOk);
-  marcarCampoInvalido('conta', !contaOk);
+  marcarCampoInvalido(ids.agencia, !agenciaOk);
+  marcarCampoInvalido(ids.conta, !contaOk);
 
   if (!agenciaOk || !contaOk) {
     const rotulo = rotuloTipoConta(tipoConta);
     showToast(`Para ${rotulo}, preencha Agência e Conta/Dígito.`, false);
-    if (!agenciaOk) {
-      document.getElementById('agencia')?.focus();
-    } else {
-      document.getElementById('conta')?.focus();
-    }
+    if (!agenciaOk) document.getElementById(ids.agencia)?.focus();
+    else document.getElementById(ids.conta)?.focus();
     return false;
   }
   return true;
@@ -2491,13 +2614,14 @@ function validarCamposObrigatorios(){
     marcarCampoInvalido('pis', false);
   }
 
-  const precisaAgenciaConta = tipoContaRequerAgenciaConta(radio('tipoConta'));
-  if (precisaAgenciaConta) {
-    validarCampo({ id: 'agencia', nome: 'Agência' });
-    validarCampo({ id: 'conta', nome: 'Conta / Dígito' });
+  const idsBanco = idsAgenciaContaAtivos(radio('tipoConta'));
+  if (idsBanco) {
+    validarCampo({ id: idsBanco.agencia, nome: 'Agência' });
+    validarCampo({ id: idsBanco.conta, nome: 'Conta / Dígito' });
   } else {
-    marcarCampoInvalido('agencia', false);
-    marcarCampoInvalido('conta', false);
+    ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) =>
+      marcarCampoInvalido(id, false)
+    );
   }
 
   if (faltantes.length > 0) {
@@ -2577,28 +2701,22 @@ function limparDadosFormulario(){
 
   const pisField = document.getElementById('pisField');
   const defGroup = document.getElementById('defGroup');
-  const agenciaField = document.getElementById('agenciaField');
-  const contaField = document.getElementById('contaField');
   const cartaBradescoField = document.getElementById('cartaBradescoField');
   if (pisField) pisField.style.display = 'none';
   if (defGroup) defGroup.style.display = 'none';
-  if (agenciaField) agenciaField.style.display = 'none';
-  if (contaField) contaField.style.display = 'none';
-  if (cartaBradescoField) cartaBradescoField.style.display = 'none';
+  if (cartaBradescoField) cartaBradescoField.setAttribute('hidden', '');
+  definirVisibilidadeDetalheBanco(document.getElementById('bradescoDetalhes'), false, null);
+  definirVisibilidadeDetalheBanco(document.getElementById('santanderDetalhes'), false, null);
   const bancoWrap = document.getElementById('bancoCpfAgenciaContaWrap');
-  if (bancoWrap) bancoWrap.classList.remove('banco-cpf-agencia-conta--bradesco');
+  if (bancoWrap) bancoWrap.classList.remove('banco-cpf-agencia-conta--detalhes');
 
-  const agenciaEl = document.getElementById('agencia');
-  const contaEl = document.getElementById('conta');
+  ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.required = false;
+    el.classList.remove('invalid');
+  });
   const pisEl = document.getElementById('pis');
-  if (agenciaEl) {
-    agenciaEl.required = false;
-    agenciaEl.classList.remove('invalid');
-  }
-  if (contaEl) {
-    contaEl.required = false;
-    contaEl.classList.remove('invalid');
-  }
   if (pisEl) {
     pisEl.required = false;
     pisEl.classList.remove('invalid');
@@ -2606,7 +2724,7 @@ function limparDadosFormulario(){
   document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
     el.classList.remove('invalid');
   });
-  document.querySelectorAll('#grupoPrimeiroEmprego, #grupoDeficiencia, #grupoValeRef').forEach((el) =>
+  document.querySelectorAll('#grupoPrimeiroEmprego, #grupoDeficiencia, #grupoTipoConta, #grupoValeRef').forEach((el) =>
     el.classList.remove('group-invalid')
   );
   limparAssinaturaCanvas();
@@ -2802,6 +2920,8 @@ async function gerarPDF(){
     const possuiDeficienciaSelecionada = radio("deficiencia");
     const valeSelecionado = radio("valeRef");
     const vtNaoOptanteMarcado = document.getElementById("vtNaoOptante")?.checked === true;
+    const tipoContaSelecionada = radio("tipoConta");
+    const dadosBanco = lerAgenciaContaFormulario(tipoContaSelecionada);
     const data = {
       nomeCompleto: v("nomeCompleto"),
       nomeSocial: v("nomeSocial"),
@@ -2816,15 +2936,15 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
-      tipoConta: radio("tipoConta"),
-      contaCorrenteBradesco: radio("tipoConta") === "conta_corrente",
-      contaSalarioBradesco: radio("tipoConta") === "bradesco",
-      poupancaBradesco: radio("tipoConta") === "poupanca_bradesco",
-      santanderCorrente: radio("tipoConta") === "santander_corrente",
-      santanderSalario: radio("tipoConta") === "santander_salario",
+      tipoConta: tipoContaSelecionada,
+      contaCorrenteBradesco: tipoContaSelecionada === "conta_corrente",
+      contaSalarioBradesco: tipoContaSelecionada === "bradesco",
+      poupancaBradesco: tipoContaSelecionada === "poupanca_bradesco",
+      santanderCorrente: tipoContaSelecionada === "santander_corrente",
+      santanderSalario: tipoContaSelecionada === "santander_salario",
       cpfConta: v("cpf"),
-      agencia: v("agencia"),
-      contaDigito: v("conta"),
+      agencia: dadosBanco.agencia,
+      contaDigito: dadosBanco.conta,
       dependentes: lerDependentesFormulario().map((dep) => ({
         nome: dep.nome,
         nascimento: formatDate(dep.nascimento),
@@ -2887,8 +3007,10 @@ async function gerarPDF(){
       marcarRadioJsonOpcao(page, font, cb.tipo_conta, tipoContaPdf);
     }
     if (tipoContaRequerAgenciaConta(tipoContaPdf)) {
-      escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
-      escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
+      const campoAgencia = tipoContaEhSantander(tipoContaPdf) ? cb.santander_agencia : cb.bradesco_agencia;
+      const campoConta = tipoContaEhSantander(tipoContaPdf) ? cb.santander_conta_digito : cb.bradesco_conta_digito;
+      if (campoAgencia?.coordenadas) escreverTextoCampoCoord(page, font, campoAgencia.coordenadas, data.agencia);
+      if (campoConta?.coordenadas) escreverTextoCampoCoord(page, font, campoConta.coordenadas, data.contaDigito);
     }
     if (tipoContaRequerCpfTitularPdf(tipoContaPdf)) {
       escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
@@ -3110,7 +3232,7 @@ const primeiroEmpregoSelecionado = document.querySelector('input[name="primeiroE
 if (primeiroEmpregoSelecionado) {
   togglePIS(primeiroEmpregoSelecionado);
 }
-['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agencia', 'conta'].forEach((id) => {
+['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) => {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', () => marcarCampoInvalido(id, false));
