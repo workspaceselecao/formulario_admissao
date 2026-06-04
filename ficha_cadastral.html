@@ -1290,7 +1290,7 @@
     <div class="modal-body">
       O PDF da <strong>Ficha Cadastral</strong> foi gerado. Deseja abrir agora o formulário de
       <strong>Adesão à Assistência Médica</strong> com nome, CPF, endereço, telefone, dependentes
-      (filhos) e assinatura já preenchidos a partir desta ficha?
+      (filhos), assinatura manuscrita e nome/data já preenchidos a partir desta ficha?
     </div>
     <label class="check-label" style="display: flex; align-items: center; gap: 8px; margin: 0 18px 12px; font-size: 13px; cursor: pointer; color: var(--text-mid)">
       <input type="checkbox" id="naoPerguntarCopiaAssist"> Não perguntar novamente após gerar o PDF
@@ -2170,6 +2170,17 @@ function construirPayloadCopiaParaAssistencia() {
       const p = nascEmPartes(d.nascimento);
       return { nome: d.nome, cpf: d.cpf, d: p.d, m: p.m, y: p.y };
     });
+  let assinaturaCanvasPng = null;
+  try {
+    const canvasAss = document.getElementById("assinaturaCanvas");
+    if (canvasAss && (assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida())) {
+      assinaturaCanvasPng = canvasAss.toDataURL("image/png", 0.88);
+    }
+  } catch (_) {
+    assinaturaCanvasPng = null;
+  }
+  out.assinaturaCanvasPng = assinaturaCanvasPng;
+  out.naoAssinarManualmente = isNaoAssinarManualmente();
   return out;
 }
 function abrirModalCopiaAssistencia() {

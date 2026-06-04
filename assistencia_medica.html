@@ -1865,6 +1865,32 @@ function limparAssinaturaCanvas() {
   assinaturaCanvasTemTraço = false;
   marcarAssinaturaInvalidaCanvas(false);
 }
+
+/** Restaura o traço da assinatura manuscrita a partir de data URL PNG (ex.: cópia da Ficha Cadastral). */
+function aplicarAssinaturaManuscritaDePng(dataUrl) {
+  if (!dataUrl || !String(dataUrl).startsWith("data:")) {
+    limparAssinaturaCanvas();
+    return;
+  }
+  const canvas = document.getElementById("assinaturaCanvas");
+  const ctx = canvas && (assinaturaCanvasCtx || canvas.getContext("2d", { alpha: true, willReadFrequently: true }));
+  if (!canvas || !ctx) return;
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    assinaturaCanvasCtx = ctx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    assinaturaCanvasTemTraço = true;
+    marcarAssinaturaInvalidaCanvas(false);
+    atualizarUiNaoAssinarManualmente();
+    agendarSalvarRascunho();
+  };
+  img.onerror = () => {
+    assinaturaCanvasTemTraço = false;
+  };
+  img.src = dataUrl;
+}
 function isAssinaturaManuscritaPreenchida() {
   if (assinaturaCanvasTemTraço) return true;
   const canvas = document.getElementById("assinaturaCanvas");
@@ -2565,32 +2591,19 @@ function aplicarEstadoRascunho(obj) {
   toggleDepConjuge();
   atualizarVisibilidadeModuloDependentes();
   atualizarTodosDnvFilhos();
-  if (obj.assinaturaCanvasPng) {
-    const c = document.getElementById("assinaturaCanvas");
-    const ctx = c && (assinaturaCanvasCtx || c.getContext("2d"));
-    if (c && ctx) {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        assinaturaCanvasCtx = ctx;
-        ctx.clearRect(0, 0, c.width, c.height);
-        ctx.drawImage(img, 0, 0, c.width, c.height);
-        assinaturaCanvasTemTraço = true;
-      };
-      img.onerror = () => {
-        assinaturaCanvasTemTraço = false;
-      };
-      img.src = obj.assinaturaCanvasPng;
-    }
-  } else {
-    limparAssinaturaCanvas();
-  }
   const naoAssinarCb = document.getElementById("naoAssinarManualmente");
   if (naoAssinarCb) {
     naoAssinarCb.checked = obj.naoAssinarManualmente === true;
     sincronizarCheckLabelNaoAssinarManualmente();
   }
   atualizarUiNaoAssinarManualmente();
+  if (obj.naoAssinarManualmente === true) {
+    limparAssinaturaCanvas();
+  } else if (obj.assinaturaCanvasPng) {
+    aplicarAssinaturaManuscritaDePng(obj.assinaturaCanvasPng);
+  } else {
+    limparAssinaturaCanvas();
+  }
 }
 
 function tentarAplicarCopiaFichaCadastral() {
@@ -2623,7 +2636,8 @@ function tentarAplicarCopiaFichaCadastral() {
     String(c.cep || "").trim() ||
     String(c.rua || "").trim() ||
     (obj.telefoneDigitos && String(obj.telefoneDigitos).replace(/\D/g, "").length >= 8) ||
-    (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.some((d) => d && String(d.nome || "").trim()));
+    (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.some((d) => d && String(d.nome || "").trim())) ||
+    (obj.assinaturaCanvasPng && String(obj.assinaturaCanvasPng).startsWith("data:"));
   if (!temAlgumDadoUtil) {
     try {
       lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
@@ -2670,6 +2684,17 @@ function tentarAplicarCopiaFichaCadastral() {
     if (obj.dataAssinatura) {
       const d = document.getElementById("dataAssinatura");
       if (d) d.value = obj.dataAssinatura;
+    }
+    const naoAssinarCb = document.getElementById("naoAssinarManualmente");
+    if (naoAssinarCb) {
+      naoAssinarCb.checked = obj.naoAssinarManualmente === true;
+      sincronizarCheckLabelNaoAssinarManualmente();
+    }
+    atualizarUiNaoAssinarManualmente();
+    if (obj.naoAssinarManualmente === true) {
+      limparAssinaturaCanvas();
+    } else if (obj.assinaturaCanvasPng) {
+      aplicarAssinaturaManuscritaDePng(obj.assinaturaCanvasPng);
     }
     if (Array.isArray(obj.dependentesFilhos) && obj.dependentesFilhos.length) {
       const n = Math.min(NUM_FILHOS, obj.dependentesFilhos.length);

@@ -129,7 +129,7 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 ### 7.1 Cópia ficha → assistência (partilhada)
 
-- `cross_copy_ficha_para_assistencia_v1` — payload JSON escrito na ficha e lido na assistência ao abrir (não persistir indefinidamente: o fluxo costuma removê-la após consumir).
+- `cross_copy_ficha_para_assistencia_v1` — payload JSON escrito na ficha e lido na assistência ao abrir (campos, dependentes, `assinaturaCanvasPng`, `naoAssinarManualmente`, nome/data); removido após consumir.
 
 ### 7.2 Rascunhos (versão no nome da chave)
 
