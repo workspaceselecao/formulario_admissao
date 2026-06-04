@@ -1,0 +1,51 @@
+{
+  "documento": {
+    "id": "declaracao_plano_saude",
+    "titulo": "Declaração Plano de Saúde",
+    "versao": "1",
+    "paginas": 2
+  },
+  "campos": {
+    "assinatura": {
+      "descricao": "Assinatura na página 2 da declaração",
+      "campos": {
+        "rubrica": {
+          "label": "Assinatura manuscrita",
+          "tipo": "imagem",
+          "pagina": 2,
+          "coordenadas": { "x": 88, "y": 160, "largura": 265, "altura": 54 },
+          "obrigatorio": true
+        },
+        "nome_legivel": {
+          "label": "Assinatura (nome por extenso)",
+          "tipo": "texto",
+          "pagina": 2,
+          "coordenadas": { "x": 40, "y": 146, "largura": 312, "altura": 20 },
+          "obrigatorio": true,
+          "observacao": "Posição quando há rubrica manuscrita"
+        },
+        "nome_legivel_sem_rubrica": {
+          "label": "Assinatura (nome por extenso, sem rubrica)",
+          "tipo": "texto",
+          "pagina": 2,
+          "coordenadas": { "x": 40, "y": 146, "largura": 312, "altura": 20 },
+          "obrigatorio": false,
+          "observacao": "Mesma área quando marca 'Não assinar manualmente'"
+        },
+        "data": {
+          "label": "Data da declaração",
+          "tipo": "data",
+          "pagina": 2,
+          "coordenadas": { "x": 383, "y": 173, "largura": 119, "altura": 24 },
+          "obrigatorio": true,
+          "mascara": "99/99/9999"
+        }
+      }
+    }
+  },
+  "metadados": {
+    "sistema_coordenadas": "PDF points (pt)",
+    "origem": "canto_inferior_esquerdo",
+    "nota": "Template DECLARACAO PLANO DE SAUDE.pdf — fluxo Plano de Benefícios"
+  }
+}

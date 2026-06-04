@@ -41,7 +41,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 
 - **Home** (`index.html`): escolha entre Ficha Cadastral e Assistência Médica.
 - **Ficha cadastral** (F-075 / PR-011, revisão conforme subtítulo no site): um único template PDF; campos de dados pessoais, endereço, conta (incl. Bradesco / Mentore), dependentes, benefícios, transporte, vale refeição, declaração com **assinatura em canvas** exportada para o PDF.
-- **Assistência médica** (F-089 / PR-090): tipo de movimentação (optante / não optante), dados do funcionário, endereço, dependentes modulares (cônjuge/filhos), assinatura; **seleção de UF e cidade** com lista via API de municípios; **template PDF único** (`DECLARACAO PLANO DE SAUDE.pdf`) para qualquer cidade; evidência no documento (metadados, data/hora, fuso, IP via serviço externo).
+- **Assistência médica** (F-089 / PR-090): escolha inicial **Plano de Benefícios** (declaração `DECLARACAO PLANO DE SAUDE.pdf`, só assinatura na pág. 2) ou **Outros Planos** (formulário completo + ficha regional por cidade via `cidades_brasil.json`); evidência no PDF regional (metadados, IP, etc.).
 - **Geração de PDF no cliente** com [pdf-lib](https://github.com/Hopding/pdf-lib) (CDN); coordenadas em `*_campos.json`.
 - **CEP:** ViaCEP (e fallback Brasil API na ficha, conforme implementação).
 - **Rascunho** por formulário em `localStorage` (chaves versionadas).
@@ -87,8 +87,9 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 
 | ID | Requisito | Prioridade |
 |----|-----------|------------|
-| RF-20 | Carregar lista de cidades por UF via API pública (todos os municípios da UF) | Must |
-| RF-21 | Usar template PDF único `DECLARACAO PLANO DE SAUDE.pdf` independentemente da cidade/UF | Must |
+| RF-20 | Escolher Plano de Benefícios ou Outros Planos no início do formulário | Must |
+| RF-21 | Plano de Benefícios: gerar `DECLARACAO PLANO DE SAUDE.pdf` apenas com assinatura (pág. 2) | Must |
+| RF-22 | Outros Planos: cidades filtradas por `cidades_brasil.json` e PDF regional (`FICHA *.pdf`) | Must |
 | RF-22 | Omitir secção de dependentes no PDF para “não optante”, conforme regra de negócio | Must |
 | RF-23 | Incluir assinatura e bloco de evidência (IP, data/hora, etc.) no PDF | Must |
 | RF-24 | Permitir download de modelo em branco quando UF + cidade válidos | Should |

@@ -67,6 +67,15 @@
   #secaoDependentes[hidden] {
     display: none !important;
   }
+  body.fluxo-plano-beneficios #fluxoOutrosPlanos {
+    display: none !important;
+  }
+  body:not(.fluxo-plano-beneficios) .assinatura-hint--beneficios {
+    display: none;
+  }
+  body.fluxo-plano-beneficios .assinatura-hint--outros {
+    display: none;
+  }
   /* Não optante (cancelamento): esconde o card de dependentes. Declarativo; não depende de script. */
   html:has(#tipoAdesaoNaooptante:checked) #secaoDependentes {
     display: none !important;
@@ -685,6 +694,21 @@
 
 <div class="container">
 
+  <div class="section-card" id="secaoTipoPlano">
+    <div class="section-header"><div class="dot"></div>Tipo de plano</div>
+    <div class="section-body">
+      <div class="radio-inline radio-inline--fill" id="tipoPlanoGroup" style="margin-top:4px">
+        <label class="radio-label"><input type="radio" name="tipoPlano" value="plano_beneficios" onchange="toggleTipoPlano(this)"> Plano de Benefícios</label>
+        <label class="radio-label"><input type="radio" name="tipoPlano" value="outros_planos" onchange="toggleTipoPlano(this)"> Outros Planos</label>
+      </div>
+      <p class="signature-pad-hint" style="margin-top:12px;font-size:12px;color:var(--text-mid);line-height:1.5">
+        <strong>Plano de Benefícios:</strong> declaração única (<em>DECLARACAO PLANO DE SAUDE.pdf</em>) — preencha apenas a assinatura.<br>
+        <strong>Outros Planos:</strong> ficha regional conforme a cidade (lista filtrada por região).
+      </p>
+    </div>
+  </div>
+
+  <div id="fluxoOutrosPlanos">
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Tipo de movimentação</div>
     <div class="section-body">
@@ -1020,13 +1044,15 @@
       </div>
     </div>
   </div>
+  </div><!-- /fluxoOutrosPlanos -->
 
-  <div class="section-card">
+  <div class="section-card" id="secaoAssinatura">
     <div class="section-header"><div class="dot"></div>Assinatura</div>
     <div class="section-body">
       <div class="signature-pad-wrap" id="signaturePadWrap">
         <label>Assinatura manuscrita <span class="req" id="reqAssinaturaManuscrita">*</span></label>
-        <p class="signature-pad-hint" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.</p>
+        <p class="signature-pad-hint assinatura-hint--beneficios" id="hintAssinaturaBeneficios">Desenhe com o mouse ou o dedo. A assinatura, o nome por extenso e a data serão incluídos na <strong>página 2</strong> da Declaração Plano de Saúde.</p>
+        <p class="signature-pad-hint assinatura-hint--outros" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
         </div>
@@ -1216,10 +1242,91 @@ lsMigrateLegacy(RASCUNHO_STORAGE_KEY, LS_LEGACY_RASCUNHO_ASSIST);
 /* Caminhos a partir da raiz do sítio; evitam 404 com rotas do tipo /assistencia_medica (sem e sem barra). */
 const CAMPOS_JSON_PATH = "/assistencia_medica_campos.json";
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const CAMPOS_PLANO_BENEFICIOS_JSON_PATH = "/declaracao_plano_saude_campos.json";
+const CAMPOS_PLANO_BENEFICIOS_FETCH_PATH = encodeURI(CAMPOS_PLANO_BENEFICIOS_JSON_PATH);
+const CIDADES_BRASIL_JSON_PATH = "/cidades_brasil.json";
 /** Lista oficial de municípios por UF (CORS aberto, cache no CDN). */
 const CIDADES_KSTR_API_BASE = "https://api.kstrtech.com.br/cidades/";
-/** Template único da assistência médica (independente da cidade/UF). */
-const TEMPLATE_ASSISTENCIA_PDF = "DECLARACAO PLANO DE SAUDE.pdf";
+/** Declaração — fluxo Plano de Benefícios. */
+const TEMPLATE_DECLARACAO_PLANO_SAUDE_PDF = "DECLARACAO PLANO DE SAUDE.pdf";
+/** Tipo em cidades_brasil.json → PDF regional (fluxo Outros Planos). */
+const FICHA_UTILIZAR_PARA_ARQUIVO = {
+  "FICHA GOIANIA": "FICHA GOIANIA.pdf",
+  "FICHA REEMBOLSO": "FICHA REEMBOLSO.pdf",
+  "FICHA GNDI": "FICHA GNDI.pdf",
+  "FICHA FSA": "FICHA FSA.pdf",
+  "FICHA SAFO": "FICHA SA_FO.pdf",
+  "FICHA BH": "FICHA BH.pdf"
+};
+let mapaCidadeParaFichaUtilizar = null;
+let camposSchemaCacheKey = null;
+
+function radioTipoPlano() {
+  return document.querySelector('input[name="tipoPlano"]:checked')?.value || "";
+}
+function ehPlanoBeneficios() {
+  return radioTipoPlano() === "plano_beneficios";
+}
+function ehOutrosPlanos() {
+  return radioTipoPlano() === "outros_planos";
+}
+
+function normalizarChaveCidade(s) {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleUpperCase("pt-BR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function garantirMapaCidadesBrasil() {
+  if (mapaCidadeParaFichaUtilizar) return true;
+  try {
+    const res = await fetch(encodeURI(CIDADES_BRASIL_JSON_PATH), { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const arr = await res.json();
+    if (!Array.isArray(arr)) throw new Error("formato");
+    const m = new Map();
+    for (const row of arr) {
+      const k = normalizarChaveCidade(row.CIDADE);
+      if (!k) continue;
+      let tipo = String(row["FICHA A UTILIZAR"] || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, " ");
+      if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
+      m.set(k, tipo);
+    }
+    mapaCidadeParaFichaUtilizar = m;
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${CIDADES_BRASIL_JSON_PATH}`, false);
+    return false;
+  }
+}
+
+function resolverTipoFichaPorCidadeNome(nomeIbge) {
+  if (!nomeIbge || !mapaCidadeParaFichaUtilizar) return null;
+  return mapaCidadeParaFichaUtilizar.get(normalizarChaveCidade(nomeIbge)) || null;
+}
+
+function resolverArquivoPdfPorCidadeNome(nomeIbge) {
+  const tipo = resolverTipoFichaPorCidadeNome(nomeIbge);
+  if (!tipo) return null;
+  return FICHA_UTILIZAR_PARA_ARQUIVO[tipo] || null;
+}
+
+function toggleTipoPlano(el) {
+  camposSchema = null;
+  camposSchemaCacheKey = null;
+  document.body.classList.toggle("fluxo-plano-beneficios", ehPlanoBeneficios());
+  document.body.classList.toggle("fluxo-outros-planos", ehOutrosPlanos());
+  document.getElementById("tipoPlanoGroup")?.classList.remove("group-invalid");
+  if (el?.name) syncRadioActive(el.name);
+  agendarSalvarRascunho();
+}
 
 /** Primeiro token do nome (campo funcionário), seguro para nome de arquivo. */
 function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
@@ -1253,13 +1360,25 @@ async function carregarTemplatePdf(nomeArquivo) {
   }
 }
 
-async function carregarTemplateAssistencia() {
-  return carregarTemplatePdf(TEMPLATE_ASSISTENCIA_PDF);
+async function carregarTemplateDeclaracaoPlanoSaude() {
+  return carregarTemplatePdf(TEMPLATE_DECLARACAO_PLANO_SAUDE_PDF);
 }
 
 async function carregarTemplateParaCidadeSelecionada() {
+  if (ehPlanoBeneficios()) {
+    marcarCampoInvalido("cidade", false);
+    return carregarTemplateDeclaracaoPlanoSaude();
+  }
+  if (!(await garantirMapaCidadesBrasil())) return null;
+  const nome = v("cidade");
+  const arq = resolverArquivoPdfPorCidadeNome(nome);
+  if (!arq) {
+    if (nome) showToast("Não há PDF configurado para esta cidade na base cidades_brasil.", false);
+    marcarCampoInvalido("cidade", !!nome);
+    return null;
+  }
   marcarCampoInvalido("cidade", false);
-  return carregarTemplateAssistencia();
+  return carregarTemplatePdf(arq);
 }
 const NUM_FILHOS = 4;
 let filhosVisiveis = 1;
@@ -1506,8 +1625,11 @@ async function buscarMunicipiosPorUf(sigla, ctrl, cargaId) {
     .filter((m) => m.nome);
 }
 
-/** Preenche o select de cidade (id cidade) com municípios da API kstr. */
+/** Preenche o select de cidade (id cidade) com municípios da API kstr (Outros Planos: filtrado por cidades_brasil). */
 async function carregarMunicipiosIBGE(uf) {
+  if (ehPlanoBeneficios()) return;
+  if (!(await garantirMapaCidadesBrasil())) return;
+
   const sigla = String(uf || "").toUpperCase().trim();
   const sel = document.getElementById("cidade");
   if (!sel) {
@@ -1536,9 +1658,17 @@ async function carregarMunicipiosIBGE(uf) {
       .toUpperCase()
       .trim();
     if (ufAinda !== sigla) return;
-    const lista = [...listaFull];
+    const lista = listaFull.filter((m) =>
+      mapaCidadeParaFichaUtilizar.has(normalizarChaveCidade(m.nome))
+    );
     lista.sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
     if (cargaId !== ibgeMunicipiosCargaGen) return;
+    if (!lista.length) {
+      showToast(
+        "Nenhuma cidade deste estado consta em cidades_brasil.json. Verifique com o suporte.",
+        false
+      );
+    }
     for (const m of lista) {
       const opt = document.createElement("option");
       opt.value = m.nome;
@@ -2017,7 +2147,41 @@ function digitosCount(str) {
 /** Aviso quando dependente está no plano mas CPF não foi informado (ou está incompleto). */
 const MSG_DOCS_DEPENDENTES_PESSOAS_ONLINE =
   "Caso não tenha a documentação completa dos seus dependentes, você pode incluí-los como dependentes através do Pessoas Online, após sua admissão.\n\nPor favor, remova o dependente que ainda não possui CPF.";
+function validarCamposPlanoBeneficios() {
+  const faltantes = [];
+  const nome = (v("assinaturaName") || "").trim();
+  marcarCampoInvalido("assinaturaName", !nome);
+  if (!nome) faltantes.push({ id: "assinaturaName", nome: "Assinatura (nome por extenso)" });
+  if (!(v("dataAssinatura") || "").trim()) {
+    marcarCampoInvalido("dataAssinatura", true);
+    faltantes.push({ id: "dataAssinatura", nome: "Data da assinatura" });
+  } else {
+    marcarCampoInvalido("dataAssinatura", false);
+  }
+  if (!isNaoAssinarManualmente() && !isAssinaturaManuscritaPreenchida()) {
+    showToast("Desenhe a assinatura manuscrita na área indicada.", false);
+    marcarAssinaturaInvalidaCanvas(true);
+    return false;
+  }
+  marcarAssinaturaInvalidaCanvas(false);
+  if (faltantes.length) {
+    showToast(`Preencha: ${faltantes.map((x) => x.nome).join(", ")}.`, false);
+    document.getElementById(faltantes[0].id)?.focus();
+    return false;
+  }
+  return true;
+}
+
 async function validarCamposObrigatorios() {
+  if (!radioTipoPlano()) {
+    showToast("Selecione Plano de Benefícios ou Outros Planos.", false);
+    document.getElementById("tipoPlanoGroup")?.classList.add("group-invalid");
+    document.getElementById("tipoPlanoGroup")?.querySelector("input")?.focus();
+    return false;
+  }
+  document.getElementById("tipoPlanoGroup")?.classList.remove("group-invalid");
+  if (ehPlanoBeneficios()) return validarCamposPlanoBeneficios();
+
   const faltantes = [];
   const add = (id, nome) => {
     const el = document.getElementById(id);
@@ -2055,6 +2219,17 @@ async function validarCamposObrigatorios() {
   marcarCampoInvalido("uf", false);
 
   add("cidade", "Cidade");
+  if (v("cidade")) {
+    if (!(await garantirMapaCidadesBrasil())) {
+      marcarCampoInvalido("cidade", true);
+      document.getElementById("cidade")?.focus();
+      return false;
+    }
+    if (!resolverArquivoPdfPorCidadeNome(v("cidade"))) {
+      marcarCampoInvalido("cidade", true);
+      faltantes.push({ id: "cidade", nome: "Cidade (sem ficha configurada)" });
+    }
+  }
 
   add("funcionario", "Nome do Funcionário");
   add("cpf", "CPF");
@@ -2206,18 +2381,29 @@ async function confirmarPoliticaLGPD() {
 }
 
 async function carregarCamposSchema() {
-  if (camposSchema) return true;
+  const key = ehPlanoBeneficios() ? "beneficios" : "outros";
+  if (camposSchema && camposSchemaCacheKey === key) return true;
+  const fetchPath = key === "beneficios" ? CAMPOS_PLANO_BENEFICIOS_FETCH_PATH : CAMPOS_JSON_FETCH_PATH;
+  const labelPath = key === "beneficios" ? CAMPOS_PLANO_BENEFICIOS_JSON_PATH : CAMPOS_JSON_PATH;
   try {
-    const res = await fetch(CAMPOS_JSON_FETCH_PATH, { cache: "no-store" });
+    const res = await fetch(fetchPath, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     camposSchema = await res.json();
     if (!camposSchema?.campos) throw new Error("Estrutura inválida");
+    camposSchemaCacheKey = key;
     return true;
   } catch (e) {
     console.error(e);
-    showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
+    showToast(`Não foi possível carregar ${labelPath}`, false);
     return false;
   }
+}
+
+function obterPaginaPdf(pdfDoc, numeroPagina) {
+  const pages = pdfDoc.getPages();
+  const idx = Math.max(0, (Number(numeroPagina) || 1) - 1);
+  if (idx >= pages.length) return null;
+  return pages[idx];
 }
 
 function limparDadosFormulario() {
@@ -2302,11 +2488,12 @@ function coletarEstadoRascunho() {
     assinaturaCanvasPng = null;
   }
   return {
-    v: 5,
+    v: 6,
     t: Date.now(),
     campos,
     assinaturaCanvasPng,
     naoAssinarManualmente: isNaoAssinarManualmente(),
+    tipoPlano: radioTipoPlano(),
     tipoAdesao: radio("tipoAdesao"),
     conj_incluir: !!document.getElementById("conj_incluir")?.checked,
     filhosVisiveis,
@@ -2333,6 +2520,14 @@ function aplicarEstadoRascunho(obj) {
     if (a.length >= 2 && b.length >= 8) {
       elTelefone.value = a.slice(0, 2) + b;
       maskTelefone(elTelefone);
+    }
+  }
+  const tp = obj.tipoPlano;
+  if (tp) {
+    const inpPlano = document.querySelector(`input[name="tipoPlano"][value="${tp}"]`);
+    if (inpPlano) {
+      inpPlano.checked = true;
+      toggleTipoPlano(inpPlano);
     }
   }
   const ta = obj.tipoAdesao;
@@ -2506,7 +2701,7 @@ function tentarAplicarCopiaFichaCadastral() {
   const cu = c.cidadeuf ? String(c.cidadeuf).trim().toLocaleUpperCase("pt-BR") : "";
   const parsedCu =
     cu.match(/^(.+?)\s*\/\s*([A-Z]{2})$/) || cu.match(/^(.+?)\s+-\s+([A-Z]{2})$/);
-  if (parsedCu) {
+  if (parsedCu && ehOutrosPlanos()) {
     void (async () => {
       ignorarSalvarRascunho = true;
       try {
@@ -2669,11 +2864,53 @@ async function gerarPDF() {
     if (!templateBytes) return;
 
     const C = camposSchema.campos;
-    const tipo = radio("tipoAdesao");
 
     const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
-    const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+    if (ehPlanoBeneficios()) {
+      const ass = C.assinatura.campos;
+      const pageAss = obterPaginaPdf(pdfDoc, ass.rubrica?.pagina || 2);
+      if (!pageAss) {
+        showToast("O PDF da declaração não possui a página de assinatura esperada.", false);
+        return;
+      }
+      const semRubrica = isNaoAssinarManualmente();
+      const bufPng = semRubrica ? null : await canvasAssinaturaParaPngArrayBuffer();
+      if (bufPng && ass.rubrica?.coordenadas) {
+        const png = await pdfDoc.embedPng(bufPng);
+        desenharPngAjustadoNoCampo(pageAss, png, ass.rubrica.coordenadas);
+      }
+      const coordsNome = semRubrica
+        ? (ass.nome_legivel_sem_rubrica?.coordenadas || ass.nome_legivel?.coordenadas)
+        : ass.nome_legivel?.coordenadas;
+      if (coordsNome) {
+        escreverTextoCampoCoord(pageAss, font, coordsNome, v("assinaturaName"));
+      }
+      if (ass.data?.coordenadas) {
+        escreverTextoCampoCoord(
+          pageAss,
+          font,
+          ass.data.coordenadas,
+          formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
+        );
+      }
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const primeiroNome = primeiroNomeUsuarioParaArquivo(v("assinaturaName"));
+      link.download = `Declaracao_Plano_Saude ${primeiroNome}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+      salvarRascunhoLocalSincrono();
+      showToast("PDF gerado com sucesso!");
+      return;
+    }
+
+    const tipo = radio("tipoAdesao");
+    const page = pdfDoc.getPages()[0];
 
     marcarRadioJsonOpcao(page, font, C.tipo_adesao, tipo);
 
@@ -2819,13 +3056,34 @@ function abrirModalAtencaoDownloadModelo() {
 
 async function baixarPdfVazioExecucao() {
   try {
-    const bytes = await carregarTemplateAssistencia();
+    if (!radioTipoPlano()) {
+      showToast("Selecione Plano de Benefícios ou Outros Planos.", false);
+      document.getElementById("tipoPlanoGroup")?.classList.add("group-invalid");
+      return;
+    }
+    if (ehOutrosPlanos()) {
+      if (!v("uf")) {
+        showToast("Selecione o estado e a cidade para baixar o modelo correto.", false);
+        marcarCampoInvalido("uf", true);
+        document.getElementById("uf")?.focus();
+        return;
+      }
+      if (!v("cidade")) {
+        showToast("Selecione a cidade para baixar o modelo correto.", false);
+        marcarCampoInvalido("cidade", true);
+        document.getElementById("cidade")?.focus();
+        return;
+      }
+    }
+    const bytes = await carregarTemplateParaCidadeSelecionada();
     if (!bytes) return;
     const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "DECLARACAO_PLANO_DE_SAUDE.pdf";
+    link.download = ehPlanoBeneficios()
+      ? "DECLARACAO_PLANO_DE_SAUDE.pdf"
+      : (resolverArquivoPdfPorCidadeNome(v("cidade")) || "assistencia_medica.pdf");
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -2977,6 +3235,8 @@ if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
 }
+const tipoPlanoInicial = document.querySelector('input[name="tipoPlano"]:checked');
+if (tipoPlanoInicial) toggleTipoPlano(tipoPlanoInicial);
 tentarAplicarCopiaFichaCadastral();
 atualizarBotoesFilhos();
 atualizarVisibilidadeModuloDependentes();

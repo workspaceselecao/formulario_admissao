@@ -10,7 +10,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 |------|--------|
 | `index.html` | Página inicial; links para a Ficha Cadastral e a Assistência Médica. |
 | `ficha_cadastral.html` | Formulário F-075 (PR-011) — um **único** template PDF. |
-| `assistencia_medica.html` | Formulário F-089 (PR-090) — **um** template PDF (`DECLARACAO PLANO DE SAUDE.pdf`) para qualquer cidade (ver §6). |
+| `assistencia_medica.html` | Formulário F-089 (PR-090) — **Plano de Benefícios** (`DECLARACAO PLANO DE SAUDE.pdf`, só assinatura, pág. 2) ou **Outros Planos** (ficha regional por cidade; ver §6). |
 | `*_campos.json` | Coordenadas e metadados dos campos no PDF (pontos, tamanho da fonte implícita no código). |
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
 | `vercel.json` | Redireciona `/` → `index.html` na Vercel. |
@@ -30,7 +30,9 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
 | `cidades_brasil.json` | Legado/referência regional (não seleciona mais o PDF da assistência). |
 | `F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Template da ficha (nome referenciado no HTML). |
-| `DECLARACAO PLANO DE SAUDE.pdf` | Template único da assistência médica (todas as cidades/UF). |
+| `DECLARACAO PLANO DE SAUDE.pdf` | Declaração — fluxo **Plano de Benefícios** (assinatura na página 2). |
+| `declaracao_plano_saude_campos.json` | Coordenadas da declaração (fluxo Plano de Benefícios). |
+| `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Fichas regionais — fluxo **Outros Planos** (`cidades_brasil.json`). |
 | `Carta Abertura de Conra Salario.pdf` | Download opcional na ficha (conta salário Bradesco). |
 | `municipios_cidades_ficha_por_uf.json` | **Legado** — já **não** é usado pelo `assistencia_medica.html` (a lista de municípios vem da API; ver §6.1). Pode manter-se no repositório sem efeito no site. |
 | `coordenadasficha.txt`, `coordenadasassmedica.txt` | Notas de leitura de coordenadas (página, x, y, largura, altura) — **referência humana** para alinhar com o JSON; não são carregados pela aplicação. |
@@ -76,10 +78,10 @@ Template único: **não** há seleção por cidade; só um `F-075_...pdf`.
 
 ## 5. Assistência médica — fluxo e dependências
 
-1. O usuário escolhe o **estado (UF)** e a **cidade** (select `#cidade`).
-2. A lista de cidades do estado vem da **API pública** (ver §6.1); o select mostra **todos** os municípios retornados para a UF.
-3. O PDF usado é sempre `DECLARACAO PLANO DE SAUDE.pdf` (`TEMPLATE_ASSISTENCIA_PDF` em `assistencia_medica.html`), independentemente da cidade.
-4. O `gerarPDF()` carrega os **bytes** desse template, desenha campos, assinatura (canvas → PNG), bloco de **evidência** (ID do documento, data/hora, fuso, IP), e inicia o download do arquivo `F-089 (PR-090) Adesão Assistência Médica - {nome}.pdf` (nomes conforme o código).
+1. O usuário escolhe **Plano de Benefícios** ou **Outros Planos** (`tipoPlano` no início do formulário).
+2. **Plano de Benefícios:** apenas a secção **Assinatura**; PDF `DECLARACAO PLANO DE SAUDE.pdf` (coordenadas em `declaracao_plano_saude_campos.json`, página 2).
+3. **Outros Planos:** formulário completo; UF + cidade (API kstr, filtrado por `cidades_brasil.json`); PDF regional via `FICHA_UTILIZAR_PARA_ARQUIVO`.
+4. O `gerarPDF()` ramifica conforme `ehPlanoBeneficios()` / `ehOutrosPlanos()`.
 5. **“Não optante”** omite a secção de dependentes (cônjuge/filhos) no desenho do PDF, conforme lógica no `gerarPDF()`.
 
 Onde o código toca o schema:
