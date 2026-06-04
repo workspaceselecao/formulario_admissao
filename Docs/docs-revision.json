@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-06-04T13:53:56-03:00",
-  "gitCommit": "5a0b3ea",
-  "gitSubject": "Corrigir URL codificada do link da declaração Plano de Saúde.",
+  "ultimaValidacaoIso": "2026-06-04T14:22:32-03:00",
+  "gitCommit": "b0cb36b",
+  "gitSubject": "Atualizar texto de revisão jurídica nos documentos LGPD e exibir última validação via Git.",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
