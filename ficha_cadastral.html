@@ -323,17 +323,13 @@
       grid-template-columns: 1fr 1fr;
     }
   }
-  /* CPF, agência e conta (desktop: três colunas) */
-  .banco-cpf-agencia-conta {
+  /* Nome completo + CPF na mesma linha (Dados Pessoais) */
+  .nome-cpf-row {
     display: grid;
     grid-column: span 2;
     gap: 18px;
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 641px) {
-    .banco-cpf-agencia-conta--detalhes {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
   }
 
   /* ── FIELDS ── */
@@ -807,6 +803,10 @@
     .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
     .address-grid { grid-template-columns: 1fr; }
     .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade { grid-column: span 1; }
+    .nome-cpf-row {
+      grid-template-columns: 1fr;
+      grid-column: span 1;
+    }
     .dep-table, .vt-table { font-size: 12px; }
 
     .dep-table thead { display: none; }
@@ -945,9 +945,15 @@
     <div class="section-header"><div class="dot"></div>Dados Pessoais</div>
     <div class="section-body">
       <div class="grid grid-2" style="margin-bottom:18px">
-        <div class="field col-span-2">
-          <label>Nome Completo <span class="req">*</span></label>
-          <input type="text" id="nomeCompleto" placeholder="Conforme Certidão de Nascimento ou Casamento">
+        <div class="nome-cpf-row">
+          <div class="field field--nome-completo">
+            <label>Nome Completo <span class="req">*</span></label>
+            <input type="text" id="nomeCompleto" placeholder="Conforme Certidão de Nascimento ou Casamento">
+          </div>
+          <div class="field field--cpf">
+            <label>CPF <span class="req">*</span></label>
+            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
+          </div>
         </div>
         <div class="field col-span-2">
           <label>Nome Social <span style="font-weight:400;color:var(--text-light)">(Inclusão no crachá)</span></label>
@@ -1101,12 +1107,6 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="banco-cpf-agencia-conta" id="bancoCpfAgenciaContaWrap">
-          <div class="field">
-            <label>CPF <span class="req">*</span></label>
-            <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
           </div>
         </div>
       </div>
@@ -2033,9 +2033,6 @@ function toggleBanco(el){
     if (isSalarioBradesco) cartaBradescoField.removeAttribute('hidden');
     else cartaBradescoField.setAttribute('hidden', '');
   }
-  const wrap = document.getElementById('bancoCpfAgenciaContaWrap');
-  const temConta = TIPOS_CONTA_VALIDOS.includes(tipo);
-  if (wrap) wrap.classList.toggle('banco-cpf-agencia-conta--detalhes', temConta);
   if (!bradescoAtivo) {
     marcarCampoInvalido('agenciaBradesco', false);
     marcarCampoInvalido('contaBradesco', false);
@@ -2426,6 +2423,7 @@ function updateProgress(){
 
   const pessoalPct = calcPct([
     () => hasValue('nomeCompleto'),
+    () => hasValue('cpf'),
     () => hasValue('celular'),
     () => hasValue('email'),
     () => hasValue('estadoCivil'),
@@ -2447,7 +2445,6 @@ function updateProgress(){
 
   const bancarioPct = calcPct([
     () => TIPOS_CONTA_VALIDOS.includes(radio('tipoConta')),
-    () => hasValue('cpf'),
     () => {
       const tipo = radio('tipoConta');
       const ids = idsAgenciaContaAtivos(tipo);
@@ -2707,9 +2704,6 @@ function limparDadosFormulario(){
   if (cartaBradescoField) cartaBradescoField.setAttribute('hidden', '');
   definirVisibilidadeDetalheBanco(document.getElementById('bradescoDetalhes'), false, null);
   definirVisibilidadeDetalheBanco(document.getElementById('santanderDetalhes'), false, null);
-  const bancoWrap = document.getElementById('bancoCpfAgenciaContaWrap');
-  if (bancoWrap) bancoWrap.classList.remove('banco-cpf-agencia-conta--detalhes');
-
   ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
