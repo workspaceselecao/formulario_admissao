@@ -148,6 +148,11 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 - Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`); formulário não é zerado automaticamente — limpeza explícita em **Descartar rascunho**.
 
+### 7.5 Documentos em `/Docs` (revisão jurídica)
+
+- Texto padrão no rodapé dos HTML em `/Docs`: revisão validada com Jurídico e Privacidade; **Última validação em** lida de `Docs/docs-revision.json` (data/hora e commit do último push).
+- Após alterar política, termos ou base legal, executar: `node scripts/atualizar-docs-revision.mjs` e commitar o JSON atualizado junto com os HTML.
+
 ---
 
 ## 8. APIs e serviços externos (resumo)

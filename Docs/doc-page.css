@@ -228,3 +228,23 @@ body {
 .doc-shell-footer a:hover {
   text-decoration: underline;
 }
+.doc-revisao-juridica {
+  margin-top: 28px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  font-size: 14px;
+  color: var(--text-mid);
+}
+.doc-revisao-juridica p {
+  margin: 0 0 10px;
+}
+.doc-revisao-juridica p:last-child {
+  margin-bottom: 0;
+}
+.doc-revisao-git-hint {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 400;
+}
