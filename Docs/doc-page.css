@@ -248,3 +248,12 @@ body {
   color: var(--text-light);
   font-weight: 400;
 }
+.doc-download-link {
+  color: var(--accent-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.doc-download-link:hover {
+  color: var(--accent);
+}

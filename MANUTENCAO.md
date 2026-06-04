@@ -152,6 +152,7 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 - Texto padrão no rodapé dos HTML em `/Docs`: revisão validada com Jurídico e Privacidade; **Última validação em** lida de `Docs/docs-revision.json` (data/hora e commit do último push).
 - Após alterar política, termos ou base legal, executar: `node scripts/atualizar-docs-revision.mjs` e commitar o JSON atualizado junto com os HTML.
+- Histórico completo para o RIPD: `node scripts/gerar-historico-versionamento.mjs` gera `Docs/historico-versionamento.md` e `.json` (link de download em `ripd.html`).
 
 ---
 

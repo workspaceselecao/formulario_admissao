@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-06-04T14:22:32-03:00",
-  "gitCommit": "d3534c4",
-  "gitSubject": "Atualizar carimbo de última validação jurídica (docs-revision.json).",
+  "ultimaValidacaoIso": "2026-06-04T14:34:20-03:00",
+  "gitCommit": "f980160",
+  "gitSubject": "RIPD: link de download do historico de versionamento e script de geracao",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
