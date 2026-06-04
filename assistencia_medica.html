@@ -292,6 +292,12 @@
   }
   .check-label input { accent-color: var(--accent); }
   .check-label.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+  .plano-tip-link {
+    color: var(--accent-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .plano-tip-link:hover { color: var(--accent); }
   .aviso-box {
     background: #fffbf5;
     border: 1.5px solid #f0d9b5;
@@ -712,7 +718,12 @@
           <label class="radio-label"><input type="radio" name="tipoPlano" value="outros_planos" onchange="toggleTipoPlano(this)"> Outros Planos</label>
         </div>
         <p class="signature-pad-hint" style="margin-top:12px;font-size:12px;color:var(--text-mid);line-height:1.5">
-          <strong>Plano de Benefícios:</strong> Disponibilização de TELEMEDICINA em parceria com o Programa Saúde Família +.<br>
+          <strong>Plano de Benefícios:</strong> Disponibilização de TELEMEDICINA em parceria com o
+          <a
+            class="plano-tip-link"
+            href="DECLARACAO PLANO DE SAUDE.pdf"
+            download="DECLARACAO PLANO DE SAUDE.pdf"
+          >Programa Saúde Família +</a>.<br>
           <strong>Outros Planos:</strong> Disponível para cargos específicos e orientados em processo seletivo.
         </p>
       </div>
