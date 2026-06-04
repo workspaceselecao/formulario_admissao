@@ -15,7 +15,7 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `index.html` — página inicial (escolha do formulário)
 - `ficha_cadastral.html` — F-075 (PR-011) e geração do PDF
 - `ficha_cadastral_campos.json` — coordenadas dos campos da ficha (pt)
-- `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` — template da ficha
+- `F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf` — template da ficha
 - `assistencia_medica.html` — F-089 (PR-090) e geração do PDF
 - `assistencia_medica_campos.json` — coordenadas dos campos da assistência médica (pt)
 - `cidades_brasil.json` — mapeia cidade → ficha PDF da assistência médica

@@ -1,8 +1,8 @@
 {
   "documento": {
-    "id": "F-075_PR-011_37",
+    "id": "F-075_PR-011_38",
     "titulo": "Ficha Cadastral de Admissão – Operacional e Administrativo",
-    "versao": "37",
+    "versao": "38",
     "paginas": 1
   },
   "campos": {
@@ -140,11 +140,11 @@
           "opcoes": {
             "sim": {
               "label": "Sim",
-              "coordenadas": { "x": 86, "y": 539, "largura": 9, "altura": 7 }
+              "coordenadas": { "x": 129, "y": 534, "largura": 9, "altura": 7 }
             },
             "nao": {
               "label": "Não",
-              "coordenadas": { "x": 109, "y": 539, "largura": 7, "altura": 7 }
+              "coordenadas": { "x": 161, "y": 534, "largura": 9, "altura": 7 }
             }
           }
         },
@@ -186,13 +186,25 @@
           "tipo": "grupo_radio",
           "pagina": 1,
           "opcoes": {
-            "bradesco": {
-              "label": "Conta Salário Bradesco",
-              "coordenadas": { "x": 92, "y": 510, "largura": 11, "altura": 10 }
-            },
             "conta_corrente": {
               "label": "Conta Corrente Bradesco",
-              "coordenadas": { "x": 92, "y": 484, "largura": 12, "altura": 10 }
+              "coordenadas": { "x": 129, "y": 509, "largura": 7, "altura": 7 }
+            },
+            "bradesco": {
+              "label": "Conta Salário Bradesco",
+              "coordenadas": { "x": 171, "y": 510, "largura": 7, "altura": 7 }
+            },
+            "poupanca_bradesco": {
+              "label": "Conta Poupança Bradesco",
+              "coordenadas": { "x": 230, "y": 510, "largura": 7, "altura": 7 }
+            },
+            "santander_corrente": {
+              "label": "Conta Corrente Santander",
+              "coordenadas": { "x": 133, "y": 486, "largura": 7, "altura": 7 }
+            },
+            "santander_salario": {
+              "label": "Conta Salário Santander",
+              "coordenadas": { "x": 176, "y": 485, "largura": 7, "altura": 7 }
             }
           }
         },
@@ -202,7 +214,7 @@
           "pagina": 1,
           "coordenadas": { "x": 288, "y": 504, "largura": 122, "altura": 14 },
           "obrigatorio": false,
-          "dependencia": { "campo": "tipo_conta", "valor": "bradesco" }
+          "dependencia": { "campo": "tipo_conta", "valor": ["bradesco", "conta_corrente", "poupanca_bradesco"] }
         },
         "bradesco_conta_digito": {
           "label": "Conta/Dígito (Bradesco)",
@@ -210,16 +222,16 @@
           "pagina": 1,
           "coordenadas": { "x": 418, "y": 504, "largura": 142, "altura": 16 },
           "obrigatorio": false,
-          "dependencia": { "campo": "tipo_conta", "valor": "bradesco" }
+          "dependencia": { "campo": "tipo_conta", "valor": ["bradesco", "conta_corrente", "poupanca_bradesco"] }
         },
         "cpf_titular": {
-          "label": "CPF do titular (Conta Corrente ou Salário Bradesco)",
+          "label": "CPF do titular (contas Bradesco)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": { "x": 291, "y": 476, "largura": 252, "altura": 15 },
           "obrigatorio": false,
           "mascara": "999.999.999-99",
-          "observacao": "Mesma área no PDF: preenchida para Conta Corrente Bradesco ou Conta Salário Bradesco"
+          "observacao": "Mesma área no PDF: preenchida para opções Bradesco (corrente, salário ou poupança)"
         }
       }
     },

@@ -1017,11 +1017,14 @@
     <div class="section-header"><div class="dot"></div>Dados Conta Bancária</div>
     <div class="section-body">
       <div class="grid grid-2">
-        <div class="field col-span-2">
+        <div class="field col-span-2" id="grupoTipoConta">
           <label>Tipo de Conta</label>
-          <div class="radio-inline" style="margin-top:4px">
-            <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
+          <div class="radio-inline" style="margin-top:4px;flex-wrap:wrap;gap:8px 16px">
             <label class="radio-label"><input type="radio" name="tipoConta" value="conta_corrente" onchange="toggleBanco(this)"> Conta Corrente Bradesco</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário Bradesco</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="poupanca_bradesco" onchange="toggleBanco(this)"> Conta Poupança Bradesco</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="santander_corrente" onchange="toggleBanco(this)"> Conta Corrente Santander</label>
+            <label class="radio-label"><input type="radio" name="tipoConta" value="santander_salario" onchange="toggleBanco(this)"> Conta Salário Santander</label>
           </div>
         </div>
         <div class="banco-cpf-agencia-conta" id="bancoCpfAgenciaContaWrap">
@@ -1264,7 +1267,7 @@
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
-const TEMPLATE_PATH = "./F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf";
+const TEMPLATE_PATH = "./F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf";
 const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conta Modelo Padrão_Bradesco.docx";
 const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
@@ -1896,8 +1899,23 @@ function togglePIS(el){
 function toggleDef(el){
   document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
 }
+const TIPOS_CONTA_BRADESCO = ['bradesco', 'conta_corrente', 'poupanca_bradesco'];
+const TIPOS_CONTA_VALIDOS = [...TIPOS_CONTA_BRADESCO, 'santander_corrente', 'santander_salario'];
 function tipoContaRequerAgenciaConta(tipo){
-  return tipo === 'bradesco' || tipo === 'conta_corrente';
+  return TIPOS_CONTA_BRADESCO.includes(tipo);
+}
+function tipoContaRequerCpfTitularPdf(tipo){
+  return TIPOS_CONTA_BRADESCO.includes(tipo);
+}
+function rotuloTipoConta(tipo){
+  const rotulos = {
+    bradesco: 'Conta Salário Bradesco',
+    conta_corrente: 'Conta Corrente Bradesco',
+    poupanca_bradesco: 'Conta Poupança Bradesco',
+    santander_corrente: 'Conta Corrente Santander',
+    santander_salario: 'Conta Salário Santander'
+  };
+  return rotulos[tipo] || 'Tipo de Conta';
 }
 function toggleBanco(el){
   const tipo = el.value;
@@ -2311,7 +2329,7 @@ function updateProgress(){
   ]);
 
   const bancarioPct = calcPct([
-    () => ['conta_corrente', 'bradesco'].includes(radio('tipoConta')),
+    () => TIPOS_CONTA_VALIDOS.includes(radio('tipoConta')),
     () => hasValue('cpf'),
     () => (tipoContaRequerAgenciaConta(radio('tipoConta')) ? hasValue('agencia') : true),
     () => (tipoContaRequerAgenciaConta(radio('tipoConta')) ? hasValue('conta') : true)
@@ -2372,6 +2390,7 @@ document.querySelectorAll('.check-label input, .radio-label input').forEach(inpu
       if (input.name === 'primeiroEmprego') document.getElementById('grupoPrimeiroEmprego')?.classList.remove('group-invalid');
       if (input.name === 'deficiencia') document.getElementById('grupoDeficiencia')?.classList.remove('group-invalid');
       if (input.name === 'valeRef') document.getElementById('grupoValeRef')?.classList.remove('group-invalid');
+      if (input.name === 'tipoConta') document.getElementById('grupoTipoConta')?.classList.remove('group-invalid');
     }
   });
 });
@@ -2417,7 +2436,7 @@ function validarContaBradescoObrigatoria(){
   marcarCampoInvalido('conta', !contaOk);
 
   if (!agenciaOk || !contaOk) {
-    const rotulo = tipoConta === 'bradesco' ? 'Conta Salário Bradesco' : 'Conta Corrente Bradesco';
+    const rotulo = rotuloTipoConta(tipoConta);
     showToast(`Para ${rotulo}, preencha Agência e Conta/Dígito.`, false);
     if (!agenciaOk) {
       document.getElementById('agencia')?.focus();
@@ -2450,6 +2469,7 @@ function validarCamposObrigatorios(){
   const gruposRadioObrigatorios = [
     { name: 'primeiroEmprego', label: 'Primeiro Emprego', elId: 'grupoPrimeiroEmprego' },
     { name: 'deficiencia', label: 'Possui Deficiência', elId: 'grupoDeficiencia' },
+    { name: 'tipoConta', label: 'Tipo de Conta', elId: 'grupoTipoConta' },
     { name: 'valeRef', label: 'Vale Refeição / Alimentação', elId: 'grupoValeRef' }
   ];
   gruposRadioObrigatorios.forEach(({ name, label, elId }) => {
@@ -2796,8 +2816,12 @@ async function gerarPDF(){
       cep: v("cep"),
       bairro: v("bairro"),
       cidade: v("cidade"),
+      tipoConta: radio("tipoConta"),
       contaCorrenteBradesco: radio("tipoConta") === "conta_corrente",
       contaSalarioBradesco: radio("tipoConta") === "bradesco",
+      poupancaBradesco: radio("tipoConta") === "poupanca_bradesco",
+      santanderCorrente: radio("tipoConta") === "santander_corrente",
+      santanderSalario: radio("tipoConta") === "santander_salario",
       cpfConta: v("cpf"),
       agencia: v("agencia"),
       contaDigito: v("conta"),
@@ -2858,16 +2882,15 @@ async function gerarPDF(){
     }
 
     const cb = C.conta_bancaria.campos;
-    if (data.contaSalarioBradesco) {
-      marcarRadioJsonOpcao(page, font, cb.tipo_conta, "bradesco");
-      escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
-      escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
-      escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
+    const tipoContaPdf = data.tipoConta;
+    if (tipoContaPdf && cb.tipo_conta?.opcoes?.[tipoContaPdf]) {
+      marcarRadioJsonOpcao(page, font, cb.tipo_conta, tipoContaPdf);
     }
-    if (data.contaCorrenteBradesco) {
-      marcarRadioJsonOpcao(page, font, cb.tipo_conta, "conta_corrente");
+    if (tipoContaRequerAgenciaConta(tipoContaPdf)) {
       escreverTextoCampoCoord(page, font, cb.bradesco_agencia.coordenadas, data.agencia);
       escreverTextoCampoCoord(page, font, cb.bradesco_conta_digito.coordenadas, data.contaDigito);
+    }
+    if (tipoContaRequerCpfTitularPdf(tipoContaPdf)) {
       escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
     }
 

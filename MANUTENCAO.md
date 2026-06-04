@@ -29,7 +29,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `ficha_cadastral_campos.json` | Schema + coordenadas do template da ficha. |
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
 | `cidades_brasil.json` | **Apenas assistência:** lista de cidades com `FICHA A UTILIZAR` (mapeia para qual PDF). |
-| `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Template da ficha (nome referenciado no HTML). |
+| `F-075_38__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Template da ficha (nome referenciado no HTML). |
 | `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Templates da assistência (nomes exatos usados no código). |
 | `municipios_cidades_ficha_por_uf.json` | **Legado** — já **não** é usado pelo `assistencia_medica.html` (a lista de municípios vem da API; ver §6.1). Pode manter-se no repositório sem efeito no site. |
 | `coordenadasficha.txt`, `coordenadasassmedica.txt` | Notas de leitura de coordenadas (página, x, y, largura, altura) — **referência humana** para alinhar com o JSON; não são carregados pela aplicação. |
