@@ -1427,8 +1427,9 @@ function sanitizarSegmentoNomeArquivo(s) {
     .trim();
 }
 
-/** Só para texto preenchido: desce ~1 linha no PDF (y menor). Boxes/radios não usam isto. */
+/** Ajuste fino no corpo do formulário (y alto). Zona de assinatura (y ≤ 120) não usa offset. */
 const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
+const LIMITE_Y_SEM_OFFSET_TEXTO_PT = 120;
 let assinaturaCanvasCtx = null;
 let assinaturaCanvasTemTraço = false;
 let assinaturaDesenhando = false;
@@ -2801,10 +2802,10 @@ function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
   const size = options.size ?? PDF_FONT_TEXTO;
   const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
   if (!str) return false;
-  const y =
-    baselineYNoCampo(c, size) -
-    OFFSET_Y_TEXTO_UMA_LINHA_PT +
-    (options.offsetY ?? 0);
+  const yBottom = Number(c.y) || 0;
+  const offsetLinha =
+    yBottom > LIMITE_Y_SEM_OFFSET_TEXTO_PT ? OFFSET_Y_TEXTO_UMA_LINHA_PT : 0;
+  const y = baselineYNoCampo(c, size) - offsetLinha + (options.offsetY ?? 0);
   const x = Number(c.x) || 0;
   page.drawText(str, {
     x: x + (options.offsetX ?? 0.5),

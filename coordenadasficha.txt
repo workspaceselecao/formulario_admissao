@@ -56,8 +56,8 @@ refeiçao{"page":1,"x":55,"y":148,"width":15,"height":12}
 alimentaçao{"page":1,"x":245,"y":148,"width":14,"height":12}
 flex{"page":1,"x":410,"y":149,"width":12,"height":10}
 assinaturamanual{"page":1,"x":76,"y":40,"width":220,"height":42}
-assinaturadigitada{"page":1,"x":78,"y":21,"width":212,"height":12}
-data dia{"page":1,"x":434,"y":42,"width":31,"height":14}
-data mês{"page":1,"x":474,"y":42,"width":35,"height":14}
-data ano{"page":1,"x":520,"y":42,"width":41,"height":14}
-informaçõesdaassinatura{"page":1,"x":13,"y":0,"width":579,"height":10}
+assinaturadigitada{"page":1,"x":89,"y":19,"width":178,"height":14}
+data dia{"page":1,"x":436,"y":42,"width":27,"height":12}
+data mês{"page":1,"x":474,"y":42,"width":34,"height":12}
+data ano{"page":1,"x":517,"y":42,"width":33,"height":12}
+informaçõesdaassinatura{"page":1,"x":21,"y":1,"width":564,"height":8}

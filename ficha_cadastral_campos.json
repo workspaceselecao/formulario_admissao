@@ -489,7 +489,7 @@
           "label": "Assinatura digitada (nome legível no PDF)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 78, "y": 21, "largura": 212, "altura": 12 },
+          "coordenadas": { "x": 89, "y": 19, "largura": 178, "altura": 14 },
           "obrigatorio": true,
           "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
         },
@@ -497,7 +497,7 @@
           "label": "Assinatura digitada (sem rubrica manual)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 78, "y": 21, "largura": 212, "altura": 12 },
+          "coordenadas": { "x": 89, "y": 19, "largura": 178, "altura": 14 },
           "obrigatorio": false,
           "observacao": "Usado somente quando o candidato marca 'Não assinar manualmente'"
         },
@@ -508,15 +508,15 @@
           "obrigatorio": true,
           "segmentos": {
             "dia": {
-              "coordenadas": { "x": 434, "y": 42, "largura": 31, "altura": 14 },
+              "coordenadas": { "x": 436, "y": 42, "largura": 27, "altura": 12 },
               "mascara": "99"
             },
             "mes": {
-              "coordenadas": { "x": 474, "y": 42, "largura": 35, "altura": 14 },
+              "coordenadas": { "x": 474, "y": 42, "largura": 34, "altura": 12 },
               "mascara": "99"
             },
             "ano": {
-              "coordenadas": { "x": 520, "y": 42, "largura": 41, "altura": 14 },
+              "coordenadas": { "x": 517, "y": 42, "largura": 33, "altura": 12 },
               "mascara": "9999"
             }
           }
@@ -525,7 +525,7 @@
           "label": "Rodapé: evidência da assinatura eletrônica (texto informativo)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 13, "y": 0, "largura": 579, "altura": 10 },
+          "coordenadas": { "x": 21, "y": 1, "largura": 564, "altura": 8 },
           "obrigatorio": false
         }
       }
