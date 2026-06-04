@@ -482,14 +482,14 @@
           "label": "Assinatura manuscrita (imagem; substitui o nome no PDF na área do modelo)",
           "tipo": "imagem",
           "pagina": 1,
-          "coordenadas": { "x": 76, "y": 40, "largura": 220, "altura": 42 },
+          "coordenadas": { "x": 77, "y": 43, "largura": 218, "altura": 38 },
           "obrigatorio": true
         },
         "nome_legivel": {
           "label": "Assinatura digitada (nome legível no PDF)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 89, "y": 19, "largura": 178, "altura": 14 },
+          "coordenadas": { "x": 95, "y": 26, "largura": 199, "altura": 10 },
           "obrigatorio": true,
           "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
         },
@@ -497,7 +497,7 @@
           "label": "Assinatura digitada (sem rubrica manual)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 89, "y": 19, "largura": 178, "altura": 14 },
+          "coordenadas": { "x": 95, "y": 26, "largura": 199, "altura": 10 },
           "obrigatorio": false,
           "observacao": "Usado somente quando o candidato marca 'Não assinar manualmente'"
         },
