@@ -1337,6 +1337,8 @@ const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
 const PDF_FONT_EVIDENCIA = 5.5;
+/** Margem inferior (pt) do carimbo de evidência da assinatura — acima da borda cortada do PDF. */
+const RODAPE_EVIDENCIA_MARGEM_Y_PT = 12;
 
 const LS_NS = "atento.forms:v1:";
 const LS_LEGACY = {
@@ -1774,7 +1776,7 @@ function desenharPngAjustadoNoCampo(page, png, box) {
 function caixaRodapeEvidenciaPdf(page, overrides = {}) {
   const { width: pageW } = page.getSize();
   const margemX = Number(overrides.x) || 21;
-  const margemInferior = Number(overrides.y) || 4;
+  const margemInferior = Number(overrides.y) || RODAPE_EVIDENCIA_MARGEM_Y_PT;
   const largura =
     Number(overrides.largura) || Math.max(200, pageW - margemX * 2);
   return {
@@ -1795,7 +1797,7 @@ function desenharEvidenciaAssinatura(page, font, box, linhas) {
   for (let i = 0; i < linhas.length; i++) {
     page.drawText(linhas[i], {
       x,
-      y: yRodape + 2 + i * lineH,
+      y: yRodape + 4 + i * lineH,
       size: tamanho,
       font,
       maxWidth: maxW

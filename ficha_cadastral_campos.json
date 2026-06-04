@@ -525,7 +525,7 @@
           "label": "Rodapé: evidência da assinatura eletrônica (texto informativo)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": { "x": 21, "y": 4, "largura": 564, "altura": 10 },
+          "coordenadas": { "x": 21, "y": 12, "largura": 564, "altura": 10 },
           "obrigatorio": false,
           "observacao": "x/y/largura são margens do rodapé; y é recalculado na geração do PDF com base na altura da página (carimbo automático)."
         }
