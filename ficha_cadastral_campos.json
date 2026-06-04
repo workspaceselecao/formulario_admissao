@@ -482,7 +482,7 @@
           "label": "Assinatura manuscrita (imagem; substitui o nome no PDF na área do modelo)",
           "tipo": "imagem",
           "pagina": 1,
-          "coordenadas": { "x": 77, "y": 43, "largura": 218, "altura": 38 },
+          "coordenadas": { "x": 77, "y": 51, "largura": 218, "altura": 38 },
           "obrigatorio": true
         },
         "nome_legivel": {
