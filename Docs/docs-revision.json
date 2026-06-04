@@ -1,7 +1,7 @@
 {
   "ultimaValidacaoIso": "2026-06-04T14:22:32-03:00",
-  "gitCommit": "b0cb36b",
-  "gitSubject": "Atualizar texto de revisão jurídica nos documentos LGPD e exibir última validação via Git.",
+  "gitCommit": "d3534c4",
+  "gitSubject": "Atualizar carimbo de última validação jurídica (docs-revision.json).",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
