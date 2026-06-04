@@ -45,10 +45,9 @@ Quando o número do processo (ex. F-075, PR-011, revisão 37) mudar no **documen
 
 ## 3. Sistema de coordenadas no PDF (pdf-lib)
 
-- **Origem:** canto **inferior esquerdo** da página, como no pdf-lib.
-- Em `ficha_cadastral_campos.json`, cada retângulo tem `x`, `y`, `largura`, `altura` já em coordenadas pdf-lib (ficha F-075 atual ≈ 596×842 pt; ver `largura_pagina_pt` / `altura_pagina_pt` no JSON).
-- **Medição no `coordenadasficha.txt`:** ferramentas que reportam **Y a partir do topo** (valores altos no topo do formulário, ex. nome ≈ 687) exigem conversão antes de gravar no JSON: `y = altura_pagina - y_topo - altura`. Campos da zona de assinatura (y ≤ 100 no `.txt`) já estão na origem inferior — não converter. Script: `node scripts/converter-coords-ficha-pdf-lib.mjs`.
-- Ao mudar o **PDF oficial**, re-medir, atualizar o `.txt` e rodar o script (ou converter manualmente) antes do deploy.
+- **Origem:** canto **inferior esquerdo** da página, como no pdf-lib (`y` cresce para cima).
+- Em `ficha_cadastral_campos.json` e `coordenadasficha.txt`, use **os mesmos valores** medidos na ferramenta (ficha F-075 ≈ 596×842 pt). Ex.: nome no topo do formulário tem `y` alto (≈ 687); assinatura no rodapé tem `y` baixo (≈ 21–67). **Não converter** `y` com `altura_pagina - y` — isso inverte o formulário e embaralha os campos.
+- Ao mudar o **PDF oficial**, re-medir, atualizar o `.txt` e copiar `x`/`y`/`width`/`height` para o JSON (`largura`/`altura`).
 
 Estrutura geral do JSON:
 
