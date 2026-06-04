@@ -1770,19 +1770,35 @@ function desenharPngAjustadoNoCampo(page, png, box) {
   }
   page.drawImage(png, { x, y: yBottom, width: w, height: h });
 }
+/** Caixa do rodapé para evidência técnica da assinatura (origem pdf-lib, y=0 na base da página). */
+function caixaRodapeEvidenciaPdf(page, overrides = {}) {
+  const { width: pageW } = page.getSize();
+  const margemX = Number(overrides.x) || 21;
+  const margemInferior = Number(overrides.y) || 4;
+  const largura =
+    Number(overrides.largura) || Math.max(200, pageW - margemX * 2);
+  return {
+    x: margemX,
+    y: margemInferior,
+    largura,
+    altura: Number(overrides.altura) || 10
+  };
+}
+
 function desenharEvidenciaAssinatura(page, font, box, linhas) {
   if (!box || !linhas?.length) return;
   const x = (Number(box.x) || 0) + 0.5;
-  const yBase = Number(box.y) || 0;
+  const yRodape = Number(box.y) || 0;
   const tamanho = PDF_FONT_EVIDENCIA;
   const lineH = tamanho * 1.18;
+  const maxW = (Number(box.largura) || 500) - 1;
   for (let i = 0; i < linhas.length; i++) {
     page.drawText(linhas[i], {
       x,
-      y: yBase + 3 + i * lineH,
+      y: yRodape + 2 + i * lineH,
       size: tamanho,
       font,
-      maxWidth: (Number(box.largura) || 500) - 1
+      maxWidth: maxW
     });
   }
 }
@@ -3093,12 +3109,10 @@ async function gerarPDF(){
       "). IP: " +
       (ipRef || "n/d") +
       ".";
-    if (ass.evidencia?.coordenadas) {
-      const cEv = ass.evidencia.coordenadas;
-      const wEv = (Number(cEv.largura) || 550) - 2;
-      const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
-      desenharEvidenciaAssinatura(page, font, cEv, linhasE);
-    }
+    const caixaRodapeEvid = caixaRodapeEvidenciaPdf(page, ass.evidencia?.coordenadas);
+    const wEv = Math.max(120, (Number(caixaRodapeEvid.largura) || 550) - 2);
+    const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
+    desenharEvidenciaAssinatura(page, font, caixaRodapeEvid, linhasE);
 
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
