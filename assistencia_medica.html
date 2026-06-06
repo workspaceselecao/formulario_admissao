@@ -1364,11 +1364,17 @@ function sanitizarSegmentoNomeArquivo(s) {
     .trim();
 }
 
+/** PDF na raiz do site (evita 404 em rotas cleanUrls como /assistencia_medica). */
+function pdfAssetFetchPath(nomeArquivo) {
+  const name = String(nomeArquivo || "").replace(/^\/+/, "");
+  return encodeURI("/" + name);
+}
+
 async function carregarTemplatePdf(nomeArquivo) {
   if (!nomeArquivo) return null;
   if (templateBytesCache[nomeArquivo]) return templateBytesCache[nomeArquivo];
   try {
-    const res = await fetch(encodeURI("./" + nomeArquivo));
+    const res = await fetch(pdfAssetFetchPath(nomeArquivo));
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const bytes = await res.arrayBuffer();
     templateBytesCache[nomeArquivo] = clonarArrayBuffer(bytes);
