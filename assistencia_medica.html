@@ -714,7 +714,7 @@
       <div class="plano-adesao-bloco">
         <div class="subsection-title">Tipo de plano</div>
         <div class="radio-inline radio-inline--fill" id="tipoPlanoGroup" style="margin-top:8px">
-          <label class="radio-label"><input type="radio" name="tipoPlano" value="plano_beneficios" onchange="toggleTipoPlano(this)"> Plano de Benefícios</label>
+          <label class="radio-label"><input type="radio" name="tipoPlano" value="plano_beneficios" checked onchange="toggleTipoPlano(this)"> Plano de Benefícios</label>
           <label class="radio-label"><input type="radio" name="tipoPlano" value="outros_planos" onchange="toggleTipoPlano(this)"> Outros Planos</label>
         </div>
         <p class="signature-pad-hint" style="margin-top:12px;font-size:12px;color:var(--text-mid);line-height:1.5">
@@ -3341,7 +3341,11 @@ if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
 }
-const tipoPlanoInicial = document.querySelector('input[name="tipoPlano"]:checked');
+let tipoPlanoInicial = document.querySelector('input[name="tipoPlano"]:checked');
+if (!tipoPlanoInicial) {
+  tipoPlanoInicial = document.querySelector('input[name="tipoPlano"][value="plano_beneficios"]');
+  if (tipoPlanoInicial) tipoPlanoInicial.checked = true;
+}
 if (tipoPlanoInicial) toggleTipoPlano(tipoPlanoInicial);
 tentarAplicarCopiaFichaCadastral();
 atualizarBotoesFilhos();
