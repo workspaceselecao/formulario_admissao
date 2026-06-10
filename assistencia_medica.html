@@ -1071,7 +1071,7 @@
       <div class="signature-pad-wrap" id="signaturePadWrap">
         <label>Assinatura manuscrita <span class="req" id="reqAssinaturaManuscrita">*</span></label>
         <p class="signature-pad-hint assinatura-hint--beneficios" id="hintAssinaturaBeneficios">Desenhe com o mouse ou o dedo. A assinatura, o nome por extenso e a data serão incluídos na <strong>página 2</strong> da Declaração Plano de Saúde.</p>
-        <p class="signature-pad-hint assinatura-hint--outros" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.</p>
+        <p class="signature-pad-hint assinatura-hint--outros" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
         </div>
@@ -1821,7 +1821,7 @@ function atualizarUiNaoAssinarManualmente() {
   if (hint) {
     hint.textContent = ativo
       ? "Com esta opção, o nome por extenso será impresso no PDF no lugar da rubrica manual."
-      : "Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF. No rodapé do PDF constarão data e hora do envio, fuso, referência de IP (se obtido) e identificador do documento, apenas no arquivo, sem armazenamento no servidor — como na Ficha Cadastral.";
+      : "Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF.";
   }
   if (ativo) marcarAssinaturaInvalidaCanvas(false);
 }
