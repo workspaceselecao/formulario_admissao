@@ -1229,16 +1229,6 @@
           <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
         </div>
       </div>
-      <div class="grid grid-2">
-        <div class="field">
-          <label>Nome completo (legível) <span class="req">*</span></label>
-          <input type="text" id="assinaturaName" placeholder="Nome legível">
-        </div>
-        <div class="field">
-          <label>Data <span class="req">*</span></label>
-          <input type="date" id="dataAssinatura" autocomplete="off">
-        </div>
-      </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressDeclaracao"></div></div>
       </div>
@@ -2129,6 +2119,18 @@ function montarCidadeUfParaCopiaAssistencia() {
   return cidade;
 }
 
+function dataAssinaturaIsoAtual() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function assinaturaNomeLegivelPdf() {
+  return (document.getElementById("nomeCompleto")?.value || "").trim();
+}
+function assinaturaDataPdfFormatada() {
+  const [y, m, day] = dataAssinaturaIsoAtual().split("-");
+  return `${day}/${m}/${y}`;
+}
+
 function construirPayloadCopiaParaAssistencia() {
   const c = (id) => (document.getElementById(id)?.value || "").trim();
   const nascEmPartes = (iso) => {
@@ -2149,9 +2151,9 @@ function construirPayloadCopiaParaAssistencia() {
       complemento: c("complemento"),
       bairro: c("bairro"),
       cidadeuf: montarCidadeUfParaCopiaAssistencia(),
-      assinaturaName: c("assinaturaName")
+      assinaturaName: c("nomeCompleto")
     },
-    dataAssinatura: (document.getElementById("dataAssinatura")?.value || "").trim()
+    dataAssinatura: dataAssinaturaIsoAtual()
   };
   const cel = c("celular");
   const tel = c("telefone");
@@ -2220,8 +2222,7 @@ const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
   "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
   "cpf", "agenciaBradesco", "contaBradesco", "agenciaSantander", "contaSantander",
-  "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal",
-  "assinaturaName", "dataAssinatura"
+  "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
 ];
 let rascunhoSalvarTimer = null;
 let ignorarSalvarRascunho = false;
@@ -2503,9 +2504,7 @@ function updateProgress(){
   ]);
 
   const declaracaoPct = calcPct([
-    () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida(),
-    () => hasValue('assinaturaName'),
-    () => hasValue('dataAssinatura')
+    () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida()
   ]);
 
   setProgress('progressPessoal', pessoalPct);
@@ -2748,7 +2747,6 @@ function limparDadosFormulario(){
   limparAssinaturaCanvas();
   sincronizarCheckLabelNaoAssinarManualmente();
   atualizarUiNaoAssinarManualmente();
-  document.getElementById('dataAssinatura').valueAsDate = new Date();
   atualizarEstadoBotaoDependente();
   sincronizarCheckLabelVtNaoOptante();
   atualizarUiValeTransporteNaoOptante();
@@ -2976,8 +2974,8 @@ async function gerarPDF(){
       interValor: moedaParaPdf(v("vtInterVal")),
       integracaoQtd: v("vtIntegracaoQtd"),
       integracaoValor: moedaParaPdf(v("vtIntegracaoVal")),
-      assinaturaNome: v("assinaturaName") || v("nomeCompleto"),
-      assinaturaData: formatDate(v("dataAssinatura")) || new Date().toLocaleDateString("pt-BR")
+      assinaturaNome: assinaturaNomeLegivelPdf(),
+      assinaturaData: assinaturaDataPdfFormatada()
     };
 
     const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
@@ -3093,7 +3091,7 @@ async function gerarPDF(){
       escreverTextoCampoCoord(page, font, coordsNomeLegivel, data.assinaturaNome);
     }
     if (ass.data?.segmentos) {
-      preencherDataSegmentadaAssinatura(page, font, ass.data, v("dataAssinatura"));
+      preencherDataSegmentadaAssinatura(page, font, ass.data, dataAssinaturaIsoAtual());
     } else if (ass.data?.coordenadas) {
       escreverTextoCampoCoord(page, font, ass.data.coordenadas, data.assinaturaData);
     }
@@ -3194,10 +3192,7 @@ document.getElementById("naoAssinarManualmente")?.addEventListener("change", () 
   atualizarUiNaoAssinarManualmente();
   agendarSalvarRascunho();
 });
-if (!tentarRestaurarRascunho()) {
-  const elData = document.getElementById("dataAssinatura");
-  if (elData) elData.valueAsDate = new Date();
-}
+tentarRestaurarRascunho();
 ["telefone", "celular"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {
