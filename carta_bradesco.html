@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carta de Abertura de Conta Salário – Bradesco | Atento</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-header-nav.css">
+<style>
+  /* ── TOKENS (página) ─────────────────── */
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf9f7;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --border-strong: #9e9890;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --label: #5a554e;
+    --success: #2d7a4a;
+    --input-focus-border: #efa27f;
+    --accent-border-subtle: rgba(1, 66, 106, 0.2);
+    --accent-border-medium: rgba(1, 66, 106, 0.28);
+    --accent-shadow-subtle: rgba(12, 40, 68, 0.06);
+    --accent-shadow-medium: rgba(1, 66, 106, 0.14);
+    --overlay-bg: rgba(10, 10, 10, 0.45);
+    --destructive: #a33;
+    --destructive-bg: rgba(180, 60, 50, 0.08);
+    --separator-subtle: rgba(0, 0, 0, 0.06);
+    --separator-medium: rgba(0, 0, 0, 0.1);
+    --accent-tap-hover: rgba(1, 66, 106, 0.07);
+    --accent-tap-focus: rgba(1, 66, 106, 0.09);
+    --accent-focus-ring: rgba(1, 66, 106, 0.28);
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── SECTION CARDS ── */
+  .section-card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card:hover { box-shadow: var(--shadow-lg); }
+
+  .section-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-body { padding: 28px 28px 20px; }
+
+  .section-progress { margin-top: 16px; }
+  .section-progress-track {
+    background: var(--border);
+    border-radius: 100px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .section-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+
+  /* ── FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+
+  .field input,
+  .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, background 0.18s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--input-focus-border);
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input.invalid,
+  .field select.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field select { cursor: pointer; }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-light);
+    border-bottom: 2px solid var(--text-light);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .data-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-mid);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    line-height: 1.5;
+  }
+  .data-info svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--accent); }
+  .data-info strong { color: var(--accent-dark); }
+
+  /* ── AVISO ── */
+  .aviso-box {
+    background: #fffbf5;
+    border: 1.5px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #6b5a3a;
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+  .aviso-box strong { color: #8a4a10; }
+
+  /* ── BOTÕES ── */
+  .form-actions-bottom {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .btn-export {
+    --btn-fill-a: #3b2447;
+    --btn-fill-b: #efa27f;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(to top right, var(--btn-fill-a), var(--btn-fill-b));
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.2s, transform 0.12s;
+    text-shadow: 0 1px 2px rgba(30, 14, 38, 0.35);
+    animation: btn-export-spark-glow 2.5s ease-in-out infinite;
+    box-shadow:
+      0 2px 14px rgba(59, 36, 71, 0.38),
+      0 0 22px rgba(239, 162, 127, 0.28);
+  }
+  .btn-export::before {
+    content: "";
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -75%;
+    width: 58%;
+    background: linear-gradient(
+      88deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.06) 62%,
+      transparent 100%
+    );
+    transform: skewX(-16deg);
+    animation: btn-export-spark-sweep 2.75s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .btn-export:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 22px rgba(59, 36, 71, 0.42),
+      0 0 32px rgba(239, 162, 127, 0.48),
+      0 0 46px rgba(255, 228, 210, 0.35);
+  }
+  .btn-export:active { transform: translateY(0); filter: brightness(0.98); }
+  .btn-export svg { width: 16px; height: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+  @keyframes btn-export-spark-glow {
+    0%, 100% {
+      box-shadow:
+        0 2px 14px rgba(59, 36, 71, 0.38),
+        0 0 20px rgba(239, 162, 127, 0.26),
+        0 0 36px rgba(239, 162, 127, 0.12);
+    }
+    50% {
+      box-shadow:
+        0 3px 18px rgba(59, 36, 71, 0.46),
+        0 0 34px rgba(239, 162, 127, 0.52),
+        0 0 52px rgba(255, 235, 220, 0.42);
+    }
+  }
+  @keyframes btn-export-spark-sweep {
+    0% { transform: skewX(-16deg) translateX(-8%); opacity: 0; }
+    8% { opacity: 1; }
+    42% { transform: skewX(-16deg) translateX(320%); opacity: 1; }
+    43%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-export { animation: none; box-shadow: 0 2px 14px rgba(59, 36, 71, 0.38); }
+    .btn-export::before { animation: none; opacity: 0; }
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--text);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-lg);
+    max-width: min(420px, calc(100vw - 48px));
+  }
+  #toast.show { display: flex; }
+  #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; flex-shrink: 0; }
+  body.modal-open { overflow: hidden; }
+
+  /* ── MODAIS ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.58);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(620px, 100%);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+  }
+  .modal-head {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .modal-head.modal-head--atencao {
+    background: #8a4510;
+    color: #fff;
+  }
+  .modal-body {
+    padding: 18px;
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-body strong { color: var(--text); }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px 18px;
+  }
+  .btn-modal {
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-modal.cancel { background: #fff; color: var(--text-mid); }
+  .btn-modal.cancel:hover { border-color: var(--text-mid); color: var(--text); }
+  .btn-modal.confirm {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-modal.confirm:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
+    .container { padding: 24px 14px 64px; }
+    .section-body { padding: 22px 18px 16px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .col-span-2 { grid-column: auto; }
+    .form-actions-bottom { justify-content: stretch; }
+    .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
+    #toast { left: 16px; right: 16px; bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <button type="button" class="header-menu-btn" id="headerMenuBtn" aria-expanded="false" aria-controls="headerNavPanel" aria-label="Abrir menu">
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+  </button>
+  <div class="page-header-main">
+    <div class="brand">
+      <span class="brand-text">Carta Conta Salário – Bradesco</span>
+    </div>
+  </div>
+</header>
+
+<div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
+<nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-labelledby="headerNavTitle" aria-hidden="true">
+  <div class="header-nav-panel-inner">
+    <div class="header-nav-panel-head">
+      <h2 class="header-nav-panel-title" id="headerNavTitle">Carta Conta Salário</h2>
+      <button type="button" class="header-nav-close-btn" id="headerNavCloseBtn" aria-label="Fechar menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <ul class="header-nav-links" role="list">
+      <li>
+        <a href="index.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Início
+        </a>
+      </li>
+      <li>
+        <a href="ficha_cadastral.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Ficha Cadastral
+        </a>
+      </li>
+      <li>
+        <a href="assistencia_medica.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 2.3A4 4 0 0 0 2 6v4a4 4 0 0 0 4 4h1v3a3 3 0 0 0 3 3"/><path d="M8 19v3"/><path d="M16 19v3"/><path d="M12 18v3"/><circle cx="16" cy="6" r="3"/><path d="M9 12a3 3 0 0 0 3-3V6"/></svg>
+          Assistência Médica
+        </a>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-link--destructive rascunho-descartar" id="btnDescartarRascunho">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          Descartar rascunho
+        </button>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-download" onclick="baixarModeloCartaVazia()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Baixar modelo da Carta em branco (PDF)
+        </button>
+      </li>
+    </ul>
+    <ul class="header-nav-links header-nav-links--legal" role="list" aria-label="Privacidade e documentação">
+      <li>
+        <a href="/politica-de-privacidade" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Política de Privacidade
+        </a>
+      </li>
+      <li>
+        <a href="/termos-de-uso" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Termos de Uso
+        </a>
+      </li>
+      <li>
+        <a href="/privacidade-e-seguranca" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Privacidade e segurança
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- DADOS DO FUNCIONÁRIO -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados do Funcionário</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field col-span-2">
+          <label>Nome Completo <span class="req">*</span></label>
+          <input type="text" id="nomeCompleto" placeholder="Conforme documento de identidade">
+        </div>
+        <div class="field">
+          <label>R.G <span class="req">*</span></label>
+          <input type="text" id="rg" placeholder="Número do R.G" maxlength="20" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>CPF <span class="req">*</span></label>
+          <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
+        </div>
+        <div class="field col-span-2">
+          <label>Endereço <span class="req">*</span></label>
+          <input type="text" id="endereco" placeholder="Rua / Av., número, complemento e bairro">
+        </div>
+        <div class="field col-span-2">
+          <label>Município <span class="req">*</span></label>
+          <input type="text" id="municipio" placeholder="Município">
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressFuncionario"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DADOS DA VAGA -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados da Vaga</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Cargo <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="cargo">
+              <option value="">SELECIONE...</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Salário <span class="req">*</span></label>
+          <input type="text" id="salario" placeholder="R$ 0,00" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="col-span-2 data-info">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          <span>A <strong>data da carta</strong> é preenchida automaticamente com o dia em que o PDF for gerado: <strong id="dataCartaPreview"></strong>.</span>
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressVaga"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aviso-box" style="margin:20px 0 14px">
+    <strong>ATENÇÃO:</strong> Salve e baixe o arquivo PDF gerado, clicando no botão abaixo, e apresente a carta impressa na agência do
+    <strong>Banco Bradesco</strong> para abertura da Conta Salário. A agência preencherá os dados da conta no rodapé e devolverá a carta para retorno ao RH.
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn-export" type="button" onclick="gerarPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Salvar e Baixar Carta preenchida (PDF)
+    </button>
+  </div>
+
+</div>
+
+<div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
+
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitle" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
+    <div class="modal-body">
+      O preenchimento pode ser guardado como rascunho neste aparelho (navegador) para você retomar depois.<br>
+      Após gerar o PDF, os dados continuam no formulário e no rascunho local; para apagá-los de vez, use <strong>Descartar rascunho</strong> no menu.<br>
+      A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
+      <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
+      Deseja continuar com a geração do PDF?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="lgpdCancelarBtn" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="lgpdContinuarBtn" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-labelledby="modalDescartarTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalDescartarTitulo">Descartar rascunho</div>
+    <div class="modal-body">
+      O rascunho guardado neste navegador e os dados atualmente no formulário serão apagados. Esta ação não pode ser desfeita.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDescartarRascunhoCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalDescartarRascunhoConfirmar" class="btn-modal confirm">Sim, descartar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+const TEMPLATE_PATH = "./Carta Abertura de Conra Salario.pdf";
+const CAMPOS_JSON_PATH = "./carta_bradesco_campos.json";
+const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
+const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
+const PDF_FONT_TEXTO = 9;
+/** Texto desenhado ligeiramente acima da linha de sublinhados (y = baseline no JSON). */
+const OFFSET_ACIMA_LINHA_PT = 1.5;
+
+/** Lista suspensa de cargos — substituir/ampliar conforme definição do RH. */
+const CARGOS = [
+  "OPERADOR(A) DE ATENDIMENTO",
+  "REPRESENTANTE DE ATENDIMENTO",
+  "AGENTE DE COBRANÇA",
+  "ANALISTA DE BACKOFFICE",
+  "SUPERVISOR(A) DE OPERAÇÕES"
+];
+
+const LS_NS = "atento.forms:v1:";
+const RASCUNHO_STORAGE_KEY = LS_NS + "carta_bradesco_rascunho_v1";
+
+let templateBytes = null;
+let camposSchema = null;
+
+/** Evita falhas silenciosas (modo privado, quota, SecurityError). */
+const appStorage = {
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.warn("[atento.forms] localStorage.getItem:", key, e);
+      return null;
+    }
+  },
+  setItem(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      console.warn("[atento.forms] localStorage.setItem:", key, e);
+      return false;
+    }
+  },
+  removeItem(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      console.warn("[atento.forms] localStorage.removeItem:", key, e);
+    }
+  }
+};
+
+function setModalOverlayVisible(overlayEl, visible) {
+  if (!overlayEl) return;
+  if (visible) {
+    overlayEl.removeAttribute("hidden");
+    overlayEl.classList.add("show");
+    overlayEl.setAttribute("aria-hidden", "false");
+    overlayEl.setAttribute("aria-modal", "true");
+  } else {
+    overlayEl.setAttribute("hidden", "");
+    overlayEl.classList.remove("show");
+    overlayEl.setAttribute("aria-hidden", "true");
+    overlayEl.removeAttribute("aria-modal");
+  }
+}
+function sincronizarBodyModalOpen() {
+  if (document.querySelector(".modal-overlay.show")) document.body.classList.add("modal-open");
+  else document.body.classList.remove("modal-open");
+}
+
+/** Primeiro token do nome; seguro para nome de arquivo. */
+function primeiroNomeUsuarioParaArquivo(nomeCompleto) {
+  const token = String(nomeCompleto || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)[0];
+  const raw = token || "candidato";
+  return raw.replace(/[\\/:*?"<>|]/g, "").trim() || "candidato";
+}
+function sanitizarSegmentoNomeArquivo(s) {
+  return String(s || "")
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// ── MASKS ──
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g, "").slice(0, 11);
+  if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+  el.value = v;
+}
+function posicionarCursorNoFim(el) {
+  requestAnimationFrame(() => {
+    const fim = el.value.length;
+    try { el.setSelectionRange(fim, fim); } catch (_e) { /* inputs não-texto */ }
+  });
+}
+function maskMoeda(el) {
+  const digitos = el.value.replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  const valor = Number.isNaN(cents) ? 0 : cents / 100;
+  el.value = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(valor);
+  posicionarCursorNoFim(el);
+}
+/** Valor numérico formatado sem "R$" (o símbolo já está impresso no template). */
+function moedaParaPdfSemSimbolo(valor) {
+  const digitos = String(valor || "").replace(/\D/g, "");
+  const cents = Number.parseInt(digitos || "0", 10);
+  if (Number.isNaN(cents) || cents === 0) return "";
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(cents / 100);
+}
+function salarioEstaVazio(valor) {
+  return moedaParaPdfSemSimbolo(valor) === "";
+}
+function aplicarMaiusculas(el) {
+  const original = el.value;
+  const upper = original.toLocaleUpperCase("pt-BR");
+  if (original !== upper) {
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    el.value = upper;
+    if (start !== null && end !== null) {
+      el.setSelectionRange(start, end);
+    }
+  }
+}
+
+// ── GET VALUE / VALIDAÇÃO ──
+function v(id) { return (document.getElementById(id)?.value || "").trim(); }
+function marcarCampoInvalido(id, invalido) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle("invalid", !!invalido);
+}
+function validarCamposObrigatorios() {
+  const obrigatorios = [
+    { id: "nomeCompleto", nome: "Nome Completo" },
+    { id: "rg", nome: "R.G" },
+    { id: "cpf", nome: "CPF" },
+    { id: "endereco", nome: "Endereço" },
+    { id: "municipio", nome: "Município" },
+    { id: "cargo", nome: "Cargo" }
+  ];
+  const faltantes = [];
+  obrigatorios.forEach(({ id, nome }) => {
+    const vazio = v(id).length === 0;
+    marcarCampoInvalido(id, vazio);
+    if (vazio) faltantes.push({ id, nome });
+  });
+
+  const salarioVazio = salarioEstaVazio(v("salario"));
+  marcarCampoInvalido("salario", salarioVazio);
+  if (salarioVazio) faltantes.push({ id: "salario", nome: "Salário" });
+
+  if (faltantes.length) {
+    showToast(`Preencha: ${faltantes.map((f) => f.nome).join(", ")}.`, false);
+    document.getElementById(faltantes[0].id)?.focus();
+    return false;
+  }
+  return true;
+}
+
+// ── TOAST ──
+function showToast(msg, ok = true) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.querySelector(".toast-dot").style.background = ok ? "#4caf7d" : "#e05c3a";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+// ── MODAL LGPD ──
+let lgpdResolver = null;
+function abrirModalLGPD() {
+  const modal = document.getElementById("lgpdModal");
+  if (!modal) return Promise.resolve(false);
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpen();
+  setTimeout(() => document.getElementById("lgpdContinuarBtn")?.focus(), 0);
+  return new Promise((resolve) => {
+    lgpdResolver = resolve;
+  });
+}
+function fecharModalLGPD(decisao) {
+  const modal = document.getElementById("lgpdModal");
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpen();
+  if (lgpdResolver) {
+    const resolve = lgpdResolver;
+    lgpdResolver = null;
+    resolve(decisao);
+  }
+}
+async function confirmarPoliticaLGPD() {
+  return abrirModalLGPD();
+}
+
+// ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
+const RASCUNHO_IDS = ["nomeCompleto", "rg", "cpf", "endereco", "municipio", "cargo", "salario"];
+let salvarRascunhoTimer = null;
+function salvarRascunho() {
+  const obj = {};
+  RASCUNHO_IDS.forEach((id) => { obj[id] = v(id); });
+  appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(obj));
+}
+function agendarSalvarRascunho() {
+  clearTimeout(salvarRascunhoTimer);
+  salvarRascunhoTimer = setTimeout(salvarRascunho, 350);
+}
+function restaurarRascunho() {
+  const raw = appStorage.getItem(RASCUNHO_STORAGE_KEY);
+  if (!raw) return;
+  let obj = null;
+  try { obj = JSON.parse(raw); } catch (_e) { return; }
+  if (!obj || typeof obj !== "object") return;
+  RASCUNHO_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && typeof obj[id] === "string") el.value = obj[id];
+  });
+  const salarioEl = document.getElementById("salario");
+  if (salarioEl && salarioEl.value) maskMoeda(salarioEl);
+}
+function limparDadosFormulario() {
+  RASCUNHO_IDS.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = "";
+    el.classList.remove("invalid");
+  });
+  updateProgress();
+}
+function descartarRascunhoEFormulario() {
+  appStorage.removeItem(RASCUNHO_STORAGE_KEY);
+  limparDadosFormulario();
+  showToast("Rascunho descartado.", true);
+}
+function abrirModalConfirmarDescartarRascunho() {
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpen();
+  setTimeout(() => document.getElementById("btnModalDescartarRascunhoConfirmar")?.focus(), 0);
+}
+function fecharModalConfirmarDescartarRascunho() {
+  const el = document.getElementById("modalConfirmarDescartarRascunho");
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpen();
+}
+
+// ── PROGRESSO ──
+function updateProgress() {
+  const setProgress = (id, checks) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const total = checks.length;
+    const ok = checks.filter((fn) => fn()).length;
+    el.style.width = `${total ? Math.round((ok / total) * 100) : 0}%`;
+  };
+  setProgress("progressFuncionario", [
+    () => v("nomeCompleto").length > 0,
+    () => v("rg").length > 0,
+    () => v("cpf").length > 0,
+    () => v("endereco").length > 0,
+    () => v("municipio").length > 0
+  ]);
+  setProgress("progressVaga", [
+    () => v("cargo").length > 0,
+    () => !salarioEstaVazio(v("salario"))
+  ]);
+}
+
+// ── DATA DA CARTA ──
+const MESES_PT = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+];
+function dataCartaAtual() {
+  const agora = new Date();
+  return {
+    dia: String(agora.getDate()),
+    mes: MESES_PT[agora.getMonth()],
+    ano: String(agora.getFullYear())
+  };
+}
+
+// ── PDF ──
+function clonarArrayBuffer(buffer) {
+  return buffer.slice(0);
+}
+function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
+  let t = String(texto || "").trim();
+  if (!t) return "";
+  if (font.widthOfTextAtSize(t, tamanhoFonte) <= larguraMax) return t;
+  const elipsis = "...";
+  let baixo = 0;
+  let alto = t.length;
+  while (baixo < alto) {
+    const meio = Math.ceil((baixo + alto) / 2);
+    const teste = t.slice(0, meio) + elipsis;
+    if (font.widthOfTextAtSize(teste, tamanhoFonte) <= larguraMax) baixo = meio;
+    else alto = meio - 1;
+  }
+  return t.slice(0, alto) + elipsis;
+}
+/** Coordenadas em pt, origem canto inferior esquerdo; y do JSON = baseline da linha de sublinhados. */
+function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
+  if (!coord) return false;
+  const w = Number(coord.largura ?? coord.width) || 200;
+  const size = options.size ?? PDF_FONT_TEXTO;
+  const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
+  if (!str) return false;
+  page.drawText(str, {
+    x: (Number(coord.x) || 0) + (options.offsetX ?? 0.5),
+    y: (Number(coord.y) || 0) + OFFSET_ACIMA_LINHA_PT + (options.offsetY ?? 0),
+    size,
+    font,
+    maxWidth: w - 2
+  });
+  return true;
+}
+
+async function carregarCamposSchema() {
+  if (camposSchema) return true;
+  try {
+    const res = await fetch(CAMPOS_JSON_FETCH_PATH, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    camposSchema = await res.json();
+    if (!camposSchema?.campos) throw new Error("Estrutura inválida");
+    return true;
+  } catch (e) {
+    console.error(e);
+    showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
+    return false;
+  }
+}
+async function carregarTemplateInicial() {
+  try {
+    const res = await fetch(TEMPLATE_FETCH_PATH);
+    if (!res.ok) throw new Error("Template não encontrado");
+    const fetchedBytes = await res.arrayBuffer();
+    templateBytes = clonarArrayBuffer(fetchedBytes);
+  } catch (_error) {
+    showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
+  }
+}
+
+async function gerarPDF() {
+  try {
+    if (!validarCamposObrigatorios()) return;
+    if (!(await confirmarPoliticaLGPD())) return;
+    if (!(await carregarCamposSchema())) return;
+    if (!templateBytes) await carregarTemplateInicial();
+    if (!templateBytes) return;
+
+    const data = {
+      nomeCompleto: v("nomeCompleto"),
+      rg: v("rg"),
+      cpf: v("cpf"),
+      endereco: v("endereco"),
+      municipio: v("municipio"),
+      cargo: v("cargo"),
+      salario: moedaParaPdfSemSimbolo(v("salario"))
+    };
+    const dataCarta = dataCartaAtual();
+
+    const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
+    const page = pdfDoc.getPages()[0];
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const C = camposSchema.campos;
+
+    const dt = C.data.campos;
+    escreverTextoCampoCoord(page, font, dt.dia.coordenadas, dataCarta.dia);
+    escreverTextoCampoCoord(page, font, dt.mes.coordenadas, dataCarta.mes);
+
+    const fu = C.funcionario.campos;
+    escreverTextoCampoCoord(page, font, fu.nome.coordenadas, data.nomeCompleto);
+    escreverTextoCampoCoord(page, font, fu.rg.coordenadas, data.rg);
+    escreverTextoCampoCoord(page, font, fu.cpf.coordenadas, data.cpf);
+    escreverTextoCampoCoord(page, font, fu.endereco.coordenadas, data.endereco);
+    escreverTextoCampoCoord(page, font, fu.municipio.coordenadas, data.municipio);
+
+    const vg = C.vaga.campos;
+    escreverTextoCampoCoord(page, font, vg.cargo.coordenadas, data.cargo);
+    escreverTextoCampoCoord(page, font, vg.salario.coordenadas, data.salario);
+
+    const em = C.empresa.campos;
+    escreverTextoCampoCoord(
+      page, font,
+      em.nome_responsavel.coordenadas,
+      em.nome_responsavel.valor_fixo || "Ana Maria Pinto da Silva"
+    );
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Carta Abertura de Conta Salário");
+    const primeiroNome = primeiroNomeUsuarioParaArquivo(data.nomeCompleto);
+    link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("PDF gerado com sucesso!", true);
+  } catch (e) {
+    console.error(e);
+    showToast("Erro ao gerar o PDF. Tente novamente.", false);
+  }
+}
+
+async function baixarModeloCartaVazia() {
+  try {
+    const resp = await fetch(TEMPLATE_FETCH_PATH, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`Falha ao baixar carta (${resp.status})`);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Carta_Abertura_de_Conta_Salario.pdf";
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("Download da carta em branco iniciado.");
+  } catch (e) {
+    console.error(e);
+    showToast("Não foi possível baixar a carta em branco.", false);
+  }
+}
+
+// ── INIT ──
+(function initCargos() {
+  const sel = document.getElementById("cargo");
+  if (!sel) return;
+  CARGOS.forEach((cargo) => {
+    const opt = document.createElement("option");
+    opt.value = cargo;
+    opt.textContent = cargo;
+    sel.appendChild(opt);
+  });
+})();
+
+(function initDataPreview() {
+  const el = document.getElementById("dataCartaPreview");
+  if (!el) return;
+  const d = dataCartaAtual();
+  el.textContent = `${d.dia} de ${d.mes} de ${d.ano}`;
+})();
+
+document.querySelectorAll('input[type="text"]').forEach((el) => {
+  if (["salario"].includes(el.id)) return;
+  el.addEventListener("input", () => aplicarMaiusculas(el));
+});
+(function initSalarioMask() {
+  const el = document.getElementById("salario");
+  if (!el) return;
+  el.addEventListener("input", () => maskMoeda(el));
+  el.addEventListener("focus", () => { if (!el.value) maskMoeda(el); });
+})();
+RASCUNHO_IDS.forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const evento = el.tagName === "SELECT" ? "change" : "input";
+  el.addEventListener(evento, () => {
+    el.classList.remove("invalid");
+    agendarSalvarRascunho();
+    updateProgress();
+  });
+});
+
+document.getElementById("lgpdCancelarBtn")?.addEventListener("click", () => fecharModalLGPD(false));
+document.getElementById("lgpdContinuarBtn")?.addEventListener("click", () => fecharModalLGPD(true));
+document.getElementById("lgpdModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "lgpdModal") fecharModalLGPD(false);
+});
+document.getElementById("btnDescartarRascunho")?.addEventListener("click", abrirModalConfirmarDescartarRascunho);
+document.getElementById("btnModalDescartarRascunhoCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunho);
+document.getElementById("btnModalDescartarRascunhoConfirmar")?.addEventListener("click", () => {
+  fecharModalConfirmarDescartarRascunho();
+  descartarRascunhoEFormulario();
+});
+document.getElementById("modalConfirmarDescartarRascunho")?.addEventListener("click", (e) => {
+  if (e.target.id === "modalConfirmarDescartarRascunho") fecharModalConfirmarDescartarRascunho();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (document.getElementById("lgpdModal")?.classList.contains("show")) {
+    fecharModalLGPD(false);
+    return;
+  }
+  if (document.getElementById("modalConfirmarDescartarRascunho")?.classList.contains("show")) {
+    fecharModalConfirmarDescartarRascunho();
+  }
+});
+
+// ── MENU LATERAL ──
+(function initHeaderNav() {
+  const btn = document.getElementById("headerMenuBtn");
+  const backdrop = document.getElementById("headerNavBackdrop");
+  const panel = document.getElementById("headerNavPanel");
+  if (!btn || !backdrop || !panel) return;
+  const body = document.body;
+
+  function setOpen(open) {
+    if (open) {
+      body.classList.add("header-nav-open");
+      btn.setAttribute("aria-expanded", "true");
+      backdrop.setAttribute("aria-hidden", "false");
+      panel.setAttribute("aria-hidden", "false");
+      body.style.overflow = "hidden";
+    } else {
+      body.classList.remove("header-nav-open");
+      btn.setAttribute("aria-expanded", "false");
+      backdrop.setAttribute("aria-hidden", "true");
+      panel.setAttribute("aria-hidden", "true");
+      body.style.overflow = "";
+    }
+  }
+  btn.addEventListener("click", () => setOpen(!body.classList.contains("header-nav-open")));
+  backdrop.addEventListener("click", () => setOpen(false));
+  document.getElementById("headerNavCloseBtn")?.addEventListener("click", () => setOpen(false));
+  panel.querySelectorAll("a.header-nav-link, button.header-nav-link").forEach((el) => {
+    el.addEventListener("click", () => setOpen(false));
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && body.classList.contains("header-nav-open")) setOpen(false);
+  });
+})();
+
+restaurarRascunho();
+updateProgress();
+carregarTemplateInicial();
+</script>
+</body>
+</html>

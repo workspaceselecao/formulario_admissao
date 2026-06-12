@@ -1,0 +1,111 @@
+{
+  "documento": {
+    "id": "carta_bradesco",
+    "titulo": "Carta de Abertura de Conta Salário – Bradesco",
+    "versao": "1",
+    "paginas": 1
+  },
+  "campos": {
+    "data": {
+      "descricao": "Linha de data no topo: Salvador - BA, ___ de ___ de 2026 (cidade e ano já impressos no template)",
+      "campos": {
+        "dia": {
+          "label": "Dia",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 122, "y": 689.5, "largura": 56, "altura": 11 },
+          "obrigatorio": true,
+          "observacao": "Preenchido automaticamente com a data atual"
+        },
+        "mes": {
+          "label": "Mês (por extenso)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 202, "y": 689.5, "largura": 89, "altura": 11 },
+          "obrigatorio": true,
+          "observacao": "Preenchido automaticamente com a data atual"
+        }
+      }
+    },
+    "funcionario": {
+      "descricao": "Dados do funcionário apresentados ao banco",
+      "campos": {
+        "nome": {
+          "label": "Nome completo",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 213, "y": 563.3, "largura": 224, "altura": 11 },
+          "obrigatorio": true
+        },
+        "rg": {
+          "label": "R.G",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 57, "y": 549.9, "largura": 121, "altura": 11 },
+          "obrigatorio": true
+        },
+        "cpf": {
+          "label": "CPF",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 349, "y": 549.9, "largura": 110, "altura": 11 },
+          "obrigatorio": true,
+          "mascara": "999.999.999-99"
+        },
+        "endereco": {
+          "label": "Endereço",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 57, "y": 536.5, "largura": 208, "altura": 11 },
+          "obrigatorio": true
+        },
+        "municipio": {
+          "label": "Município",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 333, "y": 536.5, "largura": 89, "altura": 11 },
+          "obrigatorio": true
+        }
+      }
+    },
+    "vaga": {
+      "descricao": "Dados da vaga",
+      "campos": {
+        "cargo": {
+          "label": "Cargo",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 95, "y": 408.9, "largura": 219, "altura": 11 },
+          "obrigatorio": true,
+          "observacao": "Selecionado na lista suspensa do formulário"
+        },
+        "salario": {
+          "label": "Salário (R$)",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 112, "y": 382.0, "largura": 75, "altura": 11 },
+          "obrigatorio": true,
+          "observacao": "Escrito sem o símbolo R$ (já impresso no template)"
+        }
+      }
+    },
+    "empresa": {
+      "descricao": "Dados fixos da empresa escritos pelo gerador",
+      "campos": {
+        "nome_responsavel": {
+          "label": "Nome do responsável na empresa",
+          "tipo": "texto",
+          "pagina": 1,
+          "coordenadas": { "x": 214, "y": 259.7, "largura": 209, "altura": 11 },
+          "obrigatorio": true,
+          "valor_fixo": "Ana Maria Pinto da Silva"
+        }
+      }
+    }
+  },
+  "metadados": {
+    "sistema_coordenadas": "PDF points (pt)",
+    "origem": "canto_inferior_esquerdo",
+    "nota": "Template Carta Abertura de Conra Salario.pdf (612 x 792 pt). O y de cada campo é a baseline da linha de sublinhados; o texto é desenhado ligeiramente acima (offset no gerador). Telefone de contato, cidade/UF e ano já vêm impressos no template."
+  }
+}

@@ -902,6 +902,12 @@
         </a>
       </li>
       <li>
+        <a href="carta_bradesco.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Carta Conta Salário (Bradesco)
+        </a>
+      </li>
+      <li>
         <button type="button" class="header-nav-link header-nav-link--destructive rascunho-descartar" id="btnDescartarRascunho">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
           Descartar rascunho
@@ -1086,7 +1092,7 @@
               </div>
               <div id="cartaBradescoField" hidden>
                 <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
-                  Carta de Abertura de Conta
+                  Preencher Carta de Abertura de Conta
                 </button>
               </div>
             </div>
@@ -1315,7 +1321,6 @@
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 const TEMPLATE_PATH = "./F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf";
-const CARTA_ABERTURA_CONTA_PATH = "./Carta Abertura de Conra Salario.pdf";
 const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
@@ -3143,27 +3148,9 @@ async function baixarFichaVazia(){
     showToast("Não foi possível baixar a ficha vazia.", false);
   }
 }
-async function baixarCartaAberturaConta(){
-  try {
-    const caminho = encodeURI(CARTA_ABERTURA_CONTA_PATH);
-    const resp = await fetch(caminho, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`Falha ao baixar carta de abertura (${resp.status})`);
-    const bytes = await resp.arrayBuffer();
-
-    const blob = new Blob([bytes], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Carta_Abertura_de_Conta_Salario.pdf";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-    showToast("Download da carta de abertura iniciado.");
-  } catch (error) {
-    console.error(error);
-    showToast("Não foi possível baixar a carta de abertura.", false);
-  }
+/** Abre o formulário dedicado que preenche e gera a carta (carta_bradesco.html). */
+function baixarCartaAberturaConta(){
+  window.location.assign("carta_bradesco.html");
 }
 
 initAssinaturaCanvas();
