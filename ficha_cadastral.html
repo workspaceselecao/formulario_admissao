@@ -991,9 +991,9 @@
               <label class="radio-label"><input type="radio" name="primeiroEmprego" value="nao" onchange="togglePIS(this)"> Não</label>
             </div>
           </div>
-          <div class="field field--pis" id="pisField" style="display:none">
+          <div class="field field--pis" id="pisField">
             <label>PIS <span class="req">*</span></label>
-            <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false">
+            <input type="text" id="pis" placeholder="000.00000.00-0" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" required>
           </div>
           <div class="field field--deficiencia">
             <label>Possui Deficiência? <span class="req">*</span></label>
@@ -1953,14 +1953,11 @@ function desenharMarcaDaguaNaoOptanteValeTransporte(page, font, camposRaiz) {
 
 // ── TOGGLE ──
 function togglePIS(el){
-  const precisaPis = el.value === 'nao';
+  // PIS é sempre visível e obrigatório, tanto para SIM quanto para NÃO.
   const pisField = document.getElementById('pisField');
   const pisEl = document.getElementById('pis');
-  if (pisField) pisField.style.display = precisaPis ? "" : "none";
-  if (pisEl) {
-    pisEl.required = precisaPis;
-    if (!precisaPis) pisEl.classList.remove('invalid');
-  }
+  if (pisField) pisField.style.display = "";
+  if (pisEl) pisEl.required = true;
 }
 function toggleDef(el){
   document.getElementById('defGroup').style.display = el.value==='sim'?'block':'none';
@@ -2453,11 +2450,7 @@ function updateProgress(){
     () => hasValue('email'),
     () => hasValue('estadoCivil'),
     () => !!radio('primeiroEmprego'),
-    () => {
-      const pe = radio('primeiroEmprego');
-      if (!pe) return false;
-      return pe === 'nao' ? hasValue('pis') : true;
-    },
+    () => hasValue('pis'),
     () => !!radio('deficiencia')
   ]);
 
@@ -2625,14 +2618,9 @@ function validarCamposObrigatorios(){
     }
   });
 
-  const precisaPis = radio('primeiroEmprego') === 'nao';
   const pisEl = document.getElementById('pis');
-  if (pisEl) pisEl.required = precisaPis;
-  if (precisaPis) {
-    validarCampo({ id: 'pis', nome: 'PIS' });
-  } else {
-    marcarCampoInvalido('pis', false);
-  }
+  if (pisEl) pisEl.required = true;
+  validarCampo({ id: 'pis', nome: 'PIS' });
 
   const idsBanco = idsAgenciaContaAtivos(radio('tipoConta'));
   if (idsBanco) {
@@ -2719,10 +2707,8 @@ function limparDadosFormulario(){
     el.classList.remove('active');
   });
 
-  const pisField = document.getElementById('pisField');
   const defGroup = document.getElementById('defGroup');
   const cartaBradescoField = document.getElementById('cartaBradescoField');
-  if (pisField) pisField.style.display = 'none';
   if (defGroup) defGroup.style.display = 'none';
   if (cartaBradescoField) cartaBradescoField.setAttribute('hidden', '');
   definirVisibilidadeDetalheBanco(document.getElementById('bradescoDetalhes'), false, null);
@@ -2734,10 +2720,7 @@ function limparDadosFormulario(){
     el.classList.remove('invalid');
   });
   const pisEl = document.getElementById('pis');
-  if (pisEl) {
-    pisEl.required = false;
-    pisEl.classList.remove('invalid');
-  }
+  if (pisEl) pisEl.classList.remove('invalid');
   document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
     el.classList.remove('invalid');
   });
@@ -2993,10 +2976,8 @@ async function gerarPDF(){
 
     const pe = dp.primeiro_emprego;
     if (primeiroEmpregoSelecionado === "sim") marcarRadioJsonOpcao(page, font, pe, "sim");
-    if (primeiroEmpregoSelecionado === "nao") {
-      marcarRadioJsonOpcao(page, font, pe, "nao");
-      escreverTextoCampoCoord(page, font, dp.informarpis.coordenadas, data.pis);
-    }
+    if (primeiroEmpregoSelecionado === "nao") marcarRadioJsonOpcao(page, font, pe, "nao");
+    escreverTextoCampoCoord(page, font, dp.informarpis.coordenadas, data.pis);
 
     const en = C.endereco.campos;
     escreverTextoCampoCoord(page, font, en.rua.coordenadas, data.endereco);
