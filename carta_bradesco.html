@@ -111,6 +111,22 @@
   .grid-2 { grid-template-columns: 1fr 1fr; }
   .col-span-2 { grid-column: span 2; }
 
+  /* Endereço: CEP com busca automática + campos detalhados */
+  .address-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .address-cep { grid-column: span 2; }
+  .address-endereco { grid-column: span 5; }
+  .address-numero { grid-column: span 2; }
+  .address-complemento { grid-column: span 3; }
+  .address-bairro { grid-column: span 6; }
+  .address-municipio { grid-column: span 6; }
+
+  /* Cargo largo + Salário compacto (1/4 da linha) */
+  .vaga-grid { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); }
+
   /* ── FIELDS ── */
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label {
@@ -379,7 +395,10 @@
     .container { padding: 24px 14px 64px; }
     .section-body { padding: 22px 18px 16px; }
     .grid-2 { grid-template-columns: 1fr; }
+    .vaga-grid { grid-template-columns: 1fr; }
     .col-span-2 { grid-column: auto; }
+    .address-grid { grid-template-columns: 1fr; }
+    .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-municipio { grid-column: span 1; }
     .form-actions-bottom { justify-content: stretch; }
     .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
     #toast { left: 16px; right: 16px; bottom: 16px; }
@@ -485,13 +504,31 @@
           <label>CPF <span class="req">*</span></label>
           <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskCPF(this)">
         </div>
-        <div class="field col-span-2">
-          <label>Endereço <span class="req">*</span></label>
-          <input type="text" id="endereco" placeholder="Rua / Av., número, complemento e bairro">
-        </div>
-        <div class="field col-span-2">
-          <label>Município <span class="req">*</span></label>
-          <input type="text" id="municipio" placeholder="Município">
+        <div class="col-span-2 address-grid">
+          <div class="field address-cep">
+            <label>CEP</label>
+            <input type="text" id="cep" placeholder="00000-000" maxlength="9" inputmode="numeric" autocomplete="postal-code" spellcheck="false" oninput="onCepInput(this)" onblur="buscarCepEPreencher(true)">
+          </div>
+          <div class="field address-endereco">
+            <label>Endereço <span class="req">*</span></label>
+            <input type="text" id="endereco" placeholder="Rua / Av.">
+          </div>
+          <div class="field address-numero">
+            <label>Número</label>
+            <input type="text" id="endNum" placeholder="Nº" inputmode="numeric" autocomplete="off">
+          </div>
+          <div class="field address-complemento">
+            <label>Complemento</label>
+            <input type="text" id="complemento" placeholder="Apto, Bloco...">
+          </div>
+          <div class="field address-bairro">
+            <label>Bairro</label>
+            <input type="text" id="bairro" placeholder="Bairro">
+          </div>
+          <div class="field address-municipio">
+            <label>Município <span class="req">*</span></label>
+            <input type="text" id="municipio" placeholder="Cidade - UF">
+          </div>
         </div>
       </div>
       <div class="section-progress">
@@ -504,7 +541,7 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados da Vaga</div>
     <div class="section-body">
-      <div class="grid grid-2">
+      <div class="grid vaga-grid">
         <div class="field">
           <label>Cargo <span class="req">*</span></label>
           <div class="select-wrap">
@@ -697,6 +734,115 @@ function maskCPF(el) {
   else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
   el.value = v;
 }
+function maskCep(el) {
+  let v = el.value.replace(/\D/g, "").slice(0, 8);
+  if (v.length > 5) v = v.replace(/(\d{5})(\d{0,3})/, "$1-$2");
+  el.value = v;
+}
+
+// ── BUSCA AUTOMÁTICA DE ENDEREÇO POR CEP (ViaCEP com fallback BrasilAPI) ──
+const cepCache = new Map();
+let cepBuscaEmAndamento = false;
+let ultimoCepBuscado = "";
+
+function normalizarTextoEndereco(valor) {
+  return String(valor || "").trim().toLocaleUpperCase("pt-BR");
+}
+function preencherEnderecoPorCep(dadosCep) {
+  const enderecoEl = document.getElementById("endereco");
+  const bairroEl = document.getElementById("bairro");
+  const municipioEl = document.getElementById("municipio");
+  if (enderecoEl && dadosCep.logradouro) enderecoEl.value = normalizarTextoEndereco(dadosCep.logradouro);
+  if (bairroEl && dadosCep.bairro) bairroEl.value = normalizarTextoEndereco(dadosCep.bairro);
+  if (municipioEl) {
+    const c = String(dadosCep.cidade || "").trim();
+    const u = String(dadosCep.uf || "").trim();
+    if (c && u) municipioEl.value = normalizarTextoEndereco(`${c} - ${u}`);
+    else if (c) municipioEl.value = normalizarTextoEndereco(c);
+  }
+  ["endereco", "bairro", "municipio"].forEach((id) => marcarCampoInvalido(id, false));
+}
+async function consultarCep(cep) {
+  if (cepCache.has(cep)) return cepCache.get(cep);
+
+  const viaCepResp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+  if (viaCepResp.ok) {
+    const viaCepData = await viaCepResp.json();
+    if (!viaCepData.erro) {
+      const normalizadoViaCep = {
+        logradouro: viaCepData.logradouro || "",
+        bairro: viaCepData.bairro || "",
+        cidade: viaCepData.localidade || "",
+        uf: viaCepData.uf || "",
+        fonte: "ViaCEP"
+      };
+      cepCache.set(cep, normalizadoViaCep);
+      return normalizadoViaCep;
+    }
+  }
+
+  const brasilApiResp = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+  if (brasilApiResp.ok) {
+    const brasilApiData = await brasilApiResp.json();
+    const normalizadoBrasilApi = {
+      logradouro: brasilApiData.street || "",
+      bairro: brasilApiData.neighborhood || "",
+      cidade: brasilApiData.city || "",
+      uf: brasilApiData.state || "",
+      fonte: "BrasilAPI"
+    };
+    cepCache.set(cep, normalizadoBrasilApi);
+    return normalizadoBrasilApi;
+  }
+
+  return null;
+}
+async function buscarCepEPreencher(exibirMensagemErro = false) {
+  const cepEl = document.getElementById("cep");
+  if (!cepEl) return;
+
+  const cepNumerico = cepEl.value.replace(/\D/g, "");
+  if (cepNumerico.length === 0) return;
+  if (cepNumerico.length !== 8) {
+    if (exibirMensagemErro) showToast("Informe um CEP válido com 8 dígitos.", false);
+    return;
+  }
+  if (cepBuscaEmAndamento && ultimoCepBuscado === cepNumerico) return;
+
+  try {
+    cepBuscaEmAndamento = true;
+    ultimoCepBuscado = cepNumerico;
+    const placeholderOriginal = cepEl.dataset.placeholderOriginal || cepEl.placeholder;
+    cepEl.dataset.placeholderOriginal = placeholderOriginal;
+    cepEl.placeholder = "BUSCANDO CEP...";
+
+    const dadosCep = await consultarCep(cepNumerico);
+    if (!dadosCep) {
+      showToast("CEP não encontrado.", false);
+      return;
+    }
+
+    preencherEnderecoPorCep(dadosCep);
+    agendarSalvarRascunho();
+    updateProgress();
+    showToast("Endereço preenchido a partir do CEP.", true);
+  } catch (error) {
+    console.error("Falha ao buscar CEP:", error);
+    if (exibirMensagemErro) showToast("Não foi possível consultar o CEP agora.", false);
+  } finally {
+    cepBuscaEmAndamento = false;
+    const placeholderOriginal = cepEl.dataset.placeholderOriginal || "00000-000";
+    cepEl.placeholder = placeholderOriginal;
+  }
+}
+function onCepInput(el) {
+  maskCep(el);
+  const cepNumerico = el.value.replace(/\D/g, "");
+  if (cepNumerico.length === 8) {
+    buscarCepEPreencher(false);
+  }
+}
+
 function posicionarCursorNoFim(el) {
   requestAnimationFrame(() => {
     const fim = el.value.length;
@@ -812,7 +958,7 @@ async function confirmarPoliticaLGPD() {
 }
 
 // ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
-const RASCUNHO_IDS = ["nomeCompleto", "rg", "cpf", "endereco", "municipio", "cargo", "salario"];
+const RASCUNHO_IDS = ["nomeCompleto", "rg", "cpf", "cep", "endereco", "endNum", "complemento", "bairro", "municipio", "cargo", "salario"];
 let salvarRascunhoTimer = null;
 function salvarRascunho() {
   const obj = {};
@@ -835,6 +981,11 @@ function restaurarRascunho() {
   });
   const salarioEl = document.getElementById("salario");
   if (salarioEl && salarioEl.value) maskMoeda(salarioEl);
+  const cepEl = document.getElementById("cep");
+  if (cepEl && cepEl.value) {
+    maskCep(cepEl);
+    ultimoCepBuscado = cepEl.value.replace(/\D/g, "");
+  }
 }
 function limparDadosFormulario() {
   RASCUNHO_IDS.forEach((id) => {
@@ -1113,7 +1264,14 @@ async function gerarPdfCartaBytes(dados) {
     alinhamento: "centro"
   });
   gap(11);
-  par([{ t: "Nome: __________________________________________________________________ CPF: ________________________________", bold: true }], { size: 8 });
+  // Nome e CPF transcritos do formulário; o restante fica para a agência preencher.
+  const VB = (valor, lacuna) => ({ t: dados && valor ? valor : lacuna, bold: true });
+  par([
+    { t: "Nome: ", bold: true },
+    VB(dados?.nomeCompleto, "__________________________________________________________________"),
+    { t: " CPF: ", bold: true },
+    VB(dados?.cpf, "________________________________")
+  ], { size: 8 });
   gap(11);
   par([{ t: "Atendente Bradesco: __________________________AGÊNCIA: _______________CONTA SALÁRIO: ________________________", bold: true }], { size: 8 });
 
@@ -1140,7 +1298,7 @@ async function gerarPDF() {
       nomeCompleto: v("nomeCompleto"),
       rg: v("rg"),
       cpf: v("cpf"),
-      endereco: v("endereco"),
+      endereco: [v("endereco"), v("endNum"), v("complemento"), v("bairro")].filter(Boolean).join(", "),
       municipio: v("municipio"),
       cargo: v("cargo"),
       salario: moedaParaPdfSemSimbolo(v("salario"))
@@ -1189,7 +1347,7 @@ async function baixarModeloCartaVazia() {
 })();
 
 document.querySelectorAll('input[type="text"]').forEach((el) => {
-  if (["salario"].includes(el.id)) return;
+  if (["salario", "cep"].includes(el.id)) return;
   el.addEventListener("input", () => aplicarMaiusculas(el));
 });
 (function initSalarioMask() {
