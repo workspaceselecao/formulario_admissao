@@ -3148,8 +3148,21 @@ async function baixarFichaVazia(){
     showToast("Não foi possível baixar a ficha vazia.", false);
   }
 }
-/** Abre o formulário dedicado que preenche e gera a carta (carta_bradesco.html). */
+/** Abre o formulário dedicado que preenche e gera a carta (carta_bradesco.html),
+ *  copiando os dados pessoais e o endereço já preenchidos nesta ficha. */
 function baixarCartaAberturaConta(){
+  const c = (id) => (document.getElementById(id)?.value || "").trim();
+  const prefill = {
+    nomeCompleto: c("nomeCompleto"),
+    cpf: c("cpf"),
+    cep: c("cep"),
+    endereco: c("endereco"),
+    endNum: c("endNum"),
+    complemento: c("complemento"),
+    bairro: c("bairro"),
+    municipio: c("cidade")
+  };
+  appStorage.setItem(LS_NS + "carta_bradesco_prefill_v1", JSON.stringify(prefill));
   window.location.assign("carta_bradesco.html");
 }
 

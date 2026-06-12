@@ -660,6 +660,7 @@ const CARGOS = [
 
 const LS_NS = "atento.forms:v1:";
 const RASCUNHO_STORAGE_KEY = LS_NS + "carta_bradesco_rascunho_v1";
+const PREFILL_STORAGE_KEY = LS_NS + "carta_bradesco_prefill_v1";
 
 let assetsCartaBytes = null;
 
@@ -1426,7 +1427,36 @@ document.addEventListener("keydown", (e) => {
   });
 })();
 
+/** Aplica os dados pessoais e endereço copiados da Ficha Cadastral (botão "Preencher Carta..."). */
+function aplicarPrefillFichaCadastral() {
+  const raw = appStorage.getItem(PREFILL_STORAGE_KEY);
+  if (!raw) return;
+  appStorage.removeItem(PREFILL_STORAGE_KEY);
+  let obj = null;
+  try { obj = JSON.parse(raw); } catch (_e) { return; }
+  if (!obj || typeof obj !== "object") return;
+  let copiou = false;
+  RASCUNHO_IDS.forEach((id) => {
+    const valor = typeof obj[id] === "string" ? obj[id].trim() : "";
+    if (!valor) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = valor;
+    el.classList.remove("invalid");
+    copiou = true;
+  });
+  if (!copiou) return;
+  const cepEl = document.getElementById("cep");
+  if (cepEl && cepEl.value) {
+    maskCep(cepEl);
+    ultimoCepBuscado = cepEl.value.replace(/\D/g, "");
+  }
+  salvarRascunho();
+  showToast("Dados pessoais e endereço copiados da Ficha Cadastral.", true);
+}
+
 restaurarRascunho();
+aplicarPrefillFichaCadastral();
 updateProgress();
 carregarAssetsCarta();
 </script>
