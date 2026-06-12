@@ -578,13 +578,19 @@
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
-const TEMPLATE_PATH = "./Carta Abertura de Conra Salario.pdf";
-const CAMPOS_JSON_PATH = "./carta_bradesco_campos.json";
-const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
-const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
-const PDF_FONT_TEXTO = 9;
-/** Texto desenhado ligeiramente acima da linha de sublinhados (y = baseline no JSON). */
-const OFFSET_ACIMA_LINHA_PT = 1.5;
+/**
+ * A carta é gerada do zero com pdf-lib, reproduzindo o modelo timbrado
+ * "Carta Assinada e Carimbada.docx" (página Letter 612x792 pt, margens 54 pt).
+ * Os dados entram no fluxo do texto, por isso os parágrafos reajustam-se
+ * naturalmente a nomes/endereços longos (sem coordenadas fixas).
+ */
+const ASSETS_CARTA = {
+  logo: "./carta_bradesco_logo.png",
+  assinatura: "./carta_bradesco_assinatura.png",
+  carimbo: "./carta_bradesco_carimbo.png"
+};
+const PAGINA = { largura: 612, altura: 792, margemEsq: 54, margemDir: 54, topoCorpo: 71 };
+const LARGURA_TEXTO = PAGINA.largura - PAGINA.margemEsq - PAGINA.margemDir;
 
 /** Lista suspensa de cargos — conforme definição do RH. */
 const CARGOS = [
@@ -618,8 +624,7 @@ const CARGOS = [
 const LS_NS = "atento.forms:v1:";
 const RASCUNHO_STORAGE_KEY = LS_NS + "carta_bradesco_rascunho_v1";
 
-let templateBytes = null;
-let camposSchema = null;
+let assetsCartaBytes = null;
 
 /** Evita falhas silenciosas (modo privado, quota, SecurityError). */
 const appStorage = {
@@ -893,74 +898,243 @@ function dataCartaAtual() {
   };
 }
 
-// ── PDF ──
-function clonarArrayBuffer(buffer) {
-  return buffer.slice(0);
-}
-function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
-  let t = String(texto || "").trim();
-  if (!t) return "";
-  if (font.widthOfTextAtSize(t, tamanhoFonte) <= larguraMax) return t;
-  const elipsis = "...";
-  let baixo = 0;
-  let alto = t.length;
-  while (baixo < alto) {
-    const meio = Math.ceil((baixo + alto) / 2);
-    const teste = t.slice(0, meio) + elipsis;
-    if (font.widthOfTextAtSize(teste, tamanhoFonte) <= larguraMax) baixo = meio;
-    else alto = meio - 1;
-  }
-  return t.slice(0, alto) + elipsis;
-}
-/** Coordenadas em pt, origem canto inferior esquerdo; y do JSON = baseline da linha de sublinhados. */
-function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
-  if (!coord) return false;
-  const w = Number(coord.largura ?? coord.width) || 200;
-  const size = options.size ?? PDF_FONT_TEXTO;
-  const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
-  if (!str) return false;
-  page.drawText(str, {
-    x: (Number(coord.x) || 0) + (options.offsetX ?? 0.5),
-    y: (Number(coord.y) || 0) + OFFSET_ACIMA_LINHA_PT + (options.offsetY ?? 0),
-    size,
-    font,
-    maxWidth: w - 2
-  });
-  return true;
-}
-
-async function carregarCamposSchema() {
-  if (camposSchema) return true;
+// ── PDF (motor de parágrafos com reflow) ──
+async function carregarAssetsCarta() {
+  if (assetsCartaBytes) return true;
   try {
-    const res = await fetch(CAMPOS_JSON_FETCH_PATH, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    camposSchema = await res.json();
-    if (!camposSchema?.campos) throw new Error("Estrutura inválida");
+    const [logo, assinatura, carimbo] = await Promise.all(
+      [ASSETS_CARTA.logo, ASSETS_CARTA.assinatura, ASSETS_CARTA.carimbo].map(async (p) => {
+        const r = await fetch(encodeURI(p));
+        if (!r.ok) throw new Error(`Falha ao carregar ${p}`);
+        return r.arrayBuffer();
+      })
+    );
+    assetsCartaBytes = { logo, assinatura, carimbo };
     return true;
   } catch (e) {
     console.error(e);
-    showToast(`Não foi possível carregar ${CAMPOS_JSON_PATH}`, false);
+    showToast("Não foi possível carregar as imagens do timbrado.", false);
     return false;
   }
 }
-async function carregarTemplateInicial() {
-  try {
-    const res = await fetch(TEMPLATE_FETCH_PATH);
-    if (!res.ok) throw new Error("Template não encontrado");
-    const fetchedBytes = await res.arrayBuffer();
-    templateBytes = clonarArrayBuffer(fetchedBytes);
-  } catch (_error) {
-    showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
+
+/**
+ * Desenha um parágrafo com quebra de linha automática e runs com estilos mistos.
+ * runs: [{ t, bold?, u?, size? }]; opts: { yTopo, x?, largura?, size?, entrelinha?, alinhamento? }
+ * Retorna o yTopo após o parágrafo.
+ */
+function desenharParagrafo(page, fontes, runs, opts) {
+  const x = opts.x ?? PAGINA.margemEsq;
+  const largura = opts.largura ?? LARGURA_TEXTO;
+  const sizePadrao = opts.size ?? 11;
+  const entrelinha = opts.entrelinha ?? 1.18;
+  const alinhamento = opts.alinhamento ?? "esquerda";
+
+  // Tokens com indicação de espaço real antes de cada palavra; runs adjacentes
+  // sem espaço (ex.: valor + vírgula) ficam colados.
+  const tokens = [];
+  let espacoPendente = false;
+  for (const run of runs) {
+    const fonte = run.bold ? fontes.bold : fontes.normal;
+    const size = run.size ?? sizePadrao;
+    for (const parte of String(run.t ?? "").split(/(\s+)/)) {
+      if (!parte) continue;
+      if (/^\s+$/.test(parte)) {
+        espacoPendente = true;
+      } else {
+        tokens.push({ t: parte, fonte, size, u: !!run.u, w: fonte.widthOfTextAtSize(parte, size), espacoAntes: espacoPendente });
+        espacoPendente = false;
+      }
+    }
   }
+
+  const wEspacoDe = (tk) => tk.fonte.widthOfTextAtSize(" ", tk.size);
+  const linhas = [];
+  let atual = [];
+  let larguraAtual = 0;
+  for (const tk of tokens) {
+    const wEspaco = atual.length && tk.espacoAntes ? wEspacoDe(tk) : 0;
+    if (atual.length && larguraAtual + wEspaco + tk.w > largura) {
+      linhas.push({ palavras: atual, largura: larguraAtual });
+      atual = [tk];
+      larguraAtual = tk.w;
+    } else {
+      larguraAtual += wEspaco + tk.w;
+      atual.push(tk);
+    }
+  }
+  if (atual.length) linhas.push({ palavras: atual, largura: larguraAtual });
+
+  const alturaLinha = sizePadrao * entrelinha;
+  let y = opts.yTopo;
+  for (let li = 0; li < linhas.length; li++) {
+    const linha = linhas[li];
+    const gapsReais = linha.palavras.filter((p, pi) => pi > 0 && p.espacoAntes).length;
+    let extraPorGap = 0;
+    let cursorX = x;
+    if (alinhamento === "justificado" && li < linhas.length - 1 && gapsReais > 0) {
+      extraPorGap = (largura - linha.largura) / gapsReais;
+    } else if (alinhamento === "direita") {
+      cursorX = x + largura - linha.largura;
+    } else if (alinhamento === "centro") {
+      cursorX = x + (largura - linha.largura) / 2;
+    }
+    const yBase = y - sizePadrao;
+    for (let pi = 0; pi < linha.palavras.length; pi++) {
+      const p = linha.palavras[pi];
+      if (pi > 0 && p.espacoAntes) cursorX += wEspacoDe(p) + extraPorGap;
+      page.drawText(p.t, { x: cursorX, y: yBase, size: p.size, font: p.fonte });
+      if (p.u) {
+        const proxima = pi < linha.palavras.length - 1 ? linha.palavras[pi + 1] : null;
+        const fimU = proxima?.u && proxima.espacoAntes
+          ? cursorX + p.w + wEspacoDe(proxima) + extraPorGap
+          : cursorX + p.w;
+        page.drawLine({
+          start: { x: cursorX, y: yBase - 1.6 },
+          end: { x: fimU, y: yBase - 1.6 },
+          thickness: 0.7
+        });
+      }
+      cursorX += p.w;
+    }
+    y -= alturaLinha;
+  }
+  return y;
+}
+
+/**
+ * Gera a carta completa. `dados = null` produz o modelo em branco (lacunas com sublinhados).
+ * Os valores preenchidos entram a negrito dentro do fluxo do parágrafo.
+ */
+async function gerarPdfCartaBytes(dados) {
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  const page = pdfDoc.addPage([PAGINA.largura, PAGINA.altura]);
+  const fontes = {
+    normal: await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica),
+    bold: await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold)
+  };
+  const [logoImg, assinaturaImg, carimboImg] = await Promise.all([
+    pdfDoc.embedPng(assetsCartaBytes.logo),
+    pdfDoc.embedPng(assetsCartaBytes.assinatura),
+    pdfDoc.embedPng(assetsCartaBytes.carimbo)
+  ]);
+
+  // Valor preenchido (negrito) ou lacuna de sublinhados do modelo Word.
+  const V = (valor, lacuna) => (dados && valor ? { t: valor, bold: true } : { t: lacuna });
+  const dc = dados ? dataCartaAtual() : { dia: "", mes: "", ano: "" };
+
+  // Timbrado: logo no cabeçalho (esquerda) e carimbo inclinado no topo direito.
+  page.drawImage(logoImg, { x: PAGINA.margemEsq, y: PAGINA.altura - 35.4 - 31.6, width: 140.6, height: 31.6 });
+  page.drawImage(carimboImg, {
+    x: PAGINA.largura - PAGINA.margemDir - 142.4 + 6,
+    y: PAGINA.altura - PAGINA.topoCorpo - 91.9 - 14,
+    width: 142.4,
+    height: 91.9,
+    rotate: PDFLib.degrees(10.8)
+  });
+
+  const par = (runs, opts) => { y = desenharParagrafo(page, fontes, runs, { ...opts, yTopo: y }); };
+  const gap = (h) => { y -= h; };
+  let y = PAGINA.altura - PAGINA.topoCorpo;
+
+  par([
+    V(dados?.municipio, "___________________"), { t: ", " },
+    V(dc.dia, "___"), { t: " de " },
+    V(dc.mes, "_______________"), { t: " de " },
+    V(dc.ano, "_______"), { t: "." }
+  ], { size: 10 });
+  gap(14);
+
+  par([{ t: "Ao", bold: true }], { size: 11 });
+  par([{ t: "Banco Bradesco", bold: true }], { size: 11 });
+  par([{ t: "Att. Gerente", bold: true }], { size: 11 });
+  par([{ t: "Assunto: Abertura de Conta Salário", bold: true, u: true }], { size: 11 });
+  par([{ t: "Convênio Folha de Pagamento: 080900902", bold: true }], { size: 11 });
+  gap(15);
+
+  par([{ t: "Prezado (a) senhor (a)," }], { size: 11 });
+  gap(16);
+
+  par([
+    { t: "Apresentamos o (a) Sr. (a) " },
+    V(dados?.nomeCompleto, "_____________________________________"),
+    { t: " portador (a) do R.G " },
+    V(dados?.rg, "________________"),
+    { t: ", e do CPF nº " },
+    V(dados?.cpf, "____________"),
+    { t: " e Endereço " },
+    V(dados?.endereco, "____________________________________________________________"),
+    { t: ", MUNICIPIO: " },
+    V(dados?.municipio, "__________________"),
+    { t: ", para abertura de uma " },
+    { t: "Conta Salário", bold: true },
+    { t: "." }
+  ], { size: 11, alinhamento: "justificado", entrelinha: 1.25 });
+  gap(14);
+
+  par([{
+    t: "Ressaltamos que quaisquer serviços que sejam contratados pelo funcionário junto ao Banco Bradesco no ato da abertura da conta ou em momento posterior a este, são de sua inteira responsabilidade. Sendo a empresa isenta de quaisquer encargos ou obrigações contraídas pelo funcionário junto ao Banco, cabendo a este procurar o Banco em caso de eventuais dúvidas."
+  }], { size: 11, alinhamento: "justificado", entrelinha: 1.5 });
+  gap(4);
+
+  par([{ t: "CARGO: " }, V(dados?.cargo, "______________________________")], { size: 11 });
+  gap(13);
+  par([{ t: "SALÁRIO: R$ " }, V(dados?.salario, "_____________")], { size: 11 });
+
+  // Assinatura do gerente: imagem ancorada à direita, sobre a linha.
+  page.drawImage(assinaturaImg, { x: PAGINA.margemEsq + 310.6, y: y - 69, width: 113.2, height: 62.6 });
+  gap(13);
+  par([{ t: "Atenciosamente," }], { size: 11 });
+  gap(13);
+
+  const linhaAssinatura = "__________________________________________";
+  const larguraLinhaAss = fontes.normal.widthOfTextAtSize(linhaAssinatura, 12);
+  par([{ t: linhaAssinatura, size: 12 }], { size: 12, alinhamento: "direita" });
+  par([{ t: "Assinatura do Gerente Responsável" }], {
+    size: 10,
+    alinhamento: "centro",
+    x: PAGINA.largura - PAGINA.margemDir - larguraLinhaAss,
+    largura: larguraLinhaAss
+  });
+  gap(20);
+
+  par([{ t: "Nome do responsável na empresa: Ana Maria Pinto da Silva" }], { size: 11 });
+  gap(13);
+  par([{ t: "Telefone de contato: (71) 999579457" }], { size: 11 });
+
+  // Bloco da agência ancorado ao rodapé (preenchido pelo banco).
+  const fonteB = fontes.bold;
+  let tracos = "-";
+  while (fonteB.widthOfTextAtSize(tracos + "-", 11) <= LARGURA_TEXTO) tracos += "-";
+  y = 200;
+  par([{ t: tracos, bold: true }], { size: 11 });
+  par([{ t: "ATENÇÃO AGÊNCIA – INFORMAR OS DADOS DA CONTA SALÁRIO E DEVOLVER AO COLABORADOR PARA RETORNAR AO RH", bold: true }], {
+    size: 8,
+    alinhamento: "centro"
+  });
+  gap(11);
+  par([{ t: "Nome: __________________________________________________________________ CPF: ________________________________", bold: true }], { size: 8 });
+  gap(11);
+  par([{ t: "Atendente Bradesco: __________________________AGÊNCIA: _______________CONTA SALÁRIO: ________________________", bold: true }], { size: 8 });
+
+  return pdfDoc.save();
+}
+
+function baixarPdfBytes(pdfBytes, nomeArquivo) {
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = nomeArquivo;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 async function gerarPDF() {
   try {
     if (!validarCamposObrigatorios()) return;
     if (!(await confirmarPoliticaLGPD())) return;
-    if (!(await carregarCamposSchema())) return;
-    if (!templateBytes) await carregarTemplateInicial();
-    if (!templateBytes) return;
+    if (!(await carregarAssetsCarta())) return;
 
     const data = {
       nomeCompleto: v("nomeCompleto"),
@@ -971,45 +1145,11 @@ async function gerarPDF() {
       cargo: v("cargo"),
       salario: moedaParaPdfSemSimbolo(v("salario"))
     };
-    const dataCarta = dataCartaAtual();
 
-    const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
-    const page = pdfDoc.getPages()[0];
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-    const C = camposSchema.campos;
-
-    const dt = C.data.campos;
-    escreverTextoCampoCoord(page, font, dt.dia.coordenadas, dataCarta.dia);
-    escreverTextoCampoCoord(page, font, dt.mes.coordenadas, dataCarta.mes);
-
-    const fu = C.funcionario.campos;
-    escreverTextoCampoCoord(page, font, fu.nome.coordenadas, data.nomeCompleto);
-    escreverTextoCampoCoord(page, font, fu.rg.coordenadas, data.rg);
-    escreverTextoCampoCoord(page, font, fu.cpf.coordenadas, data.cpf);
-    escreverTextoCampoCoord(page, font, fu.endereco.coordenadas, data.endereco);
-    escreverTextoCampoCoord(page, font, fu.municipio.coordenadas, data.municipio);
-
-    const vg = C.vaga.campos;
-    escreverTextoCampoCoord(page, font, vg.cargo.coordenadas, data.cargo);
-    escreverTextoCampoCoord(page, font, vg.salario.coordenadas, data.salario);
-
-    const em = C.empresa.campos;
-    escreverTextoCampoCoord(
-      page, font,
-      em.nome_responsavel.coordenadas,
-      em.nome_responsavel.valor_fixo || "Ana Maria Pinto da Silva"
-    );
-
-    const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
+    const pdfBytes = await gerarPdfCartaBytes(data);
     const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Carta Abertura de Conta Salário");
     const primeiroNome = primeiroNomeUsuarioParaArquivo(data.nomeCompleto);
-    link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
-    link.click();
-    URL.revokeObjectURL(url);
+    baixarPdfBytes(pdfBytes, `${nomeTituloPdf} ${primeiroNome}.pdf`);
     showToast("PDF gerado com sucesso!", true);
   } catch (e) {
     console.error(e);
@@ -1019,15 +1159,9 @@ async function gerarPDF() {
 
 async function baixarModeloCartaVazia() {
   try {
-    const resp = await fetch(TEMPLATE_FETCH_PATH, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`Falha ao baixar carta (${resp.status})`);
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Carta_Abertura_de_Conta_Salario.pdf";
-    link.click();
-    URL.revokeObjectURL(url);
+    if (!(await carregarAssetsCarta())) return;
+    const pdfBytes = await gerarPdfCartaBytes(null);
+    baixarPdfBytes(pdfBytes, "Carta_Abertura_de_Conta_Salario.pdf");
     showToast("Download da carta em branco iniciado.");
   } catch (e) {
     console.error(e);
@@ -1136,7 +1270,7 @@ document.addEventListener("keydown", (e) => {
 
 restaurarRascunho();
 updateProgress();
-carregarTemplateInicial();
+carregarAssetsCarta();
 </script>
 </body>
 </html>
