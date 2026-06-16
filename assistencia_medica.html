@@ -79,6 +79,10 @@
   body.fluxo-plano-beneficios #blocoTipoMovimentacao {
     display: none !important;
   }
+  body:not(.fluxo-outros-planos) #blocoPlanoOutrosVariante,
+  html:not(:has(input[name="tipoAdesao"][value="optante"]:checked)) #blocoPlanoOutrosVariante {
+    display: none !important;
+  }
   .plano-adesao-bloco + .plano-adesao-bloco {
     margin-top: 22px;
     padding-top: 20px;
@@ -736,8 +740,17 @@
       <div class="plano-adesao-bloco" id="blocoTipoMovimentacao">
         <div class="subsection-title">Tipo de movimentação</div>
         <div class="radio-inline radio-inline--fill" id="tipoAdesaoGroup" style="margin-top:8px">
-          <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR AO PLANO</label>
-          <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante">NÃO QUERO ADERIR AO PLANO</label>
+          <label class="radio-label"><input type="radio" name="tipoAdesao" value="optante">QUERO ADERIR</label>
+          <label class="radio-label"><input type="radio" name="tipoAdesao" value="naooptante" id="tipoAdesaoNaooptante">NÃO QUERO ADERIR</label>
+        </div>
+      </div>
+      <div class="plano-adesao-bloco" id="blocoPlanoOutrosVariante" hidden>
+        <div class="subsection-title">Plano (Outros Planos)</div>
+        <div class="check-group" id="planoOutrosVarianteGroup" style="margin-top:8px">
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="ms_i"> MS I</label>
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="ms_ii"> MS II</label>
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="global"> GLOBAL</label>
+          <label class="check-label"><input type="radio" name="planoOutrosVariante" value="infinity"> INFINITY</label>
         </div>
       </div>
     </div>
@@ -1270,6 +1283,7 @@ const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const CAMPOS_PLANO_BENEFICIOS_JSON_PATH = "/declaracao_plano_saude_campos.json";
 const CAMPOS_PLANO_BENEFICIOS_FETCH_PATH = encodeURI(CAMPOS_PLANO_BENEFICIOS_JSON_PATH);
 const CIDADES_BRASIL_JSON_PATH = "/cidades_brasil.json";
+const CIDADES_INFINITY_JSON_PATH = "/cidades_infinity.json";
 /** Lista oficial de municípios por UF (CORS aberto, cache no CDN). */
 const CIDADES_KSTR_API_BASE = "https://api.kstrtech.com.br/cidades/";
 /** Declaração — fluxo Plano de Benefícios. */
@@ -1283,7 +1297,8 @@ const FICHA_UTILIZAR_PARA_ARQUIVO = {
   "FICHA SAFO": "FICHA SA_FO.pdf",
   "FICHA BH": "FICHA BH.pdf"
 };
-let mapaCidadeParaFichaUtilizar = null;
+let mapaCidadePadrao = null;
+let mapaCidadeInfinity = null;
 let camposSchemaCacheKey = null;
 
 function radioTipoPlano() {
@@ -1295,6 +1310,18 @@ function ehPlanoBeneficios() {
 function ehOutrosPlanos() {
   return radioTipoPlano() === "outros_planos";
 }
+function planoOutrosVariante() {
+  return document.querySelector('input[name="planoOutrosVariante"]:checked')?.value || "";
+}
+function usaListaInfinity() {
+  return ehOutrosPlanos() && planoOutrosVariante() === "infinity";
+}
+function obterMapaCidadesAtivo() {
+  return usaListaInfinity() ? mapaCidadeInfinity : mapaCidadePadrao;
+}
+function nomeArquivoListaCidadesAtiva() {
+  return usaListaInfinity() ? CIDADES_INFINITY_JSON_PATH : CIDADES_BRASIL_JSON_PATH;
+}
 
 function normalizarChaveCidade(s) {
   return String(s || "")
@@ -1305,36 +1332,46 @@ function normalizarChaveCidade(s) {
     .trim();
 }
 
+async function carregarMapaCidadesDeJson(path) {
+  const res = await fetch(encodeURI(path), { cache: "no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const arr = await res.json();
+  if (!Array.isArray(arr)) throw new Error("formato");
+  const m = new Map();
+  for (const row of arr) {
+    const k = normalizarChaveCidade(row.CIDADE);
+    if (!k) continue;
+    let tipo = String(row["FICHA A UTILIZAR"] || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, " ");
+    if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
+    m.set(k, tipo);
+  }
+  return m;
+}
+
 async function garantirMapaCidadesBrasil() {
-  if (mapaCidadeParaFichaUtilizar) return true;
   try {
-    const res = await fetch(encodeURI(CIDADES_BRASIL_JSON_PATH), { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const arr = await res.json();
-    if (!Array.isArray(arr)) throw new Error("formato");
-    const m = new Map();
-    for (const row of arr) {
-      const k = normalizarChaveCidade(row.CIDADE);
-      if (!k) continue;
-      let tipo = String(row["FICHA A UTILIZAR"] || "")
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, " ");
-      if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
-      m.set(k, tipo);
+    if (usaListaInfinity()) {
+      if (!mapaCidadeInfinity) {
+        mapaCidadeInfinity = await carregarMapaCidadesDeJson(CIDADES_INFINITY_JSON_PATH);
+      }
+    } else if (!mapaCidadePadrao) {
+      mapaCidadePadrao = await carregarMapaCidadesDeJson(CIDADES_BRASIL_JSON_PATH);
     }
-    mapaCidadeParaFichaUtilizar = m;
     return true;
   } catch (e) {
     console.error(e);
-    showToast(`Não foi possível carregar ${CIDADES_BRASIL_JSON_PATH}`, false);
+    showToast(`Não foi possível carregar ${nomeArquivoListaCidadesAtiva()}`, false);
     return false;
   }
 }
 
 function resolverTipoFichaPorCidadeNome(nomeIbge) {
-  if (!nomeIbge || !mapaCidadeParaFichaUtilizar) return null;
-  return mapaCidadeParaFichaUtilizar.get(normalizarChaveCidade(nomeIbge)) || null;
+  const mapa = obterMapaCidadesAtivo();
+  if (!nomeIbge || !mapa) return null;
+  return mapa.get(normalizarChaveCidade(nomeIbge)) || null;
 }
 
 function resolverArquivoPdfPorCidadeNome(nomeIbge) {
@@ -1350,6 +1387,32 @@ function toggleTipoPlano(el) {
   document.body.classList.toggle("fluxo-outros-planos", ehOutrosPlanos());
   document.getElementById("tipoPlanoGroup")?.classList.remove("group-invalid");
   if (el?.name) syncRadioActive(el.name);
+  atualizarVisibilidadePlanoOutrosVariante();
+  agendarSalvarRascunho();
+}
+
+function atualizarVisibilidadePlanoOutrosVariante() {
+  const bloco = document.getElementById("blocoPlanoOutrosVariante");
+  if (!bloco) return;
+  const mostrar = ehOutrosPlanos() && radio("tipoAdesao") === "optante";
+  if (mostrar) bloco.removeAttribute("hidden");
+  else bloco.setAttribute("hidden", "");
+}
+
+async function aoMudarPlanoOutrosVariante() {
+  syncRadioActive("planoOutrosVariante");
+  document.getElementById("planoOutrosVarianteGroup")?.classList.remove("group-invalid");
+  const cidadeAntes = v("cidade");
+  const uf = v("uf");
+  if (uf) {
+    await carregarMunicipiosIBGE(uf);
+    const sel = document.getElementById("cidade");
+    if (cidadeAntes && sel && ![...sel.options].some((o) => o.value === cidadeAntes)) {
+      showToast("A cidade selecionada não está disponível neste plano. Escolha outra.", false);
+      sel.value = "";
+      marcarCampoInvalido("cidade", true);
+    }
+  }
   agendarSalvarRascunho();
 }
 
@@ -1404,7 +1467,7 @@ async function carregarTemplateParaCidadeSelecionada() {
   const nome = v("cidade");
   const arq = resolverArquivoPdfPorCidadeNome(nome);
   if (!arq) {
-    if (nome) showToast("Não há PDF configurado para esta cidade na base cidades_brasil.", false);
+    if (nome) showToast("Não há PDF configurado para esta cidade na lista do plano selecionado.", false);
     marcarCampoInvalido("cidade", !!nome);
     return null;
   }
@@ -1691,14 +1754,15 @@ async function carregarMunicipiosIBGE(uf) {
       .toUpperCase()
       .trim();
     if (ufAinda !== sigla) return;
+    const mapa = obterMapaCidadesAtivo();
     const lista = listaFull.filter((m) =>
-      mapaCidadeParaFichaUtilizar.has(normalizarChaveCidade(m.nome))
+      mapa?.has(normalizarChaveCidade(m.nome))
     );
     lista.sort((a, b) => String(a.nome).localeCompare(String(b.nome), "pt-BR"));
     if (cargaId !== ibgeMunicipiosCargaGen) return;
     if (!lista.length) {
       showToast(
-        "Nenhuma cidade deste estado consta em cidades_brasil.json. Verifique com o suporte.",
+        `Nenhuma cidade deste estado consta em ${nomeArquivoListaCidadesAtiva()}. Verifique com o suporte.`,
         false
       );
     }
@@ -2215,6 +2279,7 @@ function toggleDepFilho(n) {
 function syncRadioActive(name) {
   document.querySelectorAll(`input[name="${name}"]`).forEach((r) => {
     r.closest(".radio-label")?.classList.toggle("active", r.checked);
+    r.closest(".check-label")?.classList.toggle("active", r.checked);
   });
 }
 /** Oculta cônjuge e filhos quando a opção é cancelamento (não aderir ao plano). */
@@ -2236,11 +2301,21 @@ function atualizarVisibilidadeModuloDependentes() {
   const aplicar = () => {
     syncRadioActive("tipoAdesao");
     atualizarVisibilidadeModuloDependentes();
+    atualizarVisibilidadePlanoOutrosVariante();
   };
   document.getElementById("tipoAdesaoGroup")?.addEventListener("click", () => setTimeout(aplicar, 0));
   document.querySelectorAll('input[name="tipoAdesao"]').forEach((inp) => {
     inp.addEventListener("change", aplicar);
     inp.addEventListener("input", aplicar);
+  });
+})();
+
+(function initPlanoOutrosVariante() {
+  document.getElementById("planoOutrosVarianteGroup")?.addEventListener("click", () => {
+    setTimeout(() => void aoMudarPlanoOutrosVariante(), 0);
+  });
+  document.querySelectorAll('input[name="planoOutrosVariante"]').forEach((inp) => {
+    inp.addEventListener("change", () => void aoMudarPlanoOutrosVariante());
   });
 })();
 
@@ -2318,10 +2393,18 @@ async function validarCamposObrigatorios() {
   }
 
   if (!radio("tipoAdesao")) {
-    showToast("Selecione o tipo de movimentação.", false);
+    showToast("Selecione QUERO ADERIR ou NÃO QUERO ADERIR.", false);
     document.getElementById("tipoAdesaoGroup")?.querySelector("input")?.focus();
     return false;
   }
+
+  if (radio("tipoAdesao") === "optante" && !planoOutrosVariante()) {
+    showToast("Selecione o plano: MS I, MS II, GLOBAL ou INFINITY.", false);
+    document.getElementById("planoOutrosVarianteGroup")?.classList.add("group-invalid");
+    document.getElementById("planoOutrosVarianteGroup")?.querySelector("input")?.focus();
+    return false;
+  }
+  document.getElementById("planoOutrosVarianteGroup")?.classList.remove("group-invalid");
 
   if (!v("uf")) {
     showToast("Selecione o estado.", false);
@@ -2536,6 +2619,11 @@ function limparDadosFormulario() {
     r.checked = false;
   });
   syncRadioActive("tipoAdesao");
+  document.querySelectorAll('input[name="planoOutrosVariante"]').forEach((r) => {
+    r.checked = false;
+  });
+  syncRadioActive("planoOutrosVariante");
+  atualizarVisibilidadePlanoOutrosVariante();
   document.getElementById("conj_incluir").checked = false;
   for (let fn = 1; fn <= NUM_FILHOS; fn++) {
     const ch = document.getElementById(`fil${fn}_incluir`);
@@ -2601,13 +2689,14 @@ function coletarEstadoRascunho() {
     assinaturaCanvasPng = null;
   }
   return {
-    v: 6,
+    v: 7,
     t: Date.now(),
     campos,
     assinaturaCanvasPng,
     naoAssinarManualmente: isNaoAssinarManualmente(),
     tipoPlano: radioTipoPlano(),
     tipoAdesao: radio("tipoAdesao"),
+    planoOutrosVariante: planoOutrosVariante(),
     conj_incluir: !!document.getElementById("conj_incluir")?.checked,
     filhosVisiveis,
     fil1_incluir: !!document.getElementById("fil1_incluir")?.checked,
@@ -2649,6 +2738,13 @@ function aplicarEstadoRascunho(obj) {
     if (inp) inp.checked = true;
   }
   syncRadioActive("tipoAdesao");
+  const pv = obj.planoOutrosVariante;
+  if (pv) {
+    const inpV = document.querySelector(`input[name="planoOutrosVariante"][value="${pv}"]`);
+    if (inpV) inpV.checked = true;
+  }
+  syncRadioActive("planoOutrosVariante");
+  atualizarVisibilidadePlanoOutrosVariante();
   const ci = document.getElementById("conj_incluir");
   if (ci) ci.checked = !!obj.conj_incluir;
   let vis = 1;
@@ -2870,7 +2966,7 @@ function tentarRestaurarRascunho() {
     const raw = appStorage.getItem(RASCUNHO_STORAGE_KEY);
     if (!raw) return false;
     const obj = JSON.parse(raw);
-    if (!obj || ![1, 2, 3, 4, 5].includes(obj.v) || !obj.campos) return false;
+    if (!obj || ![1, 2, 3, 4, 5, 6, 7].includes(obj.v) || !obj.campos) return false;
     ignorarSalvarRascunho = true;
     aplicarEstadoRascunho(obj);
     ignorarSalvarRascunho = false;
@@ -3174,6 +3270,11 @@ async function baixarPdfVazioExecucao() {
       return;
     }
     if (ehOutrosPlanos()) {
+      if (radio("tipoAdesao") === "optante" && !planoOutrosVariante()) {
+        showToast("Selecione o plano (MS I, MS II, GLOBAL ou INFINITY) para baixar o modelo correto.", false);
+        document.getElementById("planoOutrosVarianteGroup")?.classList.add("group-invalid");
+        return;
+      }
       if (!v("uf")) {
         showToast("Selecione o estado e a cidade para baixar o modelo correto.", false);
         marcarCampoInvalido("uf", true);

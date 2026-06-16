@@ -1,0 +1,1634 @@
+[
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "ANAPOLIS",
+    "FICHA A UTILIZAR": "FICHA GOIANIA"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "APARECIDA DE GOIANIA",
+    "FICHA A UTILIZAR": "FICHA GOIANIA"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "DF",
+    "CIDADE": "BRASILIA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MS",
+    "CIDADE": "CAMPO GRANDE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "CATALAO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MT",
+    "CIDADE": "CUIABA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MS",
+    "CIDADE": "DOURADOS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "FORMOSA",
+    "FICHA A UTILIZAR": "FICHA GOIANIA"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "GOIANIA",
+    "FICHA A UTILIZAR": "FICHA GOIANIA"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "INHUMAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "ITUMBIARA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "JATAI",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "MINEIROS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "TO",
+    "CIDADE": "PALMAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "RIO VERDE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MT",
+    "CIDADE": "RONDONOPOLIS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MT",
+    "CIDADE": "SINOP",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MT",
+    "CIDADE": "TANGARA DA SERRA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "MS",
+    "CIDADE": "TRES LAGOAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "CO",
+    "UF": "GO",
+    "CIDADE": "TRINDADE",
+    "FICHA A UTILIZAR": "FICHA GOIANIA"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "BELO HORIZONTE",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "BETIM",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "CARATINGA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "CONTAGEM",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "DIVINOPOLIS",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "GOVERNADOR VALADARES",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "IBIRITE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "IPATINGA",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "ITUIUTABA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "JUIZ DE FORA",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "MONTES CLAROS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "NOVA LIMA",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "NOVA SERRANA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "POCOS DE CALDAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "POUSO ALEGRE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "SANTA LUZIA",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "SAO SEBASTIAO DO PARAISO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "SETE LAGOAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "TIMOTEO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "TRES CORACOES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "UBERABA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "UBERLANDIA",
+    "FICHA A UTILIZAR": "FICHA BH"
+  },
+  {
+    "REGIONAL": "MG",
+    "UF": "MG",
+    "CIDADE": "VARGINHA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "ACAILANDIA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "ALTAMIRA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "BALSAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "BELEM",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "CANAA DOS CARAJAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "CAPANEMA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "IMPERATRIZ",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "AP",
+    "CIDADE": "MACAPA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "AM",
+    "CIDADE": "MANAUS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "PACO DO LUMIAR",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "PARAUAPEBAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "REDENCAO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "SANTA INES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "SAO JOSE DE RIBAMAR",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "MA",
+    "CIDADE": "SAO LUIS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "TUCURUI",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "SE",
+    "CIDADE": "ARACAJU",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "AL",
+    "CIDADE": "ARAPIRACA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "BARREIRAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PB",
+    "CIDADE": "CAMPINA GRANDE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "CE",
+    "CIDADE": "CRATO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "EUNAPOLIS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "FEIRA DE SANTANA",
+    "FICHA A UTILIZAR": "FICHA FSA"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "CE",
+    "CIDADE": "FORTALEZA",
+    "FICHA A UTILIZAR": "FICHA SAFO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "GUANAMBI",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "ILHEUS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "ITABUNA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PB",
+    "CIDADE": "JOAO PESSOA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "CE",
+    "CIDADE": "JUAZEIRO DO NORTE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "LUIS EDUARDO MAGALHAES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "AL",
+    "CIDADE": "MACEIO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "RN",
+    "CIDADE": "MOSSORO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "RN",
+    "CIDADE": "NATAL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PI",
+    "CIDADE": "PARNAIBA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "RN",
+    "CIDADE": "PARNAMIRIM",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PB",
+    "CIDADE": "PATOS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PI",
+    "CIDADE": "PICOS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "PORTO SEGURO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PE",
+    "CIDADE": "RECIFE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "SALVADOR",
+    "FICHA A UTILIZAR": "FICHA SAFO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "CE",
+    "CIDADE": "SOBRAL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "SANTO ANTONIO DE JESUS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "TEIXEIRA DE FREITAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "PI",
+    "CIDADE": "TERESINA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "VITORIA DA CONQUISTA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "ANGRA DOS REIS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "ARACRUZ",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "ARARUAMA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "ARMACAO DOS BUZIOS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "BARRA DO PIRAI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "BARRA MANSA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "CABO FRIO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "CACHOEIRO DE ITAPEMIRIM",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "CARIACICA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "COLATINA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "CAMPO DOS GOYTACAZES",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "DUQUE DE CAXIAS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "GUARAPARI",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "IGUABA GRANDE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "ITAPERUNA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "LINHARES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "MANGARATIBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "NITEROI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "PARATY",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "PETROPOLIS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "RESENDE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "RIO BONITO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "RIO DAS OSTRAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "RIO DE JANEIRO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "SAO MATEUS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "SAO PEDRO DA ALDEIA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "SERRA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "TERESOPOLIS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "TRES RIOS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "VALENCA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "VIANA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "VILA VELHA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "ES",
+    "UF": "ES",
+    "CIDADE": "VITORIA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "VOLTA REDONDA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "RJ",
+    "UF": "RJ",
+    "CIDADE": "CAMPOS DOS GOYTACAZES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "APARECIDA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ARUJA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ATIBAIA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BARUERI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BRAGANCA PAULISTA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CACAPAVA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CAJAMAR",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CAMPOS DO JORDAO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CARAGUATATUBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "COTIA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CRUZEIRO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CUBATAO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "DIADEMA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "EMBU DAS ARTES",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "EMBU GUACU",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "GUARATINGUETA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "GUARULHOS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ILHA BELA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ITAPECERICA DA SERRA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ITATIBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ITU",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ITUPEVA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "JACAREI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "JUNDIAI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "LORENA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MAIRINQUE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MAIRIPORA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MAUA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MOGI DAS CRUZES",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "OSASCO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PINDAMONHAGABA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "RIBEIRAO PIRES",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SALTO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SANTO ANDRE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SANTOS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO BERNARDO DO CAMPO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO CAETANO DO SUL",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO JOSE DOS CAMPOS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO PAULO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO ROQUE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO SEBASTIAO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SUZANO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "TABOAO DA SERRA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "TAUBATE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "TREMEMBE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "UBATUBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "VARZEA PAULISTA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "AMERICANA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "AMERICO BRASILIENSE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ARACATUBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ARARAQUARA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ARARAS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ASSIS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "AVARE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BARRA BONITA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BAURU",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BIRIGUI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BOITUVA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "BOTUCATU",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CAMPINAS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CAPIVARI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ESPIRITO SANTO DO PINHAL",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "FRANCA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "HORTOLANDIA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "INDAIATUBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ITAPETININGA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "ITAPIRA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "JALES",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "JAU",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "LENCOIS PAULISTA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "LIMEIRA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MARILIA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MATAO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MOCOCA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MOGI GUACU",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "MOGI MIRIM",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "NOVA ODESSA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "OURINHOS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PAULINIA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PEDERNEIRAS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PIRACICABA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PIRATININGA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PORTO FELIZ",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "PRESIDENTE PRUDENTE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "RIBEIRAO PRETO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "RIO CLARO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SANTA BARBARA D OESTE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO CARLOS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO JOAO DA BOA VISTA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO JOSE DO RIO PARDO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SAO JOSE DO RIO PRETO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SERTAOZINHO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SOROCABA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "TATUI",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "TIETE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "VALINHOS",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "VINHEDO",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "VOTORANTIM",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "VOTUPORANGA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "ALEGRETE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "BAGE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "BALNEARIO CAMBORIU",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "BENTO GONCALVES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "BLUMENAU",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CACHOEIRO DO SUL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CAMAQUA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CANOAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CAPAO DA CANOA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "CAPINZAL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CARAZINHO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "CASCAVEL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CAXIAS DO SUL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "CHARQUEADAS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "CONCORDIA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "CURITIBA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "ERECHIM",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "FLORIANOPOLIS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "FOZ DO IGUACU",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "GAROPABA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "GUARAPUAVA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "IJUI",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "IMBITUBA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "JOINVILLE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "LAGOA VERMELHA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "LONDRINA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "MARINGA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "NAVEGANTES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "NOVO HAMBURGO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "OSORIO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "PALMEIRA DAS MISSOES",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "PASSO FUNDO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "PR",
+    "CIDADE": "PONTA GROSSA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "PORTO ALEGRE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "SANTA ROSA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "SANTANA DO LIVRAMENTO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "SANTO ANGELO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "SAO BENTO DO SUL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "SAO JOSE",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "SAO MARCOS",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "TAQUARA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "TRAMANDAI",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "TRES DE MAIO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "SC",
+    "CIDADE": "TUBARAO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "URUGUAIANA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "VACARIA",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SUL",
+    "UF": "RS",
+    "CIDADE": "SANTA CRUZ DO SUL",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "SUMARE",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "N",
+    "UF": "PA",
+    "CIDADE": "SANTAREM",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
+  },
+  {
+    "REGIONAL": "SP",
+    "UF": "SP",
+    "CIDADE": "CATANDUVA",
+    "FICHA A UTILIZAR": "FICHA GNDI"
+  }
+]
