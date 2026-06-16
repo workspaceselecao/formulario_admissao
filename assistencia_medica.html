@@ -80,7 +80,14 @@
     display: none !important;
   }
   body:not(.fluxo-outros-planos) #blocoPlanoOutrosVariante,
-  html:not(:has(input[name="tipoAdesao"][value="optante"]:checked)) #blocoPlanoOutrosVariante {
+  html:not(:has(input[name="tipoAdesao"]:checked)) #blocoPlanoOutrosVariante {
+    display: none !important;
+  }
+  /* Oculta os campos adicionais em Outros Planos até que o setor seja selecionado */
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) #fluxoOutrosPlanos,
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) #secaoAssinatura,
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) #avisoExportarBottom,
+  body.fluxo-outros-planos:not(:has(input[name="planoOutrosVariante"]:checked)) .form-actions-bottom {
     display: none !important;
   }
   .plano-adesao-bloco + .plano-adesao-bloco {
@@ -745,7 +752,7 @@
         </div>
       </div>
       <div class="plano-adesao-bloco" id="blocoPlanoOutrosVariante" hidden>
-        <div class="subsection-title">Plano (Outros Planos)</div>
+        <div class="subsection-title">SELECIONE O SETOR</div>
         <div class="check-group" id="planoOutrosVarianteGroup" style="margin-top:8px">
           <label class="check-label"><input type="radio" name="planoOutrosVariante" value="ms_i"> MS I</label>
           <label class="check-label"><input type="radio" name="planoOutrosVariante" value="ms_ii"> MS II</label>
@@ -1115,7 +1122,7 @@
     </div>
   </div>
 
-  <div class="aviso-box" style="margin:20px 0 14px">
+  <div class="aviso-box" id="avisoExportarBottom" style="margin:20px 0 14px">
     <strong>ATENÇÃO:</strong> Salve e baixe o arquivo PDF gerado, clicando no botão abaixo e encaminhe o arquivo PDF salvo, no seu Portal do Candidato em:
     <a href="https://candidatos.atento.com.br" target="_blank" rel="noopener noreferrer">candidatos.atento.com.br</a>, na área de Ficha de Assistência Médica.
   </div>
@@ -1394,7 +1401,7 @@ function toggleTipoPlano(el) {
 function atualizarVisibilidadePlanoOutrosVariante() {
   const bloco = document.getElementById("blocoPlanoOutrosVariante");
   if (!bloco) return;
-  const mostrar = ehOutrosPlanos() && radio("tipoAdesao") === "optante";
+  const mostrar = ehOutrosPlanos() && (radio("tipoAdesao") === "optante" || radio("tipoAdesao") === "naooptante");
   if (mostrar) bloco.removeAttribute("hidden");
   else bloco.setAttribute("hidden", "");
 }
@@ -2398,8 +2405,8 @@ async function validarCamposObrigatorios() {
     return false;
   }
 
-  if (radio("tipoAdesao") === "optante" && !planoOutrosVariante()) {
-    showToast("Selecione o plano: MS I, MS II, GLOBAL ou INFINITY.", false);
+  if (ehOutrosPlanos() && !planoOutrosVariante()) {
+    showToast("Selecione o setor.", false);
     document.getElementById("planoOutrosVarianteGroup")?.classList.add("group-invalid");
     document.getElementById("planoOutrosVarianteGroup")?.querySelector("input")?.focus();
     return false;
@@ -3270,8 +3277,8 @@ async function baixarPdfVazioExecucao() {
       return;
     }
     if (ehOutrosPlanos()) {
-      if (radio("tipoAdesao") === "optante" && !planoOutrosVariante()) {
-        showToast("Selecione o plano (MS I, MS II, GLOBAL ou INFINITY) para baixar o modelo correto.", false);
+      if (!planoOutrosVariante()) {
+        showToast("Selecione o setor para baixar o modelo correto.", false);
         document.getElementById("planoOutrosVarianteGroup")?.classList.add("group-invalid");
         return;
       }
