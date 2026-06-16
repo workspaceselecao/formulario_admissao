@@ -2038,6 +2038,12 @@ function lerAgenciaContaFormulario(tipo){
   if (!ids) return { agencia: '', conta: '' };
   return { agencia: v(ids.agencia), conta: v(ids.conta) };
 }
+/** No PDF, agência/conta NEXT recebem sufixo " - NEXT" (formulário mantém só os dígitos). */
+function valorAgenciaContaPdf(tipoConta, valor) {
+  const texto = String(valor || "").trim();
+  if (!texto || !tipoContaEhNext(tipoConta)) return texto;
+  return `${texto} - NEXT`;
+}
 function rotuloTipoConta(tipo){
   const rotulos = {
     bradesco: 'Conta Salário Bradesco',
@@ -3110,8 +3116,12 @@ async function gerarPDF(){
       // Santander usa colunas próprias; Bradesco e Next usam as colunas Bradesco do PDF
       const campoAgencia = tipoContaEhSantander(tipoContaPdf) ? cb.santander_agencia : cb.bradesco_agencia;
       const campoConta = tipoContaEhSantander(tipoContaPdf) ? cb.santander_conta_digito : cb.bradesco_conta_digito;
-      if (campoAgencia?.coordenadas) escreverTextoCampoCoord(page, font, campoAgencia.coordenadas, data.agencia);
-      if (campoConta?.coordenadas) escreverTextoCampoCoord(page, font, campoConta.coordenadas, data.contaDigito);
+      if (campoAgencia?.coordenadas) {
+        escreverTextoCampoCoord(page, font, campoAgencia.coordenadas, valorAgenciaContaPdf(tipoContaPdf, data.agencia));
+      }
+      if (campoConta?.coordenadas) {
+        escreverTextoCampoCoord(page, font, campoConta.coordenadas, valorAgenciaContaPdf(tipoContaPdf, data.contaDigito));
+      }
     }
     if (tipoContaRequerCpfTitularPdf(tipoContaPdf)) {
       escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
