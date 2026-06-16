@@ -323,6 +323,24 @@
       grid-template-columns: 1fr 1fr;
     }
   }
+  /* Banco principal: oculta colunas de detalhes até seleção */
+  .banco-col--bradesco,
+  .banco-col--next,
+  .banco-col--santander {
+    display: none !important;
+  }
+  body:has(input[name="bancoPrincipal"][value="bradesco"]:checked) .banco-col--bradesco {
+    display: flex !important;
+    grid-column: span 2 !important;
+  }
+  body:has(input[name="bancoPrincipal"][value="next"]:checked) .banco-col--next {
+    display: flex !important;
+    grid-column: span 2 !important;
+  }
+  body:has(input[name="bancoPrincipal"][value="santander"]:checked) .banco-col--santander {
+    display: flex !important;
+    grid-column: span 2 !important;
+  }
   /* Nome completo + CPF na mesma linha (Dados Pessoais) */
   .nome-cpf-row {
     display: grid;
@@ -1070,8 +1088,15 @@
     <div class="section-header"><div class="dot"></div>Dados Conta Bancária</div>
     <div class="section-body">
       <div class="grid grid-2">
+        <div class="field col-span-2" id="grupoBancoPrincipal">
+          <label>Banco <span class="req">*</span></label>
+          <div class="radio-inline" id="bancoPrincipalRadioGroup" style="margin-top:8px;flex-wrap:wrap">
+            <label class="radio-label"><input type="radio" name="bancoPrincipal" value="bradesco" onchange="selecionarBancoPrincipal(this)"> BRADESCO</label>
+            <label class="radio-label"><input type="radio" name="bancoPrincipal" value="next" onchange="selecionarBancoPrincipal(this)"> NEXT</label>
+            <label class="radio-label"><input type="radio" name="bancoPrincipal" value="santander" onchange="selecionarBancoPrincipal(this)"> SANTANDER</label>
+          </div>
+        </div>
         <div class="field col-span-2" id="grupoTipoConta">
-          <label>Tipo de Conta</label>
           <div class="grid grid-2 banco-colunas" style="margin-top:8px">
             <div class="banco-col banco-col--bradesco">
               <p class="banco-col-titulo">Bradesco</p>
@@ -1094,6 +1119,22 @@
                 <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
                   Preencher Carta de Abertura de Conta
                 </button>
+              </div>
+            </div>
+            <div class="banco-col banco-col--next">
+              <p class="banco-col-titulo">Next</p>
+              <div class="radio-inline">
+                <label class="radio-label"><input type="radio" name="tipoConta" value="next_digital" onchange="toggleBanco(this)"> Conta Corrente Digital</label>
+              </div>
+              <div class="banco-col-detalhes" id="nextDetalhes" hidden>
+                <div class="field">
+                  <label>Agência <span class="req">*</span></label>
+                  <input type="text" id="agenciaNext" placeholder="0000" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaNext" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
               </div>
             </div>
             <div class="banco-col banco-col--santander">
@@ -1969,12 +2010,16 @@ function toggleDef(el){
 }
 const TIPOS_CONTA_BRADESCO = ['bradesco', 'conta_corrente', 'poupanca_bradesco'];
 const TIPOS_CONTA_SANTANDER = ['santander_corrente', 'santander_salario'];
-const TIPOS_CONTA_VALIDOS = [...TIPOS_CONTA_BRADESCO, ...TIPOS_CONTA_SANTANDER];
+const TIPOS_CONTA_NEXT = ['next_digital'];
+const TIPOS_CONTA_VALIDOS = [...TIPOS_CONTA_BRADESCO, ...TIPOS_CONTA_SANTANDER, ...TIPOS_CONTA_NEXT];
 function tipoContaEhBradesco(tipo){
   return TIPOS_CONTA_BRADESCO.includes(tipo);
 }
 function tipoContaEhSantander(tipo){
   return TIPOS_CONTA_SANTANDER.includes(tipo);
+}
+function tipoContaEhNext(tipo){
+  return TIPOS_CONTA_NEXT.includes(tipo);
 }
 function tipoContaRequerAgenciaConta(tipo){
   return TIPOS_CONTA_VALIDOS.includes(tipo);
@@ -1985,6 +2030,7 @@ function tipoContaRequerCpfTitularPdf(tipo){
 function idsAgenciaContaAtivos(tipo){
   if (tipoContaEhBradesco(tipo)) return { agencia: 'agenciaBradesco', conta: 'contaBradesco' };
   if (tipoContaEhSantander(tipo)) return { agencia: 'agenciaSantander', conta: 'contaSantander' };
+  if (tipoContaEhNext(tipo)) return { agencia: 'agenciaNext', conta: 'contaNext' };
   return null;
 }
 function lerAgenciaContaFormulario(tipo){
@@ -1998,9 +2044,16 @@ function rotuloTipoConta(tipo){
     conta_corrente: 'Conta Corrente Bradesco',
     poupanca_bradesco: 'Conta Poupança Bradesco',
     santander_corrente: 'Conta Corrente Santander',
-    santander_salario: 'Conta Salário Santander'
+    santander_salario: 'Conta Salário Santander',
+    next_digital: 'Conta Corrente Digital Next'
   };
   return rotulos[tipo] || 'Tipo de Conta';
+}
+function bancoPrincipalDeTipoConta(tipo){
+  if (tipoContaEhBradesco(tipo)) return 'bradesco';
+  if (tipoContaEhSantander(tipo)) return 'santander';
+  if (tipoContaEhNext(tipo)) return 'next';
+  return null;
 }
 function definirVisibilidadeDetalheBanco(elDetalhes, visivel, ids){
   if (!elDetalhes) return;
@@ -2018,10 +2071,34 @@ function definirVisibilidadeDetalheBanco(elDetalhes, visivel, ids){
     if (!visivel) contaEl.classList.remove('invalid');
   }
 }
+function selecionarBancoPrincipal(el){
+  syncRadioActive('bancoPrincipal');
+  document.getElementById('grupoBancoPrincipal')?.classList.remove('group-invalid');
+  // Limpa seleção de tipo de conta incompatível com o novo banco
+  const bancoPrincipal = el?.value;
+  const tipoAtual = radio('tipoConta');
+  const bancoDoTipoAtual = bancoPrincipalDeTipoConta(tipoAtual);
+  if (tipoAtual && bancoDoTipoAtual !== bancoPrincipal) {
+    document.querySelectorAll('input[name="tipoConta"]').forEach(r => { r.checked = false; });
+    document.querySelectorAll('.banco-col .radio-label').forEach(l => l.classList.remove('active'));
+    // Esconde todos os detalhes
+    ['bradescoDetalhes','nextDetalhes','santanderDetalhes'].forEach(id => {
+      document.getElementById(id)?.setAttribute('hidden','');
+    });
+    ['agenciaBradesco','contaBradesco','agenciaNext','contaNext','agenciaSantander','contaSantander'].forEach(id => {
+      const el2 = document.getElementById(id);
+      if (el2) { el2.required = false; el2.classList.remove('invalid'); }
+    });
+    document.getElementById('cartaBradescoField')?.setAttribute('hidden','');
+  }
+  updateProgress();
+  agendarSalvarRascunho();
+}
 function toggleBanco(el){
   const tipo = el?.value || radio('tipoConta');
   const bradescoAtivo = tipoContaEhBradesco(tipo);
   const santanderAtivo = tipoContaEhSantander(tipo);
+  const nextAtivo = tipoContaEhNext(tipo);
   const isSalarioBradesco = tipo === 'bradesco';
   definirVisibilidadeDetalheBanco(
     document.getElementById('bradescoDetalhes'),
@@ -2032,6 +2109,11 @@ function toggleBanco(el){
     document.getElementById('santanderDetalhes'),
     santanderAtivo,
     { agencia: 'agenciaSantander', conta: 'contaSantander' }
+  );
+  definirVisibilidadeDetalheBanco(
+    document.getElementById('nextDetalhes'),
+    nextAtivo,
+    { agencia: 'agenciaNext', conta: 'contaNext' }
   );
   const cartaBradescoField = document.getElementById('cartaBradescoField');
   if (cartaBradescoField) {
@@ -2045,6 +2127,10 @@ function toggleBanco(el){
   if (!santanderAtivo) {
     marcarCampoInvalido('agenciaSantander', false);
     marcarCampoInvalido('contaSantander', false);
+  }
+  if (!nextAtivo) {
+    marcarCampoInvalido('agenciaNext', false);
+    marcarCampoInvalido('contaNext', false);
   }
   if (el?.name) syncRadioActive(el.name);
 }
@@ -2224,6 +2310,7 @@ const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
   "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
   "cpf", "agenciaBradesco", "contaBradesco", "agenciaSantander", "contaSantander",
+  "agenciaNext", "contaNext",
   "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
 ];
 let rascunhoSalvarTimer = null;
@@ -2263,6 +2350,7 @@ function coletarEstadoRascunho() {
       primeiroEmprego: radio("primeiroEmprego"),
       deficiencia: radio("deficiencia"),
       tipoConta: radio("tipoConta"),
+      bancoPrincipal: radio("bancoPrincipal"),
       valeRef: radio("valeRef")
     },
     tipoDeficiencia: checks("tipoDeficiencia"),
@@ -2325,6 +2413,11 @@ function aplicarEstadoRascunho(obj) {
   const rad = obj.radios || {};
   marcarRadioRestaurar("primeiroEmprego", rad.primeiroEmprego);
   marcarRadioRestaurar("deficiencia", rad.deficiencia);
+  // Restaurar banco principal primeiro, antes do tipo de conta
+  if (rad.bancoPrincipal) {
+    const bpEl = document.querySelector(`input[name="bancoPrincipal"][value="${rad.bancoPrincipal}"]`);
+    if (bpEl) { bpEl.checked = true; syncRadioActive("bancoPrincipal"); }
+  }
   marcarRadioRestaurar("tipoConta", rad.tipoConta === "mentore" ? "conta_corrente" : rad.tipoConta);
   marcarRadioRestaurar("valeRef", rad.valeRef);
 
@@ -2610,6 +2703,7 @@ function validarCamposObrigatorios(){
   const gruposRadioObrigatorios = [
     { name: 'primeiroEmprego', label: 'Primeiro Emprego', elId: 'grupoPrimeiroEmprego' },
     { name: 'deficiencia', label: 'Possui Deficiência', elId: 'grupoDeficiencia' },
+    { name: 'bancoPrincipal', label: 'Banco', elId: 'grupoBancoPrincipal' },
     { name: 'tipoConta', label: 'Tipo de Conta', elId: 'grupoTipoConta' },
     { name: 'valeRef', label: 'Vale Refeição / Alimentação', elId: 'grupoValeRef' }
   ];
@@ -2632,7 +2726,7 @@ function validarCamposObrigatorios(){
     validarCampo({ id: idsBanco.agencia, nome: 'Agência' });
     validarCampo({ id: idsBanco.conta, nome: 'Conta / Dígito' });
   } else {
-    ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) =>
+    ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) =>
       marcarCampoInvalido(id, false)
     );
   }
@@ -2718,7 +2812,8 @@ function limparDadosFormulario(){
   if (cartaBradescoField) cartaBradescoField.setAttribute('hidden', '');
   definirVisibilidadeDetalheBanco(document.getElementById('bradescoDetalhes'), false, null);
   definirVisibilidadeDetalheBanco(document.getElementById('santanderDetalhes'), false, null);
-  ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) => {
+  definirVisibilidadeDetalheBanco(document.getElementById('nextDetalhes'), false, null);
+  ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.required = false;
@@ -2941,7 +3036,8 @@ async function gerarPDF(){
       bairro: v("bairro"),
       cidade: v("cidade"),
       tipoConta: tipoContaSelecionada,
-      contaCorrenteBradesco: tipoContaSelecionada === "conta_corrente",
+      // Para Next, mapeamos para conta_corrente (Bradesco) no PDF
+      contaCorrenteBradesco: tipoContaSelecionada === "conta_corrente" || tipoContaSelecionada === "next_digital",
       contaSalarioBradesco: tipoContaSelecionada === "bradesco",
       poupancaBradesco: tipoContaSelecionada === "poupanca_bradesco",
       santanderCorrente: tipoContaSelecionada === "santander_corrente",
@@ -3005,10 +3101,13 @@ async function gerarPDF(){
 
     const cb = C.conta_bancaria.campos;
     const tipoContaPdf = data.tipoConta;
-    if (tipoContaPdf && cb.tipo_conta?.opcoes?.[tipoContaPdf]) {
-      marcarRadioJsonOpcao(page, font, cb.tipo_conta, tipoContaPdf);
+    // Para Next, marca "Conta Corrente" (Bradesco) no PDF
+    const tipoContaPdfOpcao = tipoContaEhNext(tipoContaPdf) ? 'conta_corrente' : tipoContaPdf;
+    if (tipoContaPdfOpcao && cb.tipo_conta?.opcoes?.[tipoContaPdfOpcao]) {
+      marcarRadioJsonOpcao(page, font, cb.tipo_conta, tipoContaPdfOpcao);
     }
     if (tipoContaRequerAgenciaConta(tipoContaPdf)) {
+      // Santander usa colunas próprias; Bradesco e Next usam as colunas Bradesco do PDF
       const campoAgencia = tipoContaEhSantander(tipoContaPdf) ? cb.santander_agencia : cb.bradesco_agencia;
       const campoConta = tipoContaEhSantander(tipoContaPdf) ? cb.santander_conta_digito : cb.bradesco_conta_digito;
       if (campoAgencia?.coordenadas) escreverTextoCampoCoord(page, font, campoAgencia.coordenadas, data.agencia);
@@ -3224,7 +3323,7 @@ const primeiroEmpregoSelecionado = document.querySelector('input[name="primeiroE
 if (primeiroEmpregoSelecionado) {
   togglePIS(primeiroEmpregoSelecionado);
 }
-['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander'].forEach((id) => {
+['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) => {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', () => marcarCampoInvalido(id, false));
