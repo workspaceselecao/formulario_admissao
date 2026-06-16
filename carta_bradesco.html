@@ -110,6 +110,7 @@
   .grid { display: grid; gap: 18px; }
   .grid-2 { grid-template-columns: 1fr 1fr; }
   .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
 
   /* Endereço: CEP com busca automática + campos detalhados */
   .address-grid {
@@ -124,8 +125,8 @@
   .address-bairro { grid-column: span 6; }
   .address-municipio { grid-column: span 6; }
 
-  /* Cargo largo + Salário compacto (1/4 da linha) */
-  .vaga-grid { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); }
+  /* Grupo + Cargo largos + Salário compacto */
+  .vaga-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr) minmax(0, 1fr); }
 
   /* ── FIELDS ── */
   .field { display: flex; flex-direction: column; gap: 6px; }
@@ -543,10 +544,18 @@
     <div class="section-body">
       <div class="grid vaga-grid">
         <div class="field">
+          <label>Grupo de Cargo <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="grupoDeCargo">
+              <option value="">SELECIONE...</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
           <label>Cargo <span class="req">*</span></label>
           <div class="select-wrap">
-            <select id="cargo">
-              <option value="">SELECIONE...</option>
+            <select id="cargo" disabled>
+              <option value="">SELECIONE O GRUPO...</option>
             </select>
           </div>
         </div>
@@ -554,7 +563,7 @@
           <label>Salário <span class="req">*</span></label>
           <input type="text" id="salario" placeholder="R$ 0,00" inputmode="decimal" autocomplete="off" spellcheck="false">
         </div>
-        <div class="col-span-2 data-info">
+        <div class="col-span-3 data-info">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
           <span>A <strong>data da carta</strong> é preenchida automaticamente com o dia em que o PDF for gerado: <strong id="dataCartaPreview"></strong>.</span>
         </div>
@@ -614,6 +623,7 @@
 </div>
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="carta_bradesco_cargos.js"></script>
 <script>
 /**
  * A carta é gerada do zero com pdf-lib, reproduzindo o modelo timbrado
@@ -629,34 +639,48 @@ const ASSETS_CARTA = {
 const PAGINA = { largura: 612, altura: 792, margemEsq: 54, margemDir: 54, topoCorpo: 71 };
 const LARGURA_TEXTO = PAGINA.largura - PAGINA.margemEsq - PAGINA.margemDir;
 
-/** Lista suspensa de cargos — conforme definição do RH. */
-const CARGOS = [
-  "AGENTE NEGOCIACAO DE COBRANCA",
-  "ANALISTA RECURSOS HUMANOS JUNIOR",
-  "ASSISTENTE MONITORIA",
-  "CONSULTOR COMERCIAL I",
-  "ESPECIALISTA DE RELACIONAMENTO DIGITAL I",
-  "ESPECIALISTA DE RELACIONAMENTO DIGITAL II",
-  "ESPECIALISTA DE RELACIONAMENTO DIGITAL III",
-  "ESPECIALISTA DE SUPORTE I",
-  "ESPECIALISTA DE SUPORTE II",
-  "ESPECIALISTA DE SUPORTE III",
-  "ESPECIALISTA RECUPERACAO CREDITO I",
-  "ESPECIALISTA RECUPERACAO CREDITO II",
-  "ESPECIALISTA RECUPERACAO CREDITO III",
-  "ESPECIALISTA RELACIONAMENTO CLIENTE I",
-  "ESPECIALISTA RELACIONAMENTO CLIENTE II",
-  "ESPECIALISTA RELACIONAMENTO CLIENTE III",
-  "ESPECIALISTA SUPORTE ATENDIMENTO I",
-  "ESPECIALISTA SUPORTE ATENDIMENTO II",
-  "ESPECIALISTA SUPORTE ATENDIMENTO III",
-  "ESPECIALISTA VENDAS I",
-  "ESPECIALISTA VENDAS II",
-  "ESPECIALISTA VENDAS III",
-  "TEAM LEADER I",
-  "TEAM LEADER II",
-  "TEAM LEADER III"
-];
+function encontrarGrupoPorCargo(cargo) {
+  if (!cargo || typeof GRUPOS_CARGOS !== "object") return "";
+  for (const [grupo, cargos] of Object.entries(GRUPOS_CARGOS)) {
+    if (cargos.includes(cargo)) return grupo;
+  }
+  return "";
+}
+
+function preencherSelectGrupos() {
+  const sel = document.getElementById("grupoDeCargo");
+  if (!sel || typeof GRUPOS_CARGOS !== "object") return;
+  Object.keys(GRUPOS_CARGOS)
+    .sort((a, b) => a.localeCompare(b, "pt-BR"))
+    .forEach((grupo) => {
+      const opt = document.createElement("option");
+      opt.value = grupo;
+      opt.textContent = grupo;
+      sel.appendChild(opt);
+    });
+}
+
+function atualizarCargosPorGrupo(grupo, cargoPreservado = "") {
+  const sel = document.getElementById("cargo");
+  if (!sel) return;
+  sel.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = grupo ? "SELECIONE..." : "SELECIONE O GRUPO...";
+  sel.appendChild(placeholder);
+  sel.disabled = !grupo;
+  if (!grupo) return;
+  const cargos = GRUPOS_CARGOS[grupo] || [];
+  cargos.forEach((cargo) => {
+    const opt = document.createElement("option");
+    opt.value = cargo;
+    opt.textContent = cargo;
+    sel.appendChild(opt);
+  });
+  if (cargoPreservado && cargos.includes(cargoPreservado)) {
+    sel.value = cargoPreservado;
+  }
+}
 
 const LS_NS = "atento.forms:v1:";
 const RASCUNHO_STORAGE_KEY = LS_NS + "carta_bradesco_rascunho_v1";
@@ -902,6 +926,7 @@ function validarCamposObrigatorios() {
     { id: "cpf", nome: "CPF" },
     { id: "endereco", nome: "Endereço" },
     { id: "municipio", nome: "Município" },
+    { id: "grupoDeCargo", nome: "Grupo de Cargo" },
     { id: "cargo", nome: "Cargo" }
   ];
   const faltantes = [];
@@ -959,7 +984,7 @@ async function confirmarPoliticaLGPD() {
 }
 
 // ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
-const RASCUNHO_IDS = ["nomeCompleto", "rg", "cpf", "cep", "endereco", "endNum", "complemento", "bairro", "municipio", "cargo", "salario"];
+const RASCUNHO_IDS = ["nomeCompleto", "rg", "cpf", "cep", "endereco", "endNum", "complemento", "bairro", "municipio", "grupoDeCargo", "cargo", "salario"];
 let salvarRascunhoTimer = null;
 function salvarRascunho() {
   const obj = {};
@@ -976,10 +1001,19 @@ function restaurarRascunho() {
   let obj = null;
   try { obj = JSON.parse(raw); } catch (_e) { return; }
   if (!obj || typeof obj !== "object") return;
+  let grupo = typeof obj.grupoDeCargo === "string" ? obj.grupoDeCargo.trim() : "";
+  const cargo = typeof obj.cargo === "string" ? obj.cargo.trim() : "";
+  if (!grupo && cargo) grupo = encontrarGrupoPorCargo(cargo);
   RASCUNHO_IDS.forEach((id) => {
+    if (id === "grupoDeCargo" || id === "cargo") return;
     const el = document.getElementById(id);
     if (el && typeof obj[id] === "string") el.value = obj[id];
   });
+  const grupoEl = document.getElementById("grupoDeCargo");
+  if (grupoEl && grupo) {
+    grupoEl.value = grupo;
+    atualizarCargosPorGrupo(grupo, cargo);
+  }
   const salarioEl = document.getElementById("salario");
   if (salarioEl && salarioEl.value) maskMoeda(salarioEl);
   const cepEl = document.getElementById("cep");
@@ -995,6 +1029,7 @@ function limparDadosFormulario() {
     el.value = "";
     el.classList.remove("invalid");
   });
+  atualizarCargosPorGrupo("");
   updateProgress();
 }
 function descartarRascunhoEFormulario() {
@@ -1031,6 +1066,7 @@ function updateProgress() {
     () => v("municipio").length > 0
   ]);
   setProgress("progressVaga", [
+    () => v("grupoDeCargo").length > 0,
     () => v("cargo").length > 0,
     () => !salarioEstaVazio(v("salario"))
   ]);
@@ -1329,16 +1365,17 @@ async function baixarModeloCartaVazia() {
 }
 
 // ── INIT ──
-(function initCargos() {
-  const sel = document.getElementById("cargo");
-  if (!sel) return;
-  CARGOS.forEach((cargo) => {
-    const opt = document.createElement("option");
-    opt.value = cargo;
-    opt.textContent = cargo;
-    sel.appendChild(opt);
-  });
-})();
+preencherSelectGrupos();
+document.getElementById("grupoDeCargo")?.addEventListener("change", () => {
+  const grupo = v("grupoDeCargo");
+  const cargoAtual = v("cargo");
+  const preservar = grupo && GRUPOS_CARGOS[grupo]?.includes(cargoAtual) ? cargoAtual : "";
+  atualizarCargosPorGrupo(grupo, preservar);
+  marcarCampoInvalido("grupoDeCargo", false);
+  marcarCampoInvalido("cargo", false);
+  agendarSalvarRascunho();
+  updateProgress();
+});
 
 (function initDataPreview() {
   const el = document.getElementById("dataCartaPreview");
@@ -1436,7 +1473,11 @@ function aplicarPrefillFichaCadastral() {
   try { obj = JSON.parse(raw); } catch (_e) { return; }
   if (!obj || typeof obj !== "object") return;
   let copiou = false;
+  let grupo = typeof obj.grupoDeCargo === "string" ? obj.grupoDeCargo.trim() : "";
+  const cargo = typeof obj.cargo === "string" ? obj.cargo.trim() : "";
+  if (!grupo && cargo) grupo = encontrarGrupoPorCargo(cargo);
   RASCUNHO_IDS.forEach((id) => {
+    if (id === "grupoDeCargo" || id === "cargo") return;
     const valor = typeof obj[id] === "string" ? obj[id].trim() : "";
     if (!valor) return;
     const el = document.getElementById(id);
@@ -1445,6 +1486,15 @@ function aplicarPrefillFichaCadastral() {
     el.classList.remove("invalid");
     copiou = true;
   });
+  if (grupo) {
+    const grupoEl = document.getElementById("grupoDeCargo");
+    if (grupoEl) {
+      grupoEl.value = grupo;
+      grupoEl.classList.remove("invalid");
+      atualizarCargosPorGrupo(grupo, cargo);
+      copiou = true;
+    }
+  }
   if (!copiou) return;
   const cepEl = document.getElementById("cep");
   if (cepEl && cepEl.value) {
