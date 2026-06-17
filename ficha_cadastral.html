@@ -284,11 +284,10 @@
     border-color: var(--accent-dark);
     color: #fff;
   }
-  .modal-dependentes-card {
-    max-width: min(720px, calc(100vw - 32px));
-  }
-  .modal-dependentes-card .dep-table {
-    width: 100%;
+  .gate-dependentes-acoes .btn-gate--ativo {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-dark);
   }
 
   .section-header {
@@ -1089,16 +1088,42 @@
     </div>
   </div>
 
-  <!-- GATE DEPENDENTES -->
-  <div class="section-card etapa-fluxo" id="gateDependentes" data-etapa="gate-dependentes" hidden>
+  <!-- DEPENDENTES -->
+  <div class="section-card etapa-fluxo" id="etapaDependentes" data-etapa="dependentes" hidden>
     <div class="section-header"><div class="dot"></div>Dependentes</div>
     <div class="section-body">
-      <p style="margin:0 0 14px;font-size:14px;color:var(--text-mid);line-height:1.55">
-        Deseja incluir dependentes?
-      </p>
-      <div class="gate-dependentes-acoes">
-        <button type="button" class="btn-gate btn-gate--sim" id="btnDependentesSim">Sim</button>
-        <button type="button" class="btn-gate" id="btnDependentesNao">Não</button>
+      <div id="perguntaDependentes">
+        <p style="margin:0 0 14px;font-size:14px;color:var(--text-mid);line-height:1.55">
+          Deseja incluir dependentes?
+        </p>
+        <div class="gate-dependentes-acoes">
+          <button type="button" class="btn-gate btn-gate--sim" id="btnDependentesSim">Sim</button>
+          <button type="button" class="btn-gate" id="btnDependentesNao">Não</button>
+        </div>
+      </div>
+      <div id="dependentesConteudo" hidden>
+        <table class="dep-table">
+          <thead>
+            <tr>
+              <th style="width:40%">Nome</th>
+              <th style="width:25%">Data de Nascimento</th>
+              <th style="width:35%">CPF do Dependente</th>
+            </tr>
+          </thead>
+          <tbody id="dependentesBody">
+            <tr data-dependente-index="1">
+              <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
+              <td><input type="date" id="dep1Nasc" autocomplete="off"></td>
+              <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="dep-actions">
+          <button type="button" class="btn-add-dependente" id="btnAddDependente" onclick="adicionarDependente()">+ Adicionar dependente</button>
+        </div>
+        <div class="section-progress">
+          <div class="section-progress-track"><div class="section-progress-fill" id="progressDependentes"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1328,36 +1353,6 @@
 </div>
 
 <div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
-<div id="modalDependentes" class="modal-overlay" role="dialog" aria-labelledby="modalDependentesTitulo" hidden aria-hidden="true">
-  <div class="modal-card modal-dependentes-card">
-    <div class="modal-head" id="modalDependentesTitulo">Dependentes</div>
-    <div class="modal-body">
-      <table class="dep-table">
-        <thead>
-          <tr>
-            <th style="width:40%">Nome</th>
-            <th style="width:25%">Data de Nascimento</th>
-            <th style="width:35%">CPF do Dependente</th>
-          </tr>
-        </thead>
-        <tbody id="dependentesBody">
-          <tr data-dependente-index="1">
-            <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep1Nasc" autocomplete="off"></td>
-            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="dep-actions">
-        <button type="button" class="btn-add-dependente" id="btnAddDependente" onclick="adicionarDependente()">+ Adicionar dependente</button>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button type="button" id="btnModalDependentesContinuar" class="btn-modal confirm">Continuar</button>
-    </div>
-  </div>
-</div>
-
 <div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitle" hidden aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
@@ -2202,13 +2197,24 @@ function toggleBanco(el){
 const MAX_DEPENDENTES = 5;
 /** Fluxo progressivo: null | 'sim' | 'nao' */
 let dependentesInclusao = null;
-let dependentesModalConcluido = false;
 let etapasDesbloqueadasAnterior = {};
 
-function etapaDependentesResolvida() {
+function etapaDependentesResolvida(pcts) {
   if (dependentesInclusao === "nao") return true;
-  if (dependentesInclusao === "sim" && dependentesModalConcluido) return true;
+  if (dependentesInclusao === "sim" && pcts.dependentes >= 100) return true;
   return false;
+}
+
+function atualizarUiDependentes() {
+  const conteudo = document.getElementById("dependentesConteudo");
+  if (conteudo) {
+    if (dependentesInclusao === "sim") conteudo.removeAttribute("hidden");
+    else conteudo.setAttribute("hidden", "");
+  }
+  const btnSim = document.getElementById("btnDependentesSim");
+  const btnNao = document.getElementById("btnDependentesNao");
+  btnSim?.classList.toggle("btn-gate--ativo", dependentesInclusao === "sim");
+  btnNao?.classList.toggle("btn-gate--ativo", dependentesInclusao === "nao");
 }
 
 function definirEtapaVisivel(id, visivel) {
@@ -2224,46 +2230,23 @@ function rolarParaEtapa(id) {
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function abrirModalDependentes() {
-  const modal = document.getElementById("modalDependentes");
-  if (!modal) return;
-  setModalOverlayVisible(modal, true);
-  sincronizarBodyModalOpenFicha();
-  setTimeout(() => document.getElementById("dep1Nome")?.focus(), 0);
-}
-
-function fecharModalDependentes() {
-  const modal = document.getElementById("modalDependentes");
-  if (modal) setModalOverlayVisible(modal, false);
-  sincronizarBodyModalOpenFicha();
-}
-
 function responderDependentesSim() {
   dependentesInclusao = "sim";
-  dependentesModalConcluido = false;
-  abrirModalDependentes();
+  atualizarUiDependentes();
   agendarSalvarRascunho();
   updateProgress();
+  setTimeout(() => document.getElementById("dep1Nome")?.focus(), 0);
 }
 
 function responderDependentesNao() {
   dependentesInclusao = "nao";
-  dependentesModalConcluido = true;
-  fecharModalDependentes();
+  atualizarUiDependentes();
   const tbody = document.getElementById("dependentesBody");
   if (tbody) {
     tbody.innerHTML = "";
     tbody.appendChild(criarLinhaDependente(1));
     atualizarEstadoBotaoDependente();
   }
-  agendarSalvarRascunho();
-  updateProgress();
-  rolarParaEtapa("etapaEndereco");
-}
-
-function concluirModalDependentes() {
-  dependentesModalConcluido = true;
-  fecharModalDependentes();
   agendarSalvarRascunho();
   updateProgress();
   rolarParaEtapa("etapaEndereco");
@@ -2317,7 +2300,9 @@ function calcularPercentuaisSecoes() {
   ]);
   const dependentes = dependentesInclusao === "nao"
     ? 100
-    : calcPct(dependentesChecks);
+    : dependentesInclusao === "sim"
+      ? calcPct(dependentesChecks)
+      : 0;
 
   const transporte =
     document.getElementById("vtNaoOptante")?.checked === true
@@ -2342,16 +2327,18 @@ function calcularPercentuaisSecoes() {
 
 function atualizarVisibilidadeEtapas(pcts) {
   const pessoalOk = pcts.pessoal >= 100;
-  const depOk = etapaDependentesResolvida();
+  const depOk = etapaDependentesResolvida(pcts);
   const enderecoOk = pcts.endereco >= 100;
   const bancarioOk = pcts.bancario >= 100;
   const transporteOk = pcts.transporte >= 100;
   const refeicaoOk = pcts.refeicao >= 100;
   const declaracaoOk = pcts.declaracao >= 100;
 
+  atualizarUiDependentes();
+
   const mapa = {
     etapaPessoal: true,
-    gateDependentes: pessoalOk && !depOk,
+    etapaDependentes: pessoalOk,
     etapaEndereco: pessoalOk && depOk,
     etapaBancario: pessoalOk && depOk && enderecoOk,
     etapaTransporte: pessoalOk && depOk && enderecoOk && bancarioOk,
@@ -2377,9 +2364,8 @@ function atualizarVisibilidadeEtapas(pcts) {
 
 function resetarFluxoEtapas() {
   dependentesInclusao = null;
-  dependentesModalConcluido = false;
   etapasDesbloqueadasAnterior = {};
-  fecharModalDependentes();
+  atualizarUiDependentes();
   updateProgress();
 }
 function listarLinhasDependentes(){
@@ -2602,8 +2588,7 @@ function coletarEstadoRascunho() {
     },
     tipoDeficiencia: checks("tipoDeficiencia"),
     dependentes: lerDependentesFormulario(),
-    dependentesInclusao,
-    dependentesModalConcluido
+    dependentesInclusao
   };
 }
 
@@ -2729,15 +2714,12 @@ function aplicarEstadoRascunho(obj) {
 
   if (obj.dependentesInclusao === "sim" || obj.dependentesInclusao === "nao") {
     dependentesInclusao = obj.dependentesInclusao;
-    dependentesModalConcluido = obj.dependentesModalConcluido === true || obj.dependentesInclusao === "nao";
   } else {
     const temDepPreenchido = deps.some((d) => (d.nome || d.nascimento || d.cpf));
     if (temDepPreenchido) {
       dependentesInclusao = "sim";
-      dependentesModalConcluido = true;
     } else if (v("endereco") || v("cidade")) {
       dependentesInclusao = "nao";
-      dependentesModalConcluido = true;
     }
   }
   etapasDesbloqueadasAnterior = { __suprimirScroll: true };
@@ -3581,7 +3563,6 @@ document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) 
 });
 document.getElementById("btnDependentesSim")?.addEventListener("click", responderDependentesSim);
 document.getElementById("btnDependentesNao")?.addEventListener("click", responderDependentesNao);
-document.getElementById("btnModalDependentesContinuar")?.addEventListener("click", concluirModalDependentes);
 
 document.getElementById("btnModalDescartarRascunhoCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoFicha);
 document.getElementById("btnModalDescartarRascunhoConfirmar")?.addEventListener("click", () => {
@@ -3614,10 +3595,6 @@ document.addEventListener('keydown', (event) => {
   }
   if (document.getElementById("modalCopiaAssistencia")?.classList.contains("show")) {
     fecharModalCopiaAssistRecusandoRedirecionamento();
-  }
-  if (document.getElementById("modalDependentes")?.classList.contains("show")) {
-    event.preventDefault();
-    fecharModalDependentes();
   }
 });
 function salvarRascunhoAoSair() {
