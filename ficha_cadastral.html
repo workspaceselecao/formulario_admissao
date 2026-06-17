@@ -1969,6 +1969,21 @@ const VT_INPUT_IDS_NA_OPTANTE = [
   "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal",
   "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
 ];
+const VT_LINHAS = [
+  { qtd: "vtOnibusQtd", val: "vtOnibusVal" },
+  { qtd: "vtMetroQtd", val: "vtMetroVal" },
+  { qtd: "vtInterQtd", val: "vtInterVal" },
+  { qtd: "vtIntegracaoQtd", val: "vtIntegracaoVal" }
+];
+
+function linhaValeTransportePreenchida(qtdId, valId) {
+  return v(qtdId).length > 0 && moedaParaPdf(v(valId)) !== "0,00";
+}
+
+function etapaTransporteResolvida() {
+  if (document.getElementById("vtNaoOptante")?.checked === true) return true;
+  return VT_LINHAS.some(({ qtd, val }) => linhaValeTransportePreenchida(qtd, val));
+}
 
 function atualizarUiValeTransporteNaoOptante() {
   const cb = document.getElementById("vtNaoOptante");
@@ -2305,15 +2320,14 @@ function calcularPercentuaisSecoes() {
       ? calcPct(dependentesChecks)
       : 0;
 
-  const transporte =
-    document.getElementById("vtNaoOptante")?.checked === true
-      ? 100
-      : calcPct([
-          () => hasValue("vtOnibusQtd"), () => hasMoney("vtOnibusVal"),
-          () => hasValue("vtMetroQtd"), () => hasMoney("vtMetroVal"),
-          () => hasValue("vtInterQtd"), () => hasMoney("vtInterVal"),
-          () => hasValue("vtIntegracaoQtd"), () => hasMoney("vtIntegracaoVal")
-        ]);
+  const transporte = etapaTransporteResolvida()
+    ? 100
+    : calcPct(
+        VT_LINHAS.flatMap(({ qtd, val }) => [
+          () => hasValue(qtd),
+          () => hasMoney(val)
+        ])
+      );
 
   const refeicao = calcPct([
     () => ["va", "vr", "flex"].includes(radio("valeRef"))
@@ -2331,7 +2345,7 @@ function atualizarVisibilidadeEtapas(pcts) {
   const depOk = etapaDependentesResolvida(pcts);
   const enderecoOk = pcts.endereco >= 100;
   const bancarioOk = pcts.bancario >= 100;
-  const transporteOk = pcts.transporte >= 100;
+  const transporteOk = etapaTransporteResolvida();
   const refeicaoOk = pcts.refeicao >= 100;
   const declaracaoOk = pcts.declaracao >= 100;
 
@@ -3457,7 +3471,10 @@ function baixarCartaAberturaConta(){
 }
 
 initAssinaturaCanvas();
-document.getElementById("vtNaoOptante")?.addEventListener("change", atualizarUiValeTransporteNaoOptante);
+document.getElementById("vtNaoOptante")?.addEventListener("change", () => {
+  atualizarUiValeTransporteNaoOptante();
+  updateProgress();
+});
 document.getElementById("naoAssinarManualmente")?.addEventListener("change", () => {
   sincronizarCheckLabelNaoAssinarManualmente();
   atualizarUiNaoAssinarManualmente();
