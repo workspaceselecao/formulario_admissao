@@ -274,21 +274,6 @@
     border-color: var(--accent);
     color: var(--accent-dark);
   }
-  .gate-dependentes-acoes .btn-gate--sim {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .gate-dependentes-acoes .btn-gate--sim:hover {
-    background: var(--accent-dark);
-    border-color: var(--accent-dark);
-    color: #fff;
-  }
-  .gate-dependentes-acoes .btn-gate--ativo {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent-dark);
-  }
   #dependentesConteudo {
     margin-top: 22px;
     padding-top: 20px;
@@ -1102,7 +1087,7 @@
           Deseja incluir dependentes?
         </p>
         <div class="gate-dependentes-acoes">
-          <button type="button" class="btn-gate btn-gate--sim" id="btnDependentesSim">Sim</button>
+          <button type="button" class="btn-gate" id="btnDependentesSim">Sim</button>
           <button type="button" class="btn-gate" id="btnDependentesNao">Não</button>
         </div>
       </div>
@@ -2216,10 +2201,6 @@ function atualizarUiDependentes() {
     if (dependentesInclusao === "sim") conteudo.removeAttribute("hidden");
     else conteudo.setAttribute("hidden", "");
   }
-  const btnSim = document.getElementById("btnDependentesSim");
-  const btnNao = document.getElementById("btnDependentesNao");
-  btnSim?.classList.toggle("btn-gate--ativo", dependentesInclusao === "sim");
-  btnNao?.classList.toggle("btn-gate--ativo", dependentesInclusao === "nao");
 }
 
 function definirEtapaVisivel(id, visivel) {
