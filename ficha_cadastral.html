@@ -248,6 +248,48 @@
     transition: box-shadow 0.2s;
   }
   .section-card:hover { box-shadow: var(--shadow-lg); }
+  .section-card.etapa-fluxo[hidden] {
+    display: none !important;
+  }
+  .gate-dependentes-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .gate-dependentes-acoes .btn-gate {
+    min-width: 120px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-mid);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .gate-dependentes-acoes .btn-gate:hover {
+    border-color: var(--accent);
+    color: var(--accent-dark);
+  }
+  .gate-dependentes-acoes .btn-gate--sim {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .gate-dependentes-acoes .btn-gate--sim:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: #fff;
+  }
+  .modal-dependentes-card {
+    max-width: min(720px, calc(100vw - 32px));
+  }
+  .modal-dependentes-card .dep-table {
+    width: 100%;
+  }
 
   .section-header {
     background: var(--accent);
@@ -965,7 +1007,7 @@
 
 <div class="container">
   <!-- DADOS PESSOAIS -->
-  <div class="section-card">
+  <div class="section-card etapa-fluxo" id="etapaPessoal" data-etapa="pessoal">
     <div class="section-header"><div class="dot"></div>Dados Pessoais</div>
     <div class="section-body">
       <div class="grid grid-2" style="margin-bottom:18px">
@@ -1047,8 +1089,22 @@
     </div>
   </div>
 
+  <!-- GATE DEPENDENTES -->
+  <div class="section-card etapa-fluxo" id="gateDependentes" data-etapa="gate-dependentes" hidden>
+    <div class="section-header"><div class="dot"></div>Dependentes</div>
+    <div class="section-body">
+      <p style="margin:0 0 14px;font-size:14px;color:var(--text-mid);line-height:1.55">
+        Deseja incluir dependentes?
+      </p>
+      <div class="gate-dependentes-acoes">
+        <button type="button" class="btn-gate btn-gate--sim" id="btnDependentesSim">Sim</button>
+        <button type="button" class="btn-gate" id="btnDependentesNao">Não</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ENDEREÇO -->
-  <div class="section-card">
+  <div class="section-card etapa-fluxo" id="etapaEndereco" data-etapa="endereco" hidden>
     <div class="section-header"><div class="dot"></div>Endereço</div>
     <div class="section-body">
       <div class="address-grid">
@@ -1084,7 +1140,7 @@
   </div>
 
   <!-- DADOS BANCÁRIOS -->
-  <div class="section-card">
+  <div class="section-card etapa-fluxo" id="etapaBancario" data-etapa="bancario" hidden>
     <div class="section-header"><div class="dot"></div>Dados Conta Bancária</div>
     <div class="section-body">
       <div class="grid grid-2">
@@ -1163,37 +1219,8 @@
     </div>
   </div>
 
-  <!-- DEPENDENTES -->
-  <div class="section-card">
-    <div class="section-header"><div class="dot"></div>Dependentes</div>
-    <div class="section-body">
-      <table class="dep-table">
-        <thead>
-          <tr>
-            <th style="width:40%">Nome</th>
-            <th style="width:25%">Data de Nascimento</th>
-            <th style="width:35%">CPF do Dependente</th>
-          </tr>
-        </thead>
-        <tbody id="dependentesBody">
-          <tr data-dependente-index="1">
-            <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
-            <td><input type="date" id="dep1Nasc" autocomplete="off"></td>
-            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="dep-actions">
-        <button type="button" class="btn-add-dependente" id="btnAddDependente" onclick="adicionarDependente()">+ Adicionar dependente</button>
-      </div>
-      <div class="section-progress">
-        <div class="section-progress-track"><div class="section-progress-fill" id="progressDependentes"></div></div>
-      </div>
-    </div>
-  </div>
-
   <!-- VALE TRANSPORTE -->
-  <div class="section-card">
+  <div class="section-card etapa-fluxo" id="etapaTransporte" data-etapa="transporte" hidden>
     <div class="section-header"><div class="dot"></div>Benefícios – Vale Transporte</div>
     <div class="section-body">
       <table class="vt-table">
@@ -1238,7 +1265,7 @@
   </div>
 
   <!-- VALE REFEIÇÃO/ALIMENTAÇÃO -->
-  <div class="section-card">
+  <div class="section-card etapa-fluxo" id="etapaRefeicao" data-etapa="refeicao" hidden>
     <div class="section-header"><div class="dot"></div>Vale Refeição / Alimentação</div>
     <div class="section-body">
       <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:var(--label);letter-spacing:0.5px;text-transform:uppercase;font-family:'Poppins',sans-serif">
@@ -1256,7 +1283,7 @@
   </div>
 
   <!-- ASSINATURA -->
-  <div class="section-card">
+  <div class="section-card etapa-fluxo" id="etapaDeclaracao" data-etapa="declaracao" hidden>
     <div class="section-header"><div class="dot"></div>Declaração do Candidato</div>
     <div class="section-body">
       <p style="font-size:13px;color:var(--text-mid);margin-bottom:18px;line-height:1.6">
@@ -1282,6 +1309,7 @@
     </div>
   </div>
 
+  <div id="etapaAcoes" class="etapa-fluxo" hidden>
   <div class="aviso-box" style="margin:20px 0 14px">
     <strong>ATENÇÃO:</strong> Salve e baixe o arquivo PDF gerado, clicando no botão abaixo e encaminhe o arquivo PDF salvo, no seu Portal do Candidato, em:
     <a href="https://candidatos.atento.com.br" target="_blank" rel="noopener noreferrer">candidatos.atento.com.br</a>, na área de Ficha Única Cadastral.
@@ -1295,10 +1323,41 @@
       Salvar e Baixar Ficha preenchida (PDF)
     </button>
   </div>
+  </div>
 
 </div>
 
 <div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
+<div id="modalDependentes" class="modal-overlay" role="dialog" aria-labelledby="modalDependentesTitulo" hidden aria-hidden="true">
+  <div class="modal-card modal-dependentes-card">
+    <div class="modal-head" id="modalDependentesTitulo">Dependentes</div>
+    <div class="modal-body">
+      <table class="dep-table">
+        <thead>
+          <tr>
+            <th style="width:40%">Nome</th>
+            <th style="width:25%">Data de Nascimento</th>
+            <th style="width:35%">CPF do Dependente</th>
+          </tr>
+        </thead>
+        <tbody id="dependentesBody">
+          <tr data-dependente-index="1">
+            <td><input type="text" id="dep1Nome" placeholder="Nome completo"></td>
+            <td><input type="date" id="dep1Nasc" autocomplete="off"></td>
+            <td><input type="text" id="dep1CPF" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off" spellcheck="false"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="dep-actions">
+        <button type="button" class="btn-add-dependente" id="btnAddDependente" onclick="adicionarDependente()">+ Adicionar dependente</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDependentesContinuar" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
+
 <div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitle" hidden aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
@@ -2141,6 +2200,188 @@ function toggleBanco(el){
   if (el?.name) syncRadioActive(el.name);
 }
 const MAX_DEPENDENTES = 5;
+/** Fluxo progressivo: null | 'sim' | 'nao' */
+let dependentesInclusao = null;
+let dependentesModalConcluido = false;
+let etapasDesbloqueadasAnterior = {};
+
+function etapaDependentesResolvida() {
+  if (dependentesInclusao === "nao") return true;
+  if (dependentesInclusao === "sim" && dependentesModalConcluido) return true;
+  return false;
+}
+
+function definirEtapaVisivel(id, visivel) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (visivel) el.removeAttribute("hidden");
+  else el.setAttribute("hidden", "");
+}
+
+function rolarParaEtapa(id) {
+  const el = document.getElementById(id);
+  if (!el || el.hasAttribute("hidden")) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function abrirModalDependentes() {
+  const modal = document.getElementById("modalDependentes");
+  if (!modal) return;
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenFicha();
+  setTimeout(() => document.getElementById("dep1Nome")?.focus(), 0);
+}
+
+function fecharModalDependentes() {
+  const modal = document.getElementById("modalDependentes");
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpenFicha();
+}
+
+function responderDependentesSim() {
+  dependentesInclusao = "sim";
+  dependentesModalConcluido = false;
+  abrirModalDependentes();
+  agendarSalvarRascunho();
+  updateProgress();
+}
+
+function responderDependentesNao() {
+  dependentesInclusao = "nao";
+  dependentesModalConcluido = true;
+  fecharModalDependentes();
+  const tbody = document.getElementById("dependentesBody");
+  if (tbody) {
+    tbody.innerHTML = "";
+    tbody.appendChild(criarLinhaDependente(1));
+    atualizarEstadoBotaoDependente();
+  }
+  agendarSalvarRascunho();
+  updateProgress();
+  rolarParaEtapa("etapaEndereco");
+}
+
+function concluirModalDependentes() {
+  dependentesModalConcluido = true;
+  fecharModalDependentes();
+  agendarSalvarRascunho();
+  updateProgress();
+  rolarParaEtapa("etapaEndereco");
+}
+
+function calcularPercentuaisSecoes() {
+  const hasValue = (id) => v(id).length > 0;
+  const hasMoney = (id) => moedaParaPdf(v(id)) !== "0,00";
+  const calcPct = (checks) => {
+    if (!checks.length) return 0;
+    const preenchidos = checks.filter((fn) => fn()).length;
+    return Math.round((preenchidos / checks.length) * 100);
+  };
+
+  const pessoal = calcPct([
+    () => hasValue("nomeCompleto"),
+    () => hasValue("cpf"),
+    () => hasValue("celular"),
+    () => hasValue("email"),
+    () => hasValue("estadoCivil"),
+    () => !!radio("primeiroEmprego"),
+    () => hasValue("pis"),
+    () => !!radio("deficiencia")
+  ]);
+
+  const endereco = calcPct([
+    () => hasValue("cep"),
+    () => hasValue("endereco"),
+    () => hasValue("bairro"),
+    () => hasValue("cidade")
+  ]);
+
+  const bancario = calcPct([
+    () => TIPOS_CONTA_VALIDOS.includes(radio("tipoConta")),
+    () => {
+      const tipo = radio("tipoConta");
+      const ids = idsAgenciaContaAtivos(tipo);
+      return ids ? hasValue(ids.agencia) : true;
+    },
+    () => {
+      const tipo = radio("tipoConta");
+      const ids = idsAgenciaContaAtivos(tipo);
+      return ids ? hasValue(ids.conta) : true;
+    }
+  ]);
+
+  const dependentesChecks = lerDependentesFormulario().flatMap((dep) => [
+    () => dep.nome.length > 0,
+    () => dep.nascimento.length > 0,
+    () => dep.cpf.length > 0
+  ]);
+  const dependentes = dependentesInclusao === "nao"
+    ? 100
+    : calcPct(dependentesChecks);
+
+  const transporte =
+    document.getElementById("vtNaoOptante")?.checked === true
+      ? 100
+      : calcPct([
+          () => hasValue("vtOnibusQtd"), () => hasMoney("vtOnibusVal"),
+          () => hasValue("vtMetroQtd"), () => hasMoney("vtMetroVal"),
+          () => hasValue("vtInterQtd"), () => hasMoney("vtInterVal"),
+          () => hasValue("vtIntegracaoQtd"), () => hasMoney("vtIntegracaoVal")
+        ]);
+
+  const refeicao = calcPct([
+    () => ["va", "vr", "flex"].includes(radio("valeRef"))
+  ]);
+
+  const declaracao = calcPct([
+    () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida()
+  ]);
+
+  return { pessoal, endereco, bancario, dependentes, transporte, refeicao, declaracao };
+}
+
+function atualizarVisibilidadeEtapas(pcts) {
+  const pessoalOk = pcts.pessoal >= 100;
+  const depOk = etapaDependentesResolvida();
+  const enderecoOk = pcts.endereco >= 100;
+  const bancarioOk = pcts.bancario >= 100;
+  const transporteOk = pcts.transporte >= 100;
+  const refeicaoOk = pcts.refeicao >= 100;
+  const declaracaoOk = pcts.declaracao >= 100;
+
+  const mapa = {
+    etapaPessoal: true,
+    gateDependentes: pessoalOk && !depOk,
+    etapaEndereco: pessoalOk && depOk,
+    etapaBancario: pessoalOk && depOk && enderecoOk,
+    etapaTransporte: pessoalOk && depOk && enderecoOk && bancarioOk,
+    etapaRefeicao: pessoalOk && depOk && enderecoOk && bancarioOk && transporteOk,
+    etapaDeclaracao: pessoalOk && depOk && enderecoOk && bancarioOk && transporteOk && refeicaoOk,
+    etapaAcoes: pessoalOk && depOk && enderecoOk && bancarioOk && transporteOk && refeicaoOk && declaracaoOk
+  };
+
+  const suprimirScroll = !!etapasDesbloqueadasAnterior.__suprimirScroll;
+  Object.entries(mapa).forEach(([id, visivel]) => {
+    if (
+      !suprimirScroll &&
+      visivel &&
+      !etapasDesbloqueadasAnterior[id] &&
+      id !== "etapaPessoal"
+    ) {
+      setTimeout(() => rolarParaEtapa(id), 150);
+    }
+    definirEtapaVisivel(id, visivel);
+    etapasDesbloqueadasAnterior[id] = !!visivel;
+  });
+}
+
+function resetarFluxoEtapas() {
+  dependentesInclusao = null;
+  dependentesModalConcluido = false;
+  etapasDesbloqueadasAnterior = {};
+  fecharModalDependentes();
+  updateProgress();
+}
 function listarLinhasDependentes(){
   return [...document.querySelectorAll('#dependentesBody tr')];
 }
@@ -2360,7 +2601,9 @@ function coletarEstadoRascunho() {
       valeRef: radio("valeRef")
     },
     tipoDeficiencia: checks("tipoDeficiencia"),
-    dependentes: lerDependentesFormulario()
+    dependentes: lerDependentesFormulario(),
+    dependentesInclusao,
+    dependentesModalConcluido
   };
 }
 
@@ -2483,6 +2726,23 @@ function aplicarEstadoRascunho(obj) {
   } else {
     limparAssinaturaCanvas();
   }
+
+  if (obj.dependentesInclusao === "sim" || obj.dependentesInclusao === "nao") {
+    dependentesInclusao = obj.dependentesInclusao;
+    dependentesModalConcluido = obj.dependentesModalConcluido === true || obj.dependentesInclusao === "nao";
+  } else {
+    const temDepPreenchido = deps.some((d) => (d.nome || d.nascimento || d.cpf));
+    if (temDepPreenchido) {
+      dependentesInclusao = "sim";
+      dependentesModalConcluido = true;
+    } else if (v("endereco") || v("cidade")) {
+      dependentesInclusao = "nao";
+      dependentesModalConcluido = true;
+    }
+  }
+  etapasDesbloqueadasAnterior = { __suprimirScroll: true };
+  updateProgress();
+  delete etapasDesbloqueadasAnterior.__suprimirScroll;
 }
 
 const RASCUNHO_DEBOUNCE_MS = 250;
@@ -2535,82 +2795,20 @@ document.querySelectorAll('input,select').forEach(el=>{
   el.addEventListener('change', salvarRascunhoLocalSincrono);
 });
 function updateProgress(){
-  const hasValue = (id) => v(id).length > 0;
-  const hasMoney = (id) => moedaParaPdf(v(id)) !== "0,00";
-  const calcPct = (checks) => {
-    if (!checks.length) return 0;
-    const preenchidos = checks.filter((fn) => fn()).length;
-    return Math.round((preenchidos / checks.length) * 100);
-  };
+  const pcts = calcularPercentuaisSecoes();
   const setProgress = (id, pct) => {
     const el = document.getElementById(id);
     if (el) el.style.width = `${pct}%`;
   };
 
-  const pessoalPct = calcPct([
-    () => hasValue('nomeCompleto'),
-    () => hasValue('cpf'),
-    () => hasValue('celular'),
-    () => hasValue('email'),
-    () => hasValue('estadoCivil'),
-    () => !!radio('primeiroEmprego'),
-    () => hasValue('pis'),
-    () => !!radio('deficiencia')
-  ]);
-
-  const enderecoPct = calcPct([
-    () => hasValue('cep'),
-    () => hasValue('endereco'),
-    () => hasValue('bairro'),
-    () => hasValue('cidade')
-  ]);
-
-  const bancarioPct = calcPct([
-    () => TIPOS_CONTA_VALIDOS.includes(radio('tipoConta')),
-    () => {
-      const tipo = radio('tipoConta');
-      const ids = idsAgenciaContaAtivos(tipo);
-      return ids ? hasValue(ids.agencia) : true;
-    },
-    () => {
-      const tipo = radio('tipoConta');
-      const ids = idsAgenciaContaAtivos(tipo);
-      return ids ? hasValue(ids.conta) : true;
-    }
-  ]);
-
-  const dependentesChecks = lerDependentesFormulario().flatMap((dep) => [
-    () => dep.nome.length > 0,
-    () => dep.nascimento.length > 0,
-    () => dep.cpf.length > 0
-  ]);
-  const dependentesPct = calcPct(dependentesChecks);
-
-  const transportePct =
-    document.getElementById("vtNaoOptante")?.checked === true
-      ? 100
-      : calcPct([
-          () => hasValue('vtOnibusQtd'), () => hasMoney('vtOnibusVal'),
-          () => hasValue('vtMetroQtd'), () => hasMoney('vtMetroVal'),
-          () => hasValue('vtInterQtd'), () => hasMoney('vtInterVal'),
-          () => hasValue('vtIntegracaoQtd'), () => hasMoney('vtIntegracaoVal')
-        ]);
-
-  const refeicaoPct = calcPct([
-    () => ['va', 'vr', 'flex'].includes(radio('valeRef'))
-  ]);
-
-  const declaracaoPct = calcPct([
-    () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida()
-  ]);
-
-  setProgress('progressPessoal', pessoalPct);
-  setProgress('progressEndereco', enderecoPct);
-  setProgress('progressBancario', bancarioPct);
-  setProgress('progressDependentes', dependentesPct);
-  setProgress('progressTransporte', transportePct);
-  setProgress('progressRefeicao', refeicaoPct);
-  setProgress('progressDeclaracao', declaracaoPct);
+  setProgress("progressPessoal", pcts.pessoal);
+  setProgress("progressEndereco", pcts.endereco);
+  setProgress("progressBancario", pcts.bancario);
+  setProgress("progressDependentes", pcts.dependentes);
+  setProgress("progressTransporte", pcts.transporte);
+  setProgress("progressRefeicao", pcts.refeicao);
+  setProgress("progressDeclaracao", pcts.declaracao);
+  atualizarVisibilidadeEtapas(pcts);
 }
 
 // ── CHECKBOX ACTIVE STATE ──
@@ -2839,7 +3037,7 @@ function limparDadosFormulario(){
   atualizarEstadoBotaoDependente();
   sincronizarCheckLabelVtNaoOptante();
   atualizarUiValeTransporteNaoOptante();
-  updateProgress();
+  resetarFluxoEtapas();
 }
 
 function descartarRascunhoEFormulario() {
@@ -3381,6 +3579,10 @@ document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) 
     fecharModalCopiaAssistRecusandoRedirecionamento();
   }
 });
+document.getElementById("btnDependentesSim")?.addEventListener("click", responderDependentesSim);
+document.getElementById("btnDependentesNao")?.addEventListener("click", responderDependentesNao);
+document.getElementById("btnModalDependentesContinuar")?.addEventListener("click", concluirModalDependentes);
+
 document.getElementById("btnModalDescartarRascunhoCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoFicha);
 document.getElementById("btnModalDescartarRascunhoConfirmar")?.addEventListener("click", () => {
   fecharModalConfirmarDescartarRascunhoFicha();
@@ -3412,6 +3614,10 @@ document.addEventListener('keydown', (event) => {
   }
   if (document.getElementById("modalCopiaAssistencia")?.classList.contains("show")) {
     fecharModalCopiaAssistRecusandoRedirecionamento();
+  }
+  if (document.getElementById("modalDependentes")?.classList.contains("show")) {
+    event.preventDefault();
+    fecharModalDependentes();
   }
 });
 function salvarRascunhoAoSair() {
