@@ -270,9 +270,20 @@
     color: var(--text-mid);
     transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
-  .gate-dependentes-acoes .btn-gate:hover {
+  .gate-dependentes-acoes .btn-gate:hover:not(.btn-gate--selecionado) {
     border-color: var(--accent);
     color: var(--accent-dark);
+  }
+  .gate-dependentes-acoes .btn-gate--selecionado {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(1, 66, 106, 0.28);
+  }
+  .gate-dependentes-acoes .btn-gate--selecionado:hover {
+    border-color: var(--accent-dark);
+    background: var(--accent-dark);
+    color: #fff;
   }
   #dependentesConteudo {
     margin-top: 22px;
@@ -2201,6 +2212,10 @@ function atualizarUiDependentes() {
     if (dependentesInclusao === "sim") conteudo.removeAttribute("hidden");
     else conteudo.setAttribute("hidden", "");
   }
+  const btnSim = document.getElementById("btnDependentesSim");
+  const btnNao = document.getElementById("btnDependentesNao");
+  btnSim?.classList.toggle("btn-gate--selecionado", dependentesInclusao === "sim");
+  btnNao?.classList.toggle("btn-gate--selecionado", dependentesInclusao === "nao");
 }
 
 function definirEtapaVisivel(id, visivel) {
