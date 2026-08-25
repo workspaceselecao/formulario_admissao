@@ -708,11 +708,11 @@
       <div class="grid grid-2">
         <div class="field col-span-2">
           <label>Nome Completo <span class="req">*</span></label>
-          <input type="text" id="nomeCompleto" placeholder="Conforme documento de identidade">
+          <input type="text" id="nomeCompleto" placeholder="Conforme documento de identidade" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
         </div>
         <div class="field">
           <label>RE (Matrícula) / RG <span class="req">*</span></label>
-          <input type="text" id="reRg" placeholder="Número da Matrícula ou RG" maxlength="20" autocomplete="off" spellcheck="false">
+          <input type="text" id="reRg" placeholder="Número da Matrícula ou RG" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
         </div>
         <div class="field">
           <label>&nbsp;</label>
