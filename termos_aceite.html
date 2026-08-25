@@ -210,6 +210,11 @@
     display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280;
     max-height: 200px; touch-action: none; cursor: crosshair;
   }
+  #assinaturaGuide {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
   .signature-pad-tools {
     display: flex;
     justify-content: space-between;
@@ -812,8 +817,9 @@
       <div class="signature-pad-wrap" id="signaturePadWrap">
         <label>Assinatura manuscrita <span class="req">*</span></label>
         <p class="signature-pad-hint">Desenhe sua assinatura com o mouse ou o dedo na área abaixo.</p>
-        <div class="signature-canvas-outer" id="signatureCanvasOuter">
+        <div class="signature-canvas-outer" id="signatureCanvasOuter" style="position:relative">
           <canvas id="assinaturaCanvas" width="1000" height="280"></canvas>
+          <canvas id="assinaturaGuide" width="1000" height="280"></canvas>
         </div>
         <div class="signature-pad-tools">
           <button type="button" class="btn-signature-clear" onclick="limparAssinatura()">Limpar assinatura</button>
@@ -1077,18 +1083,23 @@ if (canvas && ctx) {
  *  No canvas (origem superior), isso equivale a 89.5% da altura. */
 const LINHA_GUIA_Y_RATIO = 0.895;
 
+/** Canvas overlay separado para a linha-guia (nunca é capturado na assinatura). */
+const guideCanvas = document.getElementById('assinaturaGuide');
+const guideCtx = guideCanvas ? guideCanvas.getContext('2d') : null;
+
 function desenharLinhaGuia() {
-  if (!ctx || !canvas) return;
-  ctx.save();
-  ctx.strokeStyle = '#b0b0b0';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([8, 4]);
-  const y = canvas.height * LINHA_GUIA_Y_RATIO;
-  ctx.beginPath();
-  ctx.moveTo(80, y);
-  ctx.lineTo(canvas.width - 80, y);
-  ctx.stroke();
-  ctx.restore();
+  if (!guideCtx || !guideCanvas) return;
+  guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+  guideCtx.save();
+  guideCtx.strokeStyle = '#b0b0b0';
+  guideCtx.lineWidth = 1;
+  guideCtx.setLineDash([8, 4]);
+  const y = guideCanvas.height * LINHA_GUIA_Y_RATIO;
+  guideCtx.beginPath();
+  guideCtx.moveTo(80, y);
+  guideCtx.lineTo(guideCanvas.width - 80, y);
+  guideCtx.stroke();
+  guideCtx.restore();
 }
 
 function limparAssinatura() {
