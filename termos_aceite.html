@@ -1293,7 +1293,7 @@ function validarCampos() {
 }
 
 // ══════════════════════════════════════════════════
-// PDF GENERATION (pdf-lib) — 3 TERMOS
+// PDF GENERATION (pdf-lib) — SOBREPOR DADOS NO MODELO
 // ══════════════════════════════════════════════════
 const MESES_PT = [
   'janeiro','fevereiro','março','abril','maio','junho',
@@ -1302,6 +1302,61 @@ const MESES_PT = [
 
 function sanitizarNomeArquivo(s) {
   return String(s || '').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+const PDF_MODEL_URL = './ARQUIVO MODELO.pdf';
+
+// Coordenadas dos campos por página (origem: canto inferior esquerdo, y cresce para cima)
+// Cada campo: { page, x, y, width, height }
+const COORDS = {
+  // Página 1
+  assinatura1: { page: 1, x: 84, y: 98, width: 232, height: 49 },
+  nome1:       { page: 1, x: 121, y: 75, width: 243, height: 13 },
+  reRg1:       { page: 1, x: 132, y: 63, width: 125, height: 12 },
+  data1:       { page: 1, x: 296, y: 148, width: 218, height: 13 },
+  // Página 2
+  assinatura2: { page: 2, x: 85, y: 249, width: 231, height: 37 },
+  nome2:       { page: 2, x: 120, y: 226, width: 226, height: 12 },
+  reRg2:       { page: 2, x: 132, y: 213, width: 163, height: 13 },
+  data2:       { page: 2, x: 298, y: 302, width: 216, height: 16 },
+  // Página 3
+  assinatura3: { page: 3, x: 82, y: 405, width: 233, height: 33 },
+  nome3:       { page: 3, x: 120, y: 380, width: 232, height: 13 },
+  reRg3:       { page: 3, x: 133, y: 368, width: 153, height: 13 },
+  data3:       { page: 3, x: 297, y: 457, width: 215, height: 14 }
+};
+
+/** Desenha texto em uma página do PDF, ajustando o tamanho da fonte para caber na largura disponível. */
+function drawTextFit(page, text, coord, font, opts = {}) {
+  const { x, y, width, height } = coord;
+  const maxSize = opts.fontSize || Math.min(height * 0.85, 11);
+  let size = maxSize;
+  // Reduzir tamanho até caber na largura
+  while (size > 5 && font.widthOfTextAtSize(text, size) > width) {
+    size -= 0.3;
+  }
+  const yPos = y + (height - size) / 2; // centralizar verticalmente na caixa
+  page.drawText(text, {
+    x: x,
+    y: yPos,
+    size: size,
+    font: font,
+    color: opts.color || PDFLib.rgb(0, 0, 0)
+  });
+}
+
+/** Desenha imagem (assinatura) ajustando à caixa mantendo proporção. */
+function drawImageFit(page, img, coord) {
+  const { x, y, width, height } = coord;
+  const imgW = img.width;
+  const imgH = img.height;
+  const scale = Math.min(width / imgW, height / imgH);
+  const drawW = imgW * scale;
+  const drawH = imgH * scale;
+  // Centralizar na caixa
+  const drawX = x + (width - drawW) / 2;
+  const drawY = y + (height - drawH) / 2;
+  page.drawImage(img, { x: drawX, y: drawY, width: drawW, height: drawH });
 }
 
 async function gerarPDF() {
@@ -1315,19 +1370,16 @@ async function gerarPDF() {
   if (!continuar) return;
 
   try {
-    const pdfDoc = await PDFLib.PDFDocument.create();
-    const fontNormal = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRoman);
-    const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanBold);
-    const fontItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
+    // ── Carregar modelo existente ──
+    const modelResp = await fetch(PDF_MODEL_URL);
+    if (!modelResp.ok) throw new Error('Falha ao carregar PDF modelo');
+    const modelBytes = await modelResp.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(modelBytes);
 
-    const LARGURA = 595;
-    const ALTURA = 842;
-    const MARGEM_ESQ = 50;
-    const MARGEM_DIR = 50;
-    const MARGEM_TOPO = 60;
-    const MARGEM_BAIXO = 60;
-    const LARGURA_TEXTO = LARGURA - MARGEM_ESQ - MARGEM_DIR;
+    const fontNormal = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
 
+    // ── Dados do formulário ──
     const nomeCompleto = v('nomeCompleto');
     const reRg = v('reRg');
     const cidadeUf = v('cidadeUf');
@@ -1344,7 +1396,7 @@ async function gerarPDF() {
       dataStrCidade = cidadeUf;
     }
 
-    // Embed signature image
+    // ── Embed da assinatura ──
     const sigDataUrl = getAssinaturaDataURL();
     let sigImage = null;
     if (sigDataUrl) {
@@ -1352,208 +1404,36 @@ async function gerarPDF() {
       sigImage = await pdfDoc.embedPng(sigBytes);
     }
 
-    // ─── Helper: draw wrapped text ───
-    function wrapText(page, text, opts) {
-      const font = opts.font || fontNormal;
-      const size = opts.size || 10;
-      const maxWidth = opts.maxWidth || LARGURA_TEXTO;
-      const x = opts.x || MARGEM_ESQ;
-      let y = opts.y;
-      const lineHeight = opts.lineHeight || (size * 1.45);
-      const align = opts.align || 'left';
+    // ── Obter páginas ──
+    const pages = pdfDoc.getPages();
 
-      const words = text.split(/\s+/);
-      let line = '';
-      const lines = [];
+    // ── Sobrepor dados nas 3 páginas ──
+    const fields = [
+      { sig: COORDS.assinatura1, nome: COORDS.nome1, reRg: COORDS.reRg1, data: COORDS.data1 },
+      { sig: COORDS.assinatura2, nome: COORDS.nome2, reRg: COORDS.reRg2, data: COORDS.data2 },
+      { sig: COORDS.assinatura3, nome: COORDS.nome3, reRg: COORDS.reRg3, data: COORDS.data3 }
+    ];
 
-      for (const word of words) {
-        const testLine = line ? line + ' ' + word : word;
-        const w = font.widthOfTextAtSize(testLine, size);
-        if (w > maxWidth && line) {
-          lines.push(line);
-          line = word;
-        } else {
-          line = testLine;
-        }
-      }
-      if (line) lines.push(line);
+    for (let i = 0; i < 3 && i < pages.length; i++) {
+      const page = pages[i];
+      const f = fields[i];
 
-      for (const l of lines) {
-        if (y < MARGEM_BAIXO + 40) break;
-        let drawX = x;
-        if (align === 'center') {
-          drawX = x + (maxWidth - font.widthOfTextAtSize(l, size)) / 2;
-        } else if (align === 'right') {
-          drawX = x + maxWidth - font.widthOfTextAtSize(l, size);
-        }
-        page.drawText(l, { x: drawX, y, size, font });
-        y -= lineHeight;
-      }
-      return y;
-    }
-
-    function drawIndentedParagraph(page, text, startY, opts = {}) {
-      const font = opts.font || fontNormal;
-      const size = opts.size || 10;
-      const indent = opts.indent || 20;
-      const maxWidth = LARGURA_TEXTO - indent;
-      let y = startY;
-
-      // First line with indent
-      y = wrapText(page, text, {
-        font, size, maxWidth, x: MARGEM_ESQ + indent, y, lineHeight: size * 1.5
-      });
-      return y;
-    }
-
-    // ═══════════════════════════════════════════
-    // PAGE 1: TERMO DE SIGILO
-    // ═══════════════════════════════════════════
-    {
-      const page = pdfDoc.addPage([LARGURA, ALTURA]);
-      let y = ALTURA - MARGEM_TOPO;
-
-      y = wrapText(page, 'TERMO DE SIGILO, CONFIDENCIALIDADE, MANUSEIO E SEGURANÇA DAS INFORMAÇÕES', {
-        font: fontBold, size: 12, y, align: 'center', lineHeight: 16
-      });
-      y -= 20;
-
-      const t1_paras = [
-        'Pelo presente termo, declaro expressamente minha ciência sobre os procedimentos e condições abaixo, necessários à execução do meu trabalho, assumindo as responsabilidades inerentes à minha função, nos seguintes termos:',
-        'Que as contas de acesso à rede do CONTRATANTE, sejam de quaisquer sistemas operacionais, são de uso exclusivo dos FUNCIONÁRIOS e/ou PRESTADORES DE SERVIÇO autorizados e para acesso exclusivo à rede do CONTRATANTE sendo proibida a sua utilização por quaisquer outras pessoas.',
-        'Que as contas de acesso e suas respectivas senhas são códigos de conhecimento EXCLUSIVO, usado para identificar o usuário quando do acesso aos recursos computacionais. A senha de acesso é CONFIDENCIAL e de uso PESSOAL, sendo vedada sua divulgação a quaisquer outras pessoas.',
-        'Que senhas não devem ser escritas e expostas ao público, como, por exemplo, ser fixadas no monitor do computador ou colocadas com etiqueta embaixo do mouse.',
-        'Que os FUNCIONÁRIOS e PRESTADORES DE SERVIÇO são responsáveis pelas ações realizadas por meio de seu acesso.',
-        'Que é proibido o acesso ou tentativa de acesso a qualquer equipamento, rede ou computador externo do CONTRATANTE sem prévia autorização da outra parte e da equipe de Tecnologia e Security Office do Grupo Atento / CONTRATANTE.',
-        'Que os acessos à Intranet e/ou Internet são monitorados pela equipe do Security Office e Tecnologia e quaisquer acessos considerados indevidos estarão sujeitos às penalidades cabíveis.',
-        'Que é proibido efetuar tentativas de acessos não autorizados com o objetivo de burlar os mecanismos de segurança, dentro ou fora do domínio do Grupo Atento / CONTRATANTE.',
-        'Que são de minha total responsabilidade as conversas telefônicas, fax, transferências de arquivos, mensagens via correio eletrônico, Internet e outros que tenham a minha IDENTIFICAÇÃO DE USUÁRIO. Por isso, tomarei as devidas precauções para evitar que terceiros possam utilizar tal identificação de forma ilícita ou enganadora.',
-        'Que recebi as senhas de acesso aos sistemas pertinentes ao desenvolvimento do meu trabalho, sendo responsável pela utilização e movimentação das mesmas.',
-        'Que assumo o compromisso de proteger as informações a mim confiadas, não permitindo que estas fiquem expostas em telas, papel ou outras mídias, que possam ser visualizadas por pessoas não autorizadas.',
-        'Que por se tratar de responsabilidade do empregado, a guarda/sigilo da senha de identificação, o não atendimento dos termos do presente procedimento, constituirá quebra de sigilo no desempenho das funções, passível de adoção de medidas disciplinares ou rescisão do contrato por Justa causa nos termos do artigo 482, alínea "e" da CLT, sem prejuízo das implicações de caráter civil e penais, se configurado o dolo.'
-      ];
-
-      for (const para of t1_paras) {
-        y = drawIndentedParagraph(page, para, y, { size: 10, indent: 15, lineHeight: 14 });
-        y -= 6;
-        if (y < MARGEM_BAIXO + 80) break;
-      }
-
-      // Signature block
-      y -= 10;
-      page.drawText(dataStrCidade, { x: MARGEM_ESQ, y, size: 10, font: fontNormal });
-      y -= 30;
-
-      // Signature line
+      // Assinatura manual
       if (sigImage) {
-        const sigW = 200;
-        const sigH = sigImage.height * (sigW / sigImage.width);
-        page.drawImage(sigImage, { x: MARGEM_ESQ + 20, y: y - sigH + 10, width: sigW, height: sigH });
+        drawImageFit(page, sigImage, f.sig);
       }
-      page.drawText('____________________________________', { x: MARGEM_ESQ + 20, y: y - 8, size: 10, font: fontNormal });
-      y -= 22;
-      page.drawText('Assinatura do(a) Operador(a)', { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-      y -= 16;
-      page.drawText(`Nome: ${nomeCompleto}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-      y -= 16;
-      page.drawText(`R.G.: ${reRg}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
 
-      // Evidence footer
-      page.drawText(`Documento gerado eletronicamente por Atento Forms — ${new Date().toLocaleString('pt-BR')}`, {
-        x: MARGEM_ESQ, y: 20, size: 7, font: fontItalic, color: PDFLib.rgb(0.5, 0.5, 0.5)
-      });
+      // Nome completo
+      drawTextFit(page, nomeCompleto, f.nome, fontBold, { fontSize: 11 });
+
+      // RE/RG
+      drawTextFit(page, reRg, f.reRg, fontNormal, { fontSize: 10 });
+
+      // Cidade/UF + Data por extenso
+      drawTextFit(page, dataStrCidade, f.data, fontNormal, { fontSize: 10 });
     }
 
-    // ═══════════════════════════════════════════
-    // PAGE 2: TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO
-    // ═══════════════════════════════════════════
-    {
-      const page = pdfDoc.addPage([LARGURA, ALTURA]);
-      let y = ALTURA - MARGEM_TOPO;
-
-      y = wrapText(page, 'TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM', {
-        font: fontBold, size: 12, y, align: 'center', lineHeight: 16
-      });
-      y -= 20;
-
-      const t2_items = [
-        '1. Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "Operador de Telemarketing", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.',
-        '2. Estou ciente de que assuntos de meu interesse particular, excepcionalmente, poderão ser tratados em outro telefone colocado à minha disposição para tal finalidade, fora do sistema de gravação, cujos ramais tomei conhecimento através da relação que está em poder do Supervisor da minha área de lotação.',
-        '3. Declaro ainda que, pelo presente, autorizo a captação e utilização de minha imagem e conversas telefônicas na forma como descrito no item 1, nada podendo exigir, a qualquer título, inclusive indenização por danos patrimoniais e/ou morais, das empresas tomadoras dos serviços, por dita captação/utilização.',
-        '4. Outrossim, declaro que já tinha conhecimento das gravações de ligações telefônicas e de imagem e que em nada me oponho ao uso de tais gravações feitas até o momento.'
-      ];
-
-      for (const item of t2_items) {
-        y = drawIndentedParagraph(page, item, y, { size: 10, indent: 15, lineHeight: 14 });
-        y -= 8;
-        if (y < MARGEM_BAIXO + 80) break;
-      }
-
-      // Signature block
-      y -= 10;
-      page.drawText(dataStrCidade, { x: MARGEM_ESQ, y, size: 10, font: fontNormal });
-      y -= 30;
-
-      if (sigImage) {
-        const sigW = 200;
-        const sigH = sigImage.height * (sigW / sigImage.width);
-        page.drawImage(sigImage, { x: MARGEM_ESQ + 20, y: y - sigH + 10, width: sigW, height: sigH });
-      }
-      page.drawText('____________________________________', { x: MARGEM_ESQ + 20, y: y - 8, size: 10, font: fontNormal });
-      y -= 22;
-      page.drawText('Assinatura do(a) Operador(a)', { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-      y -= 16;
-      page.drawText(`Nome: ${nomeCompleto}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-      y -= 16;
-      page.drawText(`R.G.: ${reRg}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-
-      page.drawText(`Documento gerado eletronicamente por Atento Forms — ${new Date().toLocaleString('pt-BR')}`, {
-        x: MARGEM_ESQ, y: 20, size: 7, font: fontItalic, color: PDFLib.rgb(0.5, 0.5, 0.5)
-      });
-    }
-
-    // ═══════════════════════════════════════════
-    // PAGE 3: TERMO DE COMPROMISSO SIGILO
-    // ═══════════════════════════════════════════
-    {
-      const page = pdfDoc.addPage([LARGURA, ALTURA]);
-      let y = ALTURA - MARGEM_TOPO;
-
-      y = wrapText(page, 'TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES', {
-        font: fontBold, size: 12, y, align: 'center', lineHeight: 16
-      });
-      y -= 20;
-
-      const t3_text = '1. Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "Operador de Telemarketing", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas INFORMAÇÕES CONFIDENCIAIS e comprometo-me a manter sob absoluto sigilo qualquer dessas INFORMAÇÕES CONFIDENCIAIS a que tiver acesso em razão de minha atividade.';
-
-      y = drawIndentedParagraph(page, t3_text, y, { size: 10, indent: 15, lineHeight: 14 });
-      y -= 30;
-
-      // Signature block
-      page.drawText(dataStrCidade, { x: MARGEM_ESQ, y, size: 10, font: fontNormal });
-      y -= 30;
-
-      if (sigImage) {
-        const sigW = 200;
-        const sigH = sigImage.height * (sigW / sigImage.width);
-        page.drawImage(sigImage, { x: MARGEM_ESQ + 20, y: y - sigH + 10, width: sigW, height: sigH });
-      }
-      page.drawText('____________________________________', { x: MARGEM_ESQ + 20, y: y - 8, size: 10, font: fontNormal });
-      y -= 22;
-      page.drawText('Assinatura do(a) Operador(a)', { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-      y -= 16;
-      page.drawText(`Nome: ${nomeCompleto}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-      y -= 16;
-      page.drawText(`R.G.: ${reRg}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
-
-      page.drawText(`Documento gerado eletronicamente por Atento Forms — ${new Date().toLocaleString('pt-BR')}`, {
-        x: MARGEM_ESQ, y: 20, size: 7, font: fontItalic, color: PDFLib.rgb(0.5, 0.5, 0.5)
-      });
-    }
-
-    // ═══════════════════════════════════════════
-    // DOWNLOAD
-    // ═══════════════════════════════════════════
+    // ── Salvar e baixar ──
     const pdfBytes = await pdfDoc.save();
     const nomeArq = sanitizarNomeArquivo(`${nomeCompleto} - ${reRg}`);
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
