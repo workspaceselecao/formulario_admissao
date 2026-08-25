@@ -1399,6 +1399,89 @@ function drawImageFit(page, img, coord) {
   page.drawImage(img, { x: drawX, y: drawY, width: drawW, height: drawH });
 }
 
+// ════════════════════════════════════════════════
+// EVIDÊNCIA DA ASSINATURA (rodapé do PDF)
+// ════════════════════════════════════════════════
+const PDF_FONT_EVIDENCIA = 5.5;
+const RODAPE_EVIDENCIA_MARGEM_Y_PT = 12;
+
+async function obterIpPublicoEvidencia() {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3500);
+  try {
+    const r = await fetch('https://api.ipify.org?format=json', { signal: ctrl.signal, cache: 'no-store' });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return typeof j.ip === 'string' ? j.ip.trim() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function quebrarTextoEvidencia(font, texto, tamanho, larguraMax) {
+  const palavras = String(texto).split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let linha = '';
+  for (const p of palavras) {
+    const teste = linha ? linha + ' ' + p : p;
+    if (font.widthOfTextAtSize(teste, tamanho) <= larguraMax) {
+      linha = teste;
+    } else {
+      if (linha) linhas.push(linha);
+      linha = p;
+    }
+  }
+  if (linha) linhas.push(linha);
+  return linhas;
+}
+
+function montarTextoEvidenciaAssinatura(semRubricaManual, ipRef) {
+  const agora = new Date();
+  const docId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `doc-${agora.getTime()}`;
+  const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || '\u2014';
+  const dataHoraBr = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: fuso,
+    dateStyle: 'short',
+    timeStyle: 'medium'
+  }).format(agora);
+  return (
+    (semRubricaManual ? 'Assinatura por nome leg\u00edvel (sem rubrica manual). ' : 'Assinatura manuscrita no navegador. ') +
+    'Doc. ' + docId + '. Reg.: ' + dataHoraBr +
+    ' (fuso ' + fuso + '). IP: ' + (ipRef || 'n/d') + '.'
+  );
+}
+
+function caixaRodapeEvidenciaPdf(page, overrides = {}) {
+  const { width: pageW } = page.getSize();
+  const margemX = Number(overrides.x) || 21;
+  const margemInferior = Number(overrides.y) || RODAPE_EVIDENCIA_MARGEM_Y_PT;
+  const largura = Number(overrides.largura) || Math.max(200, pageW - margemX * 2);
+  return { x: margemX, y: margemInferior, largura, altura: Number(overrides.altura) || 10 };
+}
+
+function desenharEvidenciaAssinatura(page, font, box, linhas) {
+  if (!box || !linhas?.length) return;
+  const x = (Number(box.x) || 0) + 0.5;
+  const yRodape = Number(box.y) || 0;
+  const tamanho = PDF_FONT_EVIDENCIA;
+  const lineH = tamanho * 1.18;
+  const maxW = (Number(box.largura) || 500) - 1;
+  for (let i = 0; i < linhas.length; i++) {
+    page.drawText(linhas[i], {
+      x,
+      y: yRodape + 4 + i * lineH,
+      size: tamanho,
+      font,
+      maxWidth: maxW
+    });
+  }
+}
+
 async function gerarPDF() {
   if (!allTermsAccepted()) {
     showToast('Marque todos os checkboxes de aceite.', false);
@@ -1446,6 +1529,9 @@ async function gerarPDF() {
       sigImage = await pdfDoc.embedPng(sigBytes);
     }
 
+    // ── IP para evidência ──
+    const ipRef = await obterIpPublicoEvidencia();
+
     // ── Obter páginas ──
     const pages = pdfDoc.getPages();
 
@@ -1473,6 +1559,14 @@ async function gerarPDF() {
 
       // Cidade/UF + Data por extenso
       drawTextFit(page, dataStrCidade, f.data, fontNormal, { fontSize: 10 });
+
+      // Evidência da assinatura (rodapé)
+      const semRubricaManual = !sigImage;
+      const parEvid = montarTextoEvidenciaAssinatura(semRubricaManual, ipRef);
+      const caixaRodape = caixaRodapeEvidenciaPdf(page);
+      const wEv = Math.max(120, (Number(caixaRodape.largura) || 550) - 2);
+      const linhasE = quebrarTextoEvidencia(fontNormal, parEvid, PDF_FONT_EVIDENCIA, wEv);
+      desenharEvidenciaAssinatura(page, fontNormal, caixaRodape, linhasE);
     }
 
     // ── Salvar e baixar ──
