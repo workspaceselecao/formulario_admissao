@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Aceite – Sigilo e Confidencialidade | Atento</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-header-nav.css">
+<style>
+  /* ── TOKENS (página) ─────────────────── */
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf9f7;
+    --card: #ffffff;
+    --border: #d4cfc8;
+    --border-strong: #9e9890;
+    --accent: #01426A;
+    --accent-dark: #013756;
+    --accent-soft: #e8f0f5;
+    --text: #1a1714;
+    --text-mid: #4a453f;
+    --text-light: #7a756e;
+    --label: #5a554e;
+    --success: #2d7a4a;
+    --input-focus-border: #efa27f;
+    --accent-border-subtle: rgba(1, 66, 106, 0.2);
+    --accent-border-medium: rgba(1, 66, 106, 0.28);
+    --accent-shadow-subtle: rgba(12, 40, 68, 0.06);
+    --accent-shadow-medium: rgba(1, 66, 106, 0.14);
+    --overlay-bg: rgba(10, 10, 10, 0.45);
+    --destructive: #a33;
+    --destructive-bg: rgba(180, 60, 50, 0.08);
+    --separator-subtle: rgba(0, 0, 0, 0.06);
+    --separator-medium: rgba(0, 0, 0, 0.1);
+    --accent-tap-hover: rgba(1, 66, 106, 0.07);
+    --accent-tap-focus: rgba(1, 66, 106, 0.09);
+    --accent-focus-ring: rgba(1, 66, 106, 0.28);
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── SECTION CARDS ── */
+  .section-card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s;
+  }
+  .section-card:hover { box-shadow: var(--shadow-lg); }
+
+  .section-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-body { padding: 28px 28px 20px; }
+
+  .section-progress { margin-top: 16px; }
+  .section-progress-track {
+    background: var(--border);
+    border-radius: 100px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .section-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 18px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+
+  /* ── FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+
+  .field input,
+  .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s, background 0.18s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--input-focus-border);
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input.invalid,
+  .field select.invalid {
+    border-color: #d1432f;
+    background: #fff;
+    box-shadow: none;
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field select { cursor: pointer; }
+
+  /* ── DATA ROW (Cidade/UF + Dia/Mês/Ano) ── */
+  .data-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 14px;
+    align-items: end;
+  }
+
+  /* ── SIGNATURE PAD ── */
+  .signature-pad-wrap { margin-bottom: 20px; }
+  .signature-pad-wrap label {
+    font-size: 11px; font-weight: 600; color: var(--label);
+    letter-spacing: 0.6px; text-transform: uppercase; font-family: 'Poppins', sans-serif;
+    display: block; margin-bottom: 8px;
+  }
+  .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
+  .signature-canvas-outer {
+    position: relative;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    max-width: 100%;
+  }
+  .signature-canvas-outer.desativada {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .signature-pad-wrap.desativada .btn-signature-clear {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: none; }
+  #assinaturaCanvas {
+    display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280;
+    max-height: 200px; touch-action: none; cursor: crosshair;
+  }
+  .signature-pad-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-signature-clear {
+    background: var(--surface); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── CHECKBOXES ── */
+  .check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 500;
+    user-select: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    transition: all 0.15s;
+    background: var(--surface);
+    width: 100%;
+  }
+  .check-label:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .check-label input[type="checkbox"] {
+    width: 15px; height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .check-label.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+
+  .aceite-info {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border-subtle);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .aceite-info strong { color: var(--accent-dark); }
+
+  /* ── PDF VIEWER ── */
+  .pdf-viewer-container {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #525659;
+    margin-bottom: 16px;
+  }
+  .pdf-viewer-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: #3b3d41;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 10px;
+  }
+  .pdf-viewer-toolbar button {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .pdf-viewer-toolbar button:hover { background: rgba(255,255,255,0.28); }
+  .pdf-viewer-toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pdf-viewer-toolbar .page-info { color: #ccc; }
+  #pdfViewerContainer {
+    width: 100%;
+    min-height: 500px;
+    max-height: 70vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 8px;
+  }
+  #pdfViewerContainer canvas {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    max-width: 100%;
+  }
+
+  /* ── TERMS CONTENT ── */
+  .termo-bloco {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .termo-bloco:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .termo-titulo {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .termo-texto {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    text-align: justify;
+  }
+  .termo-texto p {
+    margin-bottom: 10px;
+    text-indent: 2em;
+  }
+  .termo-texto p:first-child { text-indent: 0; }
+  .termo-texto ol {
+    margin: 8px 0 8px 2em;
+    padding: 0;
+    list-style: decimal;
+  }
+  .termo-texto ol li {
+    margin-bottom: 6px;
+    line-height: 1.6;
+  }
+  .termo-texto .destaque {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .termo-texto .citacao {
+    font-style: italic;
+    color: var(--text-light);
+  }
+
+  /* ── AVISO ── */
+  .aviso-box {
+    background: #fffbf5;
+    border: 1.5px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: #6b5a3a;
+    line-height: 1.65;
+    margin-top: 8px;
+  }
+  .aviso-box strong { color: #8a4a10; }
+
+  /* ── BOTÕES ── */
+  .form-actions-bottom {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .btn-export {
+    --btn-fill-a: #3b2447;
+    --btn-fill-b: #efa27f;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(to top right, var(--btn-fill-a), var(--btn-fill-b));
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.2s, transform 0.12s;
+    text-shadow: 0 1px 2px rgba(30, 14, 38, 0.35);
+    animation: btn-export-spark-glow 2.5s ease-in-out infinite;
+    box-shadow:
+      0 2px 14px rgba(59, 36, 71, 0.38),
+      0 0 22px rgba(239, 162, 127, 0.28);
+  }
+  .btn-export::before {
+    content: "";
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -75%;
+    width: 58%;
+    background: linear-gradient(
+      88deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.06) 62%,
+      transparent 100%
+    );
+    transform: skewX(-16deg);
+    animation: btn-export-spark-sweep 2.75s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .btn-export:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 22px rgba(59, 36, 71, 0.42),
+      0 0 32px rgba(239, 162, 127, 0.48),
+      0 0 46px rgba(255, 228, 210, 0.35);
+  }
+  .btn-export:active { transform: translateY(0); filter: brightness(0.98); }
+  .btn-export svg { width: 16px; height: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+  .btn-export:disabled { opacity: 0.5; cursor: not-allowed; filter: none; animation: none; }
+  @keyframes btn-export-spark-glow {
+    0%, 100% {
+      box-shadow:
+        0 2px 14px rgba(59, 36, 71, 0.38),
+        0 0 20px rgba(239, 162, 127, 0.26),
+        0 0 36px rgba(239, 162, 127, 0.12);
+    }
+    50% {
+      box-shadow:
+        0 3px 18px rgba(59, 36, 71, 0.46),
+        0 0 34px rgba(239, 162, 127, 0.52),
+        0 0 52px rgba(255, 235, 220, 0.42);
+    }
+  }
+  @keyframes btn-export-spark-sweep {
+    0% { transform: skewX(-16deg) translateX(-8%); opacity: 0; }
+    8% { opacity: 1; }
+    42% { transform: skewX(-16deg) translateX(320%); opacity: 1; }
+    43%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-export { animation: none; box-shadow: 0 2px 14px rgba(59, 36, 71, 0.38); }
+    .btn-export::before { animation: none; opacity: 0; }
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--text);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-lg);
+    max-width: min(420px, calc(100vw - 48px));
+  }
+  #toast.show { display: flex; }
+  #toast .toast-dot { width: 8px; height: 8px; background: #4caf7d; border-radius: 50%; flex-shrink: 0; }
+  body.modal-open { overflow: hidden; }
+
+  /* ── MODAIS ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.58);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-card {
+    width: min(620px, 100%);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+  }
+  .modal-head {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+  }
+  .modal-head.modal-head--atencao {
+    background: #8a4510;
+    color: #fff;
+  }
+  .modal-body {
+    padding: 18px;
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .modal-body strong { color: var(--text); }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 18px 18px;
+  }
+  .btn-modal {
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    padding: 10px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-modal.cancel { background: #fff; color: var(--text-mid); }
+  .btn-modal.cancel:hover { border-color: var(--text-mid); color: var(--text); }
+  .btn-modal.confirm {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-modal.confirm:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
+    .container { padding: 24px 14px 64px; }
+    .section-body { padding: 22px 18px 16px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3 { grid-column: auto; }
+    .data-row { grid-template-columns: 1fr 1fr; }
+    .form-actions-bottom { justify-content: stretch; }
+    .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
+    #toast { left: 16px; right: 16px; bottom: 16px; }
+    #pdfViewerContainer { min-height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <button type="button" class="header-menu-btn" id="headerMenuBtn" aria-expanded="false" aria-controls="headerNavPanel" aria-label="Abrir menu">
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+    <span class="hm-line" aria-hidden="true"></span>
+  </button>
+  <div class="page-header-main">
+    <div class="brand">
+      <span class="brand-text">Termos de Aceite</span>
+    </div>
+  </div>
+</header>
+
+<div id="headerNavBackdrop" class="header-nav-backdrop" aria-hidden="true"></div>
+<nav id="headerNavPanel" class="header-nav-panel" role="navigation" aria-labelledby="headerNavTitle" aria-hidden="true">
+  <div class="header-nav-panel-inner">
+    <div class="header-nav-panel-head">
+      <h2 class="header-nav-panel-title" id="headerNavTitle">Termos de Aceite</h2>
+      <button type="button" class="header-nav-close-btn" id="headerNavCloseBtn" aria-label="Fechar menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <ul class="header-nav-links" role="list">
+      <li>
+        <a href="index.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Início
+        </a>
+      </li>
+      <li>
+        <a href="ficha_cadastral.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Ficha Cadastral
+        </a>
+      </li>
+      <li>
+        <a href="assistencia_medica.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.8 2.3A4 4 0 0 0 2 6v4a4 4 0 0 0 4 4h1v3a3 3 0 0 0 3 3"/><path d="M8 19v3"/><path d="M16 19v3"/><path d="M12 18v3"/><circle cx="16" cy="6" r="3"/><path d="M9 12a3 3 0 0 0 3-3V6"/></svg>
+          Assistência Médica
+        </a>
+      </li>
+      <li>
+        <a href="carta_bradesco.html" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Carta Conta Salário (Bradesco)
+        </a>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-link--destructive rascunho-descartar" id="btnDescartarRascunho">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          Descartar rascunho
+        </button>
+      </li>
+      <li>
+        <button type="button" class="header-nav-link header-nav-download" onclick="downloadModeloPDF()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Baixar modelo dos Termos (PDF)
+        </button>
+      </li>
+    </ul>
+    <ul class="header-nav-links header-nav-links--legal" role="list" aria-label="Privacidade e documentação">
+      <li>
+        <a href="/politica-de-privacidade" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Política de Privacidade
+        </a>
+      </li>
+      <li>
+        <a href="/termos-de-uso" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+          Termos de Uso
+        </a>
+      </li>
+      <li>
+        <a href="/privacidade-e-seguranca" class="header-nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Privacidade e segurança
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═══════ VISUALIZADOR DO PDF MODELO ═══════ -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>PDF Modelo – Termos de Aceite</div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:14px;line-height:1.6">
+        Visualize o modelo dos termos abaixo. O PDF original possui 3 páginas com os termos de sigilo, gravação e compromisso.
+      </p>
+      <div class="pdf-viewer-container">
+        <div class="pdf-viewer-toolbar">
+          <button type="button" id="pdfPrevBtn" disabled onclick="pdfNavigate(-1)">← Anterior</button>
+          <span class="page-info" id="pdfPageInfo">Carregando...</span>
+          <button type="button" id="pdfNextBtn" disabled onclick="pdfNavigate(1)">Próxima →</button>
+        </div>
+        <div id="pdfViewerContainer"></div>
+      </div>
+      <div class="aviso-box">
+        <strong>ATENÇÃO:</strong> Este é o modelo de referência. O PDF final será gerado automaticamente com os dados preenchidos e a assinatura inserida.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ TEXTOS DOS TERMOS ═══════ -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Texto dos Termos</div>
+    <div class="section-body">
+      <div class="aceite-info">
+        <strong>Leia com atenção cada um dos 3 termos abaixo.</strong> Ao final de cada um, marque a caixa de confirmação "Li e aceito" para prosseguir com a geração do documento.
+      </div>
+
+      <!-- TERMO 1 -->
+      <div class="termo-bloco" id="termo1Bloco">
+        <div class="termo-titulo">TERMO DE SIGILO, CONFIDENCIALIDADE, MANUSEIO E SEGURANÇA DAS INFORMAÇÕES</div>
+        <div class="termo-texto">
+          <p>Pelo presente termo, declaro expressamente minha ciência sobre os procedimentos e condições abaixo, necessários à execução do meu trabalho, assumindo as responsabilidades inerentes à minha função, nos seguintes termos:</p>
+          <p>Que as contas de acesso à rede do CONTRATANTE, sejam de quaisquer sistemas operacionais, são de uso exclusivo dos <span class="destaque">FUNCIONÁRIOS</span> e/ou <span class="destaque">PRESTADORES DE SERVIÇO</span> autorizados e para acesso exclusivo à rede do CONTRATANTE sendo proibida a sua utilização por quaisquer outras pessoas.</p>
+          <p>Que as contas de acesso e suas respectivas senhas são códigos de conhecimento <span class="destaque">EXCLUSIVO</span>, usado para identificar o usuário quando do acesso aos recursos computacionais. A senha de acesso é <span class="destaque">CONFIDENCIAL</span> e de uso <span class="destaque">PESSOAL</span>, sendo vedada sua divulgação a quaisquer outras pessoas.</p>
+          <p>Que senhas não devem ser escritas e expostas ao público, como, por exemplo, ser fixadas no monitor do computador ou colocadas com etiqueta embaixo do mouse.</p>
+          <p>Que os <span class="destaque">FUNCIONÁRIOS</span> e <span class="destaque">PRESTADORES DE SERVIÇO</span> são responsáveis pelas ações realizadas por meio de seu acesso.</p>
+          <p>Que é proibido o acesso ou tentativa de acesso a qualquer equipamento, rede ou computador externo do CONTRATANTE sem prévia autorização da outra parte e da equipe de Tecnologia e Security Office do Grupo Atento / CONTRATANTE.</p>
+          <p>Que os acessos à Intranet e/ou Internet são monitorados pela equipe do Security Office e Tecnologia e quaisquer acessos considerados indevidos estarão sujeitos às penalidades cabíveis.</p>
+          <p>Que é proibido efetuar tentativas de acessos não autorizados com o objetivo de burlar os mecanismos de segurança, dentro ou fora do domínio do Grupo Atento / CONTRATANTE.</p>
+          <p>Que são de minha total responsabilidade as conversas telefônicas, fax, transferências de arquivos, mensagens via correio eletrônico, Internet e outros que tenham a minha <span class="destaque">IDENTIFICAÇÃO DE USUÁRIO</span>. Por isso, tomarei as devidas precauções para evitar que terceiros possam utilizar tal identificação de forma ilícita ou enganadora.</p>
+          <p>Que recebi as senhas de acesso aos sistemas pertinentes ao desenvolvimento do meu trabalho, sendo responsável pela utilização e movimentação das mesmas.</p>
+          <p>Que assumo o compromisso de proteger as informações a mim confiadas, não permitindo que estas fiquem expostas em telas, papel ou outras mídias, que possam ser visualizadas por pessoas não autorizadas.</p>
+          <p>Que por se tratar de responsabilidade do empregado, a guarda/sigilo da senha de identificação, o não atendimento dos termos do presente procedimento, constituirá quebra de sigilo no desempenho das funções, passível de adoção de medidas disciplinares ou rescisão do contrato por Justa causa nos termos do artigo 482, alínea "e" da CLT, sem prejuízo das implicações de caráter civil e penais, se configurado o dolo.</p>
+        </div>
+        <div style="margin-top:16px">
+          <label class="check-label" id="checkTermo1Label">
+            <input type="checkbox" id="checkTermo1" onchange="updateAceiteCheckbox(this, 1)">
+            <span>Li e aceito os termos de Sigilo, Confidencialidade, Manuseio e Segurança das Informações.</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- TERMO 2 -->
+      <div class="termo-bloco" id="termo2Bloco">
+        <div class="termo-titulo">TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM</div>
+        <div class="termo-texto">
+          <ol>
+            <li>Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.</li>
+            <li>Estou ciente de que assuntos de meu interesse particular, excepcionalmente, poderão ser tratados em outro telefone colocado à minha disposição para tal finalidade, fora do sistema de gravação, cujos ramais tomei conhecimento através da relação que está em poder do Supervisor da minha área de lotação.</li>
+            <li>Declaro ainda que, pelo presente, autorizo a captação e utilização de minha imagem e conversas telefônicas na forma como descrito no item 1, nada podendo exigir, a qualquer título, inclusive indenização por danos patrimoniais e/ou morais, das empresas tomadoras dos serviços, por dita captação/utilização.</li>
+            <li>Outrossim, declaro que já tinha conhecimento das gravações de ligações telefônicas e de imagem e que em nada me oponho ao uso de tais gravações feitas até o momento.</li>
+          </ol>
+        </div>
+        <div style="margin-top:16px">
+          <label class="check-label" id="checkTermo2Label">
+            <input type="checkbox" id="checkTermo2" onchange="updateAceiteCheckbox(this, 2)">
+            <span>Li e aceito os termos de Autorização de Gravação Telefônica e de Imagem.</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- TERMO 3 -->
+      <div class="termo-bloco" id="termo3Bloco">
+        <div class="termo-titulo">TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES</div>
+        <div class="termo-texto">
+          <ol>
+            <li>Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.</li>
+          </ol>
+        </div>
+        <div style="margin-top:16px">
+          <label class="check-label" id="checkTermo3Label">
+            <input type="checkbox" id="checkTermo3" onchange="updateAceiteCheckbox(this, 3)">
+            <span>Li e aceito os termos de Compromisso Relativo à Preservação do Sigilo de Informações.</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ DADOS DO FUNCIONÁRIO ═══════ -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Dados do Funcionário</div>
+    <div class="section-body">
+      <div class="grid grid-2">
+        <div class="field col-span-2">
+          <label>Nome Completo <span class="req">*</span></label>
+          <input type="text" id="nomeCompleto" placeholder="Conforme documento de identidade">
+        </div>
+        <div class="field">
+          <label>RE (Matrícula) / RG <span class="req">*</span></label>
+          <input type="text" id="reRg" placeholder="Número da Matrícula ou RG" maxlength="20" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div style="height:42px"></div>
+        </div>
+        <div class="col-span-2 data-row">
+          <div class="field">
+            <label>Cidade / UF <span class="req">*</span></label>
+            <input type="text" id="cidadeUf" placeholder="Ex: Salvador - BA">
+          </div>
+          <div class="field">
+            <label>Dia <span class="req">*</span></label>
+            <input type="text" id="dia" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskDia(this)">
+          </div>
+          <div class="field">
+            <label>Mês <span class="req">*</span></label>
+            <select id="mes">
+              <option value="">MÊS</option>
+              <option value="janeiro">janeiro</option>
+              <option value="fevereiro">fevereiro</option>
+              <option value="março">março</option>
+              <option value="abril">abril</option>
+              <option value="maio">maio</option>
+              <option value="junho">junho</option>
+              <option value="julho">julho</option>
+              <option value="agosto">agosto</option>
+              <option value="setembro">setembro</option>
+              <option value="outubro">outubro</option>
+              <option value="novembro">novembro</option>
+              <option value="dezembro">dezembro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ano <span class="req">*</span></label>
+            <input type="text" id="ano" placeholder="AAAA" maxlength="4" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskAno(this)">
+          </div>
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressDados"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ ASSINATURA ═══════ -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Assinatura</div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:18px;line-height:1.6">
+        Desenhe sua assinatura manuscrita na área abaixo. A assinatura será inserida em todos os 3 termos do PDF gerado.
+      </p>
+      <div class="signature-pad-wrap" id="signaturePadWrap">
+        <label>Assinatura manuscrita <span class="req">*</span></label>
+        <p class="signature-pad-hint">Desenhe sua assinatura com o mouse ou o dedo na área abaixo.</p>
+        <div class="signature-canvas-outer" id="signatureCanvasOuter">
+          <canvas id="assinaturaCanvas" width="1000" height="280"></canvas>
+        </div>
+        <div class="signature-pad-tools">
+          <button type="button" class="btn-signature-clear" onclick="limparAssinatura()">Limpar assinatura</button>
+        </div>
+      </div>
+      <div class="section-progress">
+        <div class="section-progress-track"><div class="section-progress-fill" id="progressAssinatura"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CHECKLIST FINAL ═══════ -->
+  <div class="section-card">
+    <div class="section-header"><div class="dot"></div>Confirmação e Geração</div>
+    <div class="section-body">
+      <div class="aceite-info">
+        <strong>Antes de gerar o PDF, verifique:</strong><br>
+        ✓ Todos os 3 termos foram lidos e aceitos (checkboxes marcados)<br>
+        ✓ Dados pessoais estão corretos (Nome, RE/RG, Cidade/UF, Data)<br>
+        ✓ Assinatura manuscrita foi desenhada na área indicada
+      </div>
+      <div style="margin-top:16px">
+        <label class="check-label" id="checkFinalLabel">
+          <input type="checkbox" id="checkFinal" onchange="updateAceiteFinal()">
+          <span>Declaro que li e aceito todos os termos acima, e que os dados informados são verdadeiros.</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ BOTÃO GERAR ═══════ -->
+  <div class="aviso-box" style="margin:20px 0 14px">
+    <strong>ATENÇÃO:</strong> O arquivo PDF será nomeado automaticamente como <strong>"{NOME COMPLETO} - RE/RG.pdf"</strong> e conterá os 3 termos preenchidos com seus dados e assinatura.
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn-export" type="button" id="btnGerarPDF" onclick="gerarPDF()" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Salvar e Baixar Termos preenchidos (PDF)
+    </button>
+  </div>
+
+</div>
+
+<!-- ═══════ TOAST ═══════ -->
+<div id="toast"><div class="toast-dot"></div><span id="toastMsg">PDF gerado com sucesso!</span></div>
+
+<!-- ═══════ MODAL LGPD ═══════ -->
+<div id="lgpdModal" class="modal-overlay" role="dialog" aria-labelledby="lgpdTitle" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head" id="lgpdTitle">Decisão LGPD</div>
+    <div class="modal-body">
+      O preenchimento pode ser guardado como rascunho neste aparelho (navegador) para você retomar depois.<br>
+      Após gerar o PDF, os dados continuam no formulário e no rascunho local; para apagá-los de vez, use <strong>Descartar rascunho</strong> no menu.<br>
+      A <strong>ATENTO</strong> não coleta ou mantém dados avulsos neste fluxo, em conformidade com a
+      <strong>Lei Geral de Proteção de Dados Pessoais (LGPD), Lei nº 13.709/2018</strong>.<br><br>
+      Deseja continuar com a geração do PDF?
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="lgpdCancelarBtn" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="lgpdContinuarBtn" class="btn-modal confirm">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MODAL DESCARTAR RASCUNHO ═══════ -->
+<div id="modalConfirmarDescartarRascunho" class="modal-overlay" role="dialog" aria-labelledby="modalDescartarTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalDescartarTitulo">Descartar rascunho</div>
+    <div class="modal-body">
+      O rascunho guardado neste navegador e os dados atualmente no formulário serão apagados. Esta ação não pode ser desfeita.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnModalDescartarRascunhoCancelar" class="btn-modal cancel">Cancelar</button>
+      <button type="button" id="btnModalDescartarRascunhoConfirmar" class="btn-modal confirm">Sim, descartar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+// PDF VIEWER (pdf.js)
+// ══════════════════════════════════════════════════
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const PDF_MODEL_URL = './ARQUIVO MODELO.pdf';
+let pdfDoc = null;
+let pdfCurrentPage = 1;
+let pdfRendering = false;
+let pdfPagePending = null;
+
+async function loadPdfModel() {
+  try {
+    pdfDoc = await pdfjsLib.getDocument(PDF_MODEL_URL).promise;
+    pdfCurrentPage = 1;
+    updatePdfPageInfo();
+    renderPdfPage(pdfCurrentPage);
+  } catch (err) {
+    console.error('Erro ao carregar PDF modelo:', err);
+    document.getElementById('pdfViewerContainer').innerHTML =
+      '<p style="color:#ccc;padding:40px;text-align:center">Não foi possível carregar o PDF modelo.</p>';
+  }
+}
+
+function updatePdfPageInfo() {
+  const info = document.getElementById('pdfPageInfo');
+  const prevBtn = document.getElementById('pdfPrevBtn');
+  const nextBtn = document.getElementById('pdfNextBtn');
+  if (!pdfDoc || !info) return;
+  info.textContent = `Página ${pdfCurrentPage} de ${pdfDoc.numPages}`;
+  prevBtn.disabled = pdfCurrentPage <= 1;
+  nextBtn.disabled = pdfCurrentPage >= pdfDoc.numPages;
+}
+
+async function renderPdfPage(num) {
+  if (pdfRendering) { pdfPagePending = num; return; }
+  pdfRendering = true;
+
+  const container = document.getElementById('pdfViewerContainer');
+  try {
+    const page = await pdfDoc.getPage(num);
+    const scale = Math.min((container.clientWidth - 24) / page.getViewport({ scale: 1 }).width, 2.0);
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    container.innerHTML = '';
+    container.appendChild(canvas);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+  } catch (err) {
+    console.error('Erro ao renderizar página:', err);
+  }
+  pdfRendering = false;
+  if (pdfPagePending !== null && pdfPagePending !== num) {
+    const next = pdfPagePending;
+    pdfPagePending = null;
+    renderPdfPage(next);
+  }
+}
+
+function pdfNavigate(dir) {
+  if (!pdfDoc) return;
+  const newPage = pdfCurrentPage + dir;
+  if (newPage < 1 || newPage > pdfDoc.numPages) return;
+  pdfCurrentPage = newPage;
+  updatePdfPageInfo();
+  renderPdfPage(pdfCurrentPage);
+}
+
+// ══════════════════════════════════════════════════
+// HEADER NAV (copiado do padrão do projeto)
+// ══════════════════════════════════════════════════
+(function() {
+  const menuBtn = document.getElementById('headerMenuBtn');
+  const backdrop = document.getElementById('headerNavBackdrop');
+  const panel = document.getElementById('headerNavPanel');
+  const closeBtn = document.getElementById('headerNavCloseBtn');
+  if (!menuBtn || !backdrop || !panel || !closeBtn) return;
+
+  function openNav() {
+    menuBtn.setAttribute('aria-expanded', 'true');
+    panel.setAttribute('aria-hidden', 'false');
+    backdrop.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('header-nav-open');
+    closeBtn.focus();
+  }
+  function closeNav() {
+    menuBtn.setAttribute('aria-expanded', 'false');
+    panel.setAttribute('aria-hidden', 'true');
+    backdrop.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('header-nav-open');
+    menuBtn.focus();
+  }
+  menuBtn.addEventListener('click', openNav);
+  closeBtn.addEventListener('click', closeNav);
+  backdrop.addEventListener('click', closeNav);
+  panel.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeNav();
+  });
+})();
+
+// ══════════════════════════════════════════════════
+// SIGNATURE PAD
+// ══════════════════════════════════════════════════
+const canvas = document.getElementById('assinaturaCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+let assinaturaDesenhada = false;
+let desenhando = false;
+let lastX = 0;
+let lastY = 0;
+
+if (canvas && ctx) {
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1a1714';
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    desenhando = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+  }
+  function draw(e) {
+    if (!desenhando) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastX = pos.x;
+    lastY = pos.y;
+    if (!assinaturaDesenhada) {
+      assinaturaDesenhada = true;
+      updateProgress();
+    }
+  }
+  function stopDraw() { desenhando = false; }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDraw);
+}
+
+function limparAssinatura() {
+  if (!ctx || !canvas) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  assinaturaDesenhada = false;
+  updateProgress();
+}
+
+function getAssinaturaDataURL() {
+  if (!canvas || !assinaturaDesenhada) return null;
+  return canvas.toDataURL('image/png');
+}
+
+// ══════════════════════════════════════════════════
+// FORM FIELDS
+// ══════════════════════════════════════════════════
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function maskDia(el) {
+  let val = el.value.replace(/\D/g, '').slice(0, 2);
+  el.value = val;
+}
+function maskAno(el) {
+  let val = el.value.replace(/\D/g, '').slice(0, 4);
+  el.value = val;
+}
+
+// ══════════════════════════════════════════════════
+// ACEITE CHECKBOXES
+// ══════════════════════════════════════════════════
+function updateAceiteCheckbox(el, num) {
+  const label = document.getElementById('checkTermo' + num + 'Label');
+  if (label) label.classList.toggle('active', el.checked);
+  updateProgress();
+  checkAllReady();
+}
+
+function updateAceiteFinal() {
+  const el = document.getElementById('checkFinal');
+  const label = document.getElementById('checkFinalLabel');
+  if (label) label.classList.toggle('active', el.checked);
+  checkAllReady();
+}
+
+function allTermsAccepted() {
+  return document.getElementById('checkTermo1')?.checked &&
+         document.getElementById('checkTermo2')?.checked &&
+         document.getElementById('checkTermo3')?.checked &&
+         document.getElementById('checkFinal')?.checked;
+}
+
+function checkAllReady() {
+  const btn = document.getElementById('btnGerarPDF');
+  if (!btn) return;
+  btn.disabled = !allTermsAccepted();
+}
+
+// ══════════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════════
+function updateProgress() {
+  // Dados
+  const dadosChecks = [
+    () => v('nomeCompleto').length > 0,
+    () => v('reRg').length > 0,
+    () => v('cidadeUf').length > 0,
+    () => v('dia').length > 0,
+    () => v('mes').length > 0,
+    () => v('ano').length > 0
+  ];
+  const dadosOk = dadosChecks.filter(fn => fn()).length;
+  const dadosEl = document.getElementById('progressDados');
+  if (dadosEl) dadosEl.style.width = `${dadosChecks.length ? Math.round((dadosOk / dadosChecks.length) * 100) : 0}%`;
+
+  // Assinatura
+  const assinaturaEl = document.getElementById('progressAssinatura');
+  if (assinaturaEl) assinaturaEl.style.width = assinaturaDesenhada ? '100%' : '0%';
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+function showToast(msg, ok = true) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.querySelector('.toast-dot').style.background = ok ? '#4caf7d' : '#e05c3a';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ══════════════════════════════════════════════════
+// MODAL UTILS
+// ══════════════════════════════════════════════════
+function setModalOverlayVisible(overlayEl, visible) {
+  if (!overlayEl) return;
+  if (visible) {
+    overlayEl.removeAttribute('hidden');
+    overlayEl.classList.add('show');
+    overlayEl.setAttribute('aria-hidden', 'false');
+  } else {
+    overlayEl.setAttribute('hidden', '');
+    overlayEl.classList.remove('show');
+    overlayEl.setAttribute('aria-hidden', 'true');
+  }
+}
+function sincronizarBodyModalOpen() {
+  if (document.querySelector('.modal-overlay.show')) document.body.classList.add('modal-open');
+  else document.body.classList.remove('modal-open');
+}
+
+// ══════════════════════════════════════════════════
+// MODAL LGPD
+// ══════════════════════════════════════════════════
+let lgpdResolver = null;
+function abrirModalLGPD() {
+  const modal = document.getElementById('lgpdModal');
+  if (!modal) return Promise.resolve(false);
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpen();
+  setTimeout(() => document.getElementById('lgpdContinuarBtn')?.focus(), 0);
+  return new Promise(resolve => { lgpdResolver = resolve; });
+}
+function fecharModalLGPD(decisao) {
+  const modal = document.getElementById('lgpdModal');
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpen();
+  if (lgpdResolver) { const r = lgpdResolver; lgpdResolver = null; r(decisao); }
+}
+document.getElementById('lgpdContinuarBtn')?.addEventListener('click', () => fecharModalLGPD(true));
+document.getElementById('lgpdCancelarBtn')?.addEventListener('click', () => fecharModalLGPD(false));
+
+// ══════════════════════════════════════════════════
+// MODAL DESCARTAR RASCUNHO
+// ══════════════════════════════════════════════════
+document.getElementById('btnDescartarRascunho')?.addEventListener('click', () => {
+  const el = document.getElementById('modalConfirmarDescartarRascunho');
+  if (el) setModalOverlayVisible(el, true);
+  sincronizarBodyModalOpen();
+});
+document.getElementById('btnModalDescartarRascunhoCancelar')?.addEventListener('click', () => {
+  const el = document.getElementById('modalConfirmarDescartarRascunho');
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpen();
+});
+document.getElementById('btnModalDescartarRascunhoConfirmar')?.addEventListener('click', () => {
+  const el = document.getElementById('modalConfirmarDescartarRascunho');
+  if (el) setModalOverlayVisible(el, false);
+  sincronizarBodyModalOpen();
+  descartarRascunhoEFormulario();
+});
+
+// ══════════════════════════════════════════════════
+// RASCUNHO LOCAL
+// ══════════════════════════════════════════════════
+const LS_NS = 'atento.forms:v1:';
+const RASCUNHO_KEY = LS_NS + 'termos_aceite_rascunho_v1';
+const RASCUNHO_IDS = ['nomeCompleto', 'reRg', 'cidadeUf', 'dia', 'mes', 'ano'];
+
+const appStorage = {
+  getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
+  setItem(k, v) { try { localStorage.setItem(k, v); } catch(e) {} },
+  removeItem(k) { try { localStorage.removeItem(k); } catch(e) {} }
+};
+
+let salvarRascunhoTimer = null;
+function salvarRascunho() {
+  const obj = {};
+  RASCUNHO_IDS.forEach(id => { obj[id] = v(id); });
+  appStorage.setItem(RASCUNHO_KEY, JSON.stringify(obj));
+}
+function agendarSalvarRascunho() {
+  clearTimeout(salvarRascunhoTimer);
+  salvarRascunhoTimer = setTimeout(salvarRascunho, 350);
+}
+function restaurarRascunho() {
+  const raw = appStorage.getItem(RASCUNHO_KEY);
+  if (!raw) return;
+  let obj = null;
+  try { obj = JSON.parse(raw); } catch(e) { return; }
+  if (!obj || typeof obj !== 'object') return;
+  RASCUNHO_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && typeof obj[id] === 'string') el.value = obj[id];
+  });
+}
+function limparDadosFormulario() {
+  RASCUNHO_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('invalid'); }
+  });
+  limparAssinatura();
+  ['checkTermo1', 'checkTermo2', 'checkTermo3', 'checkFinal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  document.querySelectorAll('.check-label').forEach(el => el.classList.remove('active'));
+  updateProgress();
+  checkAllReady();
+}
+function descartarRascunhoEFormulario() {
+  appStorage.removeItem(RASCUNHO_KEY);
+  limparDadosFormulario();
+  showToast('Rascunho descartado.', true);
+}
+
+// Listener para auto-save
+RASCUNHO_IDS.forEach(id => {
+  document.getElementById(id)?.addEventListener('input', agendarSalvarRascunho);
+  document.getElementById(id)?.addEventListener('change', agendarSalvarRascunho);
+});
+
+// ══════════════════════════════════════════════════
+// DOWNLOAD MODELO
+// ══════════════════════════════════════════════════
+function downloadModeloPDF() {
+  const a = document.createElement('a');
+  a.href = PDF_MODEL_URL;
+  a.download = 'TERMO DE ACEITE - MODELO.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ══════════════════════════════════════════════════
+// VALIDAÇÃO
+// ══════════════════════════════════════════════════
+function marcarCampoInvalido(id, invalido) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('invalid', !!invalido);
+}
+
+function validarCampos() {
+  const obrigatorios = [
+    { id: 'nomeCompleto', nome: 'Nome Completo' },
+    { id: 'reRg', nome: 'RE / RG' },
+    { id: 'cidadeUf', nome: 'Cidade / UF' },
+    { id: 'dia', nome: 'Dia' },
+    { id: 'mes', nome: 'Mês' },
+    { id: 'ano', nome: 'Ano' }
+  ];
+  const faltantes = [];
+  obrigatorios.forEach(({ id, nome }) => {
+    const vazio = v(id).length === 0;
+    marcarCampoInvalido(id, vazio);
+    if (vazio) faltantes.push(nome);
+  });
+
+  if (!assinaturaDesenhada) {
+    const outer = document.getElementById('signatureCanvasOuter');
+    if (outer) outer.classList.add('invalid');
+    faltantes.push('Assinatura');
+  } else {
+    const outer = document.getElementById('signatureCanvasOuter');
+    if (outer) outer.classList.remove('invalid');
+  }
+
+  if (faltantes.length) {
+    showToast(`Preencha: ${faltantes.join(', ')}.`, false);
+    const firstEmpty = obrigatorios.find(({ id }) => v(id).length === 0);
+    if (firstEmpty) document.getElementById(firstEmpty.id)?.focus();
+    return false;
+  }
+  return true;
+}
+
+// ══════════════════════════════════════════════════
+// PDF GENERATION (pdf-lib) — 3 TERMOS
+// ══════════════════════════════════════════════════
+const MESES_PT = [
+  'janeiro','fevereiro','março','abril','maio','junho',
+  'julho','agosto','setembro','outubro','novembro','dezembro'
+];
+
+function sanitizarNomeArquivo(s) {
+  return String(s || '').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+async function gerarPDF() {
+  if (!allTermsAccepted()) {
+    showToast('Marque todos os checkboxes de aceite.', false);
+    return;
+  }
+  if (!validarCampos()) return;
+
+  const continuar = await abrirModalLGPD();
+  if (!continuar) return;
+
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const fontNormal = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRoman);
+    const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanBold);
+    const fontItalic = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanItalic);
+
+    const LARGURA = 595;
+    const ALTURA = 842;
+    const MARGEM_ESQ = 50;
+    const MARGEM_DIR = 50;
+    const MARGEM_TOPO = 60;
+    const MARGEM_BAIXO = 60;
+    const LARGURA_TEXTO = LARGURA - MARGEM_ESQ - MARGEM_DIR;
+
+    const nomeCompleto = v('nomeCompleto');
+    const reRg = v('reRg');
+    const cidadeUf = v('cidadeUf');
+    const dia = v('dia');
+    const mes = v('mes');
+    const ano = v('ano');
+    const dataStr = `${dia} de ${mes} de ${ano}`;
+    const dataStrCidade = `${cidadeUf}, ${dataStr}`;
+
+    // Embed signature image
+    const sigDataUrl = getAssinaturaDataURL();
+    let sigImage = null;
+    if (sigDataUrl) {
+      const sigBytes = Uint8Array.from(atob(sigDataUrl.split(',')[1]), c => c.charCodeAt(0));
+      sigImage = await pdfDoc.embedPng(sigBytes);
+    }
+
+    // ─── Helper: draw wrapped text ───
+    function wrapText(page, text, opts) {
+      const font = opts.font || fontNormal;
+      const size = opts.size || 10;
+      const maxWidth = opts.maxWidth || LARGURA_TEXTO;
+      const x = opts.x || MARGEM_ESQ;
+      let y = opts.y;
+      const lineHeight = opts.lineHeight || (size * 1.45);
+      const align = opts.align || 'left';
+
+      const words = text.split(/\s+/);
+      let line = '';
+      const lines = [];
+
+      for (const word of words) {
+        const testLine = line ? line + ' ' + word : word;
+        const w = font.widthOfTextAtSize(testLine, size);
+        if (w > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line) lines.push(line);
+
+      for (const l of lines) {
+        if (y < MARGEM_BAIXO + 40) break;
+        let drawX = x;
+        if (align === 'center') {
+          drawX = x + (maxWidth - font.widthOfTextAtSize(l, size)) / 2;
+        } else if (align === 'right') {
+          drawX = x + maxWidth - font.widthOfTextAtSize(l, size);
+        }
+        page.drawText(l, { x: drawX, y, size, font });
+        y -= lineHeight;
+      }
+      return y;
+    }
+
+    function drawIndentedParagraph(page, text, startY, opts = {}) {
+      const font = opts.font || fontNormal;
+      const size = opts.size || 10;
+      const indent = opts.indent || 20;
+      const maxWidth = LARGURA_TEXTO - indent;
+      let y = startY;
+
+      // First line with indent
+      y = wrapText(page, text, {
+        font, size, maxWidth, x: MARGEM_ESQ + indent, y, lineHeight: size * 1.5
+      });
+      return y;
+    }
+
+    // ═══════════════════════════════════════════
+    // PAGE 1: TERMO DE SIGILO
+    // ═══════════════════════════════════════════
+    {
+      const page = pdfDoc.addPage([LARGURA, ALTURA]);
+      let y = ALTURA - MARGEM_TOPO;
+
+      y = wrapText(page, 'TERMO DE SIGILO, CONFIDENCIALIDADE, MANUSEIO E SEGURANÇA DAS INFORMAÇÕES', {
+        font: fontBold, size: 12, y, align: 'center', lineHeight: 16
+      });
+      y -= 20;
+
+      const t1_paras = [
+        'Pelo presente termo, declaro expressamente minha ciência sobre os procedimentos e condições abaixo, necessários à execução do meu trabalho, assumindo as responsabilidades inerentes à minha função, nos seguintes termos:',
+        'Que as contas de acesso à rede do CONTRATANTE, sejam de quaisquer sistemas operacionais, são de uso exclusivo dos FUNCIONÁRIOS e/ou PRESTADORES DE SERVIÇO autorizados e para acesso exclusivo à rede do CONTRATANTE sendo proibida a sua utilização por quaisquer outras pessoas.',
+        'Que as contas de acesso e suas respectivas senhas são códigos de conhecimento EXCLUSIVO, usado para identificar o usuário quando do acesso aos recursos computacionais. A senha de acesso é CONFIDENCIAL e de uso PESSOAL, sendo vedada sua divulgação a quaisquer outras pessoas.',
+        'Que senhas não devem ser escritas e expostas ao público, como, por exemplo, ser fixadas no monitor do computador ou colocadas com etiqueta embaixo do mouse.',
+        'Que os FUNCIONÁRIOS e PRESTADORES DE SERVIÇO são responsáveis pelas ações realizadas por meio de seu acesso.',
+        'Que é proibido o acesso ou tentativa de acesso a qualquer equipamento, rede ou computador externo do CONTRATANTE sem prévia autorização da outra parte e da equipe de Tecnologia e Security Office do Grupo Atento / CONTRATANTE.',
+        'Que os acessos à Intranet e/ou Internet são monitorados pela equipe do Security Office e Tecnologia e quaisquer acessos considerados indevidos estarão sujeitos às penalidades cabíveis.',
+        'Que é proibido efetuar tentativas de acessos não autorizados com o objetivo de burlar os mecanismos de segurança, dentro ou fora do domínio do Grupo Atento / CONTRATANTE.',
+        'Que são de minha total responsabilidade as conversas telefônicas, fax, transferências de arquivos, mensagens via correio eletrônico, Internet e outros que tenham a minha IDENTIFICAÇÃO DE USUÁRIO. Por isso, tomarei as devidas precauções para evitar que terceiros possam utilizar tal identificação de forma ilícita ou enganadora.',
+        'Que recebi as senhas de acesso aos sistemas pertinentes ao desenvolvimento do meu trabalho, sendo responsável pela utilização e movimentação das mesmas.',
+        'Que assumo o compromisso de proteger as informações a mim confiadas, não permitindo que estas fiquem expostas em telas, papel ou outras mídias, que possam ser visualizadas por pessoas não autorizadas.',
+        'Que por se tratar de responsabilidade do empregado, a guarda/sigilo da senha de identificação, o não atendimento dos termos do presente procedimento, constituirá quebra de sigilo no desempenho das funções, passível de adoção de medidas disciplinares ou rescisão do contrato por Justa causa nos termos do artigo 482, alínea "e" da CLT, sem prejuízo das implicações de caráter civil e penais, se configurado o dolo.'
+      ];
+
+      for (const para of t1_paras) {
+        y = drawIndentedParagraph(page, para, y, { size: 10, indent: 15, lineHeight: 14 });
+        y -= 6;
+        if (y < MARGEM_BAIXO + 80) break;
+      }
+
+      // Signature block
+      y -= 10;
+      page.drawText(dataStrCidade, { x: MARGEM_ESQ, y, size: 10, font: fontNormal });
+      y -= 30;
+
+      // Signature line
+      if (sigImage) {
+        const sigW = 200;
+        const sigH = sigImage.height * (sigW / sigImage.width);
+        page.drawImage(sigImage, { x: MARGEM_ESQ + 20, y: y - sigH + 10, width: sigW, height: sigH });
+      }
+      page.drawText('____________________________________', { x: MARGEM_ESQ + 20, y: y - 8, size: 10, font: fontNormal });
+      y -= 22;
+      page.drawText('Assinatura do(a) Operador(a)', { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+      y -= 16;
+      page.drawText(`Nome: ${nomeCompleto}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+      y -= 16;
+      page.drawText(`R.G.: ${reRg}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+
+      // Evidence footer
+      page.drawText(`Documento gerado eletronicamente por Atento Forms — ${new Date().toLocaleString('pt-BR')}`, {
+        x: MARGEM_ESQ, y: 20, size: 7, font: fontItalic, color: PDFLib.rgb(0.5, 0.5, 0.5)
+      });
+    }
+
+    // ═══════════════════════════════════════════
+    // PAGE 2: TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO
+    // ═══════════════════════════════════════════
+    {
+      const page = pdfDoc.addPage([LARGURA, ALTURA]);
+      let y = ALTURA - MARGEM_TOPO;
+
+      y = wrapText(page, 'TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM', {
+        font: fontBold, size: 12, y, align: 'center', lineHeight: 16
+      });
+      y -= 20;
+
+      const t2_items = [
+        '1. Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "Operador de Telemarketing", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.',
+        '2. Estou ciente de que assuntos de meu interesse particular, excepcionalmente, poderão ser tratados em outro telefone colocado à minha disposição para tal finalidade, fora do sistema de gravação, cujos ramais tomei conhecimento através da relação que está em poder do Supervisor da minha área de lotação.',
+        '3. Declaro ainda que, pelo presente, autorizo a captação e utilização de minha imagem e conversas telefônicas na forma como descrito no item 1, nada podendo exigir, a qualquer título, inclusive indenização por danos patrimoniais e/ou morais, das empresas tomadoras dos serviços, por dita captação/utilização.',
+        '4. Outrossim, declaro que já tinha conhecimento das gravações de ligações telefônicas e de imagem e que em nada me oponho ao uso de tais gravações feitas até o momento.'
+      ];
+
+      for (const item of t2_items) {
+        y = drawIndentedParagraph(page, item, y, { size: 10, indent: 15, lineHeight: 14 });
+        y -= 8;
+        if (y < MARGEM_BAIXO + 80) break;
+      }
+
+      // Signature block
+      y -= 10;
+      page.drawText(dataStrCidade, { x: MARGEM_ESQ, y, size: 10, font: fontNormal });
+      y -= 30;
+
+      if (sigImage) {
+        const sigW = 200;
+        const sigH = sigImage.height * (sigW / sigImage.width);
+        page.drawImage(sigImage, { x: MARGEM_ESQ + 20, y: y - sigH + 10, width: sigW, height: sigH });
+      }
+      page.drawText('____________________________________', { x: MARGEM_ESQ + 20, y: y - 8, size: 10, font: fontNormal });
+      y -= 22;
+      page.drawText('Assinatura do(a) Operador(a)', { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+      y -= 16;
+      page.drawText(`Nome: ${nomeCompleto}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+      y -= 16;
+      page.drawText(`R.G.: ${reRg}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+
+      page.drawText(`Documento gerado eletronicamente por Atento Forms — ${new Date().toLocaleString('pt-BR')}`, {
+        x: MARGEM_ESQ, y: 20, size: 7, font: fontItalic, color: PDFLib.rgb(0.5, 0.5, 0.5)
+      });
+    }
+
+    // ═══════════════════════════════════════════
+    // PAGE 3: TERMO DE COMPROMISSO SIGILO
+    // ═══════════════════════════════════════════
+    {
+      const page = pdfDoc.addPage([LARGURA, ALTURA]);
+      let y = ALTURA - MARGEM_TOPO;
+
+      y = wrapText(page, 'TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES', {
+        font: fontBold, size: 12, y, align: 'center', lineHeight: 16
+      });
+      y -= 20;
+
+      const t3_text = '1. Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "Operador de Telemarketing", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas INFORMAÇÕES CONFIDENCIAIS e comprometo-me a manter sob absoluto sigilo qualquer dessas INFORMAÇÕES CONFIDENCIAIS a que tiver acesso em razão de minha atividade.';
+
+      y = drawIndentedParagraph(page, t3_text, y, { size: 10, indent: 15, lineHeight: 14 });
+      y -= 30;
+
+      // Signature block
+      page.drawText(dataStrCidade, { x: MARGEM_ESQ, y, size: 10, font: fontNormal });
+      y -= 30;
+
+      if (sigImage) {
+        const sigW = 200;
+        const sigH = sigImage.height * (sigW / sigImage.width);
+        page.drawImage(sigImage, { x: MARGEM_ESQ + 20, y: y - sigH + 10, width: sigW, height: sigH });
+      }
+      page.drawText('____________________________________', { x: MARGEM_ESQ + 20, y: y - 8, size: 10, font: fontNormal });
+      y -= 22;
+      page.drawText('Assinatura do(a) Operador(a)', { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+      y -= 16;
+      page.drawText(`Nome: ${nomeCompleto}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+      y -= 16;
+      page.drawText(`R.G.: ${reRg}`, { x: MARGEM_ESQ + 20, y, size: 10, font: fontNormal });
+
+      page.drawText(`Documento gerado eletronicamente por Atento Forms — ${new Date().toLocaleString('pt-BR')}`, {
+        x: MARGEM_ESQ, y: 20, size: 7, font: fontItalic, color: PDFLib.rgb(0.5, 0.5, 0.5)
+      });
+    }
+
+    // ═══════════════════════════════════════════
+    // DOWNLOAD
+    // ═══════════════════════════════════════════
+    const pdfBytes = await pdfDoc.save();
+    const nomeArq = sanitizarNomeArquivo(`${nomeCompleto} - ${reRg}`);
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${nomeArq}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('PDF gerado com sucesso!', true);
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    showToast('Erro ao gerar PDF. Tente novamente.', false);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadPdfModel();
+  restaurarRascunho();
+  updateProgress();
+  checkAllReady();
+  // Preencher data atual se vazia
+  if (!v('dia') && !v('mes') && !v('ano')) {
+    const now = new Date();
+    document.getElementById('dia').value = String(now.getDate()).padStart(2, '0');
+    document.getElementById('mes').value = MESES_PT[now.getMonth()];
+    document.getElementById('ano').value = String(now.getFullYear());
+  }
+});
+</script>
+</body>
+</html>
