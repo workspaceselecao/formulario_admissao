@@ -155,12 +155,18 @@
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
 
-  /* ── DATA ROW (Cidade/UF + Dia/Mês/Ano) ── */
+  /* ── DATA ROW (Cidade/UF + Data) ── */
   .data-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 14px;
     align-items: end;
+  }
+  .field input[type="date"] {
+    width: 100%;
+    min-height: 42px;
+    appearance: auto;
+    -webkit-appearance: auto;
   }
 
   /* ── SIGNATURE PAD ── */
@@ -549,7 +555,7 @@
     .section-body { padding: 22px 18px 16px; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: auto; }
-    .data-row { grid-template-columns: 1fr 1fr; }
+    .data-row { grid-template-columns: 1fr; }
     .form-actions-bottom { justify-content: stretch; }
     .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
     #toast { left: 16px; right: 16px; bottom: 16px; }
@@ -760,30 +766,8 @@
             <input type="text" id="cidadeUf" placeholder="Ex: Salvador - BA">
           </div>
           <div class="field">
-            <label>Dia <span class="req">*</span></label>
-            <input type="text" id="dia" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskDia(this)">
-          </div>
-          <div class="field">
-            <label>Mês <span class="req">*</span></label>
-            <select id="mes">
-              <option value="">MÊS</option>
-              <option value="janeiro">janeiro</option>
-              <option value="fevereiro">fevereiro</option>
-              <option value="março">março</option>
-              <option value="abril">abril</option>
-              <option value="maio">maio</option>
-              <option value="junho">junho</option>
-              <option value="julho">julho</option>
-              <option value="agosto">agosto</option>
-              <option value="setembro">setembro</option>
-              <option value="outubro">outubro</option>
-              <option value="novembro">novembro</option>
-              <option value="dezembro">dezembro</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Ano <span class="req">*</span></label>
-            <input type="text" id="ano" placeholder="AAAA" maxlength="4" inputmode="numeric" autocomplete="off" spellcheck="false" oninput="maskAno(this)">
+            <label>Data <span class="req">*</span></label>
+            <input type="date" id="dataPicker" autocomplete="off">
           </div>
         </div>
       </div>
@@ -1073,14 +1057,6 @@ function getAssinaturaDataURL() {
 // FORM FIELDS
 // ══════════════════════════════════════════════════
 function v(id) { return (document.getElementById(id)?.value || '').trim(); }
-function maskDia(el) {
-  let val = el.value.replace(/\D/g, '').slice(0, 2);
-  el.value = val;
-}
-function maskAno(el) {
-  let val = el.value.replace(/\D/g, '').slice(0, 4);
-  el.value = val;
-}
 
 // ══════════════════════════════════════════════════
 // ACEITE CHECKBOXES
@@ -1121,9 +1097,7 @@ function updateProgress() {
     () => v('nomeCompleto').length > 0,
     () => v('reRg').length > 0,
     () => v('cidadeUf').length > 0,
-    () => v('dia').length > 0,
-    () => v('mes').length > 0,
-    () => v('ano').length > 0
+    () => v('dataPicker').length > 0
   ];
   const dadosOk = dadosChecks.filter(fn => fn()).length;
   const dadosEl = document.getElementById('progressDados');
@@ -1211,7 +1185,7 @@ document.getElementById('btnModalDescartarRascunhoConfirmar')?.addEventListener(
 // ══════════════════════════════════════════════════
 const LS_NS = 'atento.forms:v1:';
 const RASCUNHO_KEY = LS_NS + 'termos_aceite_rascunho_v1';
-const RASCUNHO_IDS = ['nomeCompleto', 'reRg', 'cidadeUf', 'dia', 'mes', 'ano'];
+const RASCUNHO_IDS = ['nomeCompleto', 'reRg', 'cidadeUf', 'dataPicker'];
 
 const appStorage = {
   getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -1291,9 +1265,7 @@ function validarCampos() {
     { id: 'nomeCompleto', nome: 'Nome Completo' },
     { id: 'reRg', nome: 'RE / RG' },
     { id: 'cidadeUf', nome: 'Cidade / UF' },
-    { id: 'dia', nome: 'Dia' },
-    { id: 'mes', nome: 'Mês' },
-    { id: 'ano', nome: 'Ano' }
+    { id: 'dataPicker', nome: 'Data' }
   ];
   const faltantes = [];
   obrigatorios.forEach(({ id, nome }) => {
@@ -1359,11 +1331,18 @@ async function gerarPDF() {
     const nomeCompleto = v('nomeCompleto');
     const reRg = v('reRg');
     const cidadeUf = v('cidadeUf');
-    const dia = v('dia');
-    const mes = v('mes');
-    const ano = v('ano');
-    const dataStr = `${dia} de ${mes} de ${ano}`;
-    const dataStrCidade = `${cidadeUf}, ${dataStr}`;
+    const dataPickerVal = v('dataPicker');
+    let dataStrCidade = '';
+    if (dataPickerVal) {
+      const partes = dataPickerVal.split('-');
+      const anoNum = parseInt(partes[0], 10);
+      const mesNum = parseInt(partes[1], 10);
+      const diaNum = parseInt(partes[2], 10);
+      const mesExtenso = MESES_PT[mesNum - 1] || '';
+      dataStrCidade = `${cidadeUf}, ${String(diaNum).padStart(2, '0')} de ${mesExtenso} de ${anoNum}`;
+    } else {
+      dataStrCidade = cidadeUf;
+    }
 
     // Embed signature image
     const sigDataUrl = getAssinaturaDataURL();
@@ -1602,12 +1581,13 @@ document.addEventListener('DOMContentLoaded', () => {
   restaurarRascunho();
   updateProgress();
   checkAllReady();
-  // Preencher data atual se vazia
-  if (!v('dia') && !v('mes') && !v('ano')) {
+  // Preencher data atual no date picker se vazio
+  if (!v('dataPicker')) {
     const now = new Date();
-    document.getElementById('dia').value = String(now.getDate()).padStart(2, '0');
-    document.getElementById('mes').value = MESES_PT[now.getMonth()];
-    document.getElementById('ano').value = String(now.getFullYear());
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    document.getElementById('dataPicker').value = `${yyyy}-${mm}-${dd}`;
   }
 });
 </script>
