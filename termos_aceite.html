@@ -214,7 +214,9 @@
     position: absolute; top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none;
+    z-index: 2;
   }
+  #assinaturaCanvas { position: relative; z-index: 1; }
   .signature-pad-tools {
     display: flex;
     justify-content: space-between;
@@ -1017,6 +1019,32 @@ let desenhando = false;
 let lastX = 0;
 let lastY = 0;
 
+/** Coordenada Y da linha-guia no canvas.
+ *  No PDF modelo, a linha de assinatura (underscores) está em y≈103.46 pt
+ *  (canto inferior esquerdo). A caixa de assinatura inicia em y=98,
+ *  com altura=70 pt → a linha fica a 26.46 pt da base ≈ 37.8% da altura.
+ *  No canvas (origem superior), isso equivale a 62.2% da altura. */
+const LINHA_GUIA_Y_RATIO = 0.622;
+
+/** Canvas overlay separado para a linha-guia (nunca é capturado na assinatura). */
+const guideCanvas = document.getElementById('assinaturaGuide');
+const guideCtx = guideCanvas ? guideCanvas.getContext('2d') : null;
+
+function desenharLinhaGuia() {
+  if (!guideCtx || !guideCanvas) return;
+  guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+  guideCtx.save();
+  guideCtx.strokeStyle = '#b0b0b0';
+  guideCtx.lineWidth = 1;
+  guideCtx.setLineDash([8, 4]);
+  const y = guideCanvas.height * LINHA_GUIA_Y_RATIO;
+  guideCtx.beginPath();
+  guideCtx.moveTo(80, y);
+  guideCtx.lineTo(guideCanvas.width - 80, y);
+  guideCtx.stroke();
+  guideCtx.restore();
+}
+
 if (canvas && ctx) {
   // Linha-guia de assinatura (mesma referência do Arquivo Modelo)
   desenharLinhaGuia();
@@ -1074,32 +1102,6 @@ if (canvas && ctx) {
   canvas.addEventListener('touchstart', startDraw, { passive: false });
   canvas.addEventListener('touchmove', draw, { passive: false });
   canvas.addEventListener('touchend', stopDraw);
-}
-
-/** Coordenada Y da linha-guia no canvas.
- *  No PDF modelo, a linha de assinatura (underscores) está em y≈103.46 pt
- *  (canto inferior esquerdo). A caixa de assinatura inicia em y=98,
- *  com altura=52 pt → a linha fica a 5.46 pt da base = 10.5% da altura.
- *  No canvas (origem superior), isso equivale a 89.5% da altura. */
-const LINHA_GUIA_Y_RATIO = 0.895;
-
-/** Canvas overlay separado para a linha-guia (nunca é capturado na assinatura). */
-const guideCanvas = document.getElementById('assinaturaGuide');
-const guideCtx = guideCanvas ? guideCanvas.getContext('2d') : null;
-
-function desenharLinhaGuia() {
-  if (!guideCtx || !guideCanvas) return;
-  guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
-  guideCtx.save();
-  guideCtx.strokeStyle = '#b0b0b0';
-  guideCtx.lineWidth = 1;
-  guideCtx.setLineDash([8, 4]);
-  const y = guideCanvas.height * LINHA_GUIA_Y_RATIO;
-  guideCtx.beginPath();
-  guideCtx.moveTo(80, y);
-  guideCtx.lineTo(guideCanvas.width - 80, y);
-  guideCtx.stroke();
-  guideCtx.restore();
 }
 
 function limparAssinatura() {
