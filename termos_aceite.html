@@ -155,10 +155,10 @@
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
 
-  /* ── DATA ROW (Cidade/UF + Data) ── */
+  /* ── DATA ROW (UF + Cidade + Data) ── */
   .data-row {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr;
     gap: 14px;
     align-items: end;
   }
@@ -167,6 +167,19 @@
     min-height: 42px;
     appearance: auto;
     -webkit-appearance: auto;
+  }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-light);
+    border-bottom: 2px solid var(--text-light);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
   }
 
   /* ── SIGNATURE PAD ── */
@@ -555,7 +568,7 @@
     .section-body { padding: 22px 18px 16px; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: auto; }
-    .data-row { grid-template-columns: 1fr; }
+    .data-row { grid-template-columns: 1fr 1fr; }
     .form-actions-bottom { justify-content: stretch; }
     .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
     #toast { left: 16px; right: 16px; bottom: 16px; }
@@ -762,8 +775,20 @@
         </div>
         <div class="col-span-2 data-row">
           <div class="field">
-            <label>Cidade / UF <span class="req">*</span></label>
-            <input type="text" id="cidadeUf" placeholder="Ex: Salvador - BA">
+            <label>UF <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="uf" onchange="onUfChange()">
+                <option value="">UF</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Cidade <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="cidade" disabled>
+                <option value="">SELECIONE A UF...</option>
+              </select>
+            </div>
           </div>
           <div class="field">
             <label>Data <span class="req">*</span></label>
@@ -1096,7 +1121,8 @@ function updateProgress() {
   const dadosChecks = [
     () => v('nomeCompleto').length > 0,
     () => v('reRg').length > 0,
-    () => v('cidadeUf').length > 0,
+    () => v('uf').length > 0,
+    () => v('cidade').length > 0,
     () => v('dataPicker').length > 0
   ];
   const dadosOk = dadosChecks.filter(fn => fn()).length;
@@ -1185,7 +1211,7 @@ document.getElementById('btnModalDescartarRascunhoConfirmar')?.addEventListener(
 // ══════════════════════════════════════════════════
 const LS_NS = 'atento.forms:v1:';
 const RASCUNHO_KEY = LS_NS + 'termos_aceite_rascunho_v1';
-const RASCUNHO_IDS = ['nomeCompleto', 'reRg', 'cidadeUf', 'dataPicker'];
+const RASCUNHO_IDS = ['nomeCompleto', 'reRg', 'uf', 'cidade', 'dataPicker'];
 
 const appStorage = {
   getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -1209,7 +1235,19 @@ function restaurarRascunho() {
   let obj = null;
   try { obj = JSON.parse(raw); } catch(e) { return; }
   if (!obj || typeof obj !== 'object') return;
-  RASCUNHO_IDS.forEach(id => {
+  // Restaurar UF primeiro para popular cidades
+  const ufEl = document.getElementById('uf');
+  if (ufEl && typeof obj.uf === 'string') {
+    ufEl.value = obj.uf;
+    onUfChange();
+  }
+  // Restaurar cidade depois que a lista foi populada
+  const cidadeEl = document.getElementById('cidade');
+  if (cidadeEl && typeof obj.cidade === 'string') {
+    cidadeEl.value = obj.cidade;
+  }
+  // Restaurar os demais campos
+  ['nomeCompleto', 'reRg', 'dataPicker'].forEach(id => {
     const el = document.getElementById(id);
     if (el && typeof obj[id] === 'string') el.value = obj[id];
   });
@@ -1264,7 +1302,8 @@ function validarCampos() {
   const obrigatorios = [
     { id: 'nomeCompleto', nome: 'Nome Completo' },
     { id: 'reRg', nome: 'RE / RG' },
-    { id: 'cidadeUf', nome: 'Cidade / UF' },
+    { id: 'uf', nome: 'UF' },
+    { id: 'cidade', nome: 'Cidade' },
     { id: 'dataPicker', nome: 'Data' }
   ];
   const faltantes = [];
@@ -1382,7 +1421,9 @@ async function gerarPDF() {
     // ── Dados do formulário ──
     const nomeCompleto = v('nomeCompleto');
     const reRg = v('reRg');
-    const cidadeUf = v('cidadeUf');
+    const uf = v('uf');
+    const cidade = v('cidade');
+    const cidadeUf = `${cidade} - ${uf}`;
     const dataPickerVal = v('dataPicker');
     let dataStrCidade = '';
     if (dataPickerVal) {
@@ -1454,10 +1495,65 @@ async function gerarPDF() {
 }
 
 // ══════════════════════════════════════════════════
+// CIDADES POR UF
+// ══════════════════════════════════════════════════
+let cidadesPorUF = {};
+
+async function carregarCidades() {
+  try {
+    const resp = await fetch('./municipios_cidades_ficha_por_uf.json');
+    cidadesPorUF = await resp.json();
+    popularUFs();
+  } catch(e) {
+    console.error('Erro ao carregar cidades:', e);
+  }
+}
+
+function popularUFs() {
+  const sel = document.getElementById('uf');
+  if (!sel) return;
+  const ufs = Object.keys(cidadesPorUF).sort((a, b) => a.localeCompare(b));
+  ufs.forEach(uf => {
+    const opt = document.createElement('option');
+    opt.value = uf;
+    opt.textContent = uf;
+    sel.appendChild(opt);
+  });
+}
+
+function onUfChange() {
+  const uf = v('uf');
+  const sel = document.getElementById('cidade');
+  if (!sel) return;
+  sel.innerHTML = '';
+  if (!uf) {
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'SELECIONE A UF...';
+    sel.appendChild(placeholder);
+    sel.disabled = true;
+    return;
+  }
+  const cidades = (cidadesPorUF[uf] || []).slice().sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = 'SELECIONE...';
+  sel.appendChild(placeholder);
+  cidades.forEach(cidade => {
+    const opt = document.createElement('option');
+    opt.value = cidade;
+    opt.textContent = cidade;
+    sel.appendChild(opt);
+  });
+  sel.disabled = false;
+}
+
+// ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   loadPdfModel();
+  carregarCidades();
   restaurarRascunho();
   updateProgress();
   checkAllReady();
