@@ -1070,15 +1070,23 @@ if (canvas && ctx) {
   canvas.addEventListener('touchend', stopDraw);
 }
 
+/** Coordenada Y da linha-guia no canvas.
+ *  No PDF modelo, a linha de assinatura (underscores) está em y≈103.46 pt
+ *  (canto inferior esquerdo). A caixa de assinatura inicia em y=98,
+ *  com altura=52 pt → a linha fica a 5.46 pt da base = 10.5% da altura.
+ *  No canvas (origem superior), isso equivale a 89.5% da altura. */
+const LINHA_GUIA_Y_RATIO = 0.895;
+
 function desenharLinhaGuia() {
   if (!ctx || !canvas) return;
   ctx.save();
   ctx.strokeStyle = '#b0b0b0';
   ctx.lineWidth = 1;
   ctx.setLineDash([8, 4]);
+  const y = canvas.height * LINHA_GUIA_Y_RATIO;
   ctx.beginPath();
-  ctx.moveTo(80, canvas.height * 0.72);
-  ctx.lineTo(canvas.width - 80, canvas.height * 0.72);
+  ctx.moveTo(80, y);
+  ctx.lineTo(canvas.width - 80, y);
   ctx.stroke();
   ctx.restore();
 }
