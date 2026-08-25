@@ -1347,7 +1347,7 @@ function sanitizarNomeArquivo(s) {
 // Cada campo: { page, x, y, width, height }
 const COORDS = {
   // Página 1
-  assinatura1: { page: 1, x: 84, y: 98, width: 232, height: 49 },
+  assinatura1: { page: 1, x: 84, y: 99, width: 231, height: 52 },
   nome1:       { page: 1, x: 121, y: 75, width: 243, height: 13 },
   reRg1:       { page: 1, x: 132, y: 63, width: 125, height: 12 },
   data1:       { page: 1, x: 296, y: 148, width: 218, height: 13 },
@@ -1383,7 +1383,7 @@ function drawTextFit(page, text, coord, font, opts = {}) {
 }
 
 /** Tamanho fixo da assinatura em todas as páginas (pt) */
-const SIG_FIXED_H = 30;
+const SIG_FIXED_H = 40;
 
 /** Desenha imagem (assinatura) com tamanho fixo, justificada à esquerda. */
 function drawImageFit(page, img, coord) {
