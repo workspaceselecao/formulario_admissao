@@ -1012,6 +1012,10 @@ let lastX = 0;
 let lastY = 0;
 
 if (canvas && ctx) {
+  // Linha-guia de assinatura (mesma referência do Arquivo Modelo)
+  desenharLinhaGuia();
+
+  // Estilo para traço da assinatura
   ctx.lineWidth = 2.5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -1066,9 +1070,23 @@ if (canvas && ctx) {
   canvas.addEventListener('touchend', stopDraw);
 }
 
+function desenharLinhaGuia() {
+  if (!ctx || !canvas) return;
+  ctx.save();
+  ctx.strokeStyle = '#b0b0b0';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([8, 4]);
+  ctx.beginPath();
+  ctx.moveTo(80, canvas.height * 0.72);
+  ctx.lineTo(canvas.width - 80, canvas.height * 0.72);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function limparAssinatura() {
   if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  desenharLinhaGuia();
   assinaturaDesenhada = false;
   updateProgress();
 }
