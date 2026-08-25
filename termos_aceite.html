@@ -1022,9 +1022,9 @@ let lastY = 0;
 /** Coordenada Y da linha-guia no canvas.
  *  No PDF modelo, a linha de assinatura (underscores) está em y≈103.46 pt
  *  (canto inferior esquerdo). A caixa de assinatura inicia em y=98,
- *  com altura=70 pt → a linha fica a 26.46 pt da base ≈ 37.8% da altura.
- *  No canvas (origem superior), isso equivale a 62.2% da altura. */
-const LINHA_GUIA_Y_RATIO = 0.622;
+ *  com altura=66 pt → a linha fica a 30.46 pt da base ≈ 46.2% da altura.
+ *  No canvas (origem superior), isso equivale a 53.8% da altura. */
+const LINHA_GUIA_Y_RATIO = 0.538;
 
 /** Canvas overlay separado para a linha-guia (nunca é capturado na assinatura). */
 const guideCanvas = document.getElementById('assinaturaGuide');
@@ -1386,17 +1386,17 @@ function sanitizarNomeArquivo(s) {
 // Cada campo: { page, x, y, width, height }
 const COORDS = {
   // Página 1
-  assinatura1: { page: 1, x: 85, y: 77, width: 232, height: 70 },
+  assinatura1: { page: 1, x: 85, y: 73, width: 233, height: 66 },
   nome1:       { page: 1, x: 121, y: 75, width: 243, height: 13 },
   reRg1:       { page: 1, x: 132, y: 63, width: 125, height: 12 },
   data1:       { page: 1, x: 296, y: 148, width: 218, height: 13 },
   // Página 2
-  assinatura2: { page: 2, x: 85, y: 249, width: 231, height: 37 },
+  assinatura2: { page: 2, x: 85, y: 224, width: 233, height: 66 },
   nome2:       { page: 2, x: 120, y: 226, width: 226, height: 12 },
   reRg2:       { page: 2, x: 132, y: 213, width: 163, height: 13 },
   data2:       { page: 2, x: 298, y: 302, width: 216, height: 16 },
   // Página 3
-  assinatura3: { page: 3, x: 82, y: 405, width: 233, height: 33 },
+  assinatura3: { page: 3, x: 85, y: 377, width: 233, height: 66 },
   nome3:       { page: 3, x: 120, y: 380, width: 232, height: 13 },
   reRg3:       { page: 3, x: 133, y: 368, width: 153, height: 13 },
   data3:       { page: 3, x: 297, y: 457, width: 215, height: 14 }
