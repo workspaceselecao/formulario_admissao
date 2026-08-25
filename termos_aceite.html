@@ -1343,8 +1343,6 @@ function sanitizarNomeArquivo(s) {
   return String(s || '').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-const PDF_MODEL_URL = './ARQUIVO MODELO.pdf';
-
 // Coordenadas dos campos por página (origem: canto inferior esquerdo, y cresce para cima)
 // Cada campo: { page, x, y, width, height }
 const COORDS = {
