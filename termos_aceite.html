@@ -1382,16 +1382,19 @@ function drawTextFit(page, text, coord, font, opts = {}) {
   });
 }
 
-/** Desenha imagem (assinatura) ajustando à caixa mantendo proporção. */
+/** Tamanho fixo da assinatura em todas as páginas (pt) */
+const SIG_FIXED_H = 30;
+
+/** Desenha imagem (assinatura) com tamanho fixo, justificada à esquerda. */
 function drawImageFit(page, img, coord) {
   const { x, y, width, height } = coord;
   const imgW = img.width;
   const imgH = img.height;
-  const scale = Math.min(width / imgW, height / imgH);
+  const scale = SIG_FIXED_H / imgH;
   const drawW = imgW * scale;
-  const drawH = imgH * scale;
-  // Centralizar na caixa
-  const drawX = x + (width - drawW) / 2;
+  const drawH = SIG_FIXED_H;
+  // Justificar à esquerda, centralizar verticalmente
+  const drawX = x;
   const drawY = y + (height - drawH) / 2;
   page.drawImage(img, { x: drawX, y: drawY, width: drawW, height: drawH });
 }
