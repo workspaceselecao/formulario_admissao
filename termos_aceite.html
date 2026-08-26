@@ -156,6 +156,12 @@
   .field select { cursor: pointer; }
 
   /* ── DATA ROW (UF + Cidade + Data) ── */
+  .dados-row {
+    display: grid;
+    grid-template-columns: 3fr 1fr 2fr;
+    gap: 14px;
+    align-items: end;
+  }
   .data-row {
     display: grid;
     grid-template-columns: 0.7fr 2.3fr 1fr;
@@ -533,6 +539,7 @@
     .section-body { padding: 22px 18px 16px; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .col-span-2, .col-span-3 { grid-column: auto; }
+    .dados-row { grid-template-columns: 1fr; }
     .data-row { grid-template-columns: 0.7fr 1.3fr; }
     .form-actions-bottom { justify-content: stretch; }
     .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
@@ -705,27 +712,26 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados do Funcionário</div>
     <div class="section-body">
-      <div class="grid grid-2">
+      <div class="dados-row" style="margin-bottom:14px;">
         <div class="field">
           <label>Nome Completo <span class="req">*</span></label>
           <input type="text" id="nomeCompleto" placeholder="Conforme documento de identidade" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
         </div>
-        <div class="field" style="display:flex;gap:8px;align-items:flex-end;">
-          <div class="field" style="flex:0 0 auto;min-width:90px;">
-            <label>Tipo <span class="req">*</span></label>
-            <div class="select-wrap">
-              <select id="reRgTipo" style="text-transform:uppercase">
-                <option value="RE">RE</option>
-                <option value="RG">RG</option>
-              </select>
-            </div>
-          </div>
-          <div class="field" style="flex:1;">
-            <label>Nº Matrícula / RG <span class="req">*</span></label>
-            <input type="text" id="reRg" placeholder="Ex: 1228205" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        <div class="field">
+          <label>Tipo <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="reRgTipo" style="text-transform:uppercase">
+              <option value="RE">RE</option>
+              <option value="RG">RG</option>
+            </select>
           </div>
         </div>
-        <div class="col-span-2 data-row">
+        <div class="field">
+          <label>Nº Matrícula / RG <span class="req">*</span></label>
+          <input type="text" id="reRg" placeholder="Ex: 1228205" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        </div>
+      </div>
+      <div class="data-row">
           <div class="field">
             <label>UF <span class="req">*</span></label>
             <div class="select-wrap">
@@ -744,9 +750,7 @@
           </div>
           <div class="field">
             <label>Data <span class="req">*</span></label>
-            <input type="date" id="dataPicker" autocomplete="off">
-          </div>
-        </div>
+            <input type="date" id="dataPicker" autocomplete="off">        </div>
       </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressDados"></div></div>
