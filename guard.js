@@ -94,6 +94,13 @@
   }
 
   // ══════════════════════════════════════════════════════
+  // OVERRIDE CSS — show body for auth screen
+  // ══════════════════════════════════════════════════════
+  var GUARD_STYLE = document.createElement("style");
+  GUARD_STYLE.textContent = "html[data-guard-hidden] body{display:flex!important;align-items:center;justify-content:center;min-height:100vh}";
+  document.head.appendChild(GUARD_STYLE);
+
+  // ══════════════════════════════════════════════════════
   // VERIFICAÇÃO DE CHAVE
   // ══════════════════════════════════════════════════════
   async function verifyCode(input) {
@@ -258,6 +265,8 @@
   // ══════════════════════════════════════════════════════
   function revealContent() {
     document.documentElement.removeAttribute("data-guard-hidden");
+    // Remove flex override so body returns to normal layout
+    if (GUARD_STYLE && GUARD_STYLE.parentNode) GUARD_STYLE.parentNode.removeChild(GUARD_STYLE);
   }
 
   // ══════════════════════════════════════════════════════
