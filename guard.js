@@ -30,7 +30,7 @@
   // ══════════════════════════════════════════════════════
   // ROTAS PROTEGIDAS
   // ══════════════════════════════════════════════════════
-  const PROTECTED = ["/f075", "/f089", "/bradesco", "/termos"];
+  const PROTECTED = ["/f075", "/f089", "/bradesco", "/termos", "/ficha_cadastral", "/assistencia_medica", "/carta_bradesco", "/termos_aceite"];
 
   // ══════════════════════════════════════════════════════
   // SESSÃO
