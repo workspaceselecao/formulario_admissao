@@ -710,9 +710,20 @@
           <label>Nome Completo <span class="req">*</span></label>
           <input type="text" id="nomeCompleto" placeholder="Conforme documento de identidade" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
         </div>
-        <div class="field">
-          <label>RE (Matrícula) / RG <span class="req">*</span></label>
-          <input type="text" id="reRg" placeholder="Nº Matrícula ou RG" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        <div class="field" style="display:flex;gap:8px;align-items:flex-end;">
+          <div class="field" style="flex:0 0 auto;min-width:90px;">
+            <label>Tipo <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="reRgTipo" style="text-transform:uppercase">
+                <option value="RE">RE</option>
+                <option value="RG">RG</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Nº Matrícula / RG <span class="req">*</span></label>
+            <input type="text" id="reRg" placeholder="Ex: 1228205" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          </div>
         </div>
         <div class="col-span-2 data-row">
           <div class="field">
@@ -1020,6 +1031,7 @@ function updateProgress() {
   // Dados
   const dadosChecks = [
     () => v('nomeCompleto').length > 0,
+    () => v('reRgTipo').length > 0,
     () => v('reRg').length > 0,
     () => v('uf').length > 0,
     () => v('cidade').length > 0,
@@ -1111,7 +1123,7 @@ document.getElementById('btnModalDescartarRascunhoConfirmar')?.addEventListener(
 // ══════════════════════════════════════════════════
 const LS_NS = 'atento.forms:v1:';
 const RASCUNHO_KEY = LS_NS + 'termos_aceite_rascunho_v1';
-const RASCUNHO_IDS = ['nomeCompleto', 'reRg', 'uf', 'cidade', 'dataPicker'];
+const RASCUNHO_IDS = ['nomeCompleto', 'reRgTipo', 'reRg', 'uf', 'cidade', 'dataPicker'];
 
 const appStorage = {
   getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -1146,6 +1158,9 @@ function restaurarRascunho() {
   if (cidadeEl && typeof obj.cidade === 'string') {
     cidadeEl.value = obj.cidade;
   }
+  // Restaurar tipo RE/RG
+  const reRgTipoEl = document.getElementById('reRgTipo');
+  if (reRgTipoEl && typeof obj.reRgTipo === 'string') reRgTipoEl.value = obj.reRgTipo;
   // Restaurar os demais campos
   ['nomeCompleto', 'reRg', 'dataPicker'].forEach(id => {
     const el = document.getElementById(id);
@@ -1201,7 +1216,8 @@ function marcarCampoInvalido(id, invalido) {
 function validarCampos() {
   const obrigatorios = [
     { id: 'nomeCompleto', nome: 'Nome Completo' },
-    { id: 'reRg', nome: 'RE / RG' },
+    { id: 'reRgTipo', nome: 'Tipo (RE/RG)' },
+    { id: 'reRg', nome: 'Nº Matrícula / RG' },
     { id: 'uf', nome: 'UF' },
     { id: 'cidade', nome: 'Cidade' },
     { id: 'dataPicker', nome: 'Data' }
@@ -1404,7 +1420,8 @@ async function gerarPDF() {
 
     // ── Dados do formulário ──
     const nomeCompleto = v('nomeCompleto');
-    const reRg = v('reRg');
+    const reRgTipo = v('reRgTipo') || 'RE';
+    const reRg = `${reRgTipo}: ${v('reRg')}`;
     const uf = v('uf');
     const cidade = v('cidade');
     const cidadeUf = `${cidade} - ${uf}`;
@@ -1471,7 +1488,7 @@ async function gerarPDF() {
 
     // ── Salvar e baixar ──
     const pdfBytes = await pdfDoc.save();
-    const nomeArq = sanitizarNomeArquivo(`${nomeCompleto} - ${reRg}`);
+    const nomeArq = sanitizarNomeArquivo(`${nomeCompleto} - ${reRgTipo}: ${v('reRg')}`);
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
