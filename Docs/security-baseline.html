@@ -36,7 +36,10 @@
       <li><strong>HTTPS</strong> obrigatório em produção (transporte cifrado);</li>
       <li>Processamento local dos dados no fluxo de geração do PDF;</li>
       <li>Descarte de dados da sessão conforme fluxos da aplicação após geração do arquivo;</li>
-      <li>Ausência de envio dos campos do formulário para armazenamento remoto nos termos da arquitetura descrita.</li>
+      <li>Ausência de envio dos campos do formulário para armazenamento remoto nos termos da arquitetura descrita;</li>
+      <li><strong>Controle de acesso por chave</strong> (quando ativo): verificação criptográfica client-side utilizando SHA-256 com salt próprio, sem exposição das chaves reais no código-fonte;</li>
+      <li><strong>Sessão local:</strong> token aleatório via <code>crypto.getRandomValues()</code> armazenado em <code>sessionStorage</code> com expiração configurável; limpeza automática ao fechar a aba;</li>
+      <li><strong>Proteção de rotas:</strong> páginas formulário protegidas por <code>guard.js</code> que verifica a sessão antes de exibir o conteúdo.</li>
     </ul>
 
     <h2>Restrições Técnicas (desenvolvimento e operação)</h2>
@@ -44,7 +47,18 @@
       <li><strong>Não</strong> utilizar <code>localStorage</code> / <code>sessionStorage</code> para fins não documentados ou além do escopo de rascunho aprovado;</li>
       <li><strong>Proibido</strong> registrar em logs de aplicação conteúdo de formulários com dados pessoais ou dados sensíveis;</li>
       <li><strong>Proibido</strong> integrar esta camada com APIs externas para <strong>envio</strong> dos dados preenchidos sem avaliação de impacto, contrato e base legal;</li>
-      <li>Controle de alterações no repositório (pull requests revisados, permissões mínimas nos ambientes de CI/CD).</li>
+      <li>Controle de alterações no repositório (pull requests revisados, permissões mínimas nos ambientes de CI/CD);</li>
+      <li>Chaves de acesso tratadas como <strong>segredos de configuração</strong>; verificadores derivados (SHA-256 + salt) são os únicos elementos presentes no código-fonte;</li>
+      <li>Scripts de geração de verificadores e verificação de vazamento são mantidos fora do repositório (gitignored).</li>
+    </ul>
+
+    <h2>Proteção de Acesso (Client-Side)</h2>
+    <p>Quando ativo, o sistema de proteção funciona exclusivamente no navegador:</p>
+    <ul>
+      <li><strong>Algoritmo:</strong> normalização da entrada → concatenação com salt → SHA-256 → transformação determinística (bit reversal, XOR, swap) → comparação com verificador armazenado;</li>
+      <li><strong>Sessão:</strong> token aleatório gerado via Web Crypto API, expiração configurável (padrão: 60 min), refresh automático em cada navegação/interação;</li>
+      <li><strong>Armazenamento:</strong> apenas <code>sessionStorage</code> (token + timestamp + path); a chave original nunca é armazenada;</li>
+      <li><strong>Limitação:</strong> proteção client-side contra acesso casual; não substitui autenticação server-side.</li>
     </ul>
 
     <h2>Camada de Entrega</h2>

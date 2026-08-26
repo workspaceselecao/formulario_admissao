@@ -46,7 +46,9 @@
       <li>A veracidade das informações inseridas;</li>
       <li>O uso adequado do documento gerado;</li>
       <li>A guarda e proteção do arquivo após download;</li>
-      <li>O uso de equipamentos adequados e a gestão de sessões em ambientes partilhados (especialmente quando existir rascunho local).</li>
+      <li>O uso de equipamentos adequados e a gestão de sessões em ambientes partilhados (especialmente quando existir rascunho local);</li>
+      <li>Manter a confidencialidade da chave de acesso atribuída, não compartilhando-a com terceiros não autorizados;</li>
+      <li>Utilizar o botão <strong>Encerrar acesso</strong> ao terminar o uso, especialmente em dispositivos partilhados.</li>
     </ul>
 
     <h2>5. Limitação de Responsabilidade</h2>
@@ -65,13 +67,23 @@
       <li>Tentar comprometer a segurança da aplicação.</li>
     </ul>
 
-    <h2>7. Segurança da informação e conformidade</h2>
+    <h2>7. Controle de acesso</h2>
+    <p>Algumas páginas da plataforma podem utilizar <strong>verificação criptográfica client-side</strong> para restringir o acesso. Esta proteção:</p>
+    <ul>
+      <li>utiliza chaves derivadas via SHA-256 com salt — as chaves originais <strong>não são</strong> armazenadas no código-fonte;</li>
+      <li>cria uma sessão local temporária no navegador (expira após inatividade ou ao fechar a aba);</li>
+      <li>não constitui autenticação server-side e não substitui controles de segurança corporativos;</li>
+      <li>deve ser tratada como proteção contra acesso casual e compartilhamento indiscriminado de links.</li>
+    </ul>
+    <p>Usuários avançados com controle total do navegador podem potencialmente contornar esta verificação. A plataforma não se responsabiliza por consequências do compartilhamento indevido de chaves de acesso.</p>
+
+    <h2>8. Segurança da informação e conformidade</h2>
     <p>O uso da plataforma deve observar as políticas internas da ATENTO em matéria de proteção de dados e segurança da informação. Documentação complementar encontra-se em <a href="/Docs/index.html"><code>/Docs</code></a>, incluindo baseline de segurança e política de privacidade aplicável à versão implantada.</p>
 
-    <h2>8. Disponibilidade</h2>
+    <h2>9. Disponibilidade</h2>
     <p>A plataforma pode ser modificada, suspensa ou descontinuada a qualquer momento.</p>
 
-    <h2>9. Alterações</h2>
+    <h2>10. Alterações</h2>
     <p>Estes termos podem ser atualizados a qualquer momento. Recomenda-se a consulta periódica à versão vigente.</p>
 
     <section class="doc-revisao-juridica" aria-label="Revisão jurídica">

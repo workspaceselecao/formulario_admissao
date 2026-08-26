@@ -64,8 +64,18 @@
       <li>API própria para receber os campos preenchidos para conclusão do PDF;</li>
       <li>Banco de dados central nesta aplicação para os dados digitados no formulário;</li>
       <li>Envio obrigatório dos dados do formulário para servidores para gerar o PDF;</li>
-      <li>Logs de aplicação contendo <strong>payload</strong> de formulários com dados pessoais.</li>
+      <li>Logs de aplicação contendo <strong>payload</strong> de formulários com dados pessoais;</li>
+      <li>Chaves de acesso no código-fonte — apenas verificadores derivados (SHA-256 + salt) existem no <code>guard.js</code>.</li>
     </ul>
+
+    <h2>Controle de acesso (quando ativo)</h2>
+    <p>Além do fluxo de preenchimento, páginas protegidas utilizam <code>sessionStorage</code> para:</p>
+    <ul>
+      <li>Armazenar um <strong>token aleatório</strong> (gerado via <code>crypto.getRandomValues()</code>);</li>
+      <li>Armazenar o <strong>timestamp de expiração</strong> da sessão;</li>
+      <li>Armazenar o <strong>path</strong> da rota autenticada.</li>
+    </ul>
+    <p>Estes dados de sessão <strong>não contêm</strong> a chave de acesso inserida pelo usuário, não são transmitidos a servidores e são limpos automaticamente ao fechar a aba ou ao acionar <strong>Encerrar acesso</strong>.</p>
     <p>Infraestrutura de hospedagem/CDN pode gerar logs operacionais sem conteúdo do formulário — devem ser considerados no inventário de tratamentos quando aplicável.</p>
 
     <h2>Diagrama (texto)</h2>

@@ -75,6 +75,14 @@
       <li>pode ser <strong>eliminada</strong> pelo usuário através da função <strong>Descartar rascunho</strong> ou equivalente;</li>
       <li>não substitui políticas de arquivo físico ou sistemas oficiais da ATENTO.</li>
     </ul>
+    <p><strong>7.4 Controle de acesso por chave (quando ativo):</strong> páginas protegidas podem utilizar <strong>verificação criptográfica client-side</strong> para restringir o acesso. Esta funcionalidade:</p>
+    <ul>
+      <li>utiliza <strong>sessionStorage</strong> para armazenar um token de sessão aleatório e o timestamp de expiração — <strong>não armazena</strong> a chave de acesso inserida pelo usuário;</li>
+      <li>os verificadores são derivados de SHA-256 com salt próprio; as chaves originais <strong>não existem</strong> no código-fonte;</li>
+      <li>a sessão expira automaticamente após período de inatividade (padrão: 60 minutos) ou quando o usuário aciona <strong>Encerrar acesso</strong>;</li>
+      <li>o <code>sessionStorage</code> é limpo automaticamente ao fechar a aba do navegador;</li>
+      <li>estes dados de sessão <strong>não são</strong> transmitidos a servidores nem compartilhados com terceiros.</li>
+    </ul>
 
     <h2>8. Segurança</h2>
     <p>A aplicação utiliza <strong>HTTPS</strong> em ambiente de produção e arquitetura que reduz persistência e transmissão desnecessárias de dados pessoais. Medidas complementares constam de <a href="/Docs/security-baseline.html">Baseline de segurança</a>.</p>
