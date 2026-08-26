@@ -1,0 +1,22 @@
+# Sensitive scripts (contain real keys for detection)
+scripts/verify-no-leaked-keys.mjs
+scripts/pre-commit-check.mjs
+scripts/generate-verifiers.mjs
+
+# Keys file (used during verifier generation)
+keys.txt
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.cursor/
+.vscode/
+.idea/
+
+# Vercel
+.vercel/

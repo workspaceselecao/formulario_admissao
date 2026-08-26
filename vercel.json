@@ -63,6 +63,22 @@
     {
       "source": "/",
       "destination": "/index.html"
+    },
+    {
+      "source": "/f075",
+      "destination": "/ficha_cadastral.html"
+    },
+    {
+      "source": "/f089",
+      "destination": "/assistencia_medica.html"
+    },
+    {
+      "source": "/bradesco",
+      "destination": "/carta_bradesco.html"
+    },
+    {
+      "source": "/termos",
+      "destination": "/termos_aceite.html"
     }
   ]
 }
