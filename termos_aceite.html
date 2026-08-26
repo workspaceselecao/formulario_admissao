@@ -131,6 +131,7 @@
     border: 1.5px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
+    min-height: 42px;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     color: var(--text);
@@ -162,12 +163,14 @@
     gap: 14px;
     align-items: end;
   }
+  .dados-row .field { display: flex; flex-direction: column; justify-content: flex-end; }
   .data-row {
     display: grid;
     grid-template-columns: 0.7fr 2.3fr 1fr;
     gap: 14px;
     align-items: end;
   }
+  .data-row .field { display: flex; flex-direction: column; justify-content: flex-end; }
   .field input[type="date"] {
     width: 100%;
     min-height: 42px;
@@ -175,6 +178,7 @@
     -webkit-appearance: auto;
   }
   .select-wrap { position: relative; }
+  .select-wrap select { min-height: 42px; }
   .select-wrap::after {
     content: "";
     position: absolute;
