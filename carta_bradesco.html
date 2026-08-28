@@ -1310,7 +1310,7 @@ async function gerarPdfCartaBytes(dados) {
   while (fonteB.widthOfTextAtSize(tracos + "-", 11) <= LARGURA_TEXTO) tracos += "-";
   y = 200;
   par([{ t: tracos, bold: true }], { size: 11 });
-  par([{ t: "ATENÇÃO: INFORMAR OBRIGATORIAMENTE O DÍGITO DA AGÊNCIA E OS DADOS DA CONTA-SALÁRIO. DEVOLVER AO COLABORADOR PARA RETORNO AO RH.", bold: true }], {
+  par([{ t: "ATENÇÃO: GENTILEZA INFORMAR OBRIGATORIAMENTE O DÍGITO DA AGÊNCIA E OS DADOS DA CONTA-SALÁRIO NOS CAMPOS ABAIXO E DEVOLVER AO COLABORADOR PARA RETORNO AO RH.", bold: true }], {
     size: 8,
     alinhamento: "centro"
   });
