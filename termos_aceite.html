@@ -755,27 +755,7 @@
           <input type="text" id="reRg" placeholder="Ex: 1228205" maxlength="20" autocomplete="off" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
         </div>
       </div>
-      <div class="data-row">
-          <div class="field">
-            <label>UF <span class="req">*</span></label>
-            <div class="select-wrap">
-              <select id="uf" onchange="onUfChange()">
-                <option value="">UF</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label>Cidade <span class="req">*</span></label>
-            <div class="select-wrap">
-              <select id="cidade" disabled>
-                <option value="">SELECIONE A UF...</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label>Data <span class="req">*</span></label>
-            <input type="date" id="dataPicker" autocomplete="off">        </div>
-      </div>
+
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressDados"></div></div>
       </div>
@@ -813,7 +793,7 @@
       <div class="aceite-info">
         <strong>Antes de gerar o PDF, verifique:</strong><br>
         ✓ Todos os 3 termos foram lidos e aceitos (checkboxes marcados)<br>
-        ✓ Dados pessoais estão corretos (Nome, RE/RG, Cidade/UF, Data)<br>
+        ✓ Dados pessoais estão corretos (Nome, RE/RG, Região)<br>
         ✓ Assinatura manuscrita foi desenhada na área indicada
       </div>
       <div style="margin-top:16px">
@@ -1062,9 +1042,7 @@ function updateProgress() {
     () => v('nomeCompleto').length > 0,
     () => v('reRgTipo').length > 0,
     () => v('reRg').length > 0,
-    () => v('uf').length > 0,
-    () => v('cidade').length > 0,
-    () => v('dataPicker').length > 0
+
   ];
   const dadosOk = dadosChecks.filter(fn => fn()).length;
   const dadosEl = document.getElementById('progressDados');
@@ -1152,7 +1130,7 @@ document.getElementById('btnModalDescartarRascunhoConfirmar')?.addEventListener(
 // ══════════════════════════════════════════════════
 const LS_NS = 'atento.forms:v1:';
 const RASCUNHO_KEY = LS_NS + 'termos_aceite_rascunho_v1';
-const RASCUNHO_IDS = ['regiao', 'nomeCompleto', 'reRgTipo', 'reRg', 'uf', 'cidade', 'dataPicker'];
+const RASCUNHO_IDS = ['regiao', 'nomeCompleto', 'reRgTipo', 'reRg'];
 
 const appStorage = {
   getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -1182,22 +1160,11 @@ function restaurarRascunho() {
     regiaoEl.value = obj.regiao;
     onRegiaoChange();
   }
-  // Restaurar UF primeiro para popular cidades
-  const ufEl = document.getElementById('uf');
-  if (ufEl && typeof obj.uf === 'string') {
-    ufEl.value = obj.uf;
-    onUfChange();
-  }
-  // Restaurar cidade depois que a lista foi populada
-  const cidadeEl = document.getElementById('cidade');
-  if (cidadeEl && typeof obj.cidade === 'string') {
-    cidadeEl.value = obj.cidade;
-  }
   // Restaurar tipo RE/RG
   const reRgTipoEl = document.getElementById('reRgTipo');
   if (reRgTipoEl && typeof obj.reRgTipo === 'string') reRgTipoEl.value = obj.reRgTipo;
   // Restaurar os demais campos
-  ['nomeCompleto', 'reRg', 'dataPicker'].forEach(id => {
+  ['nomeCompleto', 'reRg'].forEach(id => {
     const el = document.getElementById(id);
     if (el && typeof obj[id] === 'string') el.value = obj[id];
   });
@@ -1256,10 +1223,7 @@ function validarCampos() {
     { id: 'regiao', nome: 'Região' },
     { id: 'nomeCompleto', nome: 'Nome Completo' },
     { id: 'reRgTipo', nome: 'Tipo (RE/RG)' },
-    { id: 'reRg', nome: 'Nº Matrícula / RG' },
-    { id: 'uf', nome: 'UF' },
-    { id: 'cidade', nome: 'Cidade' },
-    { id: 'dataPicker', nome: 'Data' }
+    { id: 'reRg', nome: 'Nº Matrícula / RG' }
   ];
   const faltantes = [];
   obrigatorios.forEach(({ id, nome }) => {
@@ -1518,21 +1482,13 @@ async function gerarPDF() {
     const nomeCompleto = v('nomeCompleto');
     const reRgTipo = v('reRgTipo') || 'RE';
     const reRg = `${reRgTipo}: ${v('reRg')}`;
-    const uf = v('uf');
-    const cidade = v('cidade');
-    const cidadeUf = `${cidade} - ${uf}`;
-    const dataPickerVal = v('dataPicker');
-    let dataStrCidade = '';
-    if (dataPickerVal) {
-      const partes = dataPickerVal.split('-');
-      const anoNum = parseInt(partes[0], 10);
-      const mesNum = parseInt(partes[1], 10);
-      const diaNum = parseInt(partes[2], 10);
-      const mesExtenso = MESES_PT[mesNum - 1] || '';
-      dataStrCidade = `${cidadeUf}, ${String(diaNum).padStart(2, '0')} de ${mesExtenso} de ${anoNum}`;
-    } else {
-      dataStrCidade = cidadeUf;
-    }
+    // Localidade automática baseada na região
+    const cidadeUf = isSP ? 'SÃO PAULO - SP' : 'SALVADOR - BA';
+    const agora = new Date();
+    const diaNum = agora.getDate();
+    const mesExtenso = MESES_PT[agora.getMonth()];
+    const anoNum = agora.getFullYear();
+    const dataStrCidade = `${cidadeUf}, ${String(diaNum).padStart(2, '0')} de ${mesExtenso} de ${anoNum}`;
 
     // ── Embed da assinatura ──
     const sigDataUrl = getAssinaturaDataURL();
@@ -1570,7 +1526,7 @@ async function gerarPDF() {
       // RE/RG
       drawTextFit(page, reRg, f.reRg, fontNormal, { fontSize: 10 });
 
-      // Cidade/UF + Data por extenso
+      // Localidade + data por extenso (automático pela região)
       drawTextFit(page, dataStrCidade, f.data, fontNormal, { fontSize: 10 });
 
       // Evidência da assinatura (rodapé)
@@ -1603,75 +1559,16 @@ async function gerarPDF() {
 }
 
 // ══════════════════════════════════════════════════
-// CIDADES POR UF
-// ══════════════════════════════════════════════════
-let cidadesPorUF = {};
 
-async function carregarCidades() {
-  try {
-    const resp = await fetch('./municipios_cidades_ficha_por_uf.json');
-    cidadesPorUF = await resp.json();
-    popularUFs();
-  } catch(e) {
-    console.error('Erro ao carregar cidades:', e);
-  }
-}
-
-function popularUFs() {
-  const sel = document.getElementById('uf');
-  if (!sel) return;
-  const ufs = Object.keys(cidadesPorUF).sort((a, b) => a.localeCompare(b));
-  ufs.forEach(uf => {
-    const opt = document.createElement('option');
-    opt.value = uf;
-    opt.textContent = uf;
-    sel.appendChild(opt);
-  });
-}
-
-function onUfChange() {
-  const uf = v('uf');
-  const sel = document.getElementById('cidade');
-  if (!sel) return;
-  sel.innerHTML = '';
-  if (!uf) {
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = 'SELECIONE A UF...';
-    sel.appendChild(placeholder);
-    sel.disabled = true;
-    return;
-  }
-  const cidades = (cidadesPorUF[uf] || []).slice().sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = 'SELECIONE...';
-  sel.appendChild(placeholder);
-  cidades.forEach(cidade => {
-    const opt = document.createElement('option');
-    opt.value = cidade;
-    opt.textContent = cidade;
-    sel.appendChild(opt);
-  });
-  sel.disabled = false;
-}
 
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  carregarCidades();
   restaurarRascunho();
   updateProgress();
   checkAllReady();
-  // Preencher data atual no date picker se vazio
-  if (!v('dataPicker')) {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    document.getElementById('dataPicker').value = `${yyyy}-${mm}-${dd}`;
-  }
+
 });
 </script>
 </body>
