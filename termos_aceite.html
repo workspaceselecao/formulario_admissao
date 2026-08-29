@@ -688,7 +688,7 @@
         <div class="termo-titulo" id="termo2Titulo">TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM</div>
         <div class="termo-texto">
           <ol>
-            <li id="termo2Item1">Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.</li>
+            <li id="termo2Item1">Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.</li>
             <li>Estou ciente de que assuntos de meu interesse particular, excepcionalmente, poderão ser tratados em outro telefone colocado à minha disposição para tal finalidade, fora do sistema de gravação, cujos ramais tomei conhecimento através da relação que está em poder do Supervisor da minha área de lotação.</li>
             <li>Declaro ainda que, pelo presente, autorizo a captação e utilização de minha imagem e conversas telefônicas na forma como descrito no item 1, nada podendo exigir, a qualquer título, inclusive indenização por danos patrimoniais e/ou morais, das empresas tomadoras dos serviços, por dita captação/utilização.</li>
             <li>Outrossim, declaro que já tinha conhecimento das gravações de ligações telefônicas e de imagem e que em nada me oponho ao uso de tais gravações feitas até o momento.</li>
@@ -707,7 +707,7 @@
         <div class="termo-titulo" id="termo3Titulo">TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES</div>
         <div class="termo-texto">
           <ol>
-            <li id="termo3Item1">Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.</li>
+            <li id="termo3Item1">Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.</li>
           </ol>
         </div>
         <div style="margin-top:16px">
@@ -1310,16 +1310,14 @@ function onRegiaoChange() {
   // Update term 2 text
   const t2i = document.getElementById('termo2Item1');
   if (t2i) {
-    const cnpj = isSP ? '02.879.250/0001-79' : '02.879.250/0062-90';
     const op = isSP ? 'Operador SAC I' : 'Operador de Telemarketing';
-    t2i.innerHTML = `Na condição de empregado da Atento do Brasil S/A, CNPJ ${cnpj}, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.`;
+    t2i.innerHTML = `Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.`;
   }
   // Update term 3 text
   const t3i = document.getElementById('termo3Item1');
   if (t3i) {
-    const cnpj = isSP ? '02.879.250/0001-79' : '02.879.250/0062-90';
     const op = isSP ? 'Operador SAC I' : 'Operador de Telemarketing';
-    t3i.innerHTML = `Na condição de empregado da Atento do Brasil S/A, CNPJ ${cnpj}, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", todas as informações`;
+    t3i.innerHTML = `Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.`;
   }
   // Update term 2 title (add ANEXO IV prefix for SP)
   const t2t = document.getElementById('termo2Titulo');
