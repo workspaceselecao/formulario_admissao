@@ -685,10 +685,10 @@
 
       <!-- TERMO 2 -->
       <div class="termo-bloco" id="termo2Bloco">
-        <div class="termo-titulo">TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM</div>
+        <div class="termo-titulo" id="termo2Titulo">TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM</div>
         <div class="termo-texto">
           <ol>
-            <li>Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.</li>
+            <li id="termo2Item1">Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.</li>
             <li>Estou ciente de que assuntos de meu interesse particular, excepcionalmente, poderão ser tratados em outro telefone colocado à minha disposição para tal finalidade, fora do sistema de gravação, cujos ramais tomei conhecimento através da relação que está em poder do Supervisor da minha área de lotação.</li>
             <li>Declaro ainda que, pelo presente, autorizo a captação e utilização de minha imagem e conversas telefônicas na forma como descrito no item 1, nada podendo exigir, a qualquer título, inclusive indenização por danos patrimoniais e/ou morais, das empresas tomadoras dos serviços, por dita captação/utilização.</li>
             <li>Outrossim, declaro que já tinha conhecimento das gravações de ligações telefônicas e de imagem e que em nada me oponho ao uso de tais gravações feitas até o momento.</li>
@@ -704,10 +704,10 @@
 
       <!-- TERMO 3 -->
       <div class="termo-bloco" id="termo3Bloco">
-        <div class="termo-titulo">TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES</div>
+        <div class="termo-titulo" id="termo3Titulo">TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES</div>
         <div class="termo-texto">
           <ol>
-            <li>Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.</li>
+            <li id="termo3Item1">Na condição de empregado da Atento do Brasil S/A, CNPJ 02.879.250/0062-90, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.</li>
           </ol>
         </div>
         <div style="margin-top:16px">
@@ -724,6 +724,18 @@
   <div class="section-card">
     <div class="section-header"><div class="dot"></div>Dados do Funcionário</div>
     <div class="section-body">
+      <div style="margin-bottom:14px;">
+        <div class="field">
+          <label>Região <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="regiao" onchange="onRegiaoChange()" style="text-transform:uppercase">
+              <option value="">SELECIONE A REGIÃO...</option>
+              <option value="BAHIA">BAHIA</option>
+              <option value="SAO_PAULO">SÃO PAULO</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="dados-row" style="margin-bottom:14px;">
         <div class="field">
           <label>Nome Completo <span class="req">*</span></label>
@@ -1046,6 +1058,7 @@ function checkAllReady() {
 function updateProgress() {
   // Dados
   const dadosChecks = [
+    () => v('regiao').length > 0,
     () => v('nomeCompleto').length > 0,
     () => v('reRgTipo').length > 0,
     () => v('reRg').length > 0,
@@ -1139,7 +1152,7 @@ document.getElementById('btnModalDescartarRascunhoConfirmar')?.addEventListener(
 // ══════════════════════════════════════════════════
 const LS_NS = 'atento.forms:v1:';
 const RASCUNHO_KEY = LS_NS + 'termos_aceite_rascunho_v1';
-const RASCUNHO_IDS = ['nomeCompleto', 'reRgTipo', 'reRg', 'uf', 'cidade', 'dataPicker'];
+const RASCUNHO_IDS = ['regiao', 'nomeCompleto', 'reRgTipo', 'reRg', 'uf', 'cidade', 'dataPicker'];
 
 const appStorage = {
   getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
@@ -1163,6 +1176,12 @@ function restaurarRascunho() {
   let obj = null;
   try { obj = JSON.parse(raw); } catch(e) { return; }
   if (!obj || typeof obj !== 'object') return;
+  // Restaurar região primeiro (atualiza textos dos termos)
+  const regiaoEl = document.getElementById('regiao');
+  if (regiaoEl && typeof obj.regiao === 'string') {
+    regiaoEl.value = obj.regiao;
+    onRegiaoChange();
+  }
   // Restaurar UF primeiro para popular cidades
   const ufEl = document.getElementById('uf');
   if (ufEl && typeof obj.uf === 'string') {
@@ -1213,9 +1232,12 @@ RASCUNHO_IDS.forEach(id => {
 // DOWNLOAD MODELO
 // ══════════════════════════════════════════════════
 function downloadModeloPDF() {
+  const isSP = getRegiao() === 'SAO_PAULO';
+  const url = isSP ? './TERMO DE SIGILO_SP.pdf' : PDF_MODEL_URL;
+  const nome = isSP ? 'TERMO DE SIGILO - SP - MODELO.pdf' : 'TERMO DE ACEITE - MODELO.pdf';
   const a = document.createElement('a');
-  a.href = PDF_MODEL_URL;
-  a.download = 'TERMO DE ACEITE - MODELO.pdf';
+  a.href = url;
+  a.download = nome;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1231,6 +1253,7 @@ function marcarCampoInvalido(id, invalido) {
 
 function validarCampos() {
   const obrigatorios = [
+    { id: 'regiao', nome: 'Região' },
     { id: 'nomeCompleto', nome: 'Nome Completo' },
     { id: 'reRgTipo', nome: 'Tipo (RE/RG)' },
     { id: 'reRg', nome: 'Nº Matrícula / RG' },
@@ -1294,6 +1317,55 @@ const COORDS = {
   reRg3:       { page: 3, x: 86, y: 368, width: 171, height: 15 },
   data3:       { page: 3, x: 297, y: 457, width: 215, height: 14 }
 };
+
+// Coordenadas SP (São Paulo) — modelo gerado por gen-sp-template.mjs
+const COORDS_SP = {
+  // Página 1
+  assinatura1: { page: 1, x: 85, y: 110, width: 233, height: 55 },
+  nome1:       { page: 1, x: 121, y: 130, width: 243, height: 13 },
+  reRg1:       { page: 1, x: 86, y: 118, width: 171, height: 15 },
+  data1:       { page: 1, x: 296, y: 148, width: 218, height: 13 },
+  // Página 2
+  assinatura2: { page: 2, x: 85, y: 260, width: 233, height: 55 },
+  nome2:       { page: 2, x: 120, y: 280, width: 226, height: 12 },
+  reRg2:       { page: 2, x: 86, y: 268, width: 171, height: 15 },
+  data2:       { page: 2, x: 298, y: 302, width: 216, height: 16 },
+  // Página 3
+  assinatura3: { page: 3, x: 85, y: 260, width: 233, height: 55 },
+  nome3:       { page: 3, x: 120, y: 280, width: 232, height: 13 },
+  reRg3:       { page: 3, x: 86, y: 268, width: 171, height: 15 },
+  data3:       { page: 3, x: 297, y: 302, width: 215, height: 14 }
+};
+
+function getRegiao() { return (document.getElementById('regiao')?.value || '').trim(); }
+
+function onRegiaoChange() {
+  const regiao = getRegiao();
+  const isSP = regiao === 'SAO_PAULO';
+
+  // Update term 2 text
+  const t2i = document.getElementById('termo2Item1');
+  if (t2i) {
+    const cnpj = isSP ? '02.879.250/0001-79' : '02.879.250/0062-90';
+    const op = isSP ? 'Operador SAC I' : 'Operador de Telemarketing';
+    t2i.innerHTML = `Na condição de empregado da Atento do Brasil S/A, CNPJ ${cnpj}, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.`;
+  }
+  // Update term 3 text
+  const t3i = document.getElementById('termo3Item1');
+  if (t3i) {
+    const cnpj = isSP ? '02.879.250/0001-79' : '02.879.250/0062-90';
+    const op = isSP ? 'Operador SAC I' : 'Operador de Telemarketing';
+    t3i.innerHTML = `Na condição de empregado da Atento do Brasil S/A, CNPJ ${cnpj}, declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", todas as informações`;
+  }
+  // Update term 2 title (add ANEXO IV prefix for SP)
+  const t2t = document.getElementById('termo2Titulo');
+  if (t2t) t2t.textContent = isSP ? 'ANEXO IV – TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM' : 'TERMO DE AUTORIZAÇÃO DE GRAVAÇÃO TELEFÔNICA E DE IMAGEM';
+  // Update term 3 title (add ANEXO V prefix for SP)
+  const t3t = document.getElementById('termo3Titulo');
+  if (t3t) t3t.textContent = isSP ? 'ANEXO V – TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES' : 'TERMO DE COMPROMISSO RELATIVO À PRESERVAÇÃO DO SIGILO DE INFORMAÇÕES';
+
+  updateProgress();
+}
 
 /** Desenha texto em uma página do PDF, ajustando o tamanho da fonte para caber na largura disponível. */
 function drawTextFit(page, text, coord, font, opts = {}) {
@@ -1425,8 +1497,14 @@ async function gerarPDF() {
   if (!continuar) return;
 
   try {
+    // ── Selecionar modelo e coordenadas por região ──
+    const regiao = getRegiao();
+    const isSP = regiao === 'SAO_PAULO';
+    const modelUrl = isSP ? './TERMO DE SIGILO_SP.pdf' : PDF_MODEL_URL;
+    const coords = isSP ? COORDS_SP : COORDS;
+
     // ── Carregar modelo existente ──
-    const modelResp = await fetch(PDF_MODEL_URL);
+    const modelResp = await fetch(modelUrl);
     if (!modelResp.ok) throw new Error('Falha ao carregar PDF modelo');
     const modelBytes = await modelResp.arrayBuffer();
     const pdfDoc = await PDFLib.PDFDocument.load(modelBytes);
@@ -1470,9 +1548,9 @@ async function gerarPDF() {
 
     // ── Sobrepor dados nas 3 páginas ──
     const fields = [
-      { sig: COORDS.assinatura1, nome: COORDS.nome1, reRg: COORDS.reRg1, data: COORDS.data1 },
-      { sig: COORDS.assinatura2, nome: COORDS.nome2, reRg: COORDS.reRg2, data: COORDS.data2 },
-      { sig: COORDS.assinatura3, nome: COORDS.nome3, reRg: COORDS.reRg3, data: COORDS.data3 }
+      { sig: coords.assinatura1, nome: coords.nome1, reRg: coords.reRg1, data: coords.data1 },
+      { sig: coords.assinatura2, nome: coords.nome2, reRg: coords.reRg2, data: coords.data2 },
+      { sig: coords.assinatura3, nome: coords.nome3, reRg: coords.reRg3, data: coords.data3 }
     ];
 
     for (let i = 0; i < 3 && i < pages.length; i++) {
