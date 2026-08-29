@@ -210,7 +210,8 @@
     opacity: 0.5;
   }
   .signature-canvas-outer.invalid { border-color: #d1432f; box-shadow: none; }
-  #assinaturaCanvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280; max-height: 200px; touch-action: none; cursor: crosshair; }
+  #assinaturaCanvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 280; max-height: 200px; touch-action: none; cursor: crosshair; position: relative; z-index: 1; }
+  #assinaturaGuide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
   .signature-pad-tools {
     display: flex;
     justify-content: space-between;
@@ -1114,6 +1115,7 @@
         <p class="signature-pad-hint assinatura-hint--outros" id="hintAssinaturaManuscrita">Desenhe com o mouse ou o dedo. A imagem (PNG, fundo transparente) é incluída no PDF.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
+          <canvas id="assinaturaGuide" width="1000" height="280"></canvas>
         </div>
         <div class="signature-pad-tools">
           <label class="check-label nao-assinar-manual-label">
@@ -1927,6 +1929,7 @@ function initAssinaturaCanvas() {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = "#1a1a1a";
+  desenharLinhaGuiaAssinatura();
   const início = (e) => {
     if (e.button === 2) return;
     assinaturaDesenhando = true;
@@ -1969,12 +1972,29 @@ function initAssinaturaCanvas() {
     setTimeout(() => document.getElementById("btnModalLimparAssinAssistConfirmar")?.focus(), 0);
   });
 }
+function desenharLinhaGuiaAssinatura() {
+  const guideCanvas = document.getElementById("assinaturaGuide");
+  if (!guideCanvas) return;
+  const gCtx = guideCanvas.getContext("2d");
+  gCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+  gCtx.save();
+  gCtx.strokeStyle = "#b0b0b0";
+  gCtx.lineWidth = 1;
+  gCtx.setLineDash([8, 4]);
+  const y = guideCanvas.height * 0.88;
+  gCtx.beginPath();
+  gCtx.moveTo(80, y);
+  gCtx.lineTo(guideCanvas.width - 80, y);
+  gCtx.stroke();
+  gCtx.restore();
+}
 function limparAssinaturaCanvas() {
   const canvas = document.getElementById("assinaturaCanvas");
   if (!canvas || !assinaturaCanvasCtx) return;
   assinaturaCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
   assinaturaCanvasTemTraço = false;
   marcarAssinaturaInvalidaCanvas(false);
+  desenharLinhaGuiaAssinatura();
 }
 
 /** Restaura o traço da assinatura manuscrita a partir de data URL PNG (ex.: cópia da Ficha Cadastral). */
