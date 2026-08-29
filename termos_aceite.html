@@ -1307,17 +1307,15 @@ function onRegiaoChange() {
   const regiao = getRegiao();
   const isSP = regiao === 'SAO_PAULO';
 
-  // Update term 2 text
+  // Update term 2 text (mesmo texto para BA e SP, sem CNPJ)
   const t2i = document.getElementById('termo2Item1');
   if (t2i) {
-    const op = isSP ? 'Operador SAC I' : 'Operador de Telemarketing';
-    t2i.innerHTML = `Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.`;
+    t2i.innerHTML = `Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", minha imagem e quaisquer conversas telefônicas das quais eu participar no ambiente de trabalho estão sujeitas à gravação.`;
   }
-  // Update term 3 text
+  // Update term 3 text (mesmo texto para BA e SP, sem CNPJ)
   const t3i = document.getElementById('termo3Item1');
   if (t3i) {
-    const op = isSP ? 'Operador SAC I' : 'Operador de Telemarketing';
-    t3i.innerHTML = `Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">${op}</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.`;
+    t3i.innerHTML = `Na condição de empregado da Atento Brasil S.A., declaro estar ciente de que, em razão da natureza dos serviços por mim prestados como "<span class="destaque">Operador de Telemarketing</span>", todas as informações, escritas ou não, em suporte físico ou virtual, bem como qualquer documento, formulário ou modelos, listas e relações com dados e informações dos clientes fornecidos ou gerados durante a execução dos Serviços, identificadas ou não como confidenciais, são consideradas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> e comprometo-me a manter sob absoluto sigilo qualquer dessas <span class="destaque">INFORMAÇÕES CONFIDENCIAIS</span> a que tiver acesso em razão de minha atividade.`;
   }
   // Update term 2 title (add ANEXO IV prefix for SP)
   const t2t = document.getElementById('termo2Titulo');
