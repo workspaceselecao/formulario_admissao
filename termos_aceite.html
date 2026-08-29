@@ -1318,23 +1318,25 @@ const COORDS = {
   data3:       { page: 3, x: 297, y: 457, width: 215, height: 14 }
 };
 
-// Coordenadas SP (São Paulo) — modelo gerado por gen-sp-template.mjs
+// Coordenadas SP (São Paulo) — baseadas no template real TERMO DE SIGILO_SP.pdf
+// Linhas de assinatura: p1 y=94.6, p2 y=289.9, p3 y=443.9
+// "Nome:" labels: p1 y=68.1, p2 y=256.7, p3 y=417.6
 const COORDS_SP = {
-  // Página 1
-  assinatura1: { page: 1, x: 85, y: 110, width: 233, height: 55 },
-  nome1:       { page: 1, x: 121, y: 130, width: 243, height: 13 },
-  reRg1:       { page: 1, x: 86, y: 118, width: 171, height: 15 },
-  data1:       { page: 1, x: 296, y: 148, width: 218, height: 13 },
-  // Página 2
-  assinatura2: { page: 2, x: 85, y: 260, width: 233, height: 55 },
-  nome2:       { page: 2, x: 120, y: 280, width: 226, height: 12 },
-  reRg2:       { page: 2, x: 86, y: 268, width: 171, height: 15 },
-  data2:       { page: 2, x: 298, y: 302, width: 216, height: 16 },
-  // Página 3
-  assinatura3: { page: 3, x: 85, y: 260, width: 233, height: 55 },
-  nome3:       { page: 3, x: 120, y: 280, width: 232, height: 13 },
-  reRg3:       { page: 3, x: 86, y: 268, width: 171, height: 15 },
-  data3:       { page: 3, x: 297, y: 302, width: 215, height: 14 }
+  // Página 1 (Termo de Sigilo)
+  assinatura1: { page: 1, x: 85, y: 73, width: 233, height: 66 },
+  nome1:       { page: 1, x: 120, y: 67, width: 230, height: 13 },
+  reRg1:       { page: 1, x: 86, y: 53, width: 171, height: 15 },
+  data1:       { page: 1, x: 85, y: 150, width: 400, height: 13 },
+  // Página 2 (ANEXO IV)
+  assinatura2: { page: 2, x: 85, y: 268, width: 233, height: 66 },
+  nome2:       { page: 2, x: 120, y: 256, width: 230, height: 13 },
+  reRg2:       { page: 2, x: 86, y: 242, width: 171, height: 15 },
+  data2:       { page: 2, x: 85, y: 340, width: 400, height: 13 },
+  // Página 3 (ANEXO V)
+  assinatura3: { page: 3, x: 85, y: 422, width: 233, height: 66 },
+  nome3:       { page: 3, x: 120, y: 417, width: 230, height: 13 },
+  reRg3:       { page: 3, x: 86, y: 403, width: 171, height: 15 },
+  data3:       { page: 3, x: 85, y: 490, width: 400, height: 13 }
 };
 
 function getRegiao() { return (document.getElementById('regiao')?.value || '').trim(); }
