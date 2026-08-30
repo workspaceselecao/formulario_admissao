@@ -187,7 +187,7 @@
         '<img class="af-logo" src="atento.svg" alt="Atento" width="194" height="194" decoding="async">' +
         '<img class="af-icon" src="guard-icon.png" alt="" width="80" height="80" decoding="async">' +
         '<h1 class="af-title">Acesso protegido</h1>' +
-        '<p class="af-desc">Digite sua chave de acesso recebida em seu e-mail de aprovação</p>' +
+        '<p class="af-desc">Digite sua chave de acesso recebida em seu<br>e-mail de aprovação</p>' +
         '<input type="text" class="af-input" id="afInput" placeholder="ATN-____-____-____" maxlength="18" autocomplete="off" spellcheck="false">' +
         '<button type="button" class="af-btn" id="afBtn">Validar acesso</button>' +
         '<div class="af-msg" id="afMsg"></div>' +
