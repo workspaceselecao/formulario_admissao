@@ -158,8 +158,7 @@
     "#af{display:none;position:fixed;inset:0;z-index:999999;background:#f0ede8;font-family:'Poppins',sans-serif;color:#1a1714}",
     "#af.show{display:flex;align-items:center;justify-content:center}",
     ".af-c{width:min(420px,92vw);text-align:center;padding:48px 32px}",
-    ".af-logo{height:64px;width:auto;margin:0 auto 32px;object-fit:contain}",
-    ".af-icon{font-size:40px;margin-bottom:16px}",
+    ".af-logo{height:64px;width:auto;margin:0 auto 32px;object-fit:contain}","    .af-icon{width:80px;height:80px;margin:0 auto 16px;object-fit:contain}",
     ".af-title{font-size:20px;font-weight:700;margin-bottom:12px;letter-spacing:-0.3px}",
     ".af-desc{font-size:14px;color:#4a453f;margin-bottom:32px;line-height:1.6}",
     ".af-input{width:100%;font-family:'Poppins',sans-serif;font-size:18px;font-weight:600;letter-spacing:2px;text-align:center;padding:14px 16px;border:2px solid #d4cfc8;border-radius:10px;background:#fff;outline:none;color:#1a1714;transition:border-color .2s,box-shadow .2s;box-sizing:border-box}",
@@ -187,13 +186,13 @@
     overlay.innerHTML =
       '<div class="af-c">' +
         '<img class="af-logo" src="atento.svg" alt="Atento" width="194" height="194" decoding="async">' +
-        '<div class="af-icon">🔐</div>' +
+        '<img class="af-icon" src="guard-icon.png" alt="" width="80" height="80" decoding="async">' +
         '<h1 class="af-title">Acesso protegido</h1>' +
         '<p class="af-desc">Digite sua chave de acesso para continuar.</p>' +
         '<input type="text" class="af-input" id="afInput" placeholder="ATN-____-____-____" maxlength="18" autocomplete="off" spellcheck="false">' +
         '<button type="button" class="af-btn" id="afBtn">Validar acesso</button>' +
         '<div class="af-msg" id="afMsg"></div>' +
-        '<p class="af-footer">🔒 Ambiente protegido</p>' +
+        '<p class="af-footer">Ambiente protegido</p>' +
       '</div>';
 
     document.body.appendChild(overlay);
