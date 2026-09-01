@@ -258,6 +258,14 @@ body.header-nav-open .header-nav-panel {
 .header-nav-link--destructive:hover svg {
   color: var(--destructive);
 }
+.header-nav-link--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: default;
+}
+.header-nav-link--disabled svg {
+  color: var(--text-light);
+}
 @media (prefers-reduced-motion: reduce) {
   .header-menu-btn .hm-line,
   .header-nav-backdrop,
