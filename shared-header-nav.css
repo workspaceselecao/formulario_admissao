@@ -27,6 +27,13 @@
   font-weight: 700;
   letter-spacing: -0.5px;
 }
+.page-header .brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
 .page-header .brand-text {
   color: var(--text);
 }
