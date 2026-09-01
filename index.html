@@ -80,6 +80,27 @@
     outline: 3px solid rgba(1, 66, 106, 0.35);
     outline-offset: 2px;
   }
+  .home-card.is-disabled {
+    opacity: 0.55;
+    pointer-events: none;
+    cursor: default;
+  }
+  .home-card.is-disabled:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+    border-color: var(--border);
+  }
+  .home-card-badge {
+    display: inline-block;
+    background: #e07a5f;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
   .home-card-tag {
     font-family: 'Poppins', sans-serif;
     font-size: 10px;
@@ -280,10 +301,11 @@
         <h2>Carta Conta Salário</h2>
         <p>Carta de apresentação ao Banco Bradesco para abertura de Conta Salário: dados do funcionário, cargo e salário, com data preenchida automaticamente.</p>
       </a>
-      <a class="home-card" href="termos_aceite.html">
+      <a class="home-card is-disabled" href="termos_aceite.html" aria-disabled="true" tabindex="-1">
         <div class="home-card-tag">Sigilo · Gravação · Compromisso</div>
         <h2>Termos de Aceite</h2>
         <p>Termos de sigilo, confidencialidade, autorização de gravação telefônica e preservação de informações: visualização do modelo PDF, leitura dos textos e assinatura para geração do documento final.</p>
+        <span class="home-card-badge">Indisponível</span>
       </a>
     </div>
     <footer class="home-footer">
