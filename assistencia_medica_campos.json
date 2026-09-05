@@ -933,7 +933,7 @@
             "altura": 15
           },
           "obrigatorio": false,
-          "observacao": "Usado somente quando o candidato marca 'Não assinar manualmente'"
+          "observacao": "Usado somente quando o candidato marca 'Não assinar'"
         },
         "data": {
           "label": "Data",

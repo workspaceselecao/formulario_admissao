@@ -30,7 +30,7 @@
           "pagina": 2,
           "coordenadas": { "x": 40, "y": 146, "largura": 312, "altura": 20 },
           "obrigatorio": false,
-          "observacao": "Mesma área quando marca 'Não assinar manualmente'"
+          "observacao": "Mesma área quando marca 'Não assinar'"
         },
         "data": {
           "label": "Data da declaração",
