@@ -219,11 +219,21 @@
     align-items: center;
     margin-top: 8px;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
   .signature-pad-tools .nao-assinar-manual-label {
-    margin-left: auto;
+    margin: 0 0 0 auto;
     padding: 7px 10px;
+  }
+  /* Botão e checkbox sempre na mesma linha, com a mesma altura (alinhamento consistente) */
+  .signature-pad-tools .btn-signature-clear,
+  .signature-pad-tools .nao-assinar-manual-label {
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .signature-pad-tools .btn-signature-clear {
+    justify-content: center;
   }
   .btn-signature-clear { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
@@ -570,6 +580,14 @@
   }
   .btn-modal.cancel { background: #fff; color: var(--text-mid); }
   .btn-modal.confirm { background: var(--accent); color: #fff; border-color: var(--accent); }
+  /* Telas muito estreitas: compacta o botão para o par continuar na mesma linha */
+  @media (max-width: 360px) {
+    .signature-pad-tools .btn-signature-clear {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+
   @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
     .page-header {
       padding: 20px;
