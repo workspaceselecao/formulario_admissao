@@ -2,8 +2,21 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (process.env.npm_lifecycle_event === 'dev' ? 5999 : 5500);
+const PORT = (() => {
+  const envPort = parseInt(process.env.PORT || '', 10);
+  if (!Number.isNaN(envPort)) return envPort;
+  // npm run dev -> 5999 (avoids the 5500 occupied by another node process)
+  if (process.env.npm_lifecycle_event === 'dev') return 5999;
+  return 5500;
+})();
 const ROOT = __dirname;
+
+// Log startup to the preview log file so we can confirm the server chose its port.
+try {
+  const logPath = path.resolve(process.env.HOME || process.env.USERPROFILE, '.freebuff', 'preview-96c3ca86-05aa-45b1-9d37-028b8570f7aa.log');
+  fs.mkdirSync(path.dirname(logPath), { recursive: true });
+  fs.appendFileSync(logPath, `Server starting on port ${PORT} (root=${ROOT})\n`);
+} catch (_) { /* best effort */ }
 
 const MIME = {
   '.html': 'text/html',
@@ -34,5 +47,8 @@ http.createServer((req, res) => {
     res.end(data);
   });
 }).listen(PORT, () => {
-  console.log('Server running at http://localhost:' + PORT);
+  console.log(`Server running at http://localhost:${PORT}, serving ${ROOT}`);
+  try {
+    fs.appendFileSync(logPath, `Server listening on http://localhost:${PORT}\n`);
+  } catch (_) { /* best effort */ }
 });
