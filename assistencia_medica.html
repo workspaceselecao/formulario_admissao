@@ -222,7 +222,8 @@
     flex-wrap: wrap;
   }
   .signature-pad-tools .nao-assinar-manual-label {
-    margin-right: auto;
+    margin-left: auto;
+    padding: 7px 10px;
   }
   .btn-signature-clear { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
@@ -1120,11 +1121,10 @@
           <canvas id="assinaturaGuide" width="1000" height="280"></canvas>
         </div>
         <div class="signature-pad-tools">
-          <label class="check-label nao-assinar-manual-label">
-            <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off">
-            Não assinar manualmente
-          </label>
           <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
+          <label class="check-label nao-assinar-manual-label">
+            <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off" aria-label="Não assinar manualmente">
+          </label>
         </div>
       </div>
       <div class="grid grid-2">
