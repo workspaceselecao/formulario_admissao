@@ -393,11 +393,16 @@
   }
 
   /* ── RESPONSIVE ── */
+  /* Dados da Vaga: em telas abaixo de 900px (celulares, tablets e janelas estreitas)
+     os campos empilham automaticamente um abaixo do outro para preenchimento confortável. */
+  @media (max-width: 900px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
+    .vaga-grid { grid-template-columns: 1fr; }
+    .vaga-grid .col-span-3 { grid-column: auto; }
+  }
   @media (max-width: 640px), ((max-width: 1024px) and (max-height: 540px) and (orientation: landscape) and (hover: none)) {
     .container { padding: 24px 14px 64px; }
     .section-body { padding: 22px 18px 16px; }
     .grid-2 { grid-template-columns: 1fr; }
-    .vaga-grid { grid-template-columns: 1fr; }
     .col-span-2 { grid-column: auto; }
     .address-grid { grid-template-columns: 1fr; }
     .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-municipio { grid-column: span 1; }
