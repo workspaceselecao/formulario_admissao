@@ -331,7 +331,17 @@
   }
 
   function isProtected(path) {
-    return path === "/admin" || path === "/admin.html";
+    // Protege TODAS as variantes pelas quais o painel pode ser acessado:
+    // rewrite (/admin), cleanUrls (/admin.html e /admin/admin.html),
+    // diretório (/admin/) e qualquer profundidade de arquivo direto.
+    return (
+      path === "/admin" ||
+      path === "/admin/" ||
+      path === "/admin.html" ||
+      path === "/admin/admin.html" ||
+      path.endsWith("/admin/admin.html") ||
+      path.endsWith("/admin.html")
+    );
   }
 
   var path = currentPath();

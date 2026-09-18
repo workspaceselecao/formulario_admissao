@@ -240,6 +240,13 @@ async function runTests() {
   const admPersistBody = admPersist.body;
   assert("persistence.js NÃO usa localStorage", !LS_USE.test(admPersistBody), "localStorage usage found!");
 
+  // Regressão: variantes de acesso direto ao arquivo do painel
+  assert("guard cobre /admin.html", adminGuardR.body.includes('path === "/admin.html"'), "missing");
+  assert("guard cobre /admin/admin.html", adminGuardR.body.includes('path === "/admin/admin.html"'), "missing");
+  assert("guard cobre profundidades arbitrários (endsWith)", adminGuardR.body.includes('path.endsWith("/admin/admin.html")') && adminGuardR.body.includes('path.endsWith("/admin.html")'), "missing");
+  assert("guard injetado no <head> (esconde antes da 1ª pintura)", adminR.body.indexOf("admin-guard.js") < adminR.body.indexOf("<body>"), "after body!");
+  assert("painel não carrega admin-guard.js duas vezes", (adminR.body.match(/<script src="[^"]*admin-guard\.js"><\/script>/g) || []).length === 1, "duplicated!");
+
   // ── TEST 10: Regra de domínio @atento.com (seção 69) ──
   console.log("\n📋 Teste 10: Regra de domínio @atento.com");
   assert("usuario@atento.com → permitido", adminDomainOk("usuario@atento.com"), "should pass");
@@ -318,6 +325,10 @@ async function runTests() {
       assert("GET historico contém evento", hist.status === 200 && hist.body.includes("suite"), "missing");
       const admPage = await fetch(`http://127.0.0.1:${srvPort}/admin`);
       assert("test-server serve /admin", admPage.status === 200 && admPage.body.includes("Painel Administrativo"), "missing");
+      const admDirect1 = await fetch(`http://127.0.0.1:${srvPort}/admin/admin.html`);
+      assert("acesso direto /admin/admin.html → 404 (sem buraco)", admDirect1.status === 404, `status ${admDirect1.status}`);
+      const admDirect2 = await fetch(`http://127.0.0.1:${srvPort}/admin.html`);
+      assert("acesso direto /admin.html → 404 (sem buraco)", admDirect2.status === 404, `status ${admDirect2.status}`);
     }
   } finally {
     srv.kill();
