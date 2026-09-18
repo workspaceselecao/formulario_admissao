@@ -23,7 +23,6 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `cidades_brasil.json` — mapeia cidade → ficha PDF (fluxo **Outros Planos**)
 - `FICHA BH.pdf`, `FICHA FSA.pdf`, `FICHA GNDI.pdf`, `FICHA GOIANIA.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA SA_FO.pdf` — fichas regionais (Outros Planos)
 - `vercel.json` — a raiz `/` serve internamente `index.html` (home)
-- `Carta Abertura de Conra Salario.pdf` — download opcional (conta salário Bradesco, só na ficha)
 
 ## Publicar na Vercel
 

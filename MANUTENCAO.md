@@ -33,10 +33,6 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `DECLARACAO PLANO DE SAUDE.pdf` | Declaração — fluxo **Plano de Benefícios** (assinatura na página 2). |
 | `declaracao_plano_saude_campos.json` | Coordenadas da declaração (fluxo Plano de Benefícios). |
 | `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Fichas regionais — fluxo **Outros Planos** (`cidades_brasil.json`). |
-| `Carta Abertura de Conra Salario.pdf` | Download opcional na ficha (conta salário Bradesco). |
-| `municipios_cidades_ficha_por_uf.json` | **Legado** — já **não** é usado pelo `assistencia_medica.html` (a lista de municípios vem da API; ver §6.1). Pode manter-se no repositório sem efeito no site. |
-| `coordenadasficha.txt`, `coordenadasassmedica.txt` | Notas de leitura de coordenadas (página, x, y, largura, altura) — **referência humana** para alinhar com o JSON; não são carregados pela aplicação. |
-| `scripts/gerar-municipios-cidades-ficha-por-uf.mjs`, `scripts/merge-municipios-cidades-uf.mjs` | Geram/merge do JSON de municípios; **obsoletos** para o fluxo atual (§9). |
 | `vercel.json` | Configuração de deploy. |
 
 Quando o número do processo (ex. F-075, PR-011, revisão 37) mudar no **documento PDF oficial**, atualize o **cabeçalho visível** no HTML (subtítulo) e, se for o caso, o nome do arquivo do template e a constante `TEMPLATE_PATH` na ficha.
@@ -46,8 +42,8 @@ Quando o número do processo (ex. F-075, PR-011, revisão 37) mudar no **documen
 ## 3. Sistema de coordenadas no PDF (pdf-lib)
 
 - **Origem:** canto **inferior esquerdo** da página, como no pdf-lib (`y` cresce para cima).
-- Em `ficha_cadastral_campos.json` e `coordenadasficha.txt`, use **os mesmos valores** medidos na ferramenta (ficha F-075 ≈ 596×842 pt). Ex.: nome no topo do formulário tem `y` alto (≈ 687); assinatura no rodapé tem `y` baixo (≈ 21–67). **Não converter** `y` com `altura_pagina - y` — isso inverte o formulário e embaralha os campos.
-- Ao mudar o **PDF oficial**, re-medir, atualizar o `.txt` e copiar `x`/`y`/`width`/`height` para o JSON (`largura`/`altura`).
+- Em `ficha_cadastral_campos.json`, use **os mesmos valores** medidos na ferramenta (ficha F-075 ≈ 596×842 pt). Ex.: nome no topo do formulário tem `y` alto (≈ 687); assinatura no rodapé tem `y` baixo (≈ 21–67). **Não converter** `y` com `altura_pagina - y` — isso inverte o formulário e embaralha os campos.
+- Ao mudar o **PDF oficial**, re-medir e copiar `x`/`y`/`width`/`height` para o JSON (`largura`/`altura`).
 - **Evidência técnica da assinatura** (hash/doc, data/hora, IP): em `ficha_cadastral.html` e `assistencia_medica.html`, `caixaRodapeEvidenciaPdf()` carimba o texto no **rodapé** da página (fluxo Outros Planos: página 1; Plano de Benefícios: página 2 da declaração). No JSON, `assinatura.evidencia.coordenadas` define só margens (`x`, `y` inferior, `largura`).
 
 Estrutura geral do JSON:
@@ -172,8 +168,11 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 ## 9. Scripts Node na pasta `scripts/`
 
-- `gerar-municipios-cidades-ficha-por-uf.mjs` / `merge-municipios-cidades-uf.mjs` — serviam o antigo arquivo `municipios_cidades_ficha_por_uf.json`. O site **já não depende** dele para a lista de cidades.
-- Só executar de novo se quiserem **dados off-line** ou relatórios; não é requisito de deploy.
+- `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/termos`). Executar com `node scripts/test-server.mjs`.
+- `run-test.mjs` — suíte de testes do projeto; executar com `node scripts/run-test.mjs`.
+- `atualizar-docs-revision.mjs` — atualiza `Docs/docs-revision.json` após alterar política, termos ou base legal (ver seção LGPD/Docs).
+- `gerar-historico-versionamento.mjs` — regenera `Docs/historico-versionamento.md` (guia público de atualizações, RIPD).
+- Não há script de build: o deploy é de site estático e não depende destes scripts.
 
 ---
 
