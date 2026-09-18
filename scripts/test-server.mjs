@@ -50,7 +50,10 @@ const REWRITES = {
   "/f089": "/assistencia_medica.html",
   "/bradesco": "/carta_bradesco.html",
   "/termos": "/termos_aceite.html",
-  "/admin": "/admin/admin.html",
+  // O painel é o índice físico do diretório (admin/index.html): em produção
+  // a Vercel o serve por filesystem em /admin — a rewrite é redundante, mas
+  // mantida por semântica/compatibilidade.
+  "/admin": "/admin/index.html",
   "/": "/index.html"
 };
 
@@ -206,6 +209,9 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   let pathname = url.pathname;
 
+  // Normaliza barra final (paridade com a Vercel: /foo/ ≡ /foo)
+  if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.slice(0, -1);
+
   // API administrativa
   if (pathname.startsWith("/api/admin/")) {
     try {
@@ -216,9 +222,16 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  // Buraco de acesso: caminhos que terminam no arquivo do painel mas não
-  // passam pelo rewrite /admin recebem 404 (acesso oficial é só via /admin).
-  if (pathname === "/admin/admin" || pathname.endsWith("/admin.html")) {
+  // Buraco de acesso: caminhos diretos aos arquivos do painel (ou às suas
+  // formas cleanUrls) recebem 404 — acesso oficial é somente via /admin.
+  // OBS.: "/index.html" (Home) não é afetado — apenas caminhos sob /admin/.
+  if (
+    pathname === "/admin.html" ||
+    pathname === "/admin/admin" ||
+    pathname === "/admin/admin.html" ||
+    pathname === "/admin/index" ||
+    pathname === "/admin/index.html"
+  ) {
     res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
     res.end("<h1>404 Not Found</h1>");
     return;
@@ -249,10 +262,20 @@ const server = createServer(async (req, res) => {
   }
 
   // Try to serve the file
-  if (!existsSync(filePath) || !statSync(filePath).isFile()) {
+  if (!existsSync(filePath)) {
     res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
     res.end("<h1>404 Not Found</h1>");
     return;
+  }
+  // Índice de diretório (paridade com a Vercel: /Docs/ → Docs/index.html)
+  if (statSync(filePath).isDirectory()) {
+    const idx = join(filePath, "index.html");
+    if (existsSync(idx) && statSync(idx).isFile()) filePath = idx;
+    else {
+      res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
+      res.end("<h1>404 Not Found</h1>");
+      return;
+    }
   }
 
   const ext = extname(filePath).toLowerCase();
@@ -279,7 +302,7 @@ server.listen(PORT, () => {
   console.log(`   http://localhost:${PORT}/f089       → assistencia_medica.html (protegido)`);
   console.log(`   http://localhost:${PORT}/bradesco   → carta_bradesco.html (protegido)`);
   console.log(`   http://localhost:${PORT}/termos     → termos_aceite.html (protegido)`);
-  console.log(`   http://localhost:${PORT}/admin      → admin/admin.html (painel — e-mail @atento.com)`);
+  console.log(`   http://localhost:${PORT}/admin      → admin/index.html (painel — e-mail @atento.com)`);
   console.log("\nAPI administrativa:");
   console.log("   GET/PUT  /api/admin/config     (overlay + backup automático)");
   console.log("   GET      /api/admin/backup     (lista; ?id= para baixar)");

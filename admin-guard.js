@@ -331,13 +331,14 @@
   }
 
   function isProtected(path) {
-    // Protege qualquer URL cujo último segmento seja o painel, em todas as
-    // variantes: /admin, /admin/, /admin.html, /admin/admin.html e a forma
-    // cleanUrls da Vercel /admin/admin (redirect 301 de admin/admin.html).
+    // Protege qualquer URL sob /admin, em todas as variantes: /admin,
+    // /admin/, /admin.html, /admin/index.html, /admin/admin.html e as
+    // formas cleanUrls da Vercel (/admin/admin, /admin/index — redirects
+    // dos arquivos .html). Tudo dentro de /admin/ é do painel; nenhuma
+    // página pública começa com /admin, então a regra não gera falso
+    // positivo (ex.: "/administrator" NÃO casa — exige a barra).
     var p = String(path || "").replace(/\/+$/, "");
-    var last = p.split("/").pop() || "";
-    var semExt = last.replace(/\.html?$/i, "");
-    return semExt === "admin";
+    return p === "/admin" || p === "/admin.html" || p.startsWith("/admin/");
   }
 
   var path = currentPath();

@@ -1,6 +1,6 @@
 # Painel Administrativo — Manual e Documentação Técnica
 
-**Rota:** `/admin` (rewrite para `admin/admin.html`)
+**Rota:** `/admin` (servido do arquivo físico `admin/index.html` — índice do diretório)
 **Acesso:** autenticação **apartada** de dois fatores — qualquer e-mail com domínio **exatamente `@atento.com`** + um dos **códigos de acesso exclusivos do painel** (formato `ATN-XXXX-XXXX-XXXX`). Os códigos dos formulários públicos **não** autorizam este painel.
 
 ---

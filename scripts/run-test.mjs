@@ -20,7 +20,7 @@ const REWRITES = {
   "/f089": "/assistencia_medica.html",
   "/bradesco": "/carta_bradesco.html",
   "/termos": "/termos_aceite.html",
-  "/admin": "/admin/admin.html",
+  "/admin": "/admin/index.html",
   "/": "/index.html"
 };
 
@@ -208,6 +208,8 @@ async function runTests() {
     assert("vercel.json tem rewrite /bradesco", rewrites.some(r => r.source === "/bradesco"), "missing");
     assert("vercel.json tem rewrite /termos", rewrites.some(r => r.source === "/termos"), "missing");
     assert("vercel.json tem rewrite /admin", rewrites.some(r => r.source === "/admin"), "missing");
+    assert("destinos de rewrite sem extensão .html (forma cleanUrls)", rewrites.every(r => !String(r.destination || "").endsWith(".html")), "destination with .html found");
+    assert("rewrite /admin aponta para /admin/ (índice físico)", (rewrites.find(r => r.source === "/admin") || {}).destination === "/admin/", "wrong destination");
   }
 
   // ── TEST 9: Painel administrativo servido ──
@@ -240,20 +242,20 @@ async function runTests() {
   const admPersistBody = admPersist.body;
   assert("persistence.js NÃO usa localStorage", !LS_USE.test(admPersistBody), "localStorage usage found!");
 
-  // Regressão: regra do guard por último segmento (cobre cleanUrls da Vercel)
-  assert("guard usa regra por último segmento (semExt === admin)", adminGuardR.body.includes('semExt === "admin"'), "missing");
+  // Regressão: regra do guard por prefixo /admin (cobre cleanUrls da Vercel)
+  assert("guard usa regra por prefixo /admin", adminGuardR.body.includes('p.startsWith("/admin/")'), "missing");
   {
     const protegido = (p) => {
       const x = String(p).replace(/\/+$/, "");
-      const last = x.split("/").pop() || "";
-      return (last.replace(/\.html?$/i, "")) === "admin";
+      return x === "/admin" || x === "/admin.html" || x.startsWith("/admin/");
     };
     assert("guard cobre /admin", protegido("/admin"), "should protect");
     assert("guard cobre /admin/", protegido("/admin/"), "should protect");
     assert("guard cobre /admin.html", protegido("/admin.html"), "should protect");
-    assert("guard cobre /admin/admin.html", protegido("/admin/admin.html"), "should protect");
-    assert("guard cobre /admin/admin (cleanUrls 301)", protegido("/admin/admin"), "should protect");
-    assert("guard NÃO protege páginas públicas", !protegido("/ficha_cadastral.html") && !protegido("/index.html") && !protegido("/"), "false positive");
+    assert("guard cobre /admin/index.html", protegido("/admin/index.html"), "should protect");
+    assert("guard cobre /admin/index (cleanUrls)", protegido("/admin/index"), "should protect");
+    assert("guard cobre /admin/admin (legado cleanUrls)", protegido("/admin/admin"), "should protect");
+    assert("guard NÃO protege páginas públicas", !protegido("/ficha_cadastral.html") && !protegido("/index.html") && !protegido("/") && !protegido("/administrator"), "false positive");
   }
   assert("guard injetado no <head> (esconde antes da 1ª pintura)", adminR.body.indexOf("admin-guard.js") < adminR.body.indexOf("<body>"), "after body!");
   assert("painel não carrega admin-guard.js duas vezes", (adminR.body.match(/<script src="[^"]*admin-guard\.js"><\/script>/g) || []).length === 1, "duplicated!");
@@ -341,8 +343,12 @@ async function runTests() {
       assert("acesso direto /admin/admin.html → 404 (sem buraco)", admDirect1.status === 404, `status ${admDirect1.status}`);
       const admDirect2 = await fetch(`http://127.0.0.1:${srvPort}/admin.html`);
       assert("acesso direto /admin.html → 404 (sem buraco)", admDirect2.status === 404, `status ${admDirect2.status}`);
-      const admDirect3 = await fetch(`http://127.0.0.1:${srvPort}/admin/admin`);
-      assert("acesso direto /admin/admin (cleanUrls) → 404", admDirect3.status === 404, `status ${admDirect3.status}`);
+      const admDirect3 = await fetch(`http://127.0.0.1:${srvPort}/admin/index.html`);
+      assert("acesso direto /admin/index.html → 404 (sem buraco)", admDirect3.status === 404, `status ${admDirect3.status}`);
+      const admDirect4 = await fetch(`http://127.0.0.1:${srvPort}/admin/index`);
+      assert("acesso direto /admin/index (cleanUrls) → 404 (sem buraco)", admDirect4.status === 404, `status ${admDirect4.status}`);
+      const admDirect5 = await fetch(`http://127.0.0.1:${srvPort}/admin/admin`);
+      assert("acesso direto /admin/admin (legado cleanUrls) → 404", admDirect5.status === 404, `status ${admDirect5.status}`);
       const admTip = await fetch(`http://127.0.0.1:${srvPort}/admin-guard.js`);
       assert("login sem tip de e-mail (nome.sobrenome removido)", !admTip.body.includes("nome.sobrenome@atento.com"), "tip still present");
     }

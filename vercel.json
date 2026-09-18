@@ -82,27 +82,27 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/f075",
-      "destination": "/ficha_cadastral.html"
+      "destination": "/ficha_cadastral"
     },
     {
       "source": "/f089",
-      "destination": "/assistencia_medica.html"
+      "destination": "/assistencia_medica"
     },
     {
       "source": "/bradesco",
-      "destination": "/carta_bradesco.html"
+      "destination": "/carta_bradesco"
     },
     {
       "source": "/termos",
-      "destination": "/termos_aceite.html"
+      "destination": "/termos_aceite"
     },
     {
       "source": "/admin",
-      "destination": "/admin/admin.html"
+      "destination": "/admin/"
     }
   ]
 }

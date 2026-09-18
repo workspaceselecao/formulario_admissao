@@ -176,7 +176,7 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 ## 9.1 Painel Administrativo
 
-- Código em `admin/` (admin.html, panel.js, panel.css, persistence.js) + `admin-guard.js` na raiz.
+- Código em `admin/` (index.html, panel.js, panel.css, persistence.js) + `admin-guard.js` na raiz.
 - Acesso (autenticação **apartada**, dois fatores): qualquer e-mail com domínio **exatamente `@atento.com`** + **código exclusivo do painel** (5 códigos `ATN-…`, verificadores no corpus `CG` de `admin-guard.js`; pipeline idêntico ao `guard.js`). As chaves dos formulários (`guard.js`) são independentes e não autorizam o painel. Novos códigos via `scripts/generate-admin-verifiers.mjs` (não contém segredos, versionado).
 - Modelo de dados: **overlay** sobre `ficha_cadastral_campos.json`, `declaracao_plano_saude_campos.json`, `cidades_brasil.json`/`cidades_infinity.json` — os JSONs do repositório permanecem a fonte primária e nunca são editados pelo painel.
 - Persistência: modo API (`data/admin-config.json` + `data/backups/` + `data/historico.json`) em dev; modo exportação (JSON versionado) em produção estática. `localStorage` é proibido como banco administrativo.
