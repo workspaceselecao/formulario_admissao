@@ -240,10 +240,21 @@ async function runTests() {
   const admPersistBody = admPersist.body;
   assert("persistence.js NÃO usa localStorage", !LS_USE.test(admPersistBody), "localStorage usage found!");
 
-  // Regressão: variantes de acesso direto ao arquivo do painel
-  assert("guard cobre /admin.html", adminGuardR.body.includes('path === "/admin.html"'), "missing");
-  assert("guard cobre /admin/admin.html", adminGuardR.body.includes('path === "/admin/admin.html"'), "missing");
-  assert("guard cobre profundidades arbitrários (endsWith)", adminGuardR.body.includes('path.endsWith("/admin/admin.html")') && adminGuardR.body.includes('path.endsWith("/admin.html")'), "missing");
+  // Regressão: regra do guard por último segmento (cobre cleanUrls da Vercel)
+  assert("guard usa regra por último segmento (semExt === admin)", adminGuardR.body.includes('semExt === "admin"'), "missing");
+  {
+    const protegido = (p) => {
+      const x = String(p).replace(/\/+$/, "");
+      const last = x.split("/").pop() || "";
+      return (last.replace(/\.html?$/i, "")) === "admin";
+    };
+    assert("guard cobre /admin", protegido("/admin"), "should protect");
+    assert("guard cobre /admin/", protegido("/admin/"), "should protect");
+    assert("guard cobre /admin.html", protegido("/admin.html"), "should protect");
+    assert("guard cobre /admin/admin.html", protegido("/admin/admin.html"), "should protect");
+    assert("guard cobre /admin/admin (cleanUrls 301)", protegido("/admin/admin"), "should protect");
+    assert("guard NÃO protege páginas públicas", !protegido("/ficha_cadastral.html") && !protegido("/index.html") && !protegido("/"), "false positive");
+  }
   assert("guard injetado no <head> (esconde antes da 1ª pintura)", adminR.body.indexOf("admin-guard.js") < adminR.body.indexOf("<body>"), "after body!");
   assert("painel não carrega admin-guard.js duas vezes", (adminR.body.match(/<script src="[^"]*admin-guard\.js"><\/script>/g) || []).length === 1, "duplicated!");
 
@@ -283,10 +294,11 @@ async function runTests() {
   console.log("\n📋 Teste 12: Sidebar — Configurações");
   for (const page of ["ficha_cadastral.html", "assistencia_medica.html", "carta_bradesco.html", "termos_aceite.html"]) {
     const r = await fetch(`http://127.0.0.1:${PORT}/${page}`);
-    assert(`${page} contém link Configurações`, r.status === 200 && r.body.includes("admin/admin.html") && r.body.includes("Configurações"), "missing");
+    assert(`${page} contém link Configurações`, r.status === 200 && r.body.includes('href="/admin"') && r.body.includes("Configurações"), "missing");
   }
   const homeCardR = await fetch(`http://127.0.0.1:${PORT}/index.html`);
-  assert("Home tem card Configurações apontando para o painel", homeCardR.status === 200 && homeCardR.body.includes('href="admin/admin.html"') && homeCardR.body.includes(">Configurações<"), "missing");
+  assert("Home tem card Configurações apontando para o painel", homeCardR.status === 200 && homeCardR.body.includes('href="/admin"') && homeCardR.body.includes(">Configurações<"), "missing");
+  assert("Home não usa mais o caminho admin/admin.html", !homeCardR.body.includes("admin/admin.html"), "legacy link");
   assert("Home não linka mais termos_aceite.html", !homeCardR.body.includes('href="termos_aceite.html"'), "still linked");
   assert("Home marca o card como Acesso restrito", homeCardR.body.includes("Acesso restrito"), "missing");
 
@@ -329,6 +341,10 @@ async function runTests() {
       assert("acesso direto /admin/admin.html → 404 (sem buraco)", admDirect1.status === 404, `status ${admDirect1.status}`);
       const admDirect2 = await fetch(`http://127.0.0.1:${srvPort}/admin.html`);
       assert("acesso direto /admin.html → 404 (sem buraco)", admDirect2.status === 404, `status ${admDirect2.status}`);
+      const admDirect3 = await fetch(`http://127.0.0.1:${srvPort}/admin/admin`);
+      assert("acesso direto /admin/admin (cleanUrls) → 404", admDirect3.status === 404, `status ${admDirect3.status}`);
+      const admTip = await fetch(`http://127.0.0.1:${srvPort}/admin-guard.js`);
+      assert("login sem tip de e-mail (nome.sobrenome removido)", !admTip.body.includes("nome.sobrenome@atento.com"), "tip still present");
     }
   } finally {
     srv.kill();

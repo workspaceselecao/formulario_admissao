@@ -218,7 +218,7 @@ const server = createServer(async (req, res) => {
 
   // Buraco de acesso: caminhos que terminam no arquivo do painel mas não
   // passam pelo rewrite /admin recebem 404 (acesso oficial é só via /admin).
-  if (pathname.endsWith("/admin.html")) {
+  if (pathname === "/admin/admin" || pathname.endsWith("/admin.html")) {
     res.writeHead(404, { "Content-Type": "text/html; charset=utf-8" });
     res.end("<h1>404 Not Found</h1>");
     return;

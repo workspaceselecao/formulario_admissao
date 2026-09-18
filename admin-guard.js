@@ -223,7 +223,7 @@
         '<h1 class="af-title">Painel Administrativo</h1>' +
         '<p class="af-desc">Acesso restrito.</p>' +
         '<label class="af-label" for="afEmail">E-mail corporativo</label>' +
-        '<input type="email" class="af-input" id="afEmail" placeholder="nome.sobrenome@atento.com" autocomplete="username" spellcheck="false">' +
+        '<input type="email" class="af-input" id="afEmail" autocomplete="username" spellcheck="false">' +
         '<label class="af-label" for="afCode" style="margin-top:14px">Código de acesso (exclusivo do painel)</label>' +
         '<input type="text" class="af-input af-input--code" id="afCode" placeholder="ATN-____-____-____" maxlength="18" autocomplete="off" spellcheck="false">' +
         '<button type="button" class="af-btn" id="afBtn">Validar acesso</button>' +
@@ -258,7 +258,7 @@
       var btn = document.getElementById("afBtn");
 
       if (!email || email.indexOf("@") === -1) {
-        msg.textContent = "Informe um e-mail corporativo válido (ex.: nome.sobrenome@atento.com).";
+        msg.textContent = "Informe um e-mail corporativo válido.";
         msg.className = "af-msg err";
         return;
       }
@@ -331,17 +331,13 @@
   }
 
   function isProtected(path) {
-    // Protege TODAS as variantes pelas quais o painel pode ser acessado:
-    // rewrite (/admin), cleanUrls (/admin.html e /admin/admin.html),
-    // diretório (/admin/) e qualquer profundidade de arquivo direto.
-    return (
-      path === "/admin" ||
-      path === "/admin/" ||
-      path === "/admin.html" ||
-      path === "/admin/admin.html" ||
-      path.endsWith("/admin/admin.html") ||
-      path.endsWith("/admin.html")
-    );
+    // Protege qualquer URL cujo último segmento seja o painel, em todas as
+    // variantes: /admin, /admin/, /admin.html, /admin/admin.html e a forma
+    // cleanUrls da Vercel /admin/admin (redirect 301 de admin/admin.html).
+    var p = String(path || "").replace(/\/+$/, "");
+    var last = p.split("/").pop() || "";
+    var semExt = last.replace(/\.html?$/i, "");
+    return semExt === "admin";
   }
 
   var path = currentPath();
