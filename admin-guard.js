@@ -221,7 +221,7 @@
       '<div class="af-c">' +
         '<img class="af-icon" src="/logomarca.png" alt="Logo" decoding="async">' +
         '<h1 class="af-title">Painel Administrativo</h1>' +
-        '<p class="af-desc">Acesso restrito.<br>Informe seu e-mail corporativo <strong>@atento.com</strong><br>e o código de acesso do painel.</p>' +
+        '<p class="af-desc">Acesso restrito.</p>' +
         '<label class="af-label" for="afEmail">E-mail corporativo</label>' +
         '<input type="email" class="af-input" id="afEmail" placeholder="nome.sobrenome@atento.com" autocomplete="username" spellcheck="false">' +
         '<label class="af-label" for="afCode" style="margin-top:14px">Código de acesso (exclusivo do painel)</label>' +
