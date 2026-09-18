@@ -214,6 +214,32 @@
       e.target.value = f;
     });
 
+    // ═══ Teclado virtual (mobile): mantém o campo focado visível ═══
+    // Quando o teclado abre, o viewport encolhe e o campo pode ficar atrás
+    // dele. Traz o campo ativo para a área visível do overlay rolável ao
+    // focar e a cada mudança de geometria do visualViewport (abrir/fechar/
+    // girar), com pequenos atrasos para esperar a animação do teclado.
+    var _kbField = null;
+    function keepFieldVisible() {
+      if (!_kbField) return;
+      try { _kbField.scrollIntoView({ behavior: "instant", block: "center" }); }
+      catch (err) { try { _kbField.scrollIntoView(false); } catch (err2) { /* sem suporte */ } }
+    }
+    (function () {
+      var el = document.getElementById("afInput");
+      if (!el) return;
+      el.addEventListener("focus", function () {
+        _kbField = el;
+        setTimeout(keepFieldVisible, 250);
+      });
+      el.addEventListener("blur", function () { if (_kbField === el) _kbField = null; });
+    })();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", keepFieldVisible);
+      window.visualViewport.addEventListener("scroll", keepFieldVisible);
+    }
+    window.addEventListener("orientationchange", function () { setTimeout(keepFieldVisible, 300); });
+
     // Enter key
     document.getElementById("afInput").addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); doVerify(); }
