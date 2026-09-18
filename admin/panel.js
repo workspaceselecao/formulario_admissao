@@ -79,7 +79,7 @@
     { id: "RN-CARTA", nome: "Carta Bradesco gerada", desc: "PDF construído programaticamente (logo, assinatura e carimbo em PNG).", class: "codigo" }
   ];
   const SEGURANCA = [
-    "Verificação client-side por e-mail @atento.com (mesmo pipeline criptográfico do guard.js).",
+    "Autenticação apartada: e-mail @atento.com + código de acesso exclusivo do painel (dois fatores, pipeline criptográfico idêntico ao guard.js).",
     "Sessão em sessionStorage com expiração de 60 min e renovação por atividade.",
     "Mensagem de erro de acesso genérica (não revela existência de conta ou permissão).",
     "Upload de PDF validado por extensão, MIME e assinatura de conteúdo (%PDF-); limite de 20 MB.",

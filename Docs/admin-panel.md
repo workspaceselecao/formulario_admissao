@@ -1,16 +1,16 @@
 # Painel Administrativo — Manual e Documentação Técnica
 
 **Rota:** `/admin` (rewrite para `admin/admin.html`)
-**Acesso:** e-mail corporativo **@atento.com** (verificação client-side, mesmo princípio do `guard.js`)
+**Acesso:** autenticação **apartada** de dois fatores — qualquer e-mail com domínio **exatamente `@atento.com`** + um dos **códigos de acesso exclusivos do painel** (formato `ATN-XXXX-XXXX-XXXX`). Os códigos dos formulários públicos **não** autorizam este painel.
 
 ---
 
 ## Como acessar
 
-1. Abra o site e abra o menu (hambúrguer no cabeçalho) em qualquer formulário;
-2. Clique em **⚙ Configurações** (item novo da sidebar);
-3. Informe seu e-mail **@atento.com** e confirme em **Validar acesso**;
-4. A sessão administrativa dura 60 minutos e se renova automaticamente enquanto a página estiver em uso (mesmo mecanismo de sessão do `guard.js`);
+1. Na **Home**, clique no card **Configurações** (substituiu o card Termos de Aceite) ou use o item **⚙ Configurações** do menu;
+2. Informe seu e-mail **@atento.com**;
+3. Informe o **código de acesso exclusivo do painel**;
+4. **Validar acesso** — a sessão administrativa dura 60 minutos e se renova automaticamente enquanto a página estiver em uso;
 5. Para sair, use o botão **Sair** no cabeçalho do painel.
 
 > **Limitação (documentada por decisão de projeto):** a verificação é client-side,
@@ -64,7 +64,7 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 | "Upload de PDF exige o modo API" | Produção estática sem backend | Versione o PDF no repositório |
 | "Cidade já cadastrada" | Normalização colidiu com entrada existente | Edite a ficha da entrada existente |
 | "Falha ao carregar template" | PDF ausente/inacessível | Rode **Verificar integridade** (Segurança) |
-| "✕ Não foi possível autorizar este acesso." | E-mail fora do domínio ou sem permissão | Mensagem é genérica de propósito (não revela detalhes) |
+| "✕ Não foi possível autorizar este acesso." | Domínio do e-mail inválido ou código incorreto | Mensagem é genérica de propósito (não revela detalhes) |
 
 ## Arquitetura de persistência (decisão importante)
 
@@ -76,9 +76,9 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 
 ## Segurança
 
-- Verificação: e-mail normalizado → domínio **exatamente** `@atento.com` (recusa subdomínios e `atento.com.br`) → pipeline salt+SHA-256+transformação idêntico ao `guard.js` → comparação com verificadores derivados (e-mails reais não ficam no código).
+- Verificação (dois fatores, apartada): ① e-mail normalizado → domínio **exatamente** `@atento.com` (recusa subdomínios e `atento.com.br`); ② código exclusivo do painel → pipeline salt+SHA-256+transformação idêntico ao `guard.js` → comparado ao corpus próprio `CG` em `admin-guard.js` (códigos reais fora do código; gerados por `scripts/generate-admin-verifiers.mjs`). Os 5 verificadores do `guard.js` dos formulários são independentes e intocados.
 - Upload: validação de extensão/MIME/assinatura, limite de 20 MB, sanitização de nome (bloqueia `../`), armazenamento como arquivo (sem execução).
-- Sessão: `sessionStorage` com expiração e renovação por atividade; **Sair** invalida a sessão.
+- Sessão: `sessionStorage` (chaves `adm_*`) com expiração e renovação por atividade; **Sair** invalida a sessão.
 - Auditoria: login, alterações de coordenadas, cidades, uploads, importações/exportações e verificações de integridade ficam no **Histórico**.
 
 ## Testes

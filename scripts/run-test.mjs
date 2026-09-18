@@ -85,6 +85,15 @@ function adminDomainOk(email) {
   return e.length > ADMIN_DOMAIN.length && e.endsWith(ADMIN_DOMAIN) && ADMIN_EMAIL_RE.test(e);
 }
 
+// Códigos EXCLUSIVOS do painel (não são as chaves dos formulários)
+const PANEL_CODES = [
+  "ATN-DCUD-LUDJ-Z8AX",
+  "ATN-CA34-5DRV-9LX4",
+  "ATN-GPFM-EVFD-3722",
+  "ATN-3D5B-PS6N-KDQF",
+  "ATN-V9Q7-GE9T-7FX7"
+];
+
 // Start server
 const server = createServer((req, res) => {
   let pathname = new URL(req.url, `http://localhost:${PORT}`).pathname;
@@ -210,11 +219,17 @@ async function runTests() {
   assert("/admin inclui botão Sair", adminR.body.includes("atentoAdminEndSession"), "missing");
   const adminGuardR = await fetch(`http://127.0.0.1:${PORT}/admin-guard.js`);
   assert("admin-guard.js → HTTP 200", adminGuardR.status === 200, `status ${adminGuardR.status}`);
-  assert("admin-guard.js não contém e-mails reais", !adminGuardR.body.includes("admin@atento.com") && !adminGuardR.body.includes("gestor.rh@atento.com"), "plaintext email in admin-guard.js!");
+  assert("admin-guard.js sem e-mails autorizados em texto plano", !/(admin|usuario|gestor\.rh)@atento\.com/.test(adminGuardR.body), "plaintext authorized email!");
   assert("admin-guard.js usa sessionStorage", adminGuardR.body.includes("sessionStorage"), "missing");
   const LS_USE = /localStorage\s*(?:\.(?:setItem|getItem|removeItem|key|clear)\s*\(|\[)|window\.localStorage/;
   assert("admin-guard.js NÃO usa localStorage", !LS_USE.test(adminGuardR.body), "localStorage usage found!");
   assert("admin-guard.js rejeita subdomínio (.endsWith com tamanho)", adminGuardR.body.includes("length <= DOMAIN.length"), "missing");
+  assert("admin-guard.js tem corpus próprio CG (apartado do guard.js)", /const CG = \[/.test(adminGuardR.body), "missing CG");
+  assert("admin-guard.js NÃO contém array G do guard.js", !/const G = \[/.test(adminGuardR.body), "form guard corpus found!");
+  assert("admin-guard.js exige código (verifyPanelCode)", adminGuardR.body.includes("function verifyPanelCode"), "missing");
+  assert("admin-guard.js valida e-mail + código (verifyAcesso)", adminGuardR.body.includes("function verifyAcesso") && adminGuardR.body.includes("verifyPanelCode"), "missing");
+  assert("tela de login tem campo de e-mail", adminGuardR.body.includes("afEmail"), "missing");
+  assert("tela de login tem campo de código", adminGuardR.body.includes("afCode"), "missing");
   const admCss = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
   assert("admin/panel.css → HTTP 200", admCss.status === 200, `status ${admCss.status}`);
   const admPersist = await fetch(`http://127.0.0.1:${PORT}/admin/persistence.js`);
@@ -240,30 +255,33 @@ async function runTests() {
   assert("usuario@atentocom → negado", !adminDomainOk("usuario@atentocom"), "should fail");
   assert("usuário@atento.com (acentuado) → negado", !adminDomainOk("usuário@atento.com"), "should fail");
 
-  // ── TEST 11: Corpus de verificadores do painel (pipeline derivado) ──
-  console.log("\n📋 Teste 11: Verificadores do painel");
-  const gMatches = adminGuardR.body.match(/\{ s: "([a-f0-9]+)", v: "([a-f0-9]{64})" \}/g) || [];
-  assert("admin-guard.js contém pares {s,v}", gMatches.length >= 2, "wrong count");
+  // ── TEST 11: Códigos EXCLUSIVOS do painel (corpus CG derivado) ──
+  console.log("\n📋 Teste 11: Códigos exclusivos do painel");
   {
-    const pairs = gMatches.map(m => { const mm = m.match(/s: "([a-f0-9]+)", v: "([a-f0-9]{64})"/); return { s: mm[1], v: mm[2] }; });
-    assert("admin@atento.com deriva um verificador do corpus",
-      pairs.some(p => deriveVerifierNode("admin@atento.com", p.s) === p.v), "no match");
-    assert("usuario@atento.com deriva um verificador do corpus",
-      pairs.some(p => deriveVerifierNode("usuario@atento.com", p.s) === p.v), "no match");
-    assert("nome.sobrenome@atento.com deriva um verificador do corpus",
-      pairs.some(p => deriveVerifierNode("nome.sobrenome@atento.com", p.s) === p.v), "no match");
-    assert("e-mail de teste removido (gestor.rh) não deriva mais verificador",
-      !pairs.some(p => deriveVerifierNode("gestor.rh@atento.com", p.s) === p.v), "unexpected match");
-    assert("e-mail fora do domínio não deriva verificador válido",
-      !pairs.some(p => deriveVerifierNode("atacante@gmail.com", p.s) === p.v), "unexpected match");
+    const cgMatches = adminGuardR.body.match(/\{ s: "([a-f0-9]+)", v: "([a-f0-9]{64})" \}/g) || [];
+    assert("admin-guard.js contém 5 pares {s,v} no corpus CG", cgMatches.length === 5, "wrong count: " + cgMatches.length);
+    const pairs = cgMatches.map(m => { const mm = m.match(/s: "([a-f0-9]+)", v: "([a-f0-9]{64})"/); return { s: mm[1], v: mm[2] }; });
+    for (const code of PANEL_CODES) {
+      const norm = code.replace(/-/g, "");
+      assert(`código do painel ${code} deriva um verificador do CG`,
+        pairs.some(p => deriveVerifierNode(norm, p.s) === p.v), "no match");
+    }
+    assert("chave de formulário NÃO autoriza o painel (apartamento efetivo)",
+      !pairs.some(p => deriveVerifierNode("ATN7KQ9X4MP82VF", p.s) === p.v), "form key matches panel corpus!");
+    assert("código inventado não deriva verificador",
+      !pairs.some(p => deriveVerifierNode("ATNXXXXXXXXXXXXX", p.s) === p.v), "unexpected match");
   }
 
-  // ── TEST 12: Sidebar ⚙ Configurações nas 4 páginas ──
+  // ── TEST 12: Sidebar ⚙ Configurações nas 4 páginas + card na Home ──
   console.log("\n📋 Teste 12: Sidebar — Configurações");
   for (const page of ["ficha_cadastral.html", "assistencia_medica.html", "carta_bradesco.html", "termos_aceite.html"]) {
     const r = await fetch(`http://127.0.0.1:${PORT}/${page}`);
     assert(`${page} contém link Configurações`, r.status === 200 && r.body.includes("admin/admin.html") && r.body.includes("Configurações"), "missing");
   }
+  const homeCardR = await fetch(`http://127.0.0.1:${PORT}/index.html`);
+  assert("Home tem card Configurações apontando para o painel", homeCardR.status === 200 && homeCardR.body.includes('href="admin/admin.html"') && homeCardR.body.includes(">Configurações<"), "missing");
+  assert("Home não linka mais termos_aceite.html", !homeCardR.body.includes('href="termos_aceite.html"'), "still linked");
+  assert("Home marca o card como Acesso restrito", homeCardR.body.includes("Acesso restrito"), "missing");
 
   // ── TEST 13: API administrativa (integração com test-server.mjs) ──
   console.log("\n📋 Teste 13: API administrativa");

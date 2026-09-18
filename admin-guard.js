@@ -3,10 +3,16 @@
  * ADMIN-GUARD — Proteção client-side do Painel Administrativo
  * ============================================================
  *
- * Mesmo princípio do guard.js (entrada → normalização → salt →
- * SHA-256 → transformação → verificação), adaptado: a entrada é o
- * e-mail corporativo e a regra de domínio é EXATAMENTE @atento.com
- * (sem subdomínios e sem variações como atento.com.br).
+ * Autenticação APARTADA dos formulários públicos (guard.js):
+ *
+ *   1. E-mail corporativo com domínio EXATAMENTE @atento.com
+ *      (recusa subdomínios e variações como atento.com.br);
+ *   2. Código de acesso EXCLUSIVO do painel (ATN-XXXX-XXXX-XXXX),
+ *      com verificadores próprios no array CG abaixo — os códigos
+ *      dos outros formulários NÃO autorizam este painel.
+ *
+ * Pipeline de verificação dos códigos: idêntico ao guard.js
+ * (entrada → normalização → salt → SHA-256 → transformação → verificação).
  *
  * Limitação (idêntica à do guard.js, aceita por decisão de projeto):
  * proteção client-side — NÃO é autenticação server-side. Não deve ser
@@ -21,27 +27,29 @@
   "use strict";
 
   // ══════════════════════════════════════════════════════
-  // VERIFICADORES DERIVADOS — e-mails reais NÃO presentes
+  // VERIFICADORES DOS CÓDIGOS DO PAINEL (derivados — códigos reais
+  // NÃO presentes neste arquivo; exclusivos deste módulo)
   // ══════════════════════════════════════════════════════
-  // Cada {s, v} = {salt, verifier} de um e-mail @atento.com autorizado,
+  // Cada {s, v} = {salt, verifier} de um código exclusivo do painel,
   // derivado com o MESMO pipeline do guard.js:
-  //   v = hex( troca-pares( XOR-mascara-sal( inverte-bits( SHA-256( salt || utf8(email) ) ) ) ) )
-  // Para liberar novos e-mails, gere o par com scripts/generate-admin-verifiers.mjs
-  // e adicione aqui (mesmo fluxo do generate-verifiers.mjs do guard.js).
-  const G = [
-    { s: "21a91bcb166862099b0ae8c880e4fa63", v: "59c6eeedeeb350b316c4a4003ee0bb6499c857fa5cbe30c9699b6875a34bdaa8" },
-    { s: "c1591486884a78e254ceb8e1dd32c1d4", v: "ffcaadb855bd9c3a8d65710115bf343670d1573e85c5455cf0b17dd46e8a3c63" },
-    { s: "3a4e71e94b909737f6203512edcc70af", v: "a630f86e1601b492b6b1d383689d93fae49317f93e6471fdc739f14e12b97c9b" }
+  //   v = hex( troca-pares( XOR-mascara-sal( inverte-bits( SHA-256( salt || utf8(codigo) ) ) ) ) )
+  // Para gerar novos códigos: scripts/generate-admin-verifiers.mjs
+  const CG = [
+    { s: "505292a1b9ff015a8a048b1bbaafce71", v: "0766a9e5d19738c3f5f1951ce5c029fe20ee0df226393e02cc3b0858a109a68f" },
+    { s: "12f205bbcab6ab4f34697c11f3d097eb", v: "e22e3a67ca8bd93164f8baa24c5c5050b251dfa1185e02432074ad3e46f00346" },
+    { s: "4c233b9f84149d216caef584aba44011", v: "fb7a22bfe66c8fdfc6c62d817c028543a9641cced3aa7609efe8c96004787579" },
+    { s: "4892a303ea3f8e795904229ae0b33452", v: "c982dbf44b167f94ed194955fbfcfb1920e3b8ff71784cf9a98e42a898b4d800" },
+    { s: "f8d7747044c86cc4ed35a90070351a13", v: "07db55b2b49fcd7bd69f7461cbe5601b0d98c196e391bb8e2a81b5d198744739" }
   ];
 
   // ══════════════════════════════════════════════════════
-  // REGRA DE DOMÍNIO — somente @atento.com exato
+  // REGRAS DE ENTRADA
   // ══════════════════════════════════════════════════════
   const DOMAIN = "@atento.com";
   const EMAIL_RE = /^[a-z0-9._%+\-]+@atento\.com$/;
 
   // ══════════════════════════════════════════════════════
-  // SESSÃO
+  // SESSÃO (chaves próprias do painel — apartadas do guard.js)
   // ══════════════════════════════════════════════════════
   const ADMIN_TK = "adm_t";
   const ADMIN_TX = "adm_x";
@@ -60,6 +68,10 @@
     if (!email || email.length <= DOMAIN.length) return false;
     if (!email.endsWith(DOMAIN)) return false; // recusa sub.atento.com, atento.com.br, gmail.com…
     return EMAIL_RE.test(email);
+  }
+
+  function normalizeCode(raw) {
+    return String(raw || "").replace(/[\s\-]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, "");
   }
 
   async function deriveVerifier(normalized, salt) {
@@ -107,14 +119,24 @@
     return hex;
   }
 
-  async function verifyEmail(input) {
-    var email = normalizeEmail(input);
-    if (!isCorporateDomain(email)) return false;
-    for (var i = 0; i < G.length; i++) {
-      var v = await deriveVerifier(email, G[i].s);
-      if (v === G[i].v) return true;
+  // Verifica o CÓDIGO exclusivo do painel contra o corpus CG
+  async function verifyPanelCode(input) {
+    var norm = normalizeCode(input);
+    if (!norm.startsWith("ATN") || norm.length !== 15) return false;
+    for (var i = 0; i < CG.length; i++) {
+      var v = await deriveVerifier(norm, CG[i].s);
+      if (v === CG[i].v) return true;
     }
     return false;
+  }
+
+  // Autenticação do painel: domínio @atento.com + código exclusivo
+  async function verifyAcesso(emailRaw, codeRaw) {
+    var email = normalizeEmail(emailRaw);
+    if (!isCorporateDomain(email)) return { ok: false, email: "" };
+    var codeOk = await verifyPanelCode(codeRaw);
+    if (!codeOk) return { ok: false, email: "" };
+    return { ok: true, email: email };
   }
 
   // ══════════════════════════════════════════════════════
@@ -172,11 +194,13 @@
     ".af-c{width:min(420px,92vw);text-align:center;padding:48px 32px}",
     ".af-icon{height:60px;width:auto;margin:0 auto 16px;object-fit:contain}",
     ".af-title{font-size:20px;font-weight:700;margin-bottom:12px;letter-spacing:-0.3px}",
-    ".af-desc{font-size:14px;color:#4a453f;margin-bottom:32px;line-height:1.6}",
-    ".af-input{width:100%;font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;text-align:center;padding:14px 16px;border:2px solid #d4cfc8;border-radius:10px;background:#fff;outline:none;color:#1a1714;transition:border-color .2s,box-shadow .2s;box-sizing:border-box}",
+    ".af-desc{font-size:14px;color:#4a453f;margin-bottom:28px;line-height:1.6}",
+    ".af-label{display:block;text-align:left;font-size:12px;font-weight:600;color:#4a453f;margin:0 2px 6px;letter-spacing:.3px}",
+    ".af-input{width:100%;font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;text-align:center;padding:13px 16px;border:2px solid #d4cfc8;border-radius:10px;background:#fff;outline:none;color:#1a1714;transition:border-color .2s,box-shadow .2s;box-sizing:border-box}",
     ".af-input:focus{border-color:#efa27f;box-shadow:none}",
-    ".af-input::placeholder{color:#b0aaa3;font-weight:400;font-size:15px}",
-    ".af-btn{width:100%;margin-top:18px;padding:14px 24px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;background:#01426A;color:#fff;transition:background .2s,transform .1s;letter-spacing:0.2px}",
+    ".af-input::placeholder{color:#b0aaa3;font-weight:400;font-size:14px}",
+    ".af-input--code{font-size:17px;letter-spacing:2px}",
+    ".af-btn{width:100%;margin-top:20px;padding:14px 24px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer;background:#01426A;color:#fff;transition:background .2s,transform .1s;letter-spacing:0.2px}",
     ".af-btn:hover{background:#013756}",
     ".af-btn:active{transform:scale(0.98)}",
     ".af-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}",
@@ -197,8 +221,11 @@
       '<div class="af-c">' +
         '<img class="af-icon" src="logomarca.png" alt="Logo" decoding="async">' +
         '<h1 class="af-title">Painel Administrativo</h1>' +
-        '<p class="af-desc">Acesso restrito.<br>Informe seu e-mail corporativo <strong>@atento.com</strong></p>' +
-        '<input type="email" class="af-input" id="afInput" placeholder="nome.sobrenome@atento.com" autocomplete="username" spellcheck="false">' +
+        '<p class="af-desc">Acesso restrito.<br>Informe seu e-mail corporativo <strong>@atento.com</strong><br>e o código de acesso do painel.</p>' +
+        '<label class="af-label" for="afEmail">E-mail corporativo</label>' +
+        '<input type="email" class="af-input" id="afEmail" placeholder="nome.sobrenome@atento.com" autocomplete="username" spellcheck="false">' +
+        '<label class="af-label" for="afCode" style="margin-top:14px">Código de acesso (exclusivo do painel)</label>' +
+        '<input type="text" class="af-input af-input--code" id="afCode" placeholder="ATN-____-____-____" maxlength="18" autocomplete="off" spellcheck="false">' +
         '<button type="button" class="af-btn" id="afBtn">Validar acesso</button>' +
         '<div class="af-msg" id="afMsg"></div>' +
         '<p class="af-footer">Ambiente administrativo protegido</p>' +
@@ -206,20 +233,37 @@
 
     document.body.appendChild(overlay);
     overlay.classList.add("show");
-    setTimeout(function () { document.getElementById("afInput").focus(); }, 100);
+    setTimeout(function () { document.getElementById("afEmail").focus(); }, 100);
 
-    document.getElementById("afInput").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") { e.preventDefault(); doVerify(); }
+    // Máscara do código: ATN-XXXX-XXXX-XXXX (mesma do guard.js)
+    document.getElementById("afCode").addEventListener("input", function (e) {
+      var raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      var f = "", pos = 0;
+      for (var i = 0; i < raw.length && i < 15; i++) {
+        if (i === 3 || i === 7 || i === 11) f += "-";
+        f += raw[i];
+      }
+      e.target.value = f;
     });
+
+    function doVerifyOnEnter(e) { if (e.key === "Enter") { e.preventDefault(); doVerify(); } }
+    document.getElementById("afEmail").addEventListener("keydown", doVerifyOnEnter);
+    document.getElementById("afCode").addEventListener("keydown", doVerifyOnEnter);
     document.getElementById("afBtn").addEventListener("click", doVerify);
 
     function doVerify() {
-      var input = document.getElementById("afInput").value.trim();
+      var email = document.getElementById("afEmail").value.trim();
+      var code = document.getElementById("afCode").value.trim();
       var msg = document.getElementById("afMsg");
       var btn = document.getElementById("afBtn");
 
-      if (!input || input.indexOf("@") === -1) {
+      if (!email || email.indexOf("@") === -1) {
         msg.textContent = "Informe um e-mail corporativo válido (ex.: nome.sobrenome@atento.com).";
+        msg.className = "af-msg err";
+        return;
+      }
+      if (!code) {
+        msg.textContent = "Informe o código de acesso do painel.";
         msg.className = "af-msg err";
         return;
       }
@@ -227,24 +271,25 @@
       btn.disabled = true;
       btn.textContent = "Validando…";
 
-      verifyEmail(input).then(function (ok) {
-        if (ok) {
+      verifyAcesso(email, code).then(function (r) {
+        if (r.ok) {
           msg.textContent = "✓ Acesso autorizado";
           msg.className = "af-msg ok";
-          grantSession(normalizeEmail(input));
+          grantSession(r.email);
           setTimeout(function () {
             overlay.classList.remove("show");
             overlay.parentNode.removeChild(overlay);
             revealContent();
           }, 600);
         } else {
-          // Mensagem genérica: não revela se o e-mail existe ou falta apenas permissão.
+          // Mensagem genérica: não revela se o e-mail existe, se o domínio
+          // falhou ou se o código é inválido.
           msg.textContent = "✕ Não foi possível autorizar este acesso.";
           msg.className = "af-msg err";
           btn.disabled = false;
           btn.textContent = "Validar acesso";
-          document.getElementById("afInput").focus();
-          document.getElementById("afInput").select();
+          document.getElementById("afEmail").focus();
+          document.getElementById("afEmail").select();
         }
       }).catch(function () {
         msg.textContent = "✕ Não foi possível autorizar este acesso.";
