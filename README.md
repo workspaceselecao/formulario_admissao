@@ -22,7 +22,13 @@ A **home** (`index.html`) permite escolher entre a Ficha Cadastral e a Assistên
 - `declaracao_plano_saude_campos.json` — coordenadas da declaração (página 2)
 - `cidades_brasil.json` — mapeia cidade → ficha PDF (fluxo **Outros Planos**)
 - `FICHA BH.pdf`, `FICHA FSA.pdf`, `FICHA GNDI.pdf`, `FICHA GOIANIA.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA SA_FO.pdf` — fichas regionais (Outros Planos)
-- `vercel.json` — a raiz `/` serve internamente `index.html` (home)
+- `vercel.json` — a raiz `/` serve internamente `index.html` (home); rotas `/f075`, `/f089`, `/bradesco`, `/termos` e `/admin`
+
+## Painel Administrativo
+
+Acesso pelo item **⚙ Configurações** do menu (ou `/admin`). Restrito a e-mails **@atento.com** — verificação client-side, mesmo princípio do `guard.js`.
+
+Gerencia templates PDF, editor visual de coordenadas (F-075 e Declaração Plano de Saúde), cidades → fichas regionais, verificação de integridade, histórico de alterações e exportação/importação de configuração (JSON). Os JSONs originais nunca são alterados pelo painel: alterações ficam num overlay administrativo, persistido via API local (`node scripts/test-server.mjs`, com backups automáticos) ou efetivado por exportação/versionamento do JSON em produção estática. Detalhes: [Docs/admin-panel.md](Docs/admin-panel.md).
 
 ## Publicar na Vercel
 

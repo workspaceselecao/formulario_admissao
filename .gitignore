@@ -20,3 +20,6 @@ Thumbs.db
 
 # Vercel
 .vercel/
+
+# Painel administrativo (modo API — dados locais do test-server)
+data/

@@ -99,6 +99,10 @@
     {
       "source": "/termos",
       "destination": "/termos_aceite.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/admin.html"
     }
   ]
 }

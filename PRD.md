@@ -224,4 +224,17 @@ O produto atual **não exige** analytics no PRD; para evolução:
 
 ---
 
+## 15. Painel Administrativo (adicionado em 18/09/2026)
+
+Módulo evolutivo sem alteração dos fluxos públicos. Rota `/admin` (rewrite no `vercel.json`), entrada pela sidebar (**⚙ Configurações** nas 4 páginas).
+
+- **Autenticação:** e-mail corporativo com domínio exatamente `@atento.com` (recusa subdomínios e `atento.com.br`), pipeline salt→SHA-256→transformação idêntico ao `guard.js`, verificadores derivados em `admin-guard.js`; sessão em `sessionStorage` (60 min, renovada por atividade). Proteção client-side — mesma natureza e limitações do `guard.js`.
+- **Escopo:** dashboard de indicadores, inventário de PDFs (upload/substituição com confirmação e backup), editor visual de coordenadas (arrastar campos sobre o PDF + edição numérica sincronizada; F-075 e Declaração), cidades → fichas regionais (normalização e correção REEBOLSO→REEMBOLSO preservadas), mapa de associação do F-089, formulários e regras de negócio classificadas (configurável × implementada no código), verificação de integridade, export/import de configuração com confirmação, histórico/auditoria e sistema.
+- **Persistência:** modelo de overlay sobre os JSONs — os JSONs originais e os PDFs permanecem a fonte primária e nunca são modificados pelo painel. Modo API (`/api/admin/*` em `scripts/test-server.mjs`; `data/admin-config.json` + backups automáticos + histórico; pronto para serverless) e modo exportação (JSON versionado no repositório) em produção estática. `localStorage` não é usado como banco (proibição do projeto).
+- **Previews:** sempre com dados fictícios.
+- **Testes:** Testes 9–13 da suíte (`node scripts/run-test.mjs`) — painel, guard administrativo, regra de domínio (12 casos), corpus de verificadores, sidebar e integração da API.
+- **Documentação:** `Docs/admin-panel.md` (manual do administrador).
+
+---
+
 *Documento derivado do comportamento e da documentação existentes no repositório; alterações de código devem refletir-se neste PRD em revisões futuras.*

@@ -6,9 +6,11 @@
  */
 
 import { createServer } from "node:http";
-import { readFileSync, existsSync, statSync } from "node:fs";
+import { readFileSync, existsSync, statSync, rmSync } from "node:fs";
 import { join, extname } from "node:path";
 import http from "node:http";
+import { spawn } from "node:child_process";
+import crypto from "node:crypto";
 
 const ROOT = join(import.meta.dirname, "..");
 const PORT = 18234;
@@ -18,6 +20,7 @@ const REWRITES = {
   "/f089": "/assistencia_medica.html",
   "/bradesco": "/carta_bradesco.html",
   "/termos": "/termos_aceite.html",
+  "/admin": "/admin/admin.html",
   "/": "/index.html"
 };
 
@@ -25,11 +28,62 @@ const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
+  ".mjs": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".pdf": "application/pdf"
 };
+
+function httpPost(url, body, contentType) {
+  return new Promise((resolve) => {
+    const u = new URL(url);
+    const req = http.request(
+      { hostname: u.hostname, port: u.port, path: u.pathname + u.search, method: "POST", timeout: 5000,
+        headers: { "Content-Type": contentType || "application/json", "Content-Length": Buffer.byteLength(body || "") } },
+      (res) => { let data = ""; res.on("data", (d) => (data += d)); res.on("end", () => resolve({ status: res.statusCode, body: data })); }
+    );
+    req.on("error", (e) => resolve({ error: e.message }));
+    if (body) req.write(body);
+    req.end();
+  });
+}
+
+function httpPut(url, body) {
+  return new Promise((resolve) => {
+    const u = new URL(url);
+    const req = http.request(
+      { hostname: u.hostname, port: u.port, path: u.pathname, method: "PUT", timeout: 5000,
+        headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body || "") } },
+      (res) => { let data = ""; res.on("data", (d) => (data += d)); res.on("end", () => resolve({ status: res.statusCode, body: data })); }
+    );
+    req.on("error", (e) => resolve({ error: e.message }));
+    if (body) req.write(body);
+    req.end();
+  });
+}
+
+// Réplica do pipeline do guard.js/admin-guard.js para validar verificadores
+function deriveVerifierNode(normalized, salt) {
+  const combined = Buffer.concat([Buffer.from(salt, "utf8"), Buffer.from(normalized, "utf8")]);
+  const hash = crypto.createHash("sha256").update(combined).digest();
+  const reversed = Buffer.alloc(32);
+  for (let i = 0; i < 32; i++) { let b = hash[i], r = 0; for (let j = 0; j < 8; j++) { r = (r << 1) | (b & 1); b >>= 1; } reversed[i] = r; }
+  const mask = crypto.createHash("sha256").update(Buffer.from("guard-salt-mask-v1:" + salt, "utf8")).digest();
+  const xored = Buffer.alloc(32);
+  for (let i = 0; i < 32; i++) xored[i] = reversed[i] ^ mask[i];
+  const shuffled = Buffer.alloc(32);
+  for (let i = 0; i < 32; i += 2) { shuffled[i] = xored[i + 1]; shuffled[i + 1] = xored[i]; }
+  return shuffled.toString("hex");
+}
+
+// Réplica da regra de domínio do admin-guard.js (seções 6/69 do prompt do painel)
+const ADMIN_DOMAIN = "@atento.com";
+const ADMIN_EMAIL_RE = /^[a-z0-9._%+\-]+@atento\.com$/;
+function adminDomainOk(email) {
+  const e = String(email || "").trim().toLowerCase().replace(/\s+/g, "");
+  return e.length > ADMIN_DOMAIN.length && e.endsWith(ADMIN_DOMAIN) && ADMIN_EMAIL_RE.test(e);
+}
 
 // Start server
 const server = createServer((req, res) => {
@@ -144,7 +198,110 @@ async function runTests() {
     assert("vercel.json tem rewrite /f089", rewrites.some(r => r.source === "/f089"), "missing");
     assert("vercel.json tem rewrite /bradesco", rewrites.some(r => r.source === "/bradesco"), "missing");
     assert("vercel.json tem rewrite /termos", rewrites.some(r => r.source === "/termos"), "missing");
+    assert("vercel.json tem rewrite /admin", rewrites.some(r => r.source === "/admin"), "missing");
   }
+
+  // ── TEST 9: Painel administrativo servido ──
+  console.log("\n📋 Teste 9: Painel administrativo");
+  const adminR = await fetch(`http://127.0.0.1:${PORT}/admin`);
+  assert("/admin → HTTP 200", adminR.status === 200, `status ${adminR.status}`);
+  assert("/admin contém Painel Administrativo", adminR.body.includes("Painel Administrativo"), "missing");
+  assert("/admin inclui admin-guard.js", adminR.body.includes("admin-guard.js"), "missing");
+  assert("/admin inclui botão Sair", adminR.body.includes("atentoAdminEndSession"), "missing");
+  const adminGuardR = await fetch(`http://127.0.0.1:${PORT}/admin-guard.js`);
+  assert("admin-guard.js → HTTP 200", adminGuardR.status === 200, `status ${adminGuardR.status}`);
+  assert("admin-guard.js não contém e-mails reais", !adminGuardR.body.includes("admin@atento.com") && !adminGuardR.body.includes("gestor.rh@atento.com"), "plaintext email in admin-guard.js!");
+  assert("admin-guard.js usa sessionStorage", adminGuardR.body.includes("sessionStorage"), "missing");
+  const LS_USE = /localStorage\s*(?:\.(?:setItem|getItem|removeItem|key|clear)\s*\(|\[)|window\.localStorage/;
+  assert("admin-guard.js NÃO usa localStorage", !LS_USE.test(adminGuardR.body), "localStorage usage found!");
+  assert("admin-guard.js rejeita subdomínio (.endsWith com tamanho)", adminGuardR.body.includes("length <= DOMAIN.length"), "missing");
+  const admCss = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
+  assert("admin/panel.css → HTTP 200", admCss.status === 200, `status ${admCss.status}`);
+  const admPersist = await fetch(`http://127.0.0.1:${PORT}/admin/persistence.js`);
+  assert("admin/persistence.js → HTTP 200", admPersist.status === 200, `status ${admPersist.status}`);
+  const admPanel = await fetch(`http://127.0.0.1:${PORT}/admin/panel.js`);
+  assert("admin/panel.js → HTTP 200", admPanel.status === 200, `status ${admPanel.status}`);
+  assert("panel.js NÃO usa localStorage", !LS_USE.test(admPanel.body), "localStorage usage found!");
+  const admPersistBody = admPersist.body;
+  assert("persistence.js NÃO usa localStorage", !LS_USE.test(admPersistBody), "localStorage usage found!");
+
+  // ── TEST 10: Regra de domínio @atento.com (seção 69) ──
+  console.log("\n📋 Teste 10: Regra de domínio @atento.com");
+  assert("usuario@atento.com → permitido", adminDomainOk("usuario@atento.com"), "should pass");
+  assert("USUARIO@ATENTO.COM → permitido", adminDomainOk("USUARIO@ATENTO.COM"), "should pass");
+  assert("usuario@Atento.com → permitido", adminDomainOk("usuario@Atento.com"), "should pass");
+  assert("nome.sobrenome@atento.com → permitido", adminDomainOk("nome.sobrenome@atento.com"), "should pass");
+  assert("usuario@gmail.com → negado", !adminDomainOk("usuario@gmail.com"), "should fail");
+  assert("usuario@hotmail.com → negado", !adminDomainOk("usuario@hotmail.com"), "should fail");
+  assert("usuario@outlook.com → negado", !adminDomainOk("usuario@outlook.com"), "should fail");
+  assert("usuario@atento.com.br → negado", !adminDomainOk("usuario@atento.com.br"), "should fail");
+  assert("atento.com → negado", !adminDomainOk("atento.com"), "should fail");
+  assert("usuario@sub.atento.com → negado", !adminDomainOk("usuario@sub.atento.com"), "should fail");
+  assert("usuario@atentocom → negado", !adminDomainOk("usuario@atentocom"), "should fail");
+  assert("usuário@atento.com (acentuado) → negado", !adminDomainOk("usuário@atento.com"), "should fail");
+
+  // ── TEST 11: Corpus de verificadores do painel (pipeline derivado) ──
+  console.log("\n📋 Teste 11: Verificadores do painel");
+  const gMatches = adminGuardR.body.match(/\{ s: "([a-f0-9]+)", v: "([a-f0-9]{64})" \}/g) || [];
+  assert("admin-guard.js contém pares {s,v}", gMatches.length >= 2, "wrong count");
+  {
+    const pairs = gMatches.map(m => { const mm = m.match(/s: "([a-f0-9]+)", v: "([a-f0-9]{64})"/); return { s: mm[1], v: mm[2] }; });
+    assert("admin@atento.com deriva um verificador do corpus",
+      pairs.some(p => deriveVerifierNode("admin@atento.com", p.s) === p.v), "no match");
+    assert("gestor.rh@atento.com deriva um verificador do corpus",
+      pairs.some(p => deriveVerifierNode("gestor.rh@atento.com", p.s) === p.v), "no match");
+    assert("e-mail fora do domínio não deriva verificador válido",
+      !pairs.some(p => deriveVerifierNode("atacante@gmail.com", p.s) === p.v), "unexpected match");
+  }
+
+  // ── TEST 12: Sidebar ⚙ Configurações nas 4 páginas ──
+  console.log("\n📋 Teste 12: Sidebar — Configurações");
+  for (const page of ["ficha_cadastral.html", "assistencia_medica.html", "carta_bradesco.html", "termos_aceite.html"]) {
+    const r = await fetch(`http://127.0.0.1:${PORT}/${page}`);
+    assert(`${page} contém link Configurações`, r.status === 200 && r.body.includes("admin/admin.html") && r.body.includes("Configurações"), "missing");
+  }
+
+  // ── TEST 13: API administrativa (integração com test-server.mjs) ──
+  console.log("\n📋 Teste 13: API administrativa");
+  const srvPort = 18235;
+  const srv = spawn(process.execPath, [join(ROOT, "scripts", "test-server.mjs")],
+    { env: { ...process.env, PORT: String(srvPort) }, stdio: ["ignore", "pipe", "pipe"] });
+  try {
+    let srvUp = false;
+    for (let i = 0; i < 40; i++) {
+      const r = await fetch(`http://127.0.0.1:${srvPort}/vercel.json`);
+      if (r.status === 200) { srvUp = true; break; }
+      await new Promise(r2 => setTimeout(r2, 250));
+    }
+    assert("test-server.mjs sobe na porta 18235", srvUp, "server not up");
+    if (srvUp) {
+      const admin404 = await fetch(`http://127.0.0.1:${srvPort}/api/admin/config`);
+      assert("GET config sem arquivo → 404", admin404.status === 404, `status ${admin404.status}`);
+      const put = await httpPut(`http://127.0.0.1:${srvPort}/api/admin/config`, JSON.stringify({ campos_ficha: { teste: { x: 1 } } }));
+      assert("PUT config → 200", put.status === 200, `status ${put.status}`);
+      const get = await fetch(`http://127.0.0.1:${srvPort}/api/admin/config`);
+      assert("GET config após PUT → 200", get.status === 200, `status ${get.status}`);
+      assert("config persistida corresponde", get.body.includes("campos_ficha"), "missing");
+      const put2 = await httpPut(`http://127.0.0.1:${srvPort}/api/admin/config`, JSON.stringify({ campos_ficha: {} }));
+      assert("segundo PUT → backup criado", put2.status === 200 && put2.body.includes("criado"), "no backup");
+      const backups = await fetch(`http://127.0.0.1:${srvPort}/api/admin/backup`);
+      assert("GET backups → lista não vazia", backups.status === 200 && backups.body.includes("admin-config"), "empty");
+      const uploadBad = await httpPost(`http://127.0.0.1:${srvPort}/api/admin/upload`, JSON.stringify({ nome: "mal.pdf", data: Buffer.from("nao-e-pdf").toString("base64") }));
+      assert("upload rejeita não-PDF (assinatura)", uploadBad.status === 400, `status ${uploadBad.status}`);
+      const uploadOk = await httpPost(`http://127.0.0.1:${srvPort}/api/admin/upload`, JSON.stringify({ nome: "teste.pdf", data: Buffer.from("%PDF-1.4 teste").toString("base64") }));
+      assert("upload aceita PDF com assinatura", uploadOk.status === 200, `status ${uploadOk.status}`);
+      const ev = await httpPost(`http://127.0.0.1:${srvPort}/api/admin/historico`, JSON.stringify({ acao: "teste", usuario: "suite" }));
+      assert("POST historico → 200", ev.status === 200, `status ${ev.status}`);
+      const hist = await fetch(`http://127.0.0.1:${srvPort}/api/admin/historico`);
+      assert("GET historico contém evento", hist.status === 200 && hist.body.includes("suite"), "missing");
+      const admPage = await fetch(`http://127.0.0.1:${srvPort}/admin`);
+      assert("test-server serve /admin", admPage.status === 200 && admPage.body.includes("Painel Administrativo"), "missing");
+    }
+  } finally {
+    srv.kill();
+  }
+  // limpa artifacts da API gerados pela suíte
+  try { rmSync(join(ROOT, "data"), { recursive: true, force: true }); } catch { /* ignore */ }
 
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);

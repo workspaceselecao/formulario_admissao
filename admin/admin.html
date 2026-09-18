@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo — Formulários de Admissão</title>
+<link rel="icon" type="image/png" href="../icone.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <!-- Proteção: admin-guard.js oculta o conteúdo até validar e-mail @atento.com -->
+  <header class="admin-header">
+    <img src="../logomarca.png" alt="Logomarca">
+    <div class="admin-header-main">
+      <h1>Painel Administrativo</h1>
+      <div class="subtitle">Configuração dos Formulários de Admissão</div>
+    </div>
+    <span class="admin-user" id="adminUserEmail" title="Sessão administrativa"></span>
+    <button type="button" class="admin-logout" onclick="atentoAdminEndSession()">Sair</button>
+  </header>
+
+  <div class="admin-shell">
+    <aside class="admin-side" aria-label="Seções do painel">
+      <button type="button" data-section="dashboard" class="active">▦ Dashboard</button>
+      <button type="button" data-section="pdfs">▤ PDFs</button>
+      <button type="button" data-section="coordenadas">✥ Coordenadas</button>
+      <button type="button" data-section="cidades">◐ Cidades</button>
+      <button type="button" data-section="assistencia">✚ Assistência</button>
+      <button type="button" data-section="formularios">✎ Formulários</button>
+      <button type="button" data-section="regras">§ Regras</button>
+      <button type="button" data-section="dados">⌗ Dados</button>
+      <button type="button" data-section="seguranca">⛨ Segurança</button>
+      <button type="button" data-section="historico">⏱ Histórico</button>
+      <button type="button" data-section="sistema">⚙ Sistema</button>
+      <div class="side-note">
+        Alterações de configuração são registradas no Histórico.
+        Proteção client-side — mesma natureza do guard.js (ver
+        <strong>Segurança</strong>).
+      </div>
+    </aside>
+
+    <main class="admin-main">
+
+      <!-- ══════════ DASHBOARD ══════════ -->
+      <section id="sec-dashboard" class="admin-section active">
+        <h2>Dashboard</h2>
+        <p class="section-desc">Visão geral das configurações carregadas dos JSONs do repositório.</p>
+        <div id="admExportNote"></div>
+        <div class="cards-grid" id="dashCards"></div>
+        <div class="panel">
+          <h3>Status das configurações</h3>
+          <div id="dashStatus"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ PDFs ══════════ -->
+      <section id="sec-pdfs" class="admin-section">
+        <h2>Templates PDF</h2>
+        <p class="section-desc">
+          Templates em uso pela aplicação. A lista carrega os arquivos reais do repositório;
+          uploads de novos PDFs dependem do modo API (ver Sistema).
+        </p>
+        <div class="toolbar">
+          <input type="search" id="pdfSearch" placeholder="Pesquisar template…" style="flex:1;min-width:180px">
+          <button type="button" class="btn secondary" id="btnUploadPdf">+ Adicionar PDF</button>
+          <input type="file" id="pdfUploadInput" accept="application/pdf,.pdf" hidden>
+        </div>
+        <div class="panel table-wrap" style="padding:0">
+          <table class="data" id="pdfTable">
+            <thead><tr>
+              <th>Arquivo</th><th>Tipo</th><th>Formulário</th><th class="num">Páginas</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>Substituir template</h3>
+          <p class="section-desc" style="margin-bottom:10px">
+            Seleciona o template e envia um novo arquivo. A substituição exige confirmação,
+            preserva a versão anterior como backup (modo API) e avisa que as coordenadas
+            podem precisar de revisão.
+          </p>
+          <div class="form-grid">
+            <div><label for="substTemplate">Template</label>
+              <select id="substTemplate"></select></div>
+            <div><label for="substFile">Novo PDF</label>
+              <input type="file" id="substFile" accept="application/pdf,.pdf"></div>
+          </div>
+          <button type="button" class="btn" id="btnSubstPdf">Enviar substituição</button>
+          <div id="substMsg" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ COORDENADAS ══════════ -->
+      <section id="sec-coordenadas" class="admin-section">
+        <h2>Editor de Coordenadas</h2>
+        <p class="section-desc">
+          Selecione o template, visualize a página e arraste os campos. O sistema de coordenadas
+          é o mesmo do pdf-lib: origem no canto <strong>inferior esquerdo</strong>, Y cresce para cima, unidade em pontos (pt).
+        </p>
+        <div class="toolbar">
+          <select id="edDoc" style="min-width:280px">
+            <option value="ficha_cadastral">Ficha Cadastral (F-075) — ficha_cadastral_campos.json</option>
+            <option value="declaracao_plano_saude">Declaração Plano de Saúde — declaracao_plano_saude_campos.json</option>
+          </select>
+          <select id="edPage" style="min-width:120px"></select>
+          <button type="button" class="btn secondary" id="edTestPreview">Visualizar PDF de teste</button>
+          <button type="button" class="btn secondary" id="edGoCampos">Ver tabela de campos</button>
+        </div>
+        <div class="editor-layout">
+          <div class="pdf-viewport">
+            <div class="pdf-page-stack" id="edPageStack">
+              <canvas id="edCanvas"></canvas>
+            </div>
+          </div>
+          <div class="panel editor-form">
+            <h3 id="edFieldTitle">Campo</h3>
+            <div id="edFieldInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo no PDF.</div>
+            <div class="form-grid">
+              <div><label for="edX">X (pt)</label><input type="number" id="edX" step="0.5" disabled></div>
+              <div><label for="edY">Y (pt)</label><input type="number" id="edY" step="0.5" disabled></div>
+              <div><label for="edL">Largura</label><input type="number" id="edL" step="0.5" disabled></div>
+              <div><label for="edA">Altura</label><input type="number" id="edA" step="0.5" disabled></div>
+              <div><label for="edPg">Página</label><input type="number" id="edPg" min="1" step="1" disabled></div>
+              <div><label for="edT">Tamanho da fonte</label><input type="number" id="edT" step="0.5" disabled></div>
+              <div style="grid-column:1/-1"><label for="edObs">Observação</label><input type="text" id="edObs" readonly title="Esta configuração depende de lógica implementada no código."></div>
+            </div>
+            <div class="notice info" id="edFontNote" style="display:none">
+              Este JSON não define fonte/tamanho/alinhamento por campo — o estilo é fixado no
+              código de geração (implementação atual). Edite apenas posição e dimensões.
+            </div>
+            <div class="editor-actions">
+              <button type="button" class="btn" id="edSave" disabled>Salvar alterações</button>
+              <button type="button" class="btn secondary" id="edCancel" disabled>Cancelar</button>
+            </div>
+            <div id="edPending" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ CIDADES ══════════ -->
+      <section id="sec-cidades" class="admin-section">
+        <h2>Cidades</h2>
+        <p class="section-desc">
+          Mapeamento cidade → ficha regional (fluxo Outros Planos). Fonte ativa:
+          <span id="cidFonte">—</span>. Normalização idêntica à da aplicação
+          (sem acentos, maiúsculas, espaços colapsados); correção histórica
+          FICHA REEBOLSO → FICHA REEMBOLSO preservada.
+        </p>
+        <div class="toolbar">
+          <input type="search" id="cidSearch" placeholder="Pesquisar cidade…" style="flex:1;min-width:180px">
+          <select id="cidUfFilter" style="min-width:90px"><option value="">UF: todas</option></select>
+          <select id="cidFichaFilter" style="min-width:160px"><option value="">Ficha: todas</option></select>
+          <button type="button" class="btn secondary" id="btnNovaCidade">+ Nova cidade</button>
+        </div>
+        <div class="panel table-wrap" style="padding:0">
+          <table class="data" id="cidTable">
+            <thead><tr>
+              <th>Cidade</th><th>UF</th><th>Regional</th><th>Ficha a utilizar</th><th>Template PDF</th><th>Ações</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel" id="cidFormPanel" hidden>
+          <h3 id="cidFormTitle">Nova cidade</h3>
+          <div class="form-grid">
+            <div><label for="cidNome">Cidade (como no IBGE)</label><input type="text" id="cidNome" placeholder="Ex.: São Paulo"></div>
+            <div><label for="cidUf">UF</label><input type="text" id="cidUf" maxlength="2" placeholder="SP" style="text-transform:uppercase"></div>
+            <div><label for="cidRegional">Regional</label><input type="text" id="cidRegional" maxlength="4" placeholder="Ex.: SP" style="text-transform:uppercase"></div>
+            <div><label for="cidFicha">Ficha a utilizar</label>
+              <select id="cidFicha">
+                <option>FICHA BH</option><option>FICHA FSA</option><option>FICHA GNDI</option>
+                <option>FICHA GOIANIA</option><option>FICHA REEMBOLSO</option><option>FICHA SA_FO</option>
+                <option>FICHA SJC</option>
+              </select></div>
+          </div>
+          <div class="editor-actions">
+            <button type="button" class="btn" id="cidSalvar">Adicionar cidade</button>
+            <button type="button" class="btn secondary" id="cidCancelar">Cancelar</button>
+          </div>
+          <div id="cidMsg" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ ASSISTÊNCIA ══════════ -->
+      <section id="sec-assistencia" class="admin-section">
+        <h2>Assistência Médica</h2>
+        <p class="section-desc">Mapa de associação do fluxo F-089: tipo de plano → cidade → template → coordenadas.</p>
+        <div class="panel">
+          <h3>Fluxo Plano de Benefícios (regra fixa)</h3>
+          <pre style="background:#f4f1ed;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto">Plano de Benefícios → DECLARACAO PLANO DE SAUDE.pdf
+                     → assistencia_medica_campos.json (layout comum) + declaracao_plano_saude_campos.json (página 2)
+                     → assinatura na página 2</pre>
+          <p class="section-desc" style="margin-top:8px">Regra implementada no código (<code>ehPlanoBeneficios()</code>) — somente leitura.</p>
+        </div>
+        <div class="panel">
+          <h3>Fluxo Outros Planos (por cidade)</h3>
+          <pre id="assocMap" style="background:#f4f1ed;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;overflow-x:auto;max-height:420px"></pre>
+        </div>
+        <div class="panel">
+          <h3>Ações rápidas</h3>
+          <div class="row-actions">
+            <a class="btn secondary" href="#sec-cidades" onclick="AdminPanel.showSection('cidades')">Gerenciar cidades</a>
+            <a class="btn secondary" href="#sec-coordenadas" onclick="AdminPanel.showSection('coordenadas')">Editar coordenadas</a>
+            <a class="btn secondary" href="#sec-pdfs" onclick="AdminPanel.showSection('pdfs')">Gerenciar PDFs</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ FORMULÁRIOS ══════════ -->
+      <section id="sec-formularios" class="admin-section">
+        <h2>Formulários</h2>
+        <p class="section-desc">Fluxos efetivamente presentes no código. Configurações de label/obrigatoriedade/máscara são lidas dos HTMLs — alterá-las dinamicamente depende de desenvolvimento (somente leitura).</p>
+        <div class="panel table-wrap" style="padding:0">
+          <table class="data" id="formTable">
+            <thead><tr><th>Formulário</th><th>Rota</th><th>Arquivo</th><th>Template / dados</th><th>Status</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>Regras de negócio (classificação)</h3>
+          <div id="regrasLista"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ REGRAS ══════════ -->
+      <section id="sec-regras" class="admin-section">
+        <h2>Regras de negócio</h2>
+        <p class="section-desc">
+          Regras identificadas no código e no PRD reverso. Classificação:
+          <span class="badge muted">Implementada no código</span> (não editável),
+          <span class="badge ok">Configurável</span> (editável pelo painel).
+          Nem toda regra deve virar configuração.
+        </p>
+        <div class="panel" id="regrasPainel"></div>
+      </section>
+
+      <!-- ══════════ DADOS ══════════ -->
+      <section id="sec-dados" class="admin-section">
+        <h2>Dados</h2>
+        <p class="section-desc">Importação/exportação da configuração administrativa e backup. Nunca há substituição silenciosa: o painel mostra o que será alterado antes de aplicar.</p>
+        <div id="dadosModo" class="notice info"></div>
+        <div class="panel">
+          <h3>Exportar configuração</h3>
+          <p class="section-desc">Gera um JSON com o overlay administrativo completo (campos alterados, cidades, associações).</p>
+          <button type="button" class="btn" id="btnExport">Exportar JSON</button>
+        </div>
+        <div class="panel">
+          <h3>Importar configuração</h3>
+          <p class="section-desc">Lê um JSON exportado, valida a estrutura e apresenta o resumo antes de aplicar.</p>
+          <input type="file" id="importFile" accept="application/json,.json">
+          <div id="importPreview" style="margin-top:12px"></div>
+        </div>
+        <div class="panel" id="backupPanel">
+          <h3>Backups (modo API)</h3>
+          <div id="backupLista" class="section-desc">Carregando…</div>
+        </div>
+      </section>
+
+      <!-- ══════════ SEGURANÇA ══════════ -->
+      <section id="sec-seguranca" class="admin-section">
+        <h2>Segurança</h2>
+        <div class="notice warn">
+          <strong>Proteção client-side.</strong> A verificação de e-mail deste painel segue o
+          mesmo princípio do guard.js das rotas públicas: barreira no navegador, não
+          autenticação server-side. Não deve ser tratada como controle de acesso forte.
+          Evolução recomendada para operações destrutivas: autenticação server-side.
+        </div>
+        <div class="panel">
+          <h3>Controles aplicados</h3>
+          <div id="segLista"></div>
+        </div>
+        <div class="panel">
+          <h3>Verificar integridade</h3>
+          <p class="section-desc">Confere existência/acessibilidade dos templates, validade das coordenadas e consistência das associações cidade → template.</p>
+          <button type="button" class="btn" id="btnIntegridade">Executar verificação</button>
+          <div id="integridadeResultado" style="margin-top:14px"></div>
+        </div>
+      </section>
+
+      <!-- ══════════ HISTÓRICO ══════════ -->
+      <section id="sec-historico" class="admin-section">
+        <h2>Histórico / Auditoria</h2>
+        <p class="section-desc">Eventos administrativos (login, alterações, importações, exportações). No modo API são gravados no servidor; no modo exportação ficam na sessão atual.</p>
+        <div class="panel" id="histPanel"><div id="histLista">Carregando…</div></div>
+      </section>
+
+      <!-- ══════════ SISTEMA ══════════ -->
+      <section id="sec-sistema" class="admin-section">
+        <h2>Sistema</h2>
+        <div class="panel">
+          <h3>Modo de persistência</h3>
+          <div id="sisModo" class="section-desc"></div>
+        </div>
+        <div class="panel">
+          <h3>Sobre</h3>
+          <div class="section-desc" id="sisSobre"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal de confirmação -->
+  <div class="modal-overlay" id="confirmOverlay" role="presentation" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h3 id="confirmTitle">Confirmar</h3>
+      <div class="modal-body" id="confirmBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" id="confirmCancel">Cancelar</button>
+        <button type="button" class="btn danger" id="confirmOk">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../admin-guard.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="persistence.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>
