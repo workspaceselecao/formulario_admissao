@@ -310,6 +310,8 @@
 
   // ══════════════════════════════════════════════════════
   // ENCERRAR SESSÃO ADMINISTRATIVA (exposta globalmente)
+  // Desloga e leva o usuário à Home do Hub. location.replace()
+  // remove o painel do histórico — "Voltar" não retorna ao painel.
   // ══════════════════════════════════════════════════════
   window.atentoAdminEndSession = function () {
     try {
@@ -317,7 +319,7 @@
       sessionStorage.removeItem(ADMIN_TX);
       sessionStorage.removeItem(ADMIN_TE);
     } catch (e) { /* ignore */ }
-    window.location.reload();
+    window.location.replace("/");
   };
 
   window.atentoAdminEmail = adminEmail;

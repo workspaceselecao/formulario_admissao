@@ -11,7 +11,7 @@
 2. Informe seu e-mail **@atento.com**;
 3. Informe o **código de acesso exclusivo do painel**;
 4. **Validar acesso** — a sessão administrativa dura 60 minutos e se renova automaticamente enquanto a página estiver em uso;
-5. Para sair, use o botão **Sair** no cabeçalho do painel.
+5. Para sair, use o botão **Sair** no cabeçalho do painel — a sessão é encerrada e você retorna à Home do Hub.
 
 > **Limitação (documentada por decisão de projeto):** a verificação é client-side,
 > do mesmo tipo do `guard.js`. Não é autenticação server-side e não deve ser
@@ -78,7 +78,7 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 
 - Verificação (dois fatores, apartada): ① e-mail normalizado → domínio **exatamente** `@atento.com` (recusa subdomínios e `atento.com.br`); ② código exclusivo do painel → pipeline salt+SHA-256+transformação idêntico ao `guard.js` → comparado ao corpus próprio `CG` em `admin-guard.js` (códigos reais fora do código; gerados por `scripts/generate-admin-verifiers.mjs`). Os 5 verificadores do `guard.js` dos formulários são independentes e intocados.
 - Upload: validação de extensão/MIME/assinatura, limite de 20 MB, sanitização de nome (bloqueia `../`), armazenamento como arquivo (sem execução).
-- Sessão: `sessionStorage` (chaves `adm_*`) com expiração e renovação por atividade; **Sair** invalida a sessão.
+- Sessão: `sessionStorage` (chaves `adm_*`) com expiração e renovação por atividade; **Sair** invalida a sessão e redireciona à Home do Hub (via `location.replace`, sem retorno ao painel pelo botão Voltar).
 - Auditoria: login, alterações de coordenadas, cidades, uploads, importações/exportações e verificações de integridade ficam no **Histórico**.
 
 ## Testes
