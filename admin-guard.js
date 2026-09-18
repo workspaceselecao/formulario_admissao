@@ -219,7 +219,7 @@
     overlay.id = "af";
     overlay.innerHTML =
       '<div class="af-c">' +
-        '<img class="af-icon" src="logomarca.png" alt="Logo" decoding="async">' +
+        '<img class="af-icon" src="/logomarca.png" alt="Logo" decoding="async">' +
         '<h1 class="af-title">Painel Administrativo</h1>' +
         '<p class="af-desc">Acesso restrito.<br>Informe seu e-mail corporativo <strong>@atento.com</strong><br>e o código de acesso do painel.</p>' +
         '<label class="af-label" for="afEmail">E-mail corporativo</label>' +

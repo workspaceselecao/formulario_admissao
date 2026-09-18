@@ -109,8 +109,10 @@ async function handleAdminApi(req, res, pathname, searchParams) {
   ensureDataDirs();
 
   if (pathname === "/api/admin/config") {
-    if (req.method === "GET") {
+    if (req.method === "GET" || req.method === "HEAD") {
+      // HEAD é usado pelo painel para detectar o modo API
       if (!existsSync(CONFIG_PATH)) { res.writeHead(404); res.end(); return; }
+      if (req.method === "HEAD") { res.writeHead(200); res.end(); return; }
       sendJSON(res, 200, JSON.parse(readFileSync(CONFIG_PATH, "utf8")));
       return;
     }
@@ -232,6 +234,10 @@ const server = createServer(async (req, res) => {
     const withHtml = pathname + ".html";
     if (existsSync(join(ROOT, withHtml))) pathname = withHtml;
   }
+
+  // Decodifica percent-encoding (ex.: "Admiss%C3%A3o" → "Admissão") —
+  // a Vercel faz isso; sem isso, templates com acento dariam 404 no local.
+  try { pathname = decodeURIComponent(pathname); } catch { /* mantém original */ }
 
   let filePath = join(ROOT, pathname);
 
