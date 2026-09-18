@@ -277,9 +277,8 @@ server.listen(PORT, () => {
   console.log("   ATN-P8YD-4M7C-V2HK");
   console.log("   ATN-X5FN-Q9RA-63TJ");
   console.log("   ATN-3VKM-8QPX-L7DZ");
-  console.log("\nE-mails de teste do painel:");
-  console.log("   admin@atento.com  ✓ autorizado");
-  console.log("   gestor.rh@atento.com  ✓ autorizado");
+  console.log("\nPainel administrativo (/admin):");
+  console.log("   Acesso: e-mails @atento.com autorizados no array G de admin-guard.js");
   console.log("   (qualquer outro domínio é recusado)");
   console.log("\nCtrl+C para encerrar.\n");
 });

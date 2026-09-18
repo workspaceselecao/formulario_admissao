@@ -27,10 +27,11 @@
   // derivado com o MESMO pipeline do guard.js:
   //   v = hex( troca-pares( XOR-mascara-sal( inverte-bits( SHA-256( salt || utf8(email) ) ) ) ) )
   // Para liberar novos e-mails, gere o par com scripts/generate-admin-verifiers.mjs
-  // (arquivo gitignored, mesmo fluxo do generate-verifiers.mjs) e adicione aqui.
+  // e adicione aqui (mesmo fluxo do generate-verifiers.mjs do guard.js).
   const G = [
-    { s: "f2d0c9a3b8e14f2d8a5c6b7d9e0f1a2b", v: "24fa3b7c3701cdd9a4d692d82f3706528e34c81406e0b1f6401a36eb005a69f2" },
-    { s: "4a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d", v: "8edcf8668e93070e961b328690828ff2a2b92e3c4144288c4259424ddcca2658" }
+    { s: "21a91bcb166862099b0ae8c880e4fa63", v: "59c6eeedeeb350b316c4a4003ee0bb6499c857fa5cbe30c9699b6875a34bdaa8" },
+    { s: "c1591486884a78e254ceb8e1dd32c1d4", v: "ffcaadb855bd9c3a8d65710115bf343670d1573e85c5455cf0b17dd46e8a3c63" },
+    { s: "3a4e71e94b909737f6203512edcc70af", v: "a630f86e1601b492b6b1d383689d93fae49317f93e6471fdc739f14e12b97c9b" }
   ];
 
   // ══════════════════════════════════════════════════════

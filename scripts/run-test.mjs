@@ -248,8 +248,12 @@ async function runTests() {
     const pairs = gMatches.map(m => { const mm = m.match(/s: "([a-f0-9]+)", v: "([a-f0-9]{64})"/); return { s: mm[1], v: mm[2] }; });
     assert("admin@atento.com deriva um verificador do corpus",
       pairs.some(p => deriveVerifierNode("admin@atento.com", p.s) === p.v), "no match");
-    assert("gestor.rh@atento.com deriva um verificador do corpus",
-      pairs.some(p => deriveVerifierNode("gestor.rh@atento.com", p.s) === p.v), "no match");
+    assert("usuario@atento.com deriva um verificador do corpus",
+      pairs.some(p => deriveVerifierNode("usuario@atento.com", p.s) === p.v), "no match");
+    assert("nome.sobrenome@atento.com deriva um verificador do corpus",
+      pairs.some(p => deriveVerifierNode("nome.sobrenome@atento.com", p.s) === p.v), "no match");
+    assert("e-mail de teste removido (gestor.rh) não deriva mais verificador",
+      !pairs.some(p => deriveVerifierNode("gestor.rh@atento.com", p.s) === p.v), "unexpected match");
     assert("e-mail fora do domínio não deriva verificador válido",
       !pairs.some(p => deriveVerifierNode("atacante@gmail.com", p.s) === p.v), "unexpected match");
   }
