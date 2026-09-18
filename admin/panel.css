@@ -263,6 +263,9 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 .historico-item { padding: 12px 0; border-bottom: 1px solid #eee7e0; font-size: 12.5px; }
 .historico-item .h-data { color: var(--text-light); font-size: 11px; }
 .historico-item .h-user { color: var(--accent); font-weight: 600; }
+/* Tabela de status do Dashboard: injetada fora de .table-wrap — garante
+   rolagem horizontal própria em telas estreitas (senão empurra o documento). */
+#dashStatus { overflow-x: auto; }
 
 /* ── Modo exportação ── */
 .export-note {
@@ -282,10 +285,11 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
     flex-direction: row; overflow-x: auto; padding: 10px;
     border-right: none; border-bottom: 1px solid var(--border);
     position: sticky; top: 73px; z-index: 90; background: #fff;
+    min-width: 0; /* filho de grid: sem isso, min-width:auto impede o encolhimento e a página transborda */
   }
+  .admin-main { padding: 18px 14px 50px; min-width: 0; }
   .admin-side button { white-space: nowrap; width: auto; }
   .admin-side .side-note { display: none; }
-  .admin-main { padding: 18px 14px 50px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
