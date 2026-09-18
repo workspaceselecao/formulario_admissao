@@ -185,13 +185,19 @@
   // UI — TELA DE AUTENTICAÇÃO (identidade visual do guard.js)
   // ══════════════════════════════════════════════════════
   var GUARD_STYLE = document.createElement("style");
-  GUARD_STYLE.textContent = "html[data-admin-hidden] body{display:flex!important;align-items:center;justify-content:center;min-height:100vh}";
+  // Centralização com rolagem segura em telas baixas: em vez de center rígido,
+  // margens automáticas garantem o centro SEM cortar o card quando o conteúdo
+  // excede a altura da tela (mobile landscape, teclado aberto etc.).
+  GUARD_STYLE.textContent = "html[data-admin-hidden] body{display:flex!important;flex-direction:column;align-items:center;min-height:100vh;margin:0 auto}";
   document.head.appendChild(GUARD_STYLE);
 
   var AUTH_CSS = [
-    "#af{display:none;position:fixed;inset:0;z-index:999999;background:#f0ede8;font-family:'Poppins',sans-serif;color:#1a1714}",
-    "#af.show{display:flex;align-items:center;justify-content:center}",
-    ".af-c{width:min(420px,92vw);text-align:center;padding:48px 32px}",
+    "#af{display:none;position:fixed;inset:0;z-index:999999;background:#f0ede8;font-family:'Poppins',sans-serif;color:#1a1714;-webkit-overflow-scrolling:touch}",
+    // Centralização segura: margin:auto no card centraliza quando há espaço e,
+    // quando falta espaço (mobile/teclado), resolve para 0 e o overlay rola —
+    // sem o corte de topo do justify-content:center em flex com overflow.
+    "#af.show{display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:24px 16px}",
+    ".af-c{width:min(420px,92vw);text-align:center;padding:48px 32px;margin:auto}",
     ".af-icon{height:60px;width:auto;margin:0 auto 16px;object-fit:contain}",
     ".af-title{font-size:20px;font-weight:700;margin-bottom:12px;letter-spacing:-0.3px}",
     ".af-desc{font-size:14px;color:#4a453f;margin-bottom:28px;line-height:1.6}",
@@ -207,7 +213,8 @@
     ".af-msg{margin-top:16px;padding:12px 16px;border-radius:8px;font-size:13px;font-weight:500;line-height:1.5;display:none}",
     ".af-msg.err{display:block;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}",
     ".af-msg.ok{display:block;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}",
-    ".af-footer{margin-top:40px;font-size:12px;color:#7a756e}"
+    ".af-footer{margin-top:40px;font-size:12px;color:#7a756e}",
+    "@media (max-width:380px){.af-c{padding:36px 20px}.af-icon{height:48px}.af-title{font-size:18px}}",
   ].join("\n");
 
   function createAuthUI() {
