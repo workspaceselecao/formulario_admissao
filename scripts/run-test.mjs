@@ -571,4 +571,56 @@ async function testarPainelV2(assert) {
   assert("filtro por usuário", f2.length === 84 && f2.every(e => e.usuario === "b@atento.com"), `got ${f2.length}`);
   assert("filtro por texto", f3.length === 1 && f3[0].entidade === "E249", `got ${f3.length}`);
   assert("corte de 200 aplicado APÓS filtro", Math.min(200, f1.length) === 125, "wrong");
+
+  // ── 14.13 — detectMode() do persistence: host estático NÃO deve ser
+  // confundido com API (regressão do salvamento com HTTP 404). A sonda é
+  // GET /api/admin/historico; API real responde 200 JSON. Host estático:
+  // 404 text/html (ou erro de rede) → modo exportação.
+  {
+    const vmCtxFor = (fetchImpl) => {
+      const docStub = criarStubsDom();
+      const sb = {
+        window: {}, document: docStub,
+        console: { log() {}, warn() {}, error() {} },
+        setTimeout() {}, clearTimeout() {},
+        fetch: fetchImpl,
+        URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+        Blob: class {}, FileReader: class { readAsText() {} },
+        Math, Date, JSON, Object, Array, Number, String, Set, Promise, Error,
+        encodeURIComponent, decodeURIComponent
+      };
+      sb.window.document = docStub;
+      sb.globalThis = sb;
+      const ctx = vm.createContext(sb);
+      vm.runInContext(readFile(join(ROOT, "admin", "persistence.js"), "utf8"), ctx, { filename: "persistence.js" });
+      return sb.window.AdminPersistence;
+    };
+    const respostaJSON = (status, body) => ({ ok: status >= 200 && status < 300, status, headers: { get: (h) => (h.toLowerCase() === "content-type" ? "application/json" : null) }, json: async () => body });
+    const respostaHTML404 = { ok: false, status: 404, headers: { get: (h) => (h.toLowerCase() === "content-type" ? "text/html" : null) }, json: async () => { throw new Error("not json"); } };
+    // Cenário 1: Vercel estática — /api/admin/historico vira 404 text/html
+    const p1 = vmCtxFor(async () => respostaHTML404);
+    assert("detectMode: host estático (404 HTML) → export", await p1.detectMode() === "export", "wrong (trataria 404 como API e PUT falharia)");
+    // Cenário 2: test-server com config inexistente — histórico responde 200 JSON
+    const p2 = vmCtxFor(async () => respostaJSON(200, { eventos: [] }));
+    assert("detectMode: API real (200 JSON) → api", await p2.detectMode() === "api", "wrong");
+    // Cenário 3: API offline (rede falha) → export, sem exceção
+    const p3 = vmCtxFor(async () => { throw new TypeError("Failed to fetch"); });
+    assert("detectMode: rede indisponível → export", await p3.detectMode() === "export", "wrong");
+    // Cenário 4: salvamento em host estático vai para rascunho (NÃO faz PUT)
+    let putFeito = false;
+    const p4 = vmCtxFor(async (url, opts) => {
+      if ((opts && opts.method) === "PUT") { putFeito = true; return respostaHTML404; }
+      return respostaHTML404;
+    });
+    const r4 = await p4.salvarOverlay({ campos_ficha: {} });
+    assert("salvarOverlay em host estático NÃO faz PUT e grava rascunho", putFeito === false && r4.persistido === false, `put=${putFeito} r=${JSON.stringify(r4)}`);
+    // Cenário 5: registrarEvento em host estático não dispara POST cego
+    let postFeito = false;
+    const p5 = vmCtxFor(async (url, opts) => {
+      if ((opts && opts.method) === "POST") { postFeito = true; return respostaHTML404; }
+      return respostaHTML404;
+    });
+    const r5 = await p5.registrarEvento({ acao: "teste" });
+    assert("registrarEvento em host estático não faz POST cego", postFeito === false && r5 === false, `post=${postFeito}`);
+  }
 }

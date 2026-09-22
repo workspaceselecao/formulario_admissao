@@ -1088,6 +1088,10 @@
       }
       itens.push({ chave: key, anterior: anterior });
       map[key] = Object.assign({}, map[key], porCampo[key].patch, { label: porCampo[key].label });
+      // origCoords passa a refletir o valor SALVO (overlay → origem): sem isto,
+      // o campo continuava "pendente" visualmente após o salvamento — e a
+      // restauração granular voltava a um valor anterior ao último salvo.
+      if (f) Object.assign(f.origCoords, map[key]);
     }
     try {
       const r = await global.AdminPersistence.salvarOverlay(state.overlay);

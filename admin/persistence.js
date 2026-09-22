@@ -38,12 +38,21 @@
   // ══════════════════════════════════════════════════════
   // DETECÇÃO DE MODO
   // ══════════════════════════════════════════════════════
+  let __modoCache = null;
   async function detectMode() {
+    if (__modoCache) return __modoCache;
+    // Sonda a rota de histórico com GET: a API real SEMPRE responde com JSON
+    // (200 mesmo sem eventos). Antes sondava HEAD /api/admin/config e tratava
+    // qualquer 404 como "API existe, config vazia" — em hospedagem estática
+    // (Vercel sem serverless) o 404 da origem enganava o detector, o painel
+    // tentava PUT /api/admin/config e o salvamento falhava com HTTP 404.
+    // Em host estático o 404 vem como text/html → modo exportação.
     try {
-      const res = await fetch("/api/admin/config", { method: "HEAD" });
-      if (res.ok || res.status === 404) return "api"; // 404 = API existe, config ainda não criada
-    } catch (e) { /* sem API */ }
-    return "export";
+      const res = await fetch("/api/admin/historico", { cache: "no-store" });
+      const ct = res.headers.get("content-type") || "";
+      __modoCache = (res.ok && ct.indexOf("application/json") !== -1) ? "api" : "export";
+    } catch (e) { __modoCache = "export"; }
+    return __modoCache;
   }
 
   // ══════════════════════════════════════════════════════
@@ -139,6 +148,9 @@
   // ══════════════════════════════════════════════════════
   async function registrarEvento(evento) {
     const registro = Object.assign({ data: new Date().toISOString() }, evento);
+    // Sem API não há POST cego (o 404 do host estático seria ignorado de
+    // qualquer forma — agora nem sai da página).
+    if (await detectMode() !== "api") return false;
     try {
       await fetch("/api/admin/historico", {
         method: "POST",
