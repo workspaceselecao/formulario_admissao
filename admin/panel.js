@@ -938,6 +938,10 @@
     // Fora do bloco numbersOnly: o estado deve refletir a pendência mesmo após restaurarCampo().
     $("edRestore").disabled = !campoTemPendencia(docKey, f);
     if (!numbersOnly) {
+      // Habilita os inputs de coordenadas ao selecionar um campo (pág. e fonte
+      // voltam a ficar somente leitura logo abaixo). Sem esta linha o editor
+      // exibia os campos cinza e não permitia editar (regressão corrigida).
+      ["edX", "edY", "edL", "edA", "edPg", "edT"].forEach(function (id) { $(id).disabled = false; });
       const temEstilo = ("fonte" in f.coords) || ("alinhamento" in f.coords);
       $("edFontNote").style.display = temEstilo ? "none" : "block";
       $("edT").disabled = true; // tamanho da fonte é fixado no código (implementação atual)
