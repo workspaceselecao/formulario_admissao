@@ -263,7 +263,8 @@
     const o = opts || {};
     return {
       id: o.id || slugCampoId(nome, o.existentes || {}),
-      secao: o.secao || "campos_adicionais",
+      // sem seção inventada: o campo só entra em seção já existente no schema
+      secao: String(o.secao || "").trim(),
       label: String(nome || "").trim(),
       tipo: o.tipo || "texto",
       obrigatorio: o.obrigatorio === true,
@@ -301,6 +302,7 @@
       if (!nOp) erros.push("Campos de \"" + entry.tipo + "\" exigem opções definidas.");
       else if (nOp < 2) avisos.push("Campo de seleção com apenas 1 opção — confirme se é intencional.");
     }
+    if (!String(entry.secao || "").trim()) erros.push("Seção de destino é obrigatória — escolha uma seção existente do schema.");
     if (entry.id && !/^[a-z0-9_]+$/.test(entry.id)) erros.push("Identificador deve conter apenas letras minúsculas, números e underscore.");
     return { erros: erros, avisos: avisos };
   }
@@ -422,15 +424,17 @@
         else ops.conflitos.push("renomear: original \"" + e.renomeadoDe + "\" ausente");
       }
     }
-    // 3) criações (campo novo do painel → seção dedicada ou existente)
+    // 3) criações — SOMENTE em seções já existentes do schema. O painel não
+    // cria seções nem altera a estrutura do JSON do repositório: um campo novo
+    // sem seção de destino válida é rejeitado (não há "campos_adicionais").
     for (const id of Object.keys(cm)) {
       const e = cm[id];
       if (!e || e.excluir || e.renomeadoDe) continue;
       if (campoPresenteRec(json.campos, id)) { ops.conflitos.push("criar: id \"" + id + "\" já existe no schema"); continue; }
-      let secao = json.campos[e.secao];
-      if (!secao || typeof secao !== "object") {
-        secao = { descricao: "Campos adicionados pelo painel administrativo (Field Builder §10)", campos: {} };
-        json.campos[e.secao] = secao;
+      const secao = json.campos[e.secao];
+      if (!secao || typeof secao !== "object" || Array.isArray(secao)) {
+        ops.conflitos.push("criar: seção \"" + e.secao + "\" não existe no schema");
+        continue;
       }
       const pai = secao.campos && typeof secao.campos === "object" ? secao.campos : secao;
       pai[id] = entryParaSchema(e);
@@ -438,6 +442,7 @@
     }
     return ops;
   }
+
   /** Presença de propriedade com o nome dado em qualquer nível (sem deletar). */
   function campoPresenteRec(node, id) {
     if (!node || typeof node !== "object" || Array.isArray(node)) return false;
@@ -2845,6 +2850,30 @@
     return out;
   }
 
+  /** Seções EXISTENTES no schema efetivo — o painel não inventa seções:
+   *  campos novos só podem entrar em uma delas (sem "campos_adicionais"). */
+  function fbSecoesExistentes(docKey) {
+    const json = fbDocEfetivo(docKey);
+    if (!json || !json.campos || typeof json.campos !== "object") return [];
+    return Object.keys(json.campos).filter(function (k) {
+      const v = json.campos[k];
+      return v && typeof v === "object" && !Array.isArray(v);
+    });
+  }
+
+  /** Marca no select a seção do campo (ou a primeira seção existente). */
+  function fbSelectSecao(valor) {
+    const sel = $("fbSecao");
+    if (!sel) return;
+    if (valor && !Array.prototype.some.call(sel.options, function (o) { return o.value === valor; })) {
+      const op = document.createElement("option");
+      op.value = valor;
+      op.textContent = valor + " (ausente no schema)";
+      sel.appendChild(op);
+    }
+    sel.value = valor || (sel.options[0] ? sel.options[0].value : "");
+  }
+
   /** ids já ocupados no JSON EFETIVO (usados pelo gerador de IDs estáveis). */
   function fbIdsExistentes(docKey) {
     const json = fbDocEfetivo(docKey);
@@ -2868,6 +2897,10 @@
     if (!dd) { box.innerHTML = ""; return; }
     const lote = (state.overlay.campos_custom || {})[f.docKey] || {};
     const itens = fbListaCamposCustom(lote);
+    const secoes = fbSecoesExistentes(f.docKey);
+    const secoesOpts = secoes.length
+      ? secoes.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + "</option>"; }).join("")
+      : '<option value="">(nenhuma seção no schema)</option>';
     let html = "";
     if (itens.length) {
       html += '<h4 style="margin:14px 0 6px;font-size:12px;color:var(--text-light)">Field Builder — ' + itens.length + " operação(ões) pendente(s) neste schema</h4>";
@@ -2892,7 +2925,7 @@
       '<div><label for="fbY">Y (pts)</label><input type="number" id="fbY" step="1" value="60"></div>' +
       '<div><label for="fbL">Largura (pts)</label><input type="number" id="fbL" step="1" value="200"></div>' +
       '<div><label for="fbA">Altura (pts)</label><input type="number" id="fbA" step="1" value="12"></div>' +
-      '<div style="grid-column:1/-1"><label for="fbSecao">Seção de destino (novo grupo ou existente)</label><input type="text" id="fbSecao" value="campos_adicionais"></div>' +
+      '<div style="grid-column:1/-1"><label for="fbSecao">Seção de destino (somente seções existentes do schema)</label><select id="fbSecao">' + secoesOpts + "</select></div>" +
       '<div style="grid-column:1/-1"><label for="fbOpcoes">Opções (radio/checkbox/seleção) — uma por linha: <code>valor|Rótulo</code></label><textarea id="fbOpcoes" rows="3" placeholder="SIM|Sim aceito\nNAO|Não aceito"></textarea></div>' +
       '<div style="grid-column:1/-1"><label for="fbDestino">Aplicar ao formulário</label><select id="fbDestino">' +
       FORMULARIOS.filter(function (x) { return x.docKey; }).map(function (x) { return '<option value="' + esc(x.docKey) + '">' + esc(x.nome) + "</option>"; }).join("") +
@@ -2940,7 +2973,7 @@
         $("fbY").value = e.coordenadas ? e.coordenadas.y : 60;
         $("fbL").value = e.coordenadas ? e.coordenadas.largura : 200;
         $("fbA").value = e.coordenadas ? e.coordenadas.altura : 12;
-        $("fbSecao").value = e.secao || "campos_adicionais";
+        fbSelectSecao(e.secao);
         $("fbOpcoes").value = e.opcoes ? Object.keys(e.opcoes).map(function (v) { return v + "|" + e.opcoes[v]; }).join("\n") : "";
       } else {
         // campo base: pré-preenche a partir do schema efetivo (sem ID novo ainda)
@@ -2958,7 +2991,7 @@
       ["fbNome", "fbOpcoes"].forEach(function (id) { $(id).value = ""; });
       $("fbTipo").value = "texto"; $("fbPagina").value = 1; $("fbObrig").value = "nao";
       $("fbX").value = 60; $("fbY").value = 60; $("fbL").value = 200; $("fbA").value = 12;
-      $("fbSecao").value = "campos_adicionais";
+      fbSelectSecao(null);
     }
     $("fbSalvar").onclick = function () { fbGravar(fSel, idEditar); };
     $("fbCancelar").onclick = function () { drawer.hidden = true; };
@@ -2983,6 +3016,14 @@
         opcoes[t.slice(0, pipe).trim()] = t.slice(pipe + 1).trim();
       }
     }
+    // seção de destino: obrigatória e restrita às seções JÁ existentes no schema
+    const secao = String($("fbSecao").value || "").trim();
+    const secoesValidas = fbSecoesExistentes(docKey);
+    if (secoesValidas.indexOf(secao) === -1) {
+      $("fbDrawerAviso").innerHTML = '<div class="notice err">Seção de destino inválida: "' + esc(secao || "(vazia)") +
+        '". Escolha uma das seções existentes do schema (' + esc(secoesValidas.join(", ") || "nenhuma") + ").</div>";
+      return;
+    }
     const lote = fbLote(docKey);
     const idsEfetivos = fbIdsExistentes(docKey);
     let id, entry, mutacao;
@@ -2997,7 +3038,7 @@
         // conteúdo; o id antigo nunca é reaproveitado.
         const idsSemEle = Object.assign({}, idsEfetivos); delete idsSemEle[idEditar];
         id = slugCampoId(nome, idsSemEle);
-        entry = novoCampoCustom(nome, { id: id, tipo: tipo, secao: campoBase ? (campoBase.secao || $("fbSecao").value.trim()) : $("fbSecao").value.trim(), obrigatorio: $("fbObrig").value === "sim", pagina: $("fbPagina").value, x: $("fbX").value, y: $("fbY").value, largura: $("fbL").value, altura: $("fbA").value, opcoes: opcoes });
+        entry = novoCampoCustom(nome, { id: id, tipo: tipo, secao: secao, obrigatorio: $("fbObrig").value === "sim", pagina: $("fbPagina").value, x: $("fbX").value, y: $("fbY").value, largura: $("fbL").value, altura: $("fbA").value, opcoes: opcoes });
         entry.renomeadoDe = idEditar;
         mutacao = "renomear \"" + idEditar + "\" → \"" + id + "\" (rótulo: " + nome + ")";
       } else if (!e0 || e0.excluir) {
@@ -3012,14 +3053,14 @@
         entry.label = nome; entry.tipo = tipo; entry.pagina = parseInt($("fbPagina").value, 10) || 1;
         entry.obrigatorio = $("fbObrig").value === "sim";
         entry.coordenadas = { x: Number($("fbX").value), y: Number($("fbY").value), largura: Number($("fbL").value), altura: Number($("fbA").value) };
-        entry.secao = $("fbSecao").value.trim();
+        entry.secao = secao;
         if (opcoes) entry.opcoes = opcoes; else delete entry.opcoes;
         mutacao = "editar \"" + id + "\" (rótulo: " + nome + ")";
       }
     } else {
       // criação — ID estável gerado contra o estado efetivo (colisão → sufixo)
       id = slugCampoId(nome, idsEfetivos);
-      entry = novoCampoCustom(nome, { id: id, tipo: tipo, secao: $("fbSecao").value.trim(), obrigatorio: $("fbObrig").value === "sim", pagina: $("fbPagina").value, x: $("fbX").value, y: $("fbY").value, largura: $("fbL").value, altura: $("fbA").value, opcoes: opcoes });
+      entry = novoCampoCustom(nome, { id: id, tipo: tipo, secao: secao, obrigatorio: $("fbObrig").value === "sim", pagina: $("fbPagina").value, x: $("fbX").value, y: $("fbY").value, largura: $("fbL").value, altura: $("fbA").value, opcoes: opcoes });
       mutacao = "criar \"" + id + "\" (rótulo: " + nome + ")";
     }
     const v = validarCampoSchema(entry);
@@ -3876,7 +3917,8 @@
       fbDocEfetivo: fbDocEfetivo,
       fbReconstruirDoc: fbReconstruirDoc,
       fbListaCamposCustom: fbListaCamposCustom,
-      fbIdsExistentes: fbIdsExistentes
+      fbIdsExistentes: fbIdsExistentes,
+      fbSecoesExistentes: fbSecoesExistentes
     }
   };
   document.addEventListener("DOMContentLoaded", init);

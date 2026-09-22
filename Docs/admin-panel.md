@@ -44,9 +44,9 @@ A aba **Campos** do detalhe de formulário ganhou CRUD de campos com **IDs está
 
 - **＋ Campo** abre o drawer lateral com rótulo, tipo (texto, número, CPF,
   telefone, data, e-mail, seleção, radio, checkbox, imagem, assinatura), página,
-  obrigatoriedade, coordenadas, seção de destino e opções (`valor|Rótulo`, uma
-  por linha, para radio/checkbox/seleção). No **Editor Visual** há o mesmo
-  atalho (**＋ Novo campo**);
+  obrigatoriedade, coordenadas, **seção de destino (select restrito às seções
+  que já existem no schema)** e opções (`valor|Rótulo`, uma por linha, para
+  radio/checkbox/seleção). No **Editor Visual** há o mesmo atalho (**＋ Novo campo**);
 - **ID estável:** o identificador é gerado **uma única vez** a partir do rótulo
   (sem acentos, minúsculo, `snake_case`, colisão → sufixo `_2`, `_3`… checando o
   JSON **efetivo**). Em renomeações um **novo ID é gerado** e o antigo nunca é
@@ -59,8 +59,11 @@ A aba **Campos** do detalhe de formulário ganhou CRUD de campos com **IDs está
   `overlay.campos_custom[docKey]` (lote por schema), com evento append-only e
   reverso no Histórico. O JSON do repositório **permanece intacto** até a
   exportação — contrato “estrutura é código”;
+- **Nenhuma seção nova:** o painel não cria seções nem altera a estrutura do
+  JSON do repositório — campos novos entram **somente em seções existentes**
+  (criar sem seção válida é rejeitado na gravação e no gate de publicação);
 - **Aplicação idempotente:** o overlay é aplicado sobre o JSON base a cada
-  reconstrução (criar → seção dedicada `campos_adicionais` por padrão;
+  reconstrução (criar → insere na seção existente escolhida;
   renomear → recria com novo ID preservando conteúdo; excluir → remove). Aplicar
   duas vezes produz o mesmo resultado;
 - **Publicação validada:** o gate de publicação (§24) valida o schema efetivo

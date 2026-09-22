@@ -863,9 +863,15 @@ async function testarPainelV3FieldBuilder(assert) {
   assert("fb: slug vazio → campo", FB.slugCampoId("!!!", {}) === "campo");
 
   // 16.2 — criar campo: id gerado contra o estado EFETIVO (colisão com base)
-  const lote1 = FB.novoCampoCustom("Nome Completo", { existentes: FB.fbIdsExistentes("ficha_cadastral"), x: 50, y: 60, largura: 220, altura: 12 });
+  const lote1 = FB.novoCampoCustom("Nome Completo", { existentes: FB.fbIdsExistentes("ficha_cadastral"), secao: "dados_pessoais", x: 50, y: 60, largura: 220, altura: 12 });
   assert("fb: criação evita colisão com id base", lote1.id === "nome_completo_2", lote1.id);
   assert("fb: novoCampoCustom tem defaults coerentes", lote1.tipo === "texto" && lote1.pagina === 1 && lote1.origem === "painel", JSON.stringify(lote1));
+
+  // 16.2b — seções: somente as JÁ existentes no schema são aceitas
+  const secoesBase = FB.fbSecoesExistentes("ficha_cadastral");
+  assert("fb: lista seções existentes do schema", secoesBase.length === 1 && secoesBase[0] === "dados_pessoais", JSON.stringify(secoesBase));
+  const semSecao = FB.validarCampoSchema({ label: "X", tipo: "texto", pagina: 1, coordenadas: { x: 1, y: 1, largura: 10, altura: 10 } });
+  assert("fb: campo sem seção de destino é erro", semSecao.erros.some(e => e.includes("Seção de destino")), JSON.stringify(semSecao.erros));
 
   // 16.3 — validarCampoSchema: erros e avisos
   const vOk = FB.validarCampoSchema(lote1);
@@ -883,19 +889,22 @@ async function testarPainelV3FieldBuilder(assert) {
   const exOk = FB.validarExclusaoCampo("nome_completo", deps);
   assert("fb: exclusão de campo livre é permitida", exOk.ok, JSON.stringify(exOk.bloqueios));
 
-  // 16.5 — aplicarCamposCustomEmJson: criar + excluir + idempotência
+  // 16.5 — aplicarCamposCustomEmJson: criar (em seção existente) + excluir + idempotência
   const json1 = JSON.parse(JSON.stringify(stFB.docBase.ficha_cadastral));
   const lote = {};
-  const criado = FB.novoCampoCustom("Telefone comercial", { existentes: FB.fbIdsExistentes("ficha_cadastral"), x: 60, y: 300, largura: 200, altura: 12 });
+  const criado = FB.novoCampoCustom("Telefone comercial", { existentes: FB.fbIdsExistentes("ficha_cadastral"), secao: "dados_pessoais", x: 60, y: 300, largura: 200, altura: 12 });
   lote[criado.id] = criado;
   lote.nome_completo = { excluir: true };
   const ops1 = FB.aplicarCamposCustomEmJson(json1, lote);
-  assert("fb: aplicação cria campo na seção dedicada", ops1.criados.length === 1 && FB.campoPresenteRec(json1.campos, "telefone_comercial"), JSON.stringify(ops1));
+  assert("fb: aplicação cria campo em seção existente", ops1.criados.length === 1 && json1.campos.dados_pessoais.campos.telefone_comercial, JSON.stringify(ops1));
   assert("fb: aplicação exclui campo", ops1.excluidos.includes("nome_completo") && !FB.campoPresenteRec(json1.campos, "nome_completo"), JSON.stringify(ops1));
   const ops2 = FB.aplicarCamposCustomEmJson(json1, lote);
   assert("fb: aplicação é idempotente (2ª passada não duplica nem reporta criação)", ops2.criados.length === 0 && ops2.excluidos.length === 0, JSON.stringify(ops2));
-  const secaoCustom = json1.campos.campos_adicionais;
-  assert("fb: seção de destino é criada com descrição", secaoCustom && secaoCustom.campos && secaoCustom.campos.telefone_comercial, JSON.stringify(Object.keys(json1.campos)));
+  assert("fb: nenhuma seção nova é criada no JSON", Object.keys(json1.campos).join(",") === "dados_pessoais" && !("campos_adicionais" in json1.campos), JSON.stringify(Object.keys(json1.campos)));
+  // seção inexistente → rejeitado (sem criar seção nenhuma)
+  const jsonOrf = JSON.parse(JSON.stringify(stFB.docBase.ficha_cadastral));
+  const opsOrf = FB.aplicarCamposCustomEmJson(jsonOrf, { campo_x: FB.novoCampoCustom("Campo X", { id: "campo_x", secao: "secao_inexistente", x: 1, y: 1, largura: 10, altura: 10 }) });
+  assert("fb: criação em seção inexistente é rejeitada (nada é inserido)", opsOrf.criados.length === 0 && opsOrf.conflitos.length === 1 && !FB.campoPresenteRec(jsonOrf.campos, "campo_x"), JSON.stringify(opsOrf));
 
   // 16.6 — renomeação: recria com novo id, preserva conteúdo, mantém id antigo no registro
   // (convenção: o lote é chaveado pelo ID NOVO; renomeadoDe aponta para o antigo)
