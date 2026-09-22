@@ -18,6 +18,70 @@
 > apresentada como controle de acesso forte. Para operações destrutivas em
 > produção, a evolução recomendada é autenticação server-side.
 
+## Saúde do Sistema (Dashboard)
+
+Ao abrir o **Dashboard**, a subseção **Saúde do Sistema** executa automaticamente uma verificação (sem rede) e mostra 🟢 íntegro / 🟡 itens de atenção / 🔴 erros críticos. Cada problema é um **link** que abre a seção correspondente já filtrada:
+
+* "N cidade(s) com ficha não mapeada para PDF" → abre **Cidades** mostrando exatamente essas cidades (com chip de filtro removível);
+* "PDF inacessível: …" → abre **PDFs** com a busca preenchida;
+* "Coordenada inválida / fora da página" → abre o **Editor** no documento e campo correspondentes.
+
+A verificação **completa** (com teste de acesso HTTP a templates e páginas) continua na seção **Segurança → Verificar integridade**; seu resultado também alimenta a Saúde do Dashboard. Ambas usam o mesmo coletor interno.
+
+## Como editar cidade (qualquer origem)
+
+1. Painel → **Cidades** → botão **Editar** em qualquer linha (JSON de origem ou overlay);
+2. O modal permite alterar **cidade, UF, regional e ficha** (formModal com validação inline);
+3. Duplicidade é revalidada com a mesma normalização da aplicação, **excluindo a própria linha** em edição;
+4. Cidade do JSON: grava um **patch completo** `{ cidade, uf, regional, ficha }` no overlay (chaveado pela normalização do nome **original** — renomear não quebra a referência). Patches antigos `{ ficha }` continuam lidos;
+5. Cidade do overlay: editada pelo `id` estável.
+
+## Paginação e busca de cidades
+
+A tabela mostra **50 cidades por página** (constante `CIDADES_POR_PAGINA` em `panel.js`), com contagem "N cidade(s) encontradas" e controles de página. Toda mudança de filtro volta à página 1. **Nenhum resultado é cortado silenciosamente.**
+
+## Trocar ficha em massa
+
+1. Selecione cidades pelos checkboxes ("selecionar todos" vale só para a página atual);
+2. Na barra azul: escolha a ficha destino → **Aplicar**;
+3. Confirme (a caixa mostra a quantidade e uma amostra das cidades afetadas);
+4. **Um único evento agregado** é registrado no Histórico (ex.: `alteracao_cidade_massa`).
+
+## Importar cidades (CSV/JSON) com preview
+
+1. Painel → **Cidades** → **⬆ Importar CSV/JSON**;
+2. Formatos aceitos: CSV com cabeçalho `cidade;uf;regional;ficha` (separador `,` ou `;`) ou JSON (array de objetos, aceita também o formato do `cidades_brasil.json`). **XLSX não é suportado** (exigiria biblioteca nova fora do build atual);
+3. O **preview obrigatório** mostra: "N registros encontrados · N válidos · N duplicados · N inválidos (motivo)", com listas separadas;
+4. Aplicar insere **somente os válidos** no overlay; duplicados/inválidos são apenas listados para revisão.
+
+## Como editar metadados de PDF
+
+Painel → **PDFs** → **Editar** em qualquer linha: altera `tipo` e `formulario` **exibidos** no painel/Dashboard/Assistência (via `overlay.pdfs_meta`, sem deploy). **O arquivo físico não é alterado por aqui** — a troca de template continua sendo exclusivamente pelo fluxo de upload/substituição (modo API).
+
+## Editor de Coordenadas — busca e restauração granular
+
+* **Lista de campos** ao lado do painel de propriedades: busca por label/seção/chave; itens com edição pendente levam um marcador (•); clicar seleciona o campo no canvas (trocando de página quando necessário);
+* **↩ Restaurar este campo**: habilitado só quando o campo selecionado tem alteração pendente; reverte **apenas aquele campo** ao valor salvo no overlay (ou ao original, se nunca teve overlay) — as demais edições pendentes são preservadas (diferente de **Cancelar**, que descarta tudo).
+
+## Importar configuração com diff campo a campo
+
+**Dados → Importar configuração** agora calcula a diferença por chave (`campos_ficha`, `campos_declaracao`, `cidades`, `cidades_novas`, `pdfs_meta`) e mostra **novos**, **alterados (de → para)** e **idênticos (recolhidos)** em checkboxes marcados por padrão. Desmarque o que não deve entrar e aplique — só o que continuar marcado é mesclado no overlay. Cidades já existentes (overlay ou base) não são reimportadas.
+
+## Histórico — filtros e desfazer
+
+* **Filtros**: busca por texto (entidade/alteração) + select de **ação** + select de **usuário** — aplicados **antes** do corte de 200 itens exibidos;
+* **↩ Desfazer**: disponível em eventos que guardam valor anterior (`reverso`). A reversão **não apaga o evento original** — cria um **novo** evento `desfazer` (com seu próprio reverso, permitindo desfazer o desfazer). A trilha completa permanece (v1 → v2 → v3 → v4=restauração de v2);
+* **Ir para o registro**: eventos sem reverso automático navegam para a tela correspondente para reversão manual — **não é undo automático** (indicado no botão).
+
+## Selos "Editável" vs "Somente leitura"
+
+Todas as tabelas do painel indicam o que pode ser alterado ali mesmo:
+
+* <span>✎ Editável</span> — o valor é editável pelo painel (vai para o overlay);
+* <span>🔒 Somente leitura — código</span> — o registro é definido no código (alterar depende de desenvolvimento).
+
+Formulários e Regras são sempre somente leitura; Cidades são sempre editáveis; PDFs têm tipo/formulário editáveis (Tarefa acima) e arquivo físico trocável só por upload.
+
 ## Como adicionar PDF
 
 1. Painel → **PDFs** → **+ Adicionar PDF**;
@@ -84,3 +148,5 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 ## Testes
 
 `node scripts/run-test.mjs` cobre (Testes 9–13): painel servido, `admin-guard.js` (sem e-mails reais, sem uso de localStorage), regra de domínio da seção 69 do prompt (12 casos), corpus de verificadores derivados, sidebar nas 4 páginas e integração da API administrativa (config/backup/upload/histórico).
+
+O **Teste 14** cobre o painel v2 (Tarefas 0–7): elementos novos servidos (formOverlay, saúde, paginação, bulk, import, lista de campos, filtros de histórico, selos), ausência de localStorage, e comportamento puro executado em `node:vm` via `AdminPanel.__teste` — patch antigo/novo de cidade, ID estável/`origemChave`, classificação de importação (válidos/duplicados/inválidos), parser CSV/JSON, `pdfs_meta`, diff de importação com desmarque, paginação completa, pendência/restauração de campo e filtros de histórico antes do corte de 200.

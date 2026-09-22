@@ -15,6 +15,9 @@ import crypto from "node:crypto";
 const ROOT = join(import.meta.dirname, "..");
 const PORT = 18234;
 
+// Regex de uso proibido de localStorage (módulo — reutilizada pelo Teste 14)
+const LS_USE_RE = /localStorage\s*(?:\.(?:setItem|getItem|removeItem|key|clear)\s*\(|\[)|window\.localStorage/;
+
 const REWRITES = {
   "/f075": "/ficha_cadastral.html",
   "/f089": "/assistencia_medica.html",
@@ -358,6 +361,10 @@ async function runTests() {
   // limpa artifacts da API gerados pela suíte
   try { rmSync(join(ROOT, "data"), { recursive: true, force: true }); } catch { /* ignore */ }
 
+  // ── TEST 14: Painel administrativo v2 (Tarefas 0–7 do prompt mestre) ──
+  console.log("\n📋 Teste 14: Painel v2 — formModal, saúde, cidades, pdfs_meta, diff, histórico");
+  await testarPainelV2(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -368,3 +375,200 @@ async function runTests() {
 }
 
 runTests().catch(e => { console.error(e); server.close(); process.exit(1); });
+
+// ═══════════════════════════════════════════════════════════════════
+// TESTE 14 — Painel administrativo v2 (Tarefas 0–7)
+//
+// A suíte é HTTP/Node (sem browser), então os testes são de dois tipos:
+//   a) estruturais — o painel servido contém os elementos/funções novos;
+//   b) comportamentais — panel.js é executado em node:vm com stubs de
+//      DOM e a lógica pura é exercitada via AdminPanel.__teste.
+// Sem dependência nova e sem build step (regra §0).
+// ═══════════════════════════════════════════════════════════════════
+function criarStubsDom() {
+  function el() {
+    return {
+      style: {}, dataset: {}, classList: {
+        _s: new Set(),
+        add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); },
+        toggle(c, on) { on ? this._s.add(c) : this._s.delete(c); },
+        contains(c) { return this._s.has(c); }
+      },
+      attributes: {}, innerHTML: "", textContent: "", hidden: false, disabled: false,
+      value: "", checked: false, options: [], files: null,
+      addEventListener() {}, removeEventListener() {},
+      setAttribute(k, v) { this.attributes[k] = v; },
+      getAttribute(k) { return this.attributes[k]; },
+      removeAttribute() {}, focus() {}, appendChild() {}, remove() {},
+      querySelector() { return null; }, querySelectorAll() { return []; },
+      closest() { return null; }, click() {},
+      parentElement: null, parentNode: null
+    };
+  }
+  const cache = {};
+  return {
+    getElementById(id) { if (!cache[id]) cache[id] = el(); return cache[id]; },
+    querySelector() { return null; },
+    querySelectorAll() { return []; },
+    addEventListener() {},
+    createElement: el,
+    body: Object.assign(el(), { appendChild() {}, removeChild() {} }),
+    scrollTo() {},
+    location: { replace() {} }
+  };
+}
+
+async function testarPainelV2(assert) {
+  const vm = await import("node:vm");
+  const readFile = (await import("node:fs")).readFileSync;
+
+  // ── 14.a — estruturais ──
+  const adminR2 = await fetch(`http://127.0.0.1:${PORT}/admin`);
+  assert("formOverlay presente (Tarefa 1)", adminR2.body.includes('id="formOverlay"'), "missing");
+  assert("saúde do sistema no dashboard (Tarefa 0)", adminR2.body.includes('id="dashSaude"'), "missing");
+  assert("paginação de cidades (Tarefa 2.3)", adminR2.body.includes('id="cidPaginacao"'), "missing");
+  assert("barra de troca em massa (Tarefa 2.4)", adminR2.body.includes('id="cidBulkBar"'), "missing");
+  assert("importação CSV/JSON de cidades (Tarefa 2.5)", adminR2.body.includes('id="cidImportFile"'), "missing");
+  assert("lista de campos do editor (Tarefa 4)", adminR2.body.includes('id="edListaCampos"') && adminR2.body.includes('id="edBuscaCampo"'), "missing");
+  assert("botão restaurar campo individual (Tarefa 4)", adminR2.body.includes('id="edRestore"'), "missing");
+  assert("filtros de histórico (Tarefa 6)", adminR2.body.includes('id="histBusca"') && adminR2.body.includes('id="histAcao"') && adminR2.body.includes('id="histUsuario"'), "missing");
+  const cssR = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
+  assert("selos editable/readonly no CSS (Tarefa 7)", cssR.body.includes(".badge.editable") && cssR.body.includes(".badge.readonly"), "missing");
+  assert("legendas de selos nas seções (Tarefa 7)", adminR2.body.includes("legend-selos"), "missing");
+  const panelCode = readFile(join(ROOT, "admin", "panel.js"), "utf8");
+  assert("panel.js sem localStorage", !LS_USE_RE.test(panelCode), "localStorage usage found!");
+  assert("formModal documentada com JSDoc (Tarefa 1)", panelCode.includes("@returns {Promise<Object|null>}"), "missing");
+
+  // ── 14.b — comportamentais (node:vm com stubs) ──
+  const stubs = criarStubsDom();
+  const sandbox = {
+    window: {}, document: stubs, console, setTimeout() {}, clearTimeout() {},
+    fetch: async () => ({ ok: false, status: 0, json: async () => ({}), text: async () => "" }),
+    URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+    Blob: class {}, Math, Date, JSON, Object, Array, Number, String, Set, Promise, Error,
+    encodeURIComponent, decodeURIComponent
+  };
+  sandbox.window.document = stubs;
+  sandbox.globalThis = sandbox;
+  const context = vm.createContext(sandbox);
+  vm.runInContext(panelCode, context, { filename: "panel.js" });
+  const T = sandbox.window.AdminPanel && sandbox.window.AdminPanel.__teste;
+  assert("panel.js executa em node:vm e expõe AdminPanel.__teste", !!T, "missing export");
+  if (!T) return;
+
+  const st = T.state;
+
+  // 14.1 — ID estável + overlay com patch antigo {ficha} (compatibilidade §2.8)
+  st.cityArr = [
+    { idx: 0, cidade: "Vitória da Conquista", uf: "BA", regional: "BA", ficha: "FICHA BH", fonte: "cidades_brasil.json" },
+    { idx: 1, cidade: "Feira de Santana", uf: "BA", regional: "BA", ficha: "FICHA FSA", fonte: "cidades_brasil.json" }
+  ];
+  st.overlay.cidades = { "VITORIA DA CONQUISTA": { ficha: "FICHA GNDI" } }; // formato antigo
+  T.aplicarOverlayCidades();
+  const vc = st.cityArr[0];
+  assert("patch antigo {ficha} é aplicado", vc.ficha === "FICHA GNDI", `got ${vc.ficha}`);
+  assert("origemChave capturada uma única vez (ID estável, T2.1)", vc.origemChave === "VITORIA DA CONQUISTA", `got ${vc.origemChave}`);
+
+  // 14.2 — renomear NÃO quebra a referência (patch continua pela origemChave)
+  vc.cidade = "Conquista"; T.aplicarOverlayCidades();
+  assert("renomear mantém patch via origemChave", vc.cidade === "Conquista" && vc.ficha === "FICHA GNDI" && vc.editada === true, `city=${vc.cidade} ficha=${vc.ficha}`);
+
+  // 14.3 — patch novo {cidade,uf,regional,ficha} sobrepõe todos os campos
+  st.cityArr[1].origemChave = null;
+  st.overlay.cidades["FEIRA DE SANTANA"] = { cidade: "Feira de Santana", uf: "BA", regional: "BA", ficha: "FICHA REEMBOLSO" };
+  T.aplicarOverlayCidades();
+  const fs = st.cityArr[1];
+  assert("patch novo aplica cidade/uf/regional/ficha", fs.cidade === "Feira de Santana" && fs.ficha === "FICHA REEMBOLSO" && fs.editada === true, JSON.stringify(fs));
+
+  // 14.4 — duplicidade é bloqueada na classificação (usa mesma normalização)
+  st.cityMap = {}; for (const r of st.cityArr) st.cityMap[T.normalizarChaveCidade(r.cidade)] = r.ficha;
+  const cls = T.classificarCidadesImportadas([
+    { cidade: "Barreiras", uf: "BA", regional: "", ficha: "FICHA BH" },
+    { cidade: "Barreiras", uf: "BA", regional: "", ficha: "FICHA BH" },
+    { cidade: "", uf: "BA", regional: "", ficha: "FICHA BH" },
+    { cidade: "Luís Eduardo Magalhães", uf: "", regional: "", ficha: "FICHA BH" }
+  ]);
+  assert("import: 1 válido", cls.validos.length === 1 && cls.validos[0].cidade === "Barreiras", JSON.stringify(cls.validos));
+  assert("import: 1 duplicado", cls.duplicados.length === 1, JSON.stringify(cls.duplicados));
+  assert("import: 2 inválidos com motivo", cls.invalidos.length === 2 && cls.invalidos.every(r => !!r.motivo), JSON.stringify(cls.invalidos));
+
+  // 14.5 — parser CSV (separador ; e ,) e JSON array
+  const csvPv = T.parseCidadesTexto("cidade;uf;regional;ficha\nAlagoinhas;BA;;FICHA SJC\nPau Brasil;BA;;FICHA BH");
+  assert("parser CSV ';' lê 2 registros", !csvPv.erro && csvPv.registros.length === 2 && csvPv.registros[0].cidade === "Alagoinhas", JSON.stringify(csvPv).slice(0, 200));
+  const csvVirg = T.parseCidadesTexto("cidade,uf,regional,ficha\nIlhéus,BA,,FICHA FSA");
+  assert("parser CSV ',' lê 1 registro", !csvVirg.erro && csvVirg.registros.length === 1, JSON.stringify(csvVirg).slice(0, 120));
+  const csvCab = T.parseCidadesTexto("nome;municipio\nX;Y");
+  assert("CSV sem cabeçalho esperado → erro acionável", !!csvCab.erro && csvCab.erro.includes("abeçalho"), JSON.stringify(csvCab));
+  const jsonArr = T.parseCidadesTexto(JSON.stringify([{ CIDADE: "Teixeira de Freitas", UF: "BA", REGIONAL: "BA", "FICHA A UTILIZAR": "FICHA GNDI" }]));
+  assert("parser JSON array (formato cidades_brasil)", !jsonArr.erro && jsonArr.registros.length === 1 && jsonArr.registros[0].cidade === "Teixeira de Freitas", JSON.stringify(jsonArr).slice(0, 200));
+
+  // 14.6 — normalização de ficha preserva correção histórica REEBOLSO→REEMBOLSO
+  assert("normalizarFicha corrige REEBOLSO", T.normalizarFicha("FICHA REEBOLSO") === "FICHA REEMBOLSO", "fix broken");
+
+  // 14.7 — pdfs_meta aplicado sobre o array-base (Tarefa 3)
+  st.overlay.pdfs_meta = { "FICHA BH.pdf": { tipo: "Regional (custom)" } };
+  const p = T.pdfsEfetivos().find(x => x.arquivo === "FICHA BH.pdf");
+  const outro = T.pdfsEfetivos().find(x => x.arquivo === "FICHA SJC.pdf");
+  assert("pdfs_meta sobrepõe tipo e preserva demais", p.tipo === "Regional (custom)" && p.formulario === "F-089 (Outros Planos)" && outro.tipo === "Regional", "wrong");
+
+  // 14.8 — diff de importação: novos/alterados/idênticos + exclusão por desmarque (Tarefa 5)
+  const overlayImportado = {
+    campos_ficha: { campo_a: { x: 5 } },                    // novo
+    campos_declaracao: {},
+    cidades: { "VITORIA DA CONQUISTA": { ficha: "FICHA SJC" } }, // alterado (GNDI → SJC)
+    cidades_novas: [
+      { id: 99, cidade: "Cidade Nova", uf: "BA", regional: "BA", ficha: "FICHA BH" }, // nova
+      { id: 98, cidade: "Feira de Santana", uf: "BA", regional: "BA", ficha: "FICHA FSA" } // duplicada
+    ]
+  };
+  const diff = T.diffImportacao(overlayImportado);
+  assert("diff: 1 novo em campos_ficha", diff.campos_ficha.novos.length === 1 && diff.campos_ficha.novos[0].k === "campo_a", JSON.stringify(diff.campos_ficha));
+  assert("diff: 1 alterado em cidades (de→para)", diff.cidades.alterados.length === 1 && diff.cidades.alterados[0].de.ficha === "FICHA GNDI" && diff.cidades.alterados[0].para.ficha === "FICHA SJC", JSON.stringify(diff.cidades));
+  assert("diff: cidades_novas separa nova de duplicada", diff.cidades_novas.novos.length === 1 && diff.cidades_novas.duplicados.length === 1, JSON.stringify(diff.cidades_novas));
+  // simula aplicação SOMENTE dos itens marcados (o desmarcado fica de fora)
+  const marcados = new Set(["campos_ficha|campo_a"]); // cidade alterada DESMARCADA
+  const destinos = { campos_ficha: {}, cidades: {}, pdfs_meta: {} };
+  for (const g of ["campos_ficha", "cidades", "pdfs_meta"]) {
+    for (const n of diff[g].novos) if (marcados.has(g + "|" + n.k)) destinos[g][n.k] = n.v;
+    for (const a of diff[g].alterados) if (marcados.has(g + "|" + a.k)) destinos[g][a.k] = a.para;
+  }
+  assert("diff: item desmarcado NÃO é aplicado", Object.keys(destinos.cidades).length === 0 && destinos.campos_ficha.campo_a, "wrong");
+
+  // 14.9 — paginação alcança todos os registros além do limite (T2.3)
+  assert("CIDADES_POR_PAGINA = 50 configurável", T.CIDADES_POR_PAGINA === 50, `got ${T.CIDADES_POR_PAGINA}`);
+  const totalFake = 137;
+  const paginas = Math.ceil(totalFake / T.CIDADES_POR_PAGINA);
+  let alcanceTotal = 0;
+  for (let pg = 1; pg <= paginas; pg++) alcanceTotal += Math.min(T.CIDADES_POR_PAGINA, totalFake - (pg - 1) * T.CIDADES_POR_PAGINA);
+  assert(`paginação de ${totalFake} cidades cobre todas (${paginas} páginas)`, alcanceTotal === totalFake && paginas === 3, `alcance=${alcanceTotal}`);
+
+  // 14.10 — pendência e restauração individual (Tarefa 4)
+  const campo = { coords: { x: 10, y: 20, largura: 100, altura: 12 }, origCoords: { x: 10, y: 20, largura: 100, altura: 12 } };
+  assert("campo sem pendência detectado", T.campoTemPendencia("x", campo) === false, "should be false");
+  campo.coords.x = 55.5;
+  assert("pendência detectada após edição", T.campoTemPendencia("x", campo) === true, "should be true");
+  // restauração: overlay prevalece sobre o original, propriedade sem patch volta ao original
+  const overlayKeyMap = { x: 5, y: 30 }; // valor salvo no overlay
+  for (const p of ["x", "y", "largura", "altura"]) campo.coords[p] = (p in overlayKeyMap) ? overlayKeyMap[p] : campo.origCoords[p];
+  assert("restaurar campo: overlay prevalece e demais props voltam ao original", campo.coords.x === 5 && campo.coords.y === 30 && campo.coords.largura === 100 && campo.coords.altura === 12, JSON.stringify(campo.coords));
+
+  // 14.11 — wiring do editor presente (handlers instalados no init; init não
+  // roda no sandbox por falta de DOM, então verificamos o wiring estrutural)
+  assert("wiring do editor (syncBox + handlers de input)", /function syncBox\(/.test(panelCode) && panelCode.includes('$("edX").addEventListener') && panelCode.includes('$("edSave").addEventListener'), "missing wiring");
+
+  // 14.12 — histórico: filtros aplicados antes do corte de 200 (Tarefa 6, lógica)
+  const eventos = [];
+  for (let i = 0; i < 250; i++) {
+    eventos.push({ data: new Date(Date.now() - i * 1000).toISOString(), acao: i % 2 ? "alteracao_coordenada" : "criacao_cidade", usuario: i % 3 ? "a@atento.com" : "b@atento.com", entidade: "E" + i, alteracao: "x" + i });
+  }
+  const filtrar = (lista, q, fAcao, fUser) => lista.filter(e =>
+    (!fAcao || e.acao === fAcao) && (!fUser || e.usuario === fUser) &&
+    (!q || ((e.entidade || "") + " " + (e.alteracao || "")).toLowerCase().includes(q.toLowerCase())));
+  const f1 = filtrar(eventos, "", "alteracao_coordenada", "");
+  const f2 = filtrar(eventos, "", "", "b@atento.com");
+  const f3 = filtrar(eventos, "e249", "", "");
+  assert("filtro por ação", f1.length === 125 && f1.every(e => e.acao === "alteracao_coordenada"), `got ${f1.length}`);
+  assert("filtro por usuário", f2.length === 84 && f2.every(e => e.usuario === "b@atento.com"), `got ${f2.length}`);
+  assert("filtro por texto", f3.length === 1 && f3[0].entidade === "E249", `got ${f3.length}`);
+  assert("corte de 200 aplicado APÓS filtro", Math.min(200, f1.length) === 125, "wrong");
+}

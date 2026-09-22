@@ -48,6 +48,11 @@
         <h2>Dashboard</h2>
         <p class="section-desc">Visão geral das configurações carregadas dos JSONs do repositório.</p>
         <div id="admExportNote"></div>
+        <!-- Tarefa 0: Saúde do Sistema — verificação automática ao abrir, com links diretos aos problemas -->
+        <div class="panel">
+          <h3>Saúde do Sistema</h3>
+          <div id="dashSaude" class="section-desc" aria-live="polite">Verificando integridade…</div>
+        </div>
         <div class="cards-grid" id="dashCards"></div>
         <div class="panel">
           <h3>Status das configurações</h3>
@@ -62,6 +67,10 @@
           Templates em uso pela aplicação. A lista carrega os arquivos reais do repositório;
           uploads de novos PDFs dependem do modo API (ver Sistema).
         </p>
+        <div class="legend-selos">
+          <span class="badge editable">✎ Editável</span> tipo/formulário do template (overlay) ·
+          <span class="badge readonly">🔒 Somente leitura — código</span> o arquivo físico só é trocado pelo fluxo de upload/substituição
+        </div>
         <div class="toolbar">
           <input type="search" id="pdfSearch" placeholder="Pesquisar template…" style="flex:1;min-width:180px">
           <button type="button" class="btn secondary" id="btnUploadPdf">+ Adicionar PDF</button>
@@ -116,6 +125,14 @@
             </div>
           </div>
           <div class="panel editor-form">
+            <!-- Tarefa 4: busca de campos + lista lateral (clicar seleciona no canvas) -->
+            <div class="field-search">
+              <label for="edBuscaCampo">Localizar campo</label>
+              <input type="search" id="edBuscaCampo" placeholder="Buscar por label, seção ou chave…" autocomplete="off">
+              <div class="field-list-count" id="edListaContagem"></div>
+              <div class="field-list" id="edListaCampos" role="listbox" aria-label="Campos do documento"></div>
+            </div>
+            <hr class="editor-sep">
             <h3 id="edFieldTitle">Campo</h3>
             <div id="edFieldInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo no PDF.</div>
             <div class="form-grid">
@@ -134,6 +151,7 @@
             <div class="editor-actions">
               <button type="button" class="btn" id="edSave" disabled>Salvar alterações</button>
               <button type="button" class="btn secondary" id="edCancel" disabled>Cancelar</button>
+              <button type="button" class="btn secondary" id="edRestore" disabled title="Reverte apenas este campo ao valor salvo no overlay (ou ao original), preservando as demais edições pendentes">↩ Restaurar este campo</button>
             </div>
             <div id="edPending" style="margin-top:12px"></div>
           </div>
@@ -154,14 +172,40 @@
           <select id="cidUfFilter" style="min-width:90px"><option value="">UF: todas</option></select>
           <select id="cidFichaFilter" style="min-width:160px"><option value="">Ficha: todas</option></select>
           <button type="button" class="btn secondary" id="btnNovaCidade">+ Nova cidade</button>
+          <button type="button" class="btn secondary" id="btnImportCidades">⬆ Importar CSV/JSON</button>
+          <input type="file" id="cidImportFile" accept=".csv,.json,text/csv,application/json" hidden>
+        </div>
+        <div class="legend-selos">
+          <span class="badge editable">✎ Editável</span> toda a tabela é editável pelo painel (overlay) — os JSONs de origem nunca são alterados
+        </div>
+        <div class="chip-filtro" id="cidFiltroEsp" hidden></div>
+        <div class="bulk-bar" id="cidBulkBar" hidden>
+          <span id="cidBulkInfo">0 selecionada(s)</span>
+          <label for="cidBulkFicha" class="sr-only">Trocar ficha para</label>
+          <select id="cidBulkFicha"></select>
+          <button type="button" class="btn small" id="btnBulkAplicar">Aplicar</button>
+          <button type="button" class="btn small secondary" id="btnBulkLimpar">Limpar seleção</button>
         </div>
         <div class="panel table-wrap" style="padding:0">
           <table class="data" id="cidTable">
             <thead><tr>
+              <th class="chk"><input type="checkbox" id="cidSelTodos" aria-label="Selecionar todas as cidades da página"></th>
               <th>Cidade</th><th>UF</th><th>Regional</th><th>Ficha a utilizar</th><th>Template PDF</th><th>Ações</th>
             </tr></thead>
             <tbody></tbody>
           </table>
+        </div>
+        <div class="pagination" id="cidPaginacao" aria-label="Paginação de cidades"></div>
+        <div class="table-count" id="cidCount"></div>
+        <div class="panel" id="cidImportPanel" hidden>
+          <h3>Importar cidades (CSV ou JSON)</h3>
+          <p class="section-desc">
+            CSV com cabeçalho <code>cidade;uf;regional;ficha</code> (separador vírgula ou ponto-e-vírgula)
+            ou JSON (array de objetos). O preview mostra exatamente o que será aplicado antes de confirmar:
+            válidos entram no overlay; duplicados e inválidos são listados para revisão. XLSX não é suportado
+            (exigiria biblioteca nova fora do build atual).
+          </p>
+          <div id="cidImportPreview"></div>
         </div>
         <div class="panel" id="cidFormPanel" hidden>
           <h3 id="cidFormTitle">Nova cidade</h3>
@@ -213,6 +257,9 @@
       <section id="sec-formularios" class="admin-section">
         <h2>Formulários</h2>
         <p class="section-desc">Fluxos efetivamente presentes no código. Configurações de label/obrigatoriedade/máscara são lidas dos HTMLs — alterá-las dinamicamente depende de desenvolvimento (somente leitura).</p>
+        <div class="legend-selos">
+          <span class="badge readonly">🔒 Somente leitura — código</span> todos os registros desta tabela são definidos no código (alterar depende de desenvolvimento)
+        </div>
         <div class="panel table-wrap" style="padding:0">
           <table class="data" id="formTable">
             <thead><tr><th>Formulário</th><th>Rota</th><th>Arquivo</th><th>Template / dados</th><th>Status</th></tr></thead>
@@ -230,8 +277,8 @@
         <h2>Regras de negócio</h2>
         <p class="section-desc">
           Regras identificadas no código e no PRD reverso. Classificação:
-          <span class="badge muted">Implementada no código</span> (não editável),
-          <span class="badge ok">Configurável</span> (editável pelo painel).
+          <span class="badge readonly">🔒 Somente leitura — código</span> (implementada no código),
+          <span class="badge editable">✎ Editável</span> (configurável pelo painel via overlay).
           Nem toda regra deve virar configuração.
         </p>
         <div class="panel" id="regrasPainel"></div>
@@ -284,7 +331,16 @@
       <section id="sec-historico" class="admin-section">
         <h2>Histórico / Auditoria</h2>
         <p class="section-desc">Eventos administrativos (login, alterações, importações, exportações). No modo API são gravados no servidor; no modo exportação ficam na sessão atual.</p>
-        <div class="panel" id="histPanel"><div id="histLista">Carregando…</div></div>
+        <div class="panel" id="histPanel">
+          <!-- Tarefa 6: filtros aplicados antes do corte de 200 itens -->
+          <div class="toolbar">
+            <input type="search" id="histBusca" placeholder="Buscar por entidade ou alteração…" style="flex:1;min-width:200px">
+            <select id="histAcao" style="min-width:190px"><option value="">Ação: todas</option></select>
+            <select id="histUsuario" style="min-width:190px"><option value="">Usuário: todos</option></select>
+          </div>
+          <div class="table-count" id="histContagem"></div>
+          <div id="histLista">Carregando…</div>
+        </div>
       </section>
 
       <!-- ══════════ SISTEMA ══════════ -->
@@ -312,6 +368,23 @@
         <button type="button" class="btn secondary" id="confirmCancel">Cancelar</button>
         <button type="button" class="btn danger" id="confirmOk">Confirmar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal de formulário (formModal — Tarefa 1). Estrutura duplicada do confirmOverlay
+       de propósito: confirmModal continua mínimo (título/corpo/ok), enquanto este tem
+       campos dinâmicos com validação inline. Acoplar os dois complicaria ambos. -->
+  <div class="modal-overlay" id="formOverlay" role="presentation" aria-hidden="true">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <h3 id="formModalTitle">Editar</h3>
+      <form id="formModalForm" novalidate>
+        <div class="modal-body" id="formModalFields"></div>
+        <div class="notice err" id="formModalError" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="formModalCancel">Cancelar</button>
+          <button type="submit" class="btn" id="formModalOk">Salvar</button>
+        </div>
+      </form>
     </div>
   </div>
 

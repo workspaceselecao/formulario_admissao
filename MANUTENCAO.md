@@ -169,7 +169,7 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 ## 9. Scripts Node na pasta `scripts/`
 
 - `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/termos`, `/admin`), além da API administrativa `/api/admin/*` (config com backup automático, uploads validados, histórico) gravando em `data/` (gitignored). Executar com `node scripts/test-server.mjs`.
-- `run-test.mjs` — suíte de testes do projeto; executar com `node scripts/run-test.mjs`.
+- `run-test.mjs` — suíte de testes do projeto (Testes 1–14; o 14 cobre o painel v2); executar com `node scripts/run-test.mjs`.
 - `atualizar-docs-revision.mjs` — atualiza `Docs/docs-revision.json` após alterar política, termos ou base legal (ver seção LGPD/Docs).
 - `gerar-historico-versionamento.mjs` — regenera `Docs/historico-versionamento.md` (guia público de atualizações, RIPD).
 - Não há script de build: o deploy é de site estático e não depende destes scripts.
@@ -179,6 +179,8 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 - Código em `admin/` (index.html, panel.js, panel.css, persistence.js) + `admin-guard.js` na raiz.
 - Acesso (autenticação **apartada**, dois fatores): qualquer e-mail com domínio **exatamente `@atento.com`** + **código exclusivo do painel** (5 códigos `ATN-…`, verificadores no corpus `CG` de `admin-guard.js`; pipeline idêntico ao `guard.js`). As chaves dos formulários (`guard.js`) são independentes e não autorizam o painel. Novos códigos via `scripts/generate-admin-verifiers.mjs` (não contém segredos, versionado).
 - Modelo de dados: **overlay** sobre `ficha_cadastral_campos.json`, `declaracao_plano_saude_campos.json`, `cidades_brasil.json`/`cidades_infinity.json` — os JSONs do repositório permanecem a fonte primária e nunca são editados pelo painel.
+- Formato do overlay (v2, compatível com o antigo): `campos_ficha`, `campos_declaracao`, `cidades` (patch `{ ficha }` antigo ou patch completo `{ cidade, uf, regional, ficha }` novo, chaveado pela normalização do nome ORIGINAL), `cidades_novas` (`{ id, cidade, uf, regional, ficha }` com `id` estável), `pdfs_meta` (`{ arquivo: { tipo, formulario } }` — só metadado; o arquivo físico troca só por upload).
+- Funcionalidades v2 do painel: Saúde do Sistema no Dashboard (links filtrados), edição completa de cidades (qualquer origem), paginação (50/página), troca de ficha em massa (1 evento agregado), importação CSV/JSON de cidades com preview obrigatório, busca/restauração granular de campos no Editor, diff campo a campo na importação de config, histórico com filtros + desfazer append-only (novo evento `desfazer`, trilha nunca apagada), selos "✎ Editável" / "🔒 Somente leitura — código".
 - Persistência: modo API (`data/admin-config.json` + `data/backups/` + `data/historico.json`) em dev; modo exportação (JSON versionado) em produção estática. `localStorage` é proibido como banco administrativo.
 - Para liberar um novo e-mail de administrador: gerar o par `{salt, verifier}` e adicionar ao array `G` de `admin-guard.js`.
 - Manual completo: `Docs/admin-panel.md`.
