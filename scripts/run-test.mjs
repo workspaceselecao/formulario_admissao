@@ -654,6 +654,53 @@ async function testarPainelV2(assert) {
   assert("aviso de manutenção existe no Dashboard (config geral.manutencao)",
     adminR2.body.includes('id="admAvisoManutencao"'), "missing");
 
+  // 14.6g — arquivos EFETIVOS do repositório: é o que faz uma coordenada
+  // ajustada no Editor Visual chegar à aplicação pública (o overlay não é lido
+  // por ela). Com overlay vazio, o gerado tem de ser igual ao arquivo real.
+  assert("botões de exportação dos arquivos do repositório no painel",
+    adminR2.body.includes('id="btnExpSchemaFicha"') && adminR2.body.includes('id="btnExpSchemaDecl"') &&
+    adminR2.body.includes('id="btnExpCidadesBrasil"') && adminR2.body.includes('id="btnExpCidadesInfinity"') &&
+    adminR2.body.includes('id="repoExportResumo"'), "missing");
+  const realFicha = JSON.parse(readFile(join(ROOT, "ficha_cadastral_campos.json"), "utf8"));
+  st.overlay.campos_ficha = {};
+  st.overlay.campos_custom = {};
+  st.docBase = st.docBase || {};
+  st.docBase.ficha_cadastral = JSON.parse(JSON.stringify(realFicha));
+  assert("overlay vazio → JSON do schema idêntico ao do repositório",
+    JSON.stringify(T.docEfetivoParaRepositorio("ficha_cadastral")) === JSON.stringify(realFicha), "divergiu");
+  st.overlay.campos_ficha["dados_pessoais.campos.nome"] = { x: 999, y: 888 };
+  const gerFicha = T.docEfetivoParaRepositorio("ficha_cadastral");
+  assert("coordenada do overlay entra no JSON gerado (merge, não substituição)",
+    gerFicha.campos.dados_pessoais.campos.nome.coordenadas.x === 999 &&
+    gerFicha.campos.dados_pessoais.campos.nome.coordenadas.largura === realFicha.campos.dados_pessoais.campos.nome.coordenadas.largura &&
+    gerFicha.campos.dados_pessoais.campos.fone.coordenadas.x === realFicha.campos.dados_pessoais.campos.fone.coordenadas.x, "patch errado");
+  assert("docBase permanece intacto após gerar o arquivo do repositório",
+    JSON.stringify(st.docBase.ficha_cadastral) === JSON.stringify(realFicha), "docBase mutado!");
+  assert("resumo de exportação conta as coordenadas pendentes de levar ao repo",
+    T.resumoExportacaoRepositorio().nPatch === 1 && T.resumoExportacaoRepositorio().nenhuma === false,
+    JSON.stringify(T.resumoExportacaoRepositorio()));
+  st.overlay.campos_ficha = {};
+
+  // cidades no formato do repositório (com e sem UF) + cidade nova do overlay
+  const realBrasil = JSON.parse(readFile(join(ROOT, "cidades_brasil.json"), "utf8"));
+  const guardCid = { cidades: st.overlay.cidades, novas: st.overlay.cidades_novas, arr: st.cityArr };
+  st.overlay.cidades = {}; st.overlay.cidades_novas = [];
+  st.cityArr = realBrasil.map((r, i) => ({ idx: i, cidade: String(r.CIDADE || ""), uf: "", regional: String(r.REGIONAL || ""), ficha: T.normalizarFicha(r["FICHA A UTILIZAR"]), fonte: "cidades_brasil.json" }));
+  assert("overlay vazio → cidades_brasil.json gerado idêntico ao do repositório",
+    JSON.stringify(T.cidadesEfetivasParaRepositorio(false)) === JSON.stringify(realBrasil), "divergiu");
+  const comUfGerado = T.cidadesEfetivasParaRepositorio(true)[0];
+  assert("variante com UF gerada tem a coluna UF (formato cidades_infinity)",
+    Object.keys(comUfGerado).join(",") === "REGIONAL,UF,CIDADE,FICHA A UTILIZAR", Object.keys(comUfGerado).join(","));
+  st.overlay.cidades_novas = [{ id: 1, cidade: "Cidade Nova", uf: "CE", regional: "NE", ficha: "FICHA SAFO" }];
+  T.aplicarOverlayCidades();
+  const linhasNovas = T.cidadesEfetivasParaRepositorio(true);
+  assert("cidade nova do overlay entra no arquivo do repositório",
+    linhasNovas.length === realBrasil.length + 1 && !!linhasNovas.find(l => l.CIDADE === "Cidade Nova" && l.UF === "CE"),
+    "n=" + linhasNovas.length);
+  st.overlay.cidades = guardCid.cidades;
+  st.overlay.cidades_novas = guardCid.novas;
+  st.cityArr = guardCid.arr; // restaura para os testes de diff/importação abaixo
+
   // 14.7 — pdfs_meta aplicado sobre o array-base (Tarefa 3)
   st.overlay.pdfs_meta = { "FICHA BH.pdf": { tipo: "Regional (custom)" } };
   const p = T.pdfsEfetivos().find(x => x.arquivo === "FICHA BH.pdf");
@@ -674,6 +721,28 @@ async function testarPainelV2(assert) {
   assert("diff: 1 novo em campos_ficha", diff.campos_ficha.novos.length === 1 && diff.campos_ficha.novos[0].k === "campo_a", JSON.stringify(diff.campos_ficha));
   assert("diff: 1 alterado em cidades (de→para)", diff.cidades.alterados.length === 1 && diff.cidades.alterados[0].de.ficha === "FICHA GNDI" && diff.cidades.alterados[0].para.ficha === "FICHA SJC", JSON.stringify(diff.cidades));
   assert("diff: cidades_novas separa nova de duplicada", diff.cidades_novas.novos.length === 1 && diff.cidades_novas.duplicados.length === 1, JSON.stringify(diff.cidades_novas));
+
+  // 14.8b — reimportar o PRÓPRIO arquivo exportado não pode sugerir mudança.
+  // Regressão de UX: o cabeçalho dizia “0 novo · 0 alterado … Desmarque o que
+  // NÃO deve ser aplicado” e o grupo mostrava “Configurações (1)”, parecendo
+  // 1 alteração pendente.
+  const soma = (obj, campo) => Object.keys(obj).reduce((n, k) => n + (obj[k][campo] ? (typeof obj[k][campo] === "number" ? obj[k][campo] : obj[k][campo].length) : 0), 0);
+  const mesmo = T.diffImportacao(JSON.parse(JSON.stringify(st.overlay)));
+  assert("reimportar o mesmo overlay resulta em 0 novo e 0 alterado",
+    soma(mesmo, "novos") + mesmo.cidades_novas.novos.length === 0 && soma(mesmo, "alterados") === 0,
+    JSON.stringify({ novos: soma(mesmo, "novos"), alt: soma(mesmo, "alterados") }));
+  const guardCfg = st.overlay.configuracoes;
+  st.overlay.configuracoes = { geral: { nome_sistema: "X" } };
+  const mesmoCfg = T.diffImportacao({ configuracoes: { geral: { nome_sistema: "X" } } });
+  assert("item idêntico é contado como idêntico (não como mudança)",
+    mesmoCfg.configuracoes.identicos === 1 && mesmoCfg.configuracoes.novos.length === 0 && mesmoCfg.configuracoes.alterados.length === 0,
+    JSON.stringify(mesmoCfg.configuracoes));
+  st.overlay.configuracoes = guardCfg;
+  const mix = T.diffOverlayMaps({ a: 1, b: 2 }, { a: 1, b: 3, c: 4 });
+  assert("diffOverlayMaps separa novos/alterados/idênticos",
+    mix.novos.length === 1 && mix.alterados.length === 1 && mix.identicos === 1 && mix.total === 3, JSON.stringify(mix));
+  assert("importação sem mudanças mostra aviso claro e não oferece aplicar",
+    panelCode.includes("Nada a aplicar.") && panelCode.includes('if (!$("btnImportOk")) return;'), "missing");
   // simula aplicação SOMENTE dos itens marcados (o desmarcado fica de fora)
   const marcados = new Set(["campos_ficha|campo_a"]); // cidade alterada DESMARCADA
   const destinos = { campos_ficha: {}, cidades: {}, pdfs_meta: {} };

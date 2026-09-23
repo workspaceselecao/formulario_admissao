@@ -2967,6 +2967,41 @@
     return json;
   }
 
+  /**
+   * JSON do schema pronto para o REPOSITÓRIO: arquivo base + operações do Field
+   * Builder + patches de coordenadas do Editor Visual — exatamente o que a
+   * aplicação pública lê. O `admin-config.json` exportado NÃO é lido por ela;
+   * sem este passo, uma coordenada ajustada no painel nunca chega ao PDF do
+   * candidato. Com overlay vazio o resultado é idêntico ao arquivo do
+   * repositório (invariante verificada por scripts/audit-panel.mjs).
+   */
+  function docEfetivoParaRepositorio(docKey) {
+    if (!state.docBase[docKey]) return null;
+    const json = JSON.parse(JSON.stringify(state.docBase[docKey]));
+    const lote = (state.overlay.campos_custom || {})[docKey];
+    if (lote) aplicarCamposCustomEmJson(json, lote);
+    const patches = state.overlay[DOCS[docKey].overlayKey] || {};
+    const flat = [];
+    flattenFields(json.campos, "", flat);
+    for (const f of flat) {
+      const p = patches[f.key];
+      if (p) Object.assign(f.coords, p);
+    }
+    return json;
+  }
+
+  /**
+   * Base de cidades no formato ORIGINAL do repositório (chaves em maiúsculas),
+   * já com patches do overlay e cidades novas. `comUf=true` gera a forma de
+   * `cidades_infinity.json`; `false`, a de `cidades_brasil.json` (sem UF).
+   */
+  function cidadesEfetivasParaRepositorio(comUf) {
+    return state.cityArr.map(function (r) {
+      if (comUf) return { REGIONAL: r.regional || "", UF: r.uf || "", CIDADE: r.cidade, "FICHA A UTILIZAR": r.ficha };
+      return { REGIONAL: r.regional || "", CIDADE: r.cidade, "FICHA A UTILIZAR": r.ficha };
+    });
+  }
+
   /** Reaplica o overlay custom ao JSON ativo e reconstrói flat/lista/editor. */
   function fbReconstruirDoc(docKey) {
     const dd = state.docData[docKey];
@@ -3424,6 +3459,53 @@
   }
 
   // ══════════════════════════════════════════════════════
+  // v3 — EXPORTAR ARQUIVOS DO REPOSITÓRIO (efetivos)
+  //
+  // Fecha o ciclo painel → aplicação pública. O overlay administrativo
+  // (admin-config.json) NÃO é lido pelos formulários públicos: eles leem
+  // ficha_cadastral_campos.json, declaracao_plano_saude_campos.json,
+  // cidades_brasil.json e cidades_infinity.json, na raiz do repositório.
+  // Estes botões geram esses arquivos já com o que foi editado no painel.
+  // ══════════════════════════════════════════════════════
+  /** Resumo do que será gravado nos arquivos do repositório. */
+  function resumoExportacaoRepositorio() {
+    const nPatch = Object.keys(state.overlay.campos_ficha || {}).length + Object.keys(state.overlay.campos_declaracao || {}).length;
+    const nCustom = Object.keys(state.overlay.campos_custom || {}).reduce(function (n, k) { return n + Object.keys(state.overlay.campos_custom[k] || {}).length; }, 0);
+    const nCidades = Object.keys(state.overlay.cidades || {}).length;
+    const nNovas = (state.overlay.cidades_novas || []).length;
+    return { nPatch: nPatch, nCustom: nCustom, nCidades: nCidades, nNovas: nNovas, nenhuma: !(nPatch || nCustom || nCidades || nNovas) };
+  }
+
+  function renderExportacaoRepositorio() {
+    const box = $("repoExportResumo");
+    if (!box) return;
+    const r = resumoExportacaoRepositorio();
+    box.innerHTML = r.nenhuma
+      ? '<div class="notice info">Sem alterações no overlay: os arquivos gerados ficam <strong>idênticos</strong> aos do repositório (útil para conferir, não para alterar).</div>'
+      : '<div class="notice warn">Pendente de levar ao repositório: <strong>' + r.nPatch + "</strong> coordenada(s) ajustada(s) · <strong>" + r.nCustom +
+        "</strong> operação(ões) de campo · <strong>" + r.nCidades + "</strong> cidade(s) alterada(s) + <strong>" + r.nNovas + "</strong> nova(s). " +
+        "Baixe os arquivos abaixo, substitua na raiz do repositório e comite.</div>";
+  }
+
+  function exportarSchemaRepositorio(docKey) {
+    const json = docEfetivoParaRepositorio(docKey);
+    if (!json) { toast("Schema base não carregado — recarregue o painel.", false); return; }
+    const nome = DOCS[docKey].jsonPath.replace("../", "");
+    global.AdminPersistence.baixarJSON(json, nome);
+    logEvento({ acao: "exportacao", entidade: nome, alteracao: "JSON efetivo do schema (base + painel) para versionar no repositório" });
+    toast(nome + " gerado — substitua o arquivo na raiz do repositório e faça o commit.");
+  }
+
+  function exportarCidadesRepositorio(comUf) {
+    const nome = comUf ? "cidades_infinity.json" : "cidades_brasil.json";
+    const linhas = cidadesEfetivasParaRepositorio(comUf);
+    if (!linhas.length) { toast("Nenhuma cidade carregada para exportar.", false); return; }
+    global.AdminPersistence.baixarJSON(linhas, nome);
+    logEvento({ acao: "exportacao", entidade: nome, alteracao: linhas.length + " cidade(s) no formato do repositório (base + overlay) para versionar" });
+    toast(nome + " gerado — substitua o arquivo na raiz do repositório e faça o commit.");
+  }
+
+  // ══════════════════════════════════════════════════════
   // TAREFA 5 — DADOS: EXPORT / IMPORT (com diff) / BACKUP
   // ══════════════════════════════════════════════════════
   async function exportarConfig() {
@@ -3498,13 +3580,19 @@
       const d = diffImportacao(o);
       const nTotalNovos = d.campos_ficha.novos.length + d.campos_declaracao.novos.length + d.cidades.novos.length + d.pdfs_meta.novos.length + d.cidades_novas.novos.length + d.forms_meta.novos.length + d.templates_versoes.novos.length + d.configuracoes.novos.length + d.campos_custom.novos.length;
       const nTotalAlt = d.campos_ficha.alterados.length + d.campos_declaracao.alterados.length + d.cidades.alterados.length + d.pdfs_meta.alterados.length + d.forms_meta.alterados.length + d.templates_versoes.alterados.length + d.configuracoes.alterados.length + d.campos_custom.alterados.length;
+      // Itens idênticos não alteram nada, mas precisam aparecer na conta: sem
+      // isso, “Configurações (1) · 1 idêntico” parecia 1 mudança pendente.
+      const nTotalIdenticos = d.campos_ficha.identicos + d.campos_declaracao.identicos + d.cidades.identicos + d.pdfs_meta.identicos + d.forms_meta.identicos + d.templates_versoes.identicos + d.configuracoes.identicos + d.campos_custom.identicos;
+      const nMudancas = nTotalNovos + nTotalAlt;
 
       // ── Tarefa 5 — diff campo a campo com checkboxes (marcados por padrão) ──
       const rotulos = { campos_ficha: "Coordenadas F-075", campos_declaracao: "Coordenadas Declaração", cidades: "Patches de cidade", pdfs_meta: "Metadados de PDF", forms_meta: "Metadados de formulários", templates_versoes: "Versões de templates", configuracoes: "Configurações", campos_custom: "Campos do Field Builder (§10)" };
       function blocoMap(key) {
         const dd = d[key];
         if (!dd.total) return "";
-        let html = "<h4 style='margin:10px 0 4px;font-size:12.5px'>" + rotulos[key] + " (" + dd.total + ")</h4>";
+        const nMud = dd.novos.length + dd.alterados.length;
+        let html = "<h4 style='margin:10px 0 4px;font-size:12.5px'>" + rotulos[key] + " (" + dd.total + " no arquivo" +
+          (nMud ? " · " + nMud + " mudança(s)" : " · sem mudanças") + ")</h4>";
         const item = function (ck, val, marcado, label) {
           return "<div class='diff-line'><label style='display:flex;gap:8px;align-items:flex-start;cursor:pointer'>" +
             "<input type='checkbox' data-imp='" + key + "|" + esc(ck) + "'" + (marcado ? " checked" : "") + "> <span>" + label + "</span></label></div>";
@@ -3514,7 +3602,13 @@
         if (dd.identicos) html += "<details style='margin:6px 0'><summary style='font-size:11.5px;color:var(--text-light);cursor:pointer'>" + dd.identicos + " idêntico(s) (recolhidos — não alteram nada)</summary></details>";
         return html;
       }
-      let html = "<div class='notice warn'><strong>Diff da importação:</strong> " + nTotalNovos + " novo(s) · " + nTotalAlt + " alterado(s). Desmarque o que NÃO deve ser aplicado.</div>";
+      let html = nMudancas
+        ? "<div class='notice warn'><strong>Diff da importação:</strong> " + nTotalNovos + " novo(s) · " + nTotalAlt + " alterado(s)" +
+          (nTotalIdenticos ? " · " + nTotalIdenticos + " idêntico(s)" : "") + ". Desmarque o que NÃO deve ser aplicado.</div>"
+        : "<div class='notice info'><strong>Nada a aplicar.</strong> O arquivo é idêntico ao overlay que já está carregado neste painel" +
+          (nTotalIdenticos ? " (" + nTotalIdenticos + " item(ns) conferido(s), nenhuma diferença)." : " (overlay vazio nos dois lados).") +
+          " Isso é o esperado ao exportar e reimportar a <em>mesma sessão</em> sem alterar nada. Para ver mudanças, altere algo depois de exportar " +
+          "ou importe este arquivo em outro ambiente — outra aba/navegador, outra máquina ou o painel em modo API.</div>";
       html += blocoMap("campos_ficha") + blocoMap("campos_declaracao") + blocoMap("cidades") + blocoMap("pdfs_meta") + blocoMap("forms_meta") + blocoMap("templates_versoes") + blocoMap("configuracoes") + blocoMap("campos_custom");
       if (d.cidades_novas.novos.length || d.cidades_novas.duplicados.length) {
         html += "<h4 style='margin:10px 0 4px;font-size:12.5px'>Cidades novas (" + d.cidades_novas.novos.length + " novas · " + d.cidades_novas.duplicados.length + " já existentes)</h4>";
@@ -3524,9 +3618,12 @@
         }
         if (d.cidades_novas.duplicados.length) html += "<div class='diff-line' style='color:var(--text-light)'>" + d.cidades_novas.duplicados.length + " cidade(s) já existente(s) no overlay atual — não serão reimportadas.</div>";
       }
-      html += '<button type="button" class="btn" id="btnImportOk" style="margin-top:12px">Aplicar selecionadas</button>';
+      // Sem mudanças não existe “selecionadas para aplicar”: o botão só aparece
+      // quando o diff tem o que aplicar.
+      if (nMudancas) html += '<button type="button" class="btn" id="btnImportOk" style="margin-top:12px">Aplicar selecionadas</button>';
       $("importPreview").innerHTML = html;
 
+      if (!$("btnImportOk")) return;
       $("btnImportOk").addEventListener("click", comLoading($("btnImportOk"), async function () {
         const marcados = Array.from(document.querySelectorAll("input[data-imp]:checked")).map(function (c) { return c.getAttribute("data-imp"); });
         if (!marcados.length) { toast("Nenhum item selecionado — nada foi aplicado.", false); return; }
@@ -3567,6 +3664,7 @@
   }
 
   async function renderDados() {
+    renderExportacaoRepositorio();
     const el = $("dadosModo");
     if (state.modo === "api") {
       el.className = "notice ok";
@@ -3942,6 +4040,11 @@
 
     // Dados
     $("btnExport").addEventListener("click", comLoading($("btnExport"), exportarConfig));
+    // v3 — arquivos efetivos do repositório (painel → aplicação pública)
+    $("btnExpSchemaFicha").addEventListener("click", function () { exportarSchemaRepositorio("ficha_cadastral"); });
+    $("btnExpSchemaDecl").addEventListener("click", function () { exportarSchemaRepositorio("declaracao_plano_saude"); });
+    $("btnExpCidadesBrasil").addEventListener("click", function () { exportarCidadesRepositorio(false); });
+    $("btnExpCidadesInfinity").addEventListener("click", function () { exportarCidadesRepositorio(true); });
     $("importFile").addEventListener("change", function () { if (this.files[0]) importarConfig(this.files[0]); });
 
     // Histórico (Tarefa 6 — filtros)
@@ -4068,6 +4171,9 @@
       renomearCampoRec: renomearCampoRec,
       campoPresenteRec: campoPresenteRec,
       fbDocEfetivo: fbDocEfetivo,
+      docEfetivoParaRepositorio: docEfetivoParaRepositorio,
+      cidadesEfetivasParaRepositorio: cidadesEfetivasParaRepositorio,
+      resumoExportacaoRepositorio: resumoExportacaoRepositorio,
       fbReconstruirDoc: fbReconstruirDoc,
       fbListaCamposCustom: fbListaCamposCustom,
       fbIdsExistentes: fbIdsExistentes,

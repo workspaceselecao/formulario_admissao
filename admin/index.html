@@ -416,6 +416,22 @@
           <p class="section-desc">Gera um JSON com o overlay administrativo completo (campos alterados, cidades, associações).</p>
           <button type="button" class="btn" id="btnExport">Exportar JSON</button>
         </div>
+        <div class="panel" id="repoExportPanel">
+          <h3>Exportar arquivos do repositório (efetivos)</h3>
+          <p class="section-desc">
+            Gera o arquivo <strong>como a aplicação pública o lê</strong>: JSON base + campos do Field Builder +
+            coordenadas do Editor Visual + cidades do overlay. Baixe, substitua o arquivo de mesmo nome na
+            <strong>raiz do repositório</strong>, comite e faça o deploy. Sem esse passo, uma coordenada ajustada aqui
+            não chega ao PDF do candidato — <strong>a aplicação pública não lê o <code>admin-config.json</code></strong>.
+          </p>
+          <div id="repoExportResumo" class="section-desc"></div>
+          <div class="editor-actions" style="flex-wrap:wrap;gap:8px">
+            <button type="button" class="btn" id="btnExpSchemaFicha">⬇ ficha_cadastral_campos.json</button>
+            <button type="button" class="btn" id="btnExpSchemaDecl">⬇ declaracao_plano_saude_campos.json</button>
+            <button type="button" class="btn secondary" id="btnExpCidadesBrasil">⬇ cidades_brasil.json</button>
+            <button type="button" class="btn secondary" id="btnExpCidadesInfinity">⬇ cidades_infinity.json</button>
+          </div>
+        </div>
         <div class="panel">
           <h3>Importar configuração</h3>
           <p class="section-desc">Lê um JSON exportado, valida a estrutura e apresenta o resumo antes de aplicar.</p>

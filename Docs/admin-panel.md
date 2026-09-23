@@ -304,8 +304,21 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 
 ## Como exportar / importar configuração
 
-- **Dados → Exportar JSON**: baixa `admin-config-AAAA-MM-DD.json` com todo o overlay (campos alterados, associações, cidades novas);
-- **Dados → Importar configuração**: valida a estrutura e mostra **antes de aplicar** quantos registros serão adicionados/alterados; exige confirmação.
+- **Dados → Exportar JSON**: baixa `admin-config-AAAA-MM-DD.json` com todo o overlay (campos alterados, associações, cidades novas, configurações);
+- **Dados → Importar configuração**: valida a estrutura (`admin_config_v1`) e mostra **antes de aplicar** o diff por grupo; exige confirmação. Cada item traz checkbox (marcado por padrão) para desmarcar o que não deve ser aplicado.
+
+**Como ler o diff da importação** — o diff compara o arquivo com o overlay **que já está carregado neste painel**:
+
+| Situação | O que aparece |
+|---|---|
+| Chave só no arquivo | **novo** — será criada se ficar marcada |
+| Chave nos dois, valor diferente | **alterado** — mostra `de → para` |
+| Chave nos dois, valor igual | **idêntico** (recolhido em `<details>`) — não altera nada |
+| Nada diferente | **“Nada a aplicar”** — o arquivo é igual ao overlay atual; o botão de aplicar **não** é exibido |
+
+Por isso, **exportar e reimportar a mesma sessão dá `0 novo(s) · 0 alterado(s)`** — é o resultado correto, não um erro. O cabeçalho do grupo mostra o total de chaves do arquivo e quantas são mudança (ex.: “Configurações (1 no arquivo · sem mudanças)”).
+
+Usos legítimos da importação: levar a configuração de um ambiente para outro (produção estática → painel em modo API), restaurar um backup, ou reaplicar parte de um overlay recebido. Em **modo exportação**, o rascunho vive por aba (`sessionStorage`) — para ver um diff real, abra o painel em **outra aba/navegador** (overlay vazio, tudo vira “novo”) ou altere algo depois de exportar.
 
 ## Como interpretar erros
 
@@ -318,6 +331,8 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 | Coluna **UF** vazia nas 272 cidades | `cidades_brasil.json` não tem coluna UF; o painel ignorava `cidades_infinity.json` (mesmas cidades, com UF) | Corrigido no carregamento (enriquecimento por cidade) |
 | Coluna **Cidades** vazia na tabela de Formulários | O formulário não declarava quais templates usa | Corrigido (`docKey`/`pdfFiles` no inventário) |
 | Alteração publicada volta a aparecer como **pendente** | A marcação gravava só o texto da chave: publicar uma cidade homônima de um campo marcava o outro | Corrigido (`chavePublicacao` com namespace por grupo; chave legada ainda é lida) |
+| Importação diz **“0 novo(s) · 0 alterado(s)”** | O arquivo é idêntico ao overlay já carregado (exportou e reimportou a mesma sessão) | Comportamento correto — a UI agora explica e não oferece aplicar; para transportar, importe em outra sessão/ambiente |
+| "Coordenada ajustada e aplicada não aparece no PDF do candidato" | A aplicação pública lê os JSONs do repositório, não o overlay | **Dados → Exportar arquivos do repositório (efetivos)**, substitua o `*_campos.json` na raiz e comite |
 | "Upload de PDF exige o modo API" | Produção estática sem backend | Versione o PDF no repositório |
 | "Cidade já cadastrada" | Normalização colidiu com entrada existente | Edite a ficha da entrada existente |
 | "Falha ao carregar template" | PDF ausente/inacessível | Rode **Verificar integridade** (Segurança) |
@@ -333,12 +348,24 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 
 O overlay é um estado **do painel**: ele sobrevive à sessão (rascunho em `sessionStorage`) e pode ser exportado/importado, mas **a aplicação pública não lê o overlay hoje** — ela lê os arquivos do repositório. Portanto "salvar" tem dois sentidos distintos:
 
-| O que você editou | Onde a alteração é efetivada |
-|---|---|
-| Cidades / fichas | `cidades_brasil.json` e `cidades_infinity.json` (commit) — o `Exportar` da seção Cidades gera relatório/CSV para conferência, não substitui o JSON do repositório |
-| Campos e coordenadas | `*_campos.json` do formulário (commit) — via Field Builder/CSV quando aplicável |
-| Templates PDF | O PDF do repositório (commit) — upload exige modo API |
-| Configurações do painel | Só o painel (overlay). Não alteram a aplicação pública |
+| O que você editou | Arquivo a levar ao repositório | Botão |
+|---|---|---|
+| Coordenadas (Editor Visual) | `ficha_cadastral_campos.json` / `declaracao_plano_saude_campos.json` | **Dados → Exportar arquivos do repositório** |
+| Campos (Field Builder) | o mesmo `*_campos.json` do formulário | idem (o Field Builder entra no arquivo gerado) |
+| Cidades / fichas | `cidades_brasil.json` e `cidades_infinity.json` | idem (os dois arquivos, no formato original) |
+| Templates PDF | o PDF na raiz do repositório | upload exige **modo API** |
+| Configurações do painel | — | só o painel (não alteram a aplicação pública) |
+
+### Como aplicar as coordenadas/fichas de verdade (ciclo completo)
+
+1. Edite no painel (**Editor Visual**, **Campos**, **Cidades**) e clique em **Aplicar** — a alteração entra no *overlay*;
+2. **Dados & Backups → Exportar arquivos do repositório (efetivos)** → baixe o(s) arquivo(s) necessário(s). O painel avisa quantas coordenadas, operações de campo e cidades estão pendentes de levar ao repositório;
+3. Substitua o arquivo de **mesmo nome na raiz do repositório** pelo baixado;
+4. `commit` + `push` → deploy. A aplicação pública passa a usar as novas coordenadas/fichas.
+
+O arquivo gerado é o **JSON base + operações do Field Builder + patches de coordenadas + cidades do overlay** — exatamente o que o formulário público lê. Invariante garantida: **com overlay vazio, o arquivo gerado é idêntico ao do repositório** (mesmo conteúdo e mesma ordem de chaves), o que a auditoria e o Teste 14.6g verificam. Se você baixar e nada tiver sido editado, o arquivo é o próprio arquivo atual — serve para conferir, não para alterar.
+
+> `admin-config.json` (**Exportar JSON**) continua sendo **backup/transferência do overlay**, não o que alimenta a aplicação pública.
 
 - **Modo API** (dev ou backend): `PUT /api/admin/config` grava `data/admin-config.json` com backup automático + `data/uploads/` + `data/historico.json`.
 - **Modo exportação** (produção estática): **Dados → Exportar JSON** baixa `admin-config-AAAA-MM-DD.json` para **backup/transferência entre ambientes** (reimportável por **Importar configuração**). Para efetivar na aplicação pública, a alteração precisa chegar aos JSONs do repositório (tabela acima) e ser commitada.

@@ -228,7 +228,27 @@ if (typeof T.construirIndiceBusca === "function" && typeof T.buscarIndice === "f
   }
 }
 
-// ── 11. Configurações sem consumidor (controle fantasma) ─────────────
+// ── 11. Arquivos do repositório gerados pelo painel ──────────────────
+// Invariante central do ciclo painel → aplicação pública: com overlay vazio, o
+// arquivo gerado precisa ser IDÊNTICO ao do repositório (mesmo conteúdo e mesma
+// ordem de chaves). É o que prova que o botão “Exportar arquivos do repositório”
+// produz algo que pode substituir o arquivo real.
+for (const [key, arquivo] of [["ficha_cadastral", "ficha_cadastral_campos.json"], ["declaracao_plano_saude", "declaracao_plano_saude_campos.json"]]) {
+  const gerado = T.docEfetivoParaRepositorio(key);
+  const real = JSON.parse(readFileSync(join(ROOT, arquivo), "utf8"));
+  check(`overlay vazio ⇒ ${arquivo} gerado é idêntico ao do repositório`,
+    JSON.stringify(gerado) === JSON.stringify(real), "o JSON gerado divergiu do arquivo do repositório");
+}
+for (const [comUf, arquivo] of [[false, "cidades_brasil.json"], [true, "cidades_infinity.json"]]) {
+  const gerado = T.cidadesEfetivasParaRepositorio(comUf);
+  const real = JSON.parse(readFileSync(join(ROOT, arquivo), "utf8"));
+  check(`overlay vazio ⇒ ${arquivo} gerado é idêntico ao do repositório`,
+    JSON.stringify(gerado) === JSON.stringify(real), `linhas geradas ${gerado.length} × repositório ${real.length}`);
+}
+check("resumo de exportação vazio quando o overlay está limpo",
+  T.resumoExportacaoRepositorio().nenhuma === true, JSON.stringify(T.resumoExportacaoRepositorio()));
+
+// ── 12. Configurações sem consumidor (controle fantasma) ─────────────
 // Toda chave de CONFIG_DEFS precisa ser LIDA em algum fluxo: a busca conta as
 // ocorrências do literal no painel (1 = apenas a própria definição).
 const panelSrc = readFileSync(join(ROOT, "admin", "panel.js"), "utf8");
