@@ -70,6 +70,13 @@ A aba **Campos** do detalhe de formulário ganhou CRUD de campos com **IDs está
   completo — coordenadas inválidas, grupo de opções vazio e `dependencia`
   apontando para campo inexistente são **erros críticos** que travam a
   publicação; campos fora da página são avisos.
+- **Índice de ids do schema (`idsCamposSchema`):** a checagem de `dependencia`
+  e a colisão de id do builder usam **todos** os campos do schema, inclusive
+  grupos (`grupo_radio`/`grupo_checkbox`) que **não têm `coordenadas` próprias**
+  (as coordenadas ficam nas opções). Usar a lista achatada do editor
+  (`flattenFields`, que só devolve nós com coordenadas) como fonte de ids
+  gerava erros críticos falsos e travava a publicação — regressão coberta pelos
+  testes 16.9b/16.9c.
 
 ## Templates: versionamento e validação (§18/§19 — v3)
 
@@ -139,10 +146,26 @@ A dica “Ctrl + K para buscar” fica visível no cabeçalho.
 
 ## Configurações (§22 — v3)
 
-Parâmetros por categoria (**Geral, Formulários, PDFs, Cidades, Segurança**),
-salvos em `overlay.configuracoes` com leitura via default
-(`configGet`/`configSetPath`; int limitada ao range definido). Toda alteração
-registra evento no histórico.
+Parâmetros por categoria (**Geral, Formulários, PDFs, Segurança**), salvos em
+`overlay.configuracoes` com leitura via default (`configGet`/`configSetPath`;
+int limitada ao range definido). Toda alteração registra evento no histórico.
+
+**Regra de produto: configuração sem consumidor não existe.** Cada chave declara
+`efeito` (exibido abaixo do rótulo) e é lida por um fluxo real:
+
+| Chave | Default | Onde vale |
+|---|---|---|
+| `geral.nome_sistema` | "Formulários de Admissão" | Título da aba (`document.title`) e seção **Sistema** |
+| `geral.manutencao` | desligado | Faixa de aviso no topo do **Dashboard** |
+| `formularios.validar_uf` | ligado | Cadastro/edição de cidade e **importação** CSV/JSON (chave canônica) |
+| `formularios.exigir_template` | ligado | Gate de publicação: cidade sem template mapeado é **crítico** (ligado) ou **aviso** (desligado) |
+| `pdfs.limite_mb` | 20 | Limite de tamanho no upload de template |
+| `pdfs.manter_versoes` | ligado | Substituição de template: trilha completa de versões × apenas atual+anterior |
+| `seguranca.confirmar_destrutivas` | ligado | Confirmação em descartar pendências, excluir campo, remover cidade e rollback |
+
+`cidades.validar_uf` foi **consolidada** em `formularios.validar_uf` (havia duas
+chaves para a mesma decisão, uma delas sem consumidor). Overlays antigos que
+salvaram a chave legada continuam valendo (`CONFIG_ALIASES`).
 
 ## Modelo de dados — overlay v3 (§32/§33)
 
@@ -165,6 +188,22 @@ e opcionais** — overlays v1/v2 são migrados por normalização na carga (nenh
 é descartado e nenhuma chave antiga muda de formato). A exportação v3 inclui as
 chaves novas; a importação aceita arquivos v1/v2 (campos ausentes = sem alteração)
 e apresenta o diff por grupo antes de aplicar.
+
+## Auditoria contra os dados reais
+
+`node scripts/audit-panel.mjs` executa o **mesmo pipeline do painel**
+(`carregarTudo` + coletores de Saúde/Validação + gate de publicação) em
+`node:vm`, servindo `fetch` a partir dos arquivos do repositório, e falha quando
+alguma verificação não bate com os dados reais (falsos positivos). Ele também
+confere que **nenhuma configuração é controle fantasma** (toda chave de
+`CONFIG_DEFS` é lida em algum fluxo).
+
+Cobre, entre outras: gate de publicação sem erro/aviso com overlay vazio; Saúde
+rápida (sem rede) e completa (com `HEAD` real nos arquivos); toda cidade com
+ficha mapeada e UF válida; métricas por formulário; inventário de PDFs existente;
+schemas reais aprovados no gate, com as dimensões reais dos PDFs; Command Palette
+encontrando dados reais. O **Teste 17** da suíte executa essa auditoria, então
+um falso positivo novo quebra o `node scripts/run-test.mjs`.
 
 ## Saúde do Sistema (Dashboard)
 
@@ -274,6 +313,11 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 |---|---|---|
 | "Modo exportação" no Dashboard | API administrativa não disponível no ambiente (é **aviso de operação**, não erro) | Use `node scripts/test-server.mjs` para gravar de verdade em dev; em produção estática, siga "Como salvar de fato" abaixo |
 | "N cidade(s) com ficha não mapeada para PDF" | A ficha da cidade não existe em `FICHA_UTILIZAR_PARA_ARQUIVO` (painel) | Confira a grafia: a chave é **`FICHA SAFO`** (arquivo físico `FICHA SA_FO.pdf`). Clique no aviso para abrir **Cidades** já filtrada e use **Alterar ficha** / **trocar ficha em massa** |
+| "Schema de X: dependencia aponta para campo inexistente" (uma por dependência) | **Falso positivo corrigido:** o menu contava só nós com coordenadas, então todo grupo de rádio (ex.: `primeiro_emprego`, `tipo_conta`) parecia inexistente | Atualize o painel; a checagem agora usa `idsCamposSchema`. Teste 16.9c valida os schemas reais no gate |
+| "PDF inacessível: …" para **todos** os templates | **Falso positivo corrigido:** o `HEAD` usava o nome do arquivo sem o prefixo `../`, batendo em `/admin/arquivo.pdf` | Atualize o painel; os caminhos agora saem de `urlRepositorio()`. Teste 14.6c + auditoria cobrem |
+| Coluna **UF** vazia nas 272 cidades | `cidades_brasil.json` não tem coluna UF; o painel ignorava `cidades_infinity.json` (mesmas cidades, com UF) | Corrigido no carregamento (enriquecimento por cidade) |
+| Coluna **Cidades** vazia na tabela de Formulários | O formulário não declarava quais templates usa | Corrigido (`docKey`/`pdfFiles` no inventário) |
+| Alteração publicada volta a aparecer como **pendente** | A marcação gravava só o texto da chave: publicar uma cidade homônima de um campo marcava o outro | Corrigido (`chavePublicacao` com namespace por grupo; chave legada ainda é lida) |
 | "Upload de PDF exige o modo API" | Produção estática sem backend | Versione o PDF no repositório |
 | "Cidade já cadastrada" | Normalização colidiu com entrada existente | Edite a ficha da entrada existente |
 | "Falha ao carregar template" | PDF ausente/inacessível | Rode **Verificar integridade** (Segurança) |

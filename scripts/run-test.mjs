@@ -373,6 +373,10 @@ async function runTests() {
   console.log("\n📋 Teste 16: Field Builder — criar/renomear/excluir campos (IDs estáveis)");
   await testarPainelV3FieldBuilder(assert);
 
+  // ── TEST 17: auditoria do painel × dados reais (falsos positivos) ──
+  console.log("\n📋 Teste 17: Auditoria do painel contra os dados reais do repositório");
+  await testarAuditoriaPainel(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -383,6 +387,32 @@ async function runTests() {
 }
 
 runTests().catch(e => { console.error(e); server.close(); process.exit(1); });
+
+// ═══════════════════════════════════════════════════════════════════
+// TESTE 17 — Auditoria do painel contra os dados reais
+//
+// Executa scripts/audit-panel.mjs, que roda o MESMO pipeline do painel
+// (carregarTudo + coletores de Saúde/Validação + gate de publicação) em
+// node:vm servindo `fetch` dos arquivos do repositório. Serve para provar que
+// o painel não acusa problema que não existe (foi o caso da ficha SAFO não
+// mapeada e das dependências de grupo "inexistentes", que travavam a
+// publicação), e é onde a auditoria roda de fato contra os dados reais.
+// ═══════════════════════════════════════════════════════════════════
+async function testarAuditoriaPainel(assert) {
+  const r = await new Promise((resolve) => {
+    const p = spawn(process.execPath, [join(ROOT, "scripts", "audit-panel.mjs")], { cwd: ROOT });
+    let out = "", err = "";
+    p.stdout.on("data", (d) => (out += d));
+    p.stderr.on("data", (d) => (err += d));
+    p.on("close", (code) => resolve({ code, out, err }));
+    p.on("error", (e) => resolve({ code: -1, out, err: e.message }));
+  });
+  const falhas = (r.out.match(/^\s+❌/gm) || []).length;
+  assert("auditoria do painel passa sem falso positivo", r.code === 0,
+    "exit=" + r.code + " | \n" + r.out.split("\n").filter((l) => /❌|→/.test(l)).join("\n") + r.err);
+  assert("auditoria roda o pipeline real e reporta as verificações", /carrega os 2 schemas de campos/.test(r.out) && falhas === 0,
+    "falhas=" + falhas);
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // TESTE 14 — Painel administrativo v2 (Tarefas 0–7)
@@ -539,6 +569,90 @@ async function testarPainelV2(assert) {
   const foraDaPublica = Object.keys(mapaFichas).filter(k => !publicaSrc.includes('"' + k + '"'));
   assert("mapa de fichas do painel espelha a aplicação pública",
     foraDaPublica.length === 0, "chaves ausentes em assistencia_medica.html: " + JSON.stringify(foraDaPublica));
+
+  // 14.6c — caminho de arquivo do repositório a partir do painel (/admin/…).
+  // Regressão: o coletor de integridade fazia HEAD no nome cru, batia em
+  // /admin/arquivo.pdf e acusava “PDF inacessível” para TODOS os templates.
+  assert("urlRepositorio prefixa ../ sem encode duplicado",
+    T.urlRepositorio("FICHA BH.pdf") === "../FICHA BH.pdf" && T.urlRepositorio("F-075 x.pdf") === "../F-075 x.pdf",
+    T.urlRepositorio("FICHA BH.pdf"));
+
+  // 14.6d — a marcação de publicação é por GRUPO: a mesma chave em grupos
+  // diferentes (ex.: cidade e campo homônimos) precisa ser publicada uma a uma.
+  const ovPend = {
+    campos_ficha: { "CHAVE IGUAL": { x: 1 } }, cidades: { "CHAVE IGUAL": { ficha: "FICHA SJC" } },
+    cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, campos_custom: {}, campos_declaracao: {}
+  };
+  assert("chave de publicação é namespaced por grupo",
+    T.chavePublicacao("cidades", "X") === "cidades|X", T.chavePublicacao("cidades", "X"));
+  const pubIgual = T.publicarPendentes(ovPend, {}, "admin@atento.com");
+  assert("mesma chave em grupos distintos gera 2 pendências", pubIgual.publicados === 2, JSON.stringify(Object.keys(pubIgual.marcados)));
+  assert("nenhuma pendência sobra depois de publicar",
+    T.calcularPendentes(ovPend, pubIgual.marcados).length === 0,
+    JSON.stringify(T.calcularPendentes(ovPend, pubIgual.marcados).map(p => p.overlayKey + ":" + p.chave)));
+  assert("marcação legada (chave crua) continua sendo respeitada",
+    T.estaPublicado({ "CHAVE IGUAL": { publicadoEm: "x" } }, "campos_ficha", "CHAVE IGUAL") === true, "legacy");
+
+  // 14.6e — métricas de formulário contam cidades por TODOS os templates do
+  // formulário (`pdfFiles`): a F-089 usa a declaração e as fichas regionais.
+  const metrF = T.formulariosComMetricas(
+    [{ codigo: "F-089", nome: "F-089 · Assistência Médica", pdfFile: "DECLARACAO PLANO DE SAUDE.pdf", pdfFiles: ["DECLARACAO PLANO DE SAUDE.pdf", "FICHA BH.pdf", "FICHA SA_FO.pdf"] }],
+    {}, {},
+    T.FICHA_UTILIZAR_PARA_ARQUIVO,
+    [{ cidade: "A", ficha: "FICHA BH" }, { cidade: "B", ficha: "FICHA SJC" }, { cidade: "C", ficha: "FICHA SAFO" }],
+    {}, {}, {}
+  )[0];
+  assert("métricas contam cidades de todos os templates do formulário", metrF.nCidades === 2, JSON.stringify(metrF)); // FICHA BH + FICHA SAFO; a FICHA SJC não é deste formulário
+
+  // 14.6f — CONFIGURAÇÕES (§22) precisam ter EFEITO nos fluxos (nenhum controle
+  // fantasma: chave que só grava valor é bug de produto).
+  st.overlay.configuracoes = {};
+  for (const k of ["geral.nome_sistema", "geral.manutencao", "formularios.validar_uf", "formularios.exigir_template", "pdfs.limite_mb", "pdfs.manter_versoes", "seguranca.confirmar_destrutivas"]) {
+    assert(`configuração ${k} tem default legível`, T.configGet(k) !== undefined && T.configGet(k) !== null, "undefined");
+  }
+  assert("configLigada é true com overlay vazio (default ligada)", T.configLigada("formularios.exigir_template") === true, "false");
+  st.overlay.configuracoes = { formularios: { exigir_template: false } };
+  assert("configLigada respeita o valor desligado no overlay", T.configLigada("formularios.exigir_template") === false, "true");
+
+  // exigir_template=false rebaixa "cidade sem template" de crítico para aviso
+  const cidadesReaisGuard = st.cityArr;
+  st.cityArr = [{ idx: 0, cidade: "Cidade Sem Ficha", uf: "SP", regional: "SP", ficha: "FICHA INEXISTENTE", fonte: "teste" }];
+  st.overlay.configuracoes = {};
+  const gateLigado = T.coletarProblemas();
+  assert("exigir_template LIGADO: ficha não mapeada bloqueia a publicação",
+    gateLigado.criticos.some(t => t.indexOf("Cidade sem template mapeado") === 0), JSON.stringify(gateLigado.criticos));
+  st.overlay.configuracoes = { formularios: { exigir_template: false } };
+  const gateDesligado = T.coletarProblemas();
+  assert("exigir_template DESLIGADO: vira aviso (não bloqueia)",
+    !gateDesligado.criticos.some(t => t.indexOf("Cidade sem template mapeado") === 0) &&
+    gateDesligado.avisos.some(t => t.indexOf("Cidade sem template mapeado") === 0), JSON.stringify(gateDesligado.avisos));
+  st.cityArr = cidadesReaisGuard;
+  st.overlay.configuracoes = {};
+
+  // validar_uf=false aceita importação sem UF válida
+  const cityMapGuard = st.cityMap;
+  st.cityMap = {};
+  const semUfImp = [{ cidade: "Cidade Sem Uf", uf: "ZZ", regional: "", ficha: "FICHA BH" }];
+  assert("validar_uf LIGADO: UF inválida reprova a importação",
+    T.classificarCidadesImportadas(semUfImp, { validarUf: true }).invalidos.length === 1, "aceitou");
+  assert("validar_uf DESLIGADO: UF inválida passa na importação",
+    T.classificarCidadesImportadas(semUfImp, { validarUf: false }).validos.length === 1, "reprovou");
+  st.cityMap = cityMapGuard; // restaura para os testes de diff/importação abaixo
+
+  // estruturais: fluxos destrutivos consultam a configuração de confirmação e os
+  // controles fantasma de §22 têm consumidor no código
+  assert("fluxos destrutivos usam confirmarDestrutivo (desligável em Segurança)",
+    panelCode.includes('confirmarDestrutivo("Descartar pendências"') &&
+    panelCode.includes('confirmarDestrutivo("Excluir campo"') &&
+    panelCode.includes('confirmarDestrutivo("Remover cidade (overlay)"') &&
+    panelCode.includes('confirmarDestrutivo("Restaurar versão anterior"'), "missing");
+  assert("configurações de manutenção e versões são lidas pelos fluxos",
+    panelCode.includes('configLigada("geral.manutencao")') &&
+    panelCode.includes('configLigada("pdfs.manter_versoes")') &&
+    panelCode.includes('configGet("geral.nome_sistema")') &&
+    panelCode.includes('configGet("pdfs.limite_mb")'), "missing consumer");
+  assert("aviso de manutenção existe no Dashboard (config geral.manutencao)",
+    adminR2.body.includes('id="admAvisoManutencao"'), "missing");
 
   // 14.7 — pdfs_meta aplicado sobre o array-base (Tarefa 3)
   st.overlay.pdfs_meta = { "FICHA BH.pdf": { tipo: "Regional (custom)" } };
@@ -960,6 +1074,30 @@ async function testarPainelV3FieldBuilder(assert) {
   const jsonOk2 = { campos: { s: { campos: { a: { label: "A", tipo: "texto", coordenadas: { x: 10, y: 10, largura: 10, altura: 10 }, pagina: 1 } } } } };
   const vDocOk = FB.validarDocCampos(jsonOk2, null);
   assert("fb: schema válido → sem erros", vDocOk.erros.length === 0, JSON.stringify(vDocOk.erros));
+
+  // 16.9b — grupo SEM coordenadas é campo válido como alvo de `dependencia`.
+  // Regressão: o conjunto de ids vinha de flattenFields(), que só devolve nós
+  // com `coordenadas` — então todo grupo_radio era acusado de "campo
+  // inexistente" e a publicação da F-075 ficava bloqueada por 6 erros críticos
+  // falsos (primeiro_emprego, possui_deficiencia e tipo_conta existem).
+  const jsonGrupo = { campos: { s: { campos: {
+    g: { label: "Grupo", tipo: "grupo_radio", pagina: 1, opcoes: {
+      sim: { label: "Sim", coordenadas: { x: 10, y: 10, largura: 5, altura: 5 } },
+      nao: { label: "Não", coordenadas: { x: 20, y: 10, largura: 5, altura: 5 } }
+    } },
+    f: { label: "Dependente do grupo", tipo: "texto", pagina: 1, coordenadas: { x: 30, y: 30, largura: 40, altura: 10 }, dependencia: { campo: "g", valor: "sim" } }
+  } } } };
+  const vGrupo = FB.validarDocCampos(jsonGrupo, null);
+  assert("fb: dependencia para grupo SEM coordenadas não é erro", vGrupo.erros.length === 0, JSON.stringify(vGrupo.erros));
+  const idsG = FB.idsCamposSchema(jsonGrupo.campos, {}, "");
+  assert("fb: ids do schema incluem grupo e opções", !!idsG.g && !!idsG.sim && !!idsG.nao && !!idsG.f, JSON.stringify(idsG));
+
+  // 16.9c — os schemas REAIS do repositório passam no gate de publicação.
+  for (const arqSchema of ["ficha_cadastral_campos.json", "declaracao_plano_saude_campos.json", "assistencia_medica_campos.json"]) {
+    const schemaReal = JSON.parse(readFile(join(ROOT, arqSchema), "utf8"));
+    const vReal = FB.validarDocCampos(schemaReal, null);
+    assert(`fb: ${arqSchema} sem erros críticos (gate de publicação §24)`, vReal.erros.length === 0, JSON.stringify(vReal.erros.slice(0, 4)));
+  }
 
   // 16.10 — fbDocEfetivo: base + overlay sem mutar o docBase
   stFB.overlay.campos_custom = { ficha_cadastral: { telefone_comercial: criado } };

@@ -86,18 +86,28 @@
     { arquivo: "FICHA SA_FO.pdf", tipo: "Regional", formulario: "F-089 (Outros Planos)", path: "FICHA SA_FO.pdf" },
     { arquivo: "FICHA SJC.pdf", tipo: "Regional", formulario: "F-089 (Outros Planos)", path: "FICHA SJC.pdf" }
   ];
+  /**
+   * URL de um arquivo do repositório a partir do painel: a página vive em
+   * `/admin/` e os templates ficam na raiz, então todo acesso precisa do
+   * prefixo `../`. O inventário guarda apenas o NOME do arquivo (é o nome que a
+   * API de upload e as versões usam) — a URL é montada na hora de acessar.
+   * Usar o nome cru em `fetch(HEAD)` batia em `/admin/arquivo.pdf` e fazia a
+   * verificação de integridade acusar "PDF inacessível" para TODOS os templates.
+   */
+  function urlRepositorio(arquivo) { return "../" + arquivo; }
+
   const DOCS = {
     ficha_cadastral: {
       label: "Ficha Cadastral (F-075)",
       jsonPath: "../ficha_cadastral_campos.json",
-      pdfPath: "../" + encodeURI(FICHA_PDF),
+      pdfPath: encodeURI(urlRepositorio(FICHA_PDF)),
       pdfFile: FICHA_PDF,
       overlayKey: "campos_ficha"
     },
     declaracao_plano_saude: {
       label: "Declaração Plano de Saúde (F-089)",
       jsonPath: "../declaracao_plano_saude_campos.json",
-      pdfPath: "../" + encodeURI(DECLARACAO_PDF),
+      pdfPath: encodeURI(urlRepositorio(DECLARACAO_PDF)),
       pdfFile: DECLARACAO_PDF,
       overlayKey: "campos_declaracao"
     }
@@ -105,8 +115,10 @@
   /** Mapa código → arquivo físico do template (§9 aba Template e métricas). */
   const FORM_PDF_ARQUIVO = { "F-075": FICHA_PDF, "F-089": DECLARACAO_PDF };
   const FORMULARIOS = [
-    { nome: "F-075 · Ficha Cadastral", rota: "/f075", arquivo: "ficha_cadastral.html", template: FICHA_PDF, status: "Ativo", schema: "ficha_cadastral_campos.json" },
-    { nome: "F-089 · Assistência Médica", rota: "/f089", arquivo: "assistencia_medica.html", template: "DECLARACAO (Plano de Benefícios) ou FICHA regional por cidade", status: "Ativo", schema: "assistencia_medica_campos.json + declaracao_plano_saude_campos.json" },
+    // `docKey` liga o formulário ao schema de campos (contagem de campos) e
+    // `pdfFiles` ao(s) template(s) que o alimentam (contagem de cidades).
+    { nome: "F-075 · Ficha Cadastral", rota: "/f075", arquivo: "ficha_cadastral.html", template: FICHA_PDF, status: "Ativo", schema: "ficha_cadastral_campos.json", docKey: "ficha_cadastral", pdfFile: FICHA_PDF },
+    { nome: "F-089 · Assistência Médica", rota: "/f089", arquivo: "assistencia_medica.html", template: "DECLARACAO (Plano de Benefícios) ou FICHA regional por cidade", status: "Ativo", schema: "assistencia_medica_campos.json + declaracao_plano_saude_campos.json", docKey: "declaracao_plano_saude", pdfFile: DECLARACAO_PDF, pdfFiles: [DECLARACAO_PDF].concat(PDFS.filter(function (p) { return p.tipo === "Regional"; }).map(function (p) { return p.arquivo; })) },
     { nome: "Carta Conta Salário Bradesco", rota: "/bradesco", arquivo: "carta_bradesco.html", template: "Gerado do zero (sem template)", status: "Ativo", schema: "—" },
     { nome: "Termos de Aceite", rota: "/termos", arquivo: "termos_aceite.html", template: "ARQUIVO MODELO.pdf / TERMO DE SIGILO_SP.pdf", status: "Indisponível (na home)", schema: "—" }
   ];
@@ -333,6 +345,45 @@
     return { ok: bloqueios.length === 0, bloqueios: bloqueios, avisos: avisos };
   }
 
+  /**
+   * Um nó do schema é um CAMPO quando declara `tipo`, `coordenadas` ou
+   * `opcoes`. Grupos (`grupo_radio`/`grupo_checkbox`) NÃO têm coordenadas
+   * próprias — elas ficam nas opções — mas continuam sendo campos do schema:
+   * podem ser alvo de `dependencia` e id válido no Field Builder.
+   */
+  function esCampoSchema(node) {
+    return !!node && typeof node === "object" && !Array.isArray(node) &&
+      (!!node.coordenadas || !!node.tipo || !!node.opcoes);
+  }
+
+  /**
+   * Índice de TODOS os ids de campo do schema (rótulo curto → true), incluindo
+   * grupos sem coordenadas. NÃO use flattenFields() como fonte de ids: ele só
+   * devolve nós com `coordenadas`, e por isso acusava falsamente
+   * "dependencia aponta para campo inexistente" para todo grupo de rádio
+   * (ex.: `primeiro_emprego`, `possivel_deficiencia`, `tipo_conta`).
+   */
+  function idsCamposSchema(node, out, path) {
+    const acc = out || {};
+    if (!node || typeof node !== "object") return acc;
+    const p = path || "";
+    if (Array.isArray(node)) {
+      node.forEach(function (n, i) { idsCamposSchema(n, acc, p + "[" + i + "]"); });
+      return acc;
+    }
+    if (esCampoSchema(node)) {
+      const segs = p.split(".");
+      acc[segs[segs.length - 1]] = true;
+      // opção de grupo declarada em lista: o id útil é o próprio valor
+      if (node.valor != null) acc[String(node.valor)] = true;
+    }
+    for (const k of Object.keys(node)) {
+      const v = node[k];
+      if (v && typeof v === "object") idsCamposSchema(v, acc, p ? p + "." + k : k);
+    }
+    return acc;
+  }
+
   /** Validação estrutural de um documento de campos (integra overlay custom).
    *  Retorna { erros[], avisos[] } — usado no gate de publicação (§24). */
   function validarDocCampos(json, pageSizes) {
@@ -340,11 +391,7 @@
     if (!json || !json.campos) return { erros: erros, avisos: avisos };
     const flat = [];
     flattenFields(json.campos, "", flat);
-    const idsCurto = {};
-    for (const f of flat) {
-      const segs = f.key.split(".");
-      idsCurto[segs[segs.length - 1]] = true;
-    }
+    const idsCurto = idsCamposSchema(json.campos, {}, "");
     for (const f of flat) {
       if (!String(f.label || "").trim()) erros.push("Campo sem rótulo: " + f.key);
       const c = f.coords || {};
@@ -564,19 +611,32 @@
       state.docData[key] = { json: json, flat: docDataFlat(key, json), page: 1, sel: null, dirty: false };
     }
 
-    // Cidades
+    // Cidades — base: cidades_brasil.json (tem REGIONAL/CIDADE/FICHA, NÃO tem UF)
+    // com fallback para cidades_infinity.json se a primeira não existir.
+    let cidadesBase = null;
     try {
-      const brasil = await fetchJSON("../cidades_brasil.json");
+      cidadesBase = await fetchJSON("../cidades_brasil.json");
       state.citySource = "cidades_brasil.json";
-      state.cityArr = (Array.isArray(brasil) ? brasil : []).map(function (r, i) {
-        return { idx: i, cidade: String(r.CIDADE || ""), uf: String(r.UF || ""), regional: String(r.REGIONAL || ""), ficha: normalizarFicha(r["FICHA A UTILIZAR"]), fonte: "cidades_brasil.json" };
-      });
     } catch (e) {
-      const inf = await fetchJSON("../cidades_infinity.json");
+      cidadesBase = await fetchJSON("../cidades_infinity.json");
       state.citySource = "cidades_infinity.json";
-      state.cityArr = (Array.isArray(inf) ? inf : []).map(function (r, i) {
-        return { idx: i, cidade: String(r.CIDADE || ""), uf: String(r.UF || ""), regional: String(r.REGIONAL || ""), ficha: normalizarFicha(r["FICHA A UTILIZAR"]), fonte: "cidades_infinity.json" };
-      });
+    }
+    state.cityArr = (Array.isArray(cidadesBase) ? cidadesBase : []).map(function (r, i) {
+      return { idx: i, cidade: String(r.CIDADE || ""), uf: String(r.UF || ""), regional: String(r.REGIONAL || ""), ficha: normalizarFicha(r["FICHA A UTILIZAR"]), fonte: state.citySource };
+    });
+    // Enriquecimento de UF: cidades_infinity.json lista as MESMAS cidades, mas com
+    // a coluna UF. Sem isso o painel exibia UF vazia nas 272 cidades e as
+    // validações de UF (cadastro/importação/“UF suspeita”) ficavam sem dado real.
+    if (state.citySource === "cidades_brasil.json") {
+      try {
+        const inf = await fetchJSON("../cidades_infinity.json");
+        const ufPorCidade = {};
+        for (const r of (Array.isArray(inf) ? inf : [])) {
+          const k = normalizarChaveCidade(r.CIDADE);
+          if (k && r.UF) ufPorCidade[k] = String(r.UF);
+        }
+        for (const r of state.cityArr) if (!r.uf) r.uf = ufPorCidade[normalizarChaveCidade(r.cidade)] || "";
+      } catch (e) { /* UF é enriquecimento opcional: sem o arquivo, segue sem UF */ }
     }
     applyCidadesOverlay();
     rebuildCityMap();
@@ -644,22 +704,35 @@
     };
   }
 
+  /**
+   * Chave de marcação de publicação. É NAMESPACED por grupo (`grupo|chave`)
+   * porque o mesmo texto pode existir em grupos diferentes (ex.: uma cidade e
+   * um campo homônimos) — com chave crua, publicar um item marcava o outro como
+   * publicado e a alteração real continuava “pendente” para sempre.
+   * A leitura aceita a chave legada (sem prefixo) para overlays já exportados.
+   */
+  function chavePublicacao(overlayKey, chave) { return overlayKey + "|" + chave; }
+  function estaPublicado(pub, overlayKey, chave) {
+    return !!pub[chavePublicacao(overlayKey, chave)] || !!pub[chave];
+  }
+
   /** §23 — alterações pendentes: itens do overlay ainda não marcados como publicados. */
   function calcularPendentes(overlay, marcados) {
     const pend = [];
     const pub = marcados || {};
-    for (const key of Object.keys((overlay || {}).campos_ficha || {})) if (!pub[key]) pend.push({ overlayKey: "campos_ficha", chave: key, label: key, detalhe: resumoValor(overlay.campos_ficha[key]) });
-    for (const key of Object.keys((overlay || {}).campos_declaracao || {})) if (!pub[key]) pend.push({ overlayKey: "campos_declaracao", chave: key, label: key, detalhe: resumoValor(overlay.campos_declaracao[key]) });
-    for (const key of Object.keys((overlay || {}).cidades || {})) if (!pub[key]) pend.push({ overlayKey: "cidades", chave: key, label: key, detalhe: resumoValor(overlay.cidades[key]) });
-    for (const n of (overlay || {}).cidades_novas || []) {
-      const k = "n" + n.id;
-      if (!pub[k]) pend.push({ overlayKey: "cidades_novas", chave: k, label: n.cidade, detalhe: (n.cidade || "") + " (" + (n.uf || "—") + ") → " + (n.ficha || "—") });
-    }
-    for (const key of Object.keys((overlay || {}).pdfs_meta || {})) if (!pub[key]) pend.push({ overlayKey: "pdfs_meta", chave: key, label: key, detalhe: resumoValor(overlay.pdfs_meta[key]) });
-    for (const key of Object.keys((overlay || {}).forms_meta || {})) if (!pub[key]) pend.push({ overlayKey: "forms_meta", chave: key, label: key, detalhe: resumoValor(overlay.forms_meta[key]) });
-    for (const key of Object.keys((overlay || {}).templates_versoes || {})) if (!pub[key]) pend.push({ overlayKey: "templates_versoes", chave: key, label: key, detalhe: resumoValor(overlay.templates_versoes[key]) });
-    for (const key of Object.keys((overlay || {}).configuracoes || {})) if (!pub[key]) pend.push({ overlayKey: "configuracoes", chave: key, label: key, detalhe: resumoValor(overlay.configuracoes[key]) });
-    for (const key of Object.keys((overlay || {}).campos_custom || {})) if (!pub[key]) pend.push({ overlayKey: "campos_custom", chave: key, label: "Campos — " + key, detalhe: resumoValorCamposCustom(overlay.campos_custom[key]) });
+    const o = overlay || {};
+    const add = function (overlayKey, chave, label, detalhe) {
+      if (!estaPublicado(pub, overlayKey, chave)) pend.push({ overlayKey: overlayKey, chave: chave, label: label, detalhe: detalhe });
+    };
+    for (const key of Object.keys(o.campos_ficha || {})) add("campos_ficha", key, key, resumoValor(o.campos_ficha[key]));
+    for (const key of Object.keys(o.campos_declaracao || {})) add("campos_declaracao", key, key, resumoValor(o.campos_declaracao[key]));
+    for (const key of Object.keys(o.cidades || {})) add("cidades", key, key, resumoValor(o.cidades[key]));
+    for (const n of (o.cidades_novas || [])) add("cidades_novas", "n" + n.id, n.cidade, (n.cidade || "") + " (" + (n.uf || "—") + ") → " + (n.ficha || "—"));
+    for (const key of Object.keys(o.pdfs_meta || {})) add("pdfs_meta", key, key, resumoValor(o.pdfs_meta[key]));
+    for (const key of Object.keys(o.forms_meta || {})) add("forms_meta", key, key, resumoValor(o.forms_meta[key]));
+    for (const key of Object.keys(o.templates_versoes || {})) add("templates_versoes", key, key, resumoValor(o.templates_versoes[key]));
+    for (const key of Object.keys(o.configuracoes || {})) add("configuracoes", key, key, resumoValor(o.configuracoes[key]));
+    for (const key of Object.keys(o.campos_custom || {})) add("campos_custom", key, "Campos — " + key, resumoValorCamposCustom(o.campos_custom[key]));
     return pend;
   }
 
@@ -682,7 +755,7 @@
     const pend = calcularPendentes(overlay, marcados);
     const pub = Object.assign({}, marcados || {});
     const agora = new Date().toISOString();
-    for (const p of pend) pub[p.chave] = { publicadoEm: agora, por: usuario || "" };
+    for (const p of pend) pub[chavePublicacao(p.overlayKey, p.chave)] = { publicadoEm: agora, por: usuario || "" };
     return { marcados: pub, publicados: pend.length };
   }
 
@@ -743,7 +816,12 @@
       const meta = (formsMeta || {})[f.codigo] || {};
       const st = templateStatusParaForm(f.codigo, Object.assign({ template: f.pdfFile || "" }, meta), versoes);
       const nCampos = docKey && docFlatLens[docKey] != null ? docFlatLens[docKey] : null;
-      const nCidades = f.pdfFile ? (porFicha[f.pdfFile] || 0) : null;
+      // v3: `pdfFiles` lista todos os templates do formulário (F-089 usa a declaração
+      // no Plano de Benefícios e as fichas regionais em Outros Planos). Sem isso a
+      // coluna “Cidades” ficava vazia para o formulário que MAIS depende de cidade.
+      const nCidades = f.pdfFiles
+        ? cityArr.filter(function (r) { return f.pdfFiles.indexOf(fichaParaArquivo[r.ficha]) !== -1; }).length
+        : (f.pdfFile ? (porFicha[f.pdfFile] || 0) : null);
       const nCamposCustom = docKey && cc[docKey] ? Object.keys(cc[docKey]).length : 0;
       return Object.assign({}, f, { nCampos: nCampos, nCidades: nCidades, nCamposCustom: nCamposCustom, templateStatus: st, meta: meta });
     });
@@ -849,9 +927,15 @@
         if (coordenadaForaDaPagina(c, size)) avisos.push("Fora da página: " + DOCS[key].label + " → " + f.label);
       }
     }
-    // Cidades → ficha mapeada; UF válida
+    // Cidades → ficha mapeada; UF válida.
+    // `formularios.exigir_template` decide se ficha sem template BLOQUEIA a
+    // publicação (padrão) ou apenas avisa — a chave antes só era gravada.
+    const exigirTemplate = configLigada("formularios.exigir_template");
     for (const r of state.cityArr) {
-      if (!FICHA_UTILIZAR_PARA_ARQUIVO[r.ficha]) criticos.push("Cidade sem template mapeado: " + r.cidade + " (" + (r.uf || "—") + ") → ficha \"" + r.ficha + "\"");
+      if (!FICHA_UTILIZAR_PARA_ARQUIVO[r.ficha]) {
+        const msg = "Cidade sem template mapeado: " + r.cidade + " (" + (r.uf || "—") + ") → ficha \"" + r.ficha + "\"";
+        if (exigirTemplate) criticos.push(msg); else avisos.push(msg);
+      }
       if (r.uf && !ufValida(r.uf)) avisos.push("UF suspeita: " + r.cidade + " → \"" + r.uf + "\"");
     }
     // §10 — Field Builder: validação estrutural completa do schema EFETIVO
@@ -887,21 +971,38 @@
   // ══════════════════════════════════════════════════════
   // v3 — CONFIGURAÇÕES (§22): categorias, salvas em overlay.configuracoes
   // ══════════════════════════════════════════════════════
+  // Cada chave declara `efeito` (onde é lida no painel): configuração sem
+  // consumidor é controle fantasma e não deve existir na UI.
   const CONFIG_DEFS = [
-    { key: "geral.nome_sistema", label: "Nome do sistema", categoria: "Geral", tipo: "texto", default: "Formulários de Admissão" },
-    { key: "geral.manutencao", label: "Modo manutenção (aviso no painel)", categoria: "Geral", tipo: "bool", default: false },
-    { key: "formularios.validar_uf", label: "Validar UF em cadastros e importações", categoria: "Formulários", tipo: "bool", default: true },
-    { key: "formularios.exigir_template", label: "Exigir template válido para publicar", categoria: "Formulários", tipo: "bool", default: true },
-    { key: "pdfs.limite_mb", label: "Limite de upload de PDF (MB)", categoria: "PDFs", tipo: "int", min: 1, max: 50, default: 20 },
-    { key: "pdfs.manter_versoes", label: "Manter histórico de versões dos templates", categoria: "PDFs", tipo: "bool", default: true },
-    { key: "cidades.validar_uf", label: "Validar UF (27 estados) em cidades", categoria: "Cidades", tipo: "bool", default: true },
-    { key: "seguranca.confirmar_destrutivas", label: "Exigir confirmação em operações destrutivas", categoria: "Segurança", tipo: "bool", default: true }
+    { key: "geral.nome_sistema", label: "Nome do sistema", categoria: "Geral", tipo: "texto", default: "Formulários de Admissão", efeito: "Título da aba e seção Sistema" },
+    { key: "geral.manutencao", label: "Modo manutenção (aviso no painel)", categoria: "Geral", tipo: "bool", default: false, efeito: "Aviso no topo do Dashboard" },
+    { key: "formularios.validar_uf", label: "Validar UF em cadastros e importações", categoria: "Formulários", tipo: "bool", default: true, efeito: "Cadastro/edição de cidade e importação CSV/JSON" },
+    { key: "formularios.exigir_template", label: "Bloquear publicação com cidade sem template", categoria: "Formulários", tipo: "bool", default: true, efeito: "Gate de publicação (crítico × aviso)" },
+    { key: "pdfs.limite_mb", label: "Limite de upload de PDF (MB)", categoria: "PDFs", tipo: "int", min: 1, max: 50, default: 20, efeito: "Validação do upload de template" },
+    { key: "pdfs.manter_versoes", label: "Manter histórico de versões dos templates", categoria: "PDFs", tipo: "bool", default: true, efeito: "Substituição de template (trilha de versões/rollback)" },
+    { key: "seguranca.confirmar_destrutivas", label: "Exigir confirmação em operações destrutivas", categoria: "Segurança", tipo: "bool", default: true, efeito: "Descartar pendências, excluir campo, remover cidade, rollback de template" }
   ];
+  /**
+   * Chaves consolidadas: `cidades.validar_uf` era uma SEGUNDA chave com o mesmo
+   * significado de `formularios.validar_uf` e nenhum consumidor — duas chaves
+   * para a mesma decisão é o que faz a configuração “não funcionar”. Agora só a
+   * canônica aparece na UI; a antiga continua sendo lida para overlays salvos.
+   */
+  const CONFIG_ALIASES = { "formularios.validar_uf": ["cidades.validar_uf"] };
   /** Leitura com default (§22); int é limitada ao range definido em CONFIG_DEFS. */
   function configGet(key) {
     const def = CONFIG_DEFS.find(function (d) { return d.key === key; });
     const cfg = state.overlay.configuracoes || {};
-    const raw = key.split(".").reduce(function (acc, k) { return acc && acc[k]; }, cfg);
+    const lerPath = function (k) { return k.split(".").reduce(function (acc, s) { return acc && acc[s]; }, cfg); };
+    const raw = (function () {
+      const direto = lerPath(key);
+      if (direto !== undefined) return direto;
+      for (const alias of (CONFIG_ALIASES[key] || [])) {
+        const v = lerPath(alias);
+        if (v !== undefined) return v; // overlay antigo salvou a chave legada
+      }
+      return undefined;
+    })();
     if (raw == null) return def ? def.default : null;
     if (def && def.tipo === "bool") return raw !== false;
     if (def && def.tipo === "int") {
@@ -924,6 +1025,24 @@
     node[parts[parts.length - 1]] = value;
     return out;
   }
+  /**
+   * Uso EFETIVO das configurações (§22). Toda chave de CONFIG_DEFS precisa ser
+   * lida em algum fluxo — configuração que só grava valor vira controle fantasma
+   * na UI (o administrador “salva” e nada muda). `configLigada` centraliza o
+   * default `true` (chave ausente no overlay = ligada).
+   */
+  function configLigada(key) { return configGet(key) !== false; }
+
+  /**
+   * Confirmação de operação destrutiva — desligável em Segurança
+   * (`seguranca.confirmar_destrutivas`). Desligada, a operação segue direto
+   * (o evento continua sendo registrado no Histórico com o valor anterior).
+   */
+  async function confirmarDestrutivo(titulo, html, okLabel) {
+    if (!configLigada("seguranca.confirmar_destrutivas")) return true;
+    return confirmModal(titulo, html, okLabel);
+  }
+
   /** Serialização de valor de configuração para o overlay (bool/int/texto). */
   function configValorParaOverlay(def, raw) {
     if (def.tipo === "bool") return raw === true || raw === "true";
@@ -941,7 +1060,8 @@
       for (const d of CONFIG_DEFS.filter(function (x) { return x.categoria === cat; })) {
         const val = configGet(d.key);
         html += '<div class="diff-line" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">' +
-          '<label for="cfg_' + esc(d.key) + '" style="flex:1;min-width:240px;font-size:12.5px">' + esc(d.label) + '</label>';
+          '<label for="cfg_' + esc(d.key) + '" style="flex:1;min-width:240px;font-size:12.5px">' + esc(d.label) +
+          (d.efeito ? '<br><span style="font-size:11.5px;color:var(--text-light)">Onde vale: ' + esc(d.efeito) + '</span>' : "") + '</label>';
         if (d.tipo === "bool") {
           const selTrue = val ? ' selected' : '';
           const selFalse = !val ? ' selected' : '';
@@ -1148,6 +1268,17 @@
   }
 
   function renderDashboard() {
+    // §22 — configurações com efeito real: nome do sistema (título da aba) e
+    // modo manutenção (aviso no topo do Dashboard). Antes só gravavam valor.
+    const nomeSistema = configGet("geral.nome_sistema");
+    try { document.title = nomeSistema + " — Painel Administrativo"; } catch (e) { /* ambiente sem title */ }
+    const avisoManut = $("admAvisoManutencao");
+    if (avisoManut) {
+      avisoManut.innerHTML = configLigada("geral.manutencao")
+        ? '<div class="export-note">⚠ <div><strong>Modo manutenção ativo.</strong> Definido em <em>Configurações → Geral</em>. O painel segue operando normalmente; desligue a chave quando o ambiente voltar à operação.</div></div>'
+        : "";
+    }
+
     const ficha = state.docData.ficha_cadastral;
     const decl = state.docData.declaracao_plano_saude;
     const nCoordFicha = countCoords(ficha.json);
@@ -1244,7 +1375,7 @@
     const overlay = exportarOverlayPuro();
     const pend = calcularPendentes(overlay, state.pendentesMarcados);
     if (!pend.length) return;
-    const ok = await confirmModal("Descartar pendências",
+    const ok = await confirmarDestrutivo("Descartar pendências",
       "<p>Você está prestes a <strong>descartar " + pend.length + " alteração(ões)</strong> do overlay administrativo (campos, cidades, metadados e versões).</p>" +
       "<p>Cidades novas cuja associação não exista na base serão preservadas para não deixar mapeamento sem template.</p>",
       "Descartar");
@@ -1280,7 +1411,7 @@
     // 1) Templates PDF acessíveis
     for (const p of pdfsEfetivos()) {
       if (rapido) { okN++; continue; }
-      if (await head(p.path)) okN++;
+      if (await head(urlRepositorio(p.arquivo))) okN++;
       else { errN++; itens.push({ nivel: "err", texto: "PDF inacessível: " + p.arquivo, go: function () { irParaPdfs(p.arquivo); } }); }
     }
 
@@ -1317,7 +1448,7 @@
     // 4) Formulários acessíveis
     for (const f of FORMULARIOS) {
       if (rapido) { okN++; continue; }
-      if (await head(f.arquivo)) okN++;
+      if (await head(urlRepositorio(f.arquivo))) okN++;
       else { errN++; itens.push({ nivel: "err", texto: "Arquivo do formulário inacessível: " + f.arquivo, go: function () { showSection("formularios"); } }); }
     }
 
@@ -1428,13 +1559,14 @@
       tbody.appendChild(tr);
     }
     tbody.querySelectorAll("button[data-visualizar]").forEach(function (b) {
-      b.addEventListener("click", function () { window.open("../" + encodeURI(b.getAttribute("data-visualizar")), "_blank"); });
+      b.addEventListener("click", function () { window.open(encodeURI(urlRepositorio(b.getAttribute("data-visualizar"))), "_blank"); });
     });
     tbody.querySelectorAll("button[data-editar-meta]").forEach(function (b) {
       b.addEventListener("click", function () { editarPdfMeta(b.getAttribute("data-editar-meta")); });
     });
     const sel = $("substTemplate");
-    sel.innerHTML = pdfsEfetivos().map(function (p) { return '<option value="' + esc(p.path) + '">' + esc(p.arquivo) + "</option>"; }).join("");
+    // value = NOME do arquivo (é o que a substituição/upload usam como destino)
+    sel.innerHTML = pdfsEfetivos().map(function (p) { return '<option value="' + esc(p.arquivo) + '">' + esc(p.arquivo) + "</option>"; }).join("");
   }
 
   async function editarPdfMeta(arquivo) {
@@ -1480,7 +1612,7 @@
     const anterior = ent.anterior;
     if (!anterior) { toast("Não há versão anterior disponível para restaurar.", false); return; }
     const novaVersao = proximaVersaoTemplate(ent);
-    const ok = await confirmModal("Restaurar versão anterior",
+    const ok = await confirmarDestrutivo("Restaurar versão anterior",
       "<p>Template: <strong>" + esc(arquivo) + "</strong></p>" +
       "<p>Versão atual: <strong>v" + esc(ent.atual.versao) + "</strong> → será preservada no histórico.</p>" +
       "<p>Será criada a <strong>v" + novaVersao + " = restauração de v" + esc(anterior.versao) + "</strong> (a trilha de auditoria é mantida).</p>" +
@@ -1591,13 +1723,18 @@
       }
 
       const nomeDestino = destinoAtual || (global.AdminPersistence.sanitizarNomeArquivo(file.name).replace(/\.pdf$/i, "") + ".pdf");
+      // `pdfs.manter_versoes` decide se a trilha de versões é acumulada.
+      const avisoVersao = destinoAtual
+        ? (configLigada("pdfs.manter_versoes")
+          ? "<p>Versão atual será preservada no histórico (rollback disponível). Motivo: <strong>" + esc(motivo) + "</strong></p>"
+          : "<p><strong>Histórico de versões desativado nas Configurações</strong> — será guardada apenas a versão anterior. Motivo: <strong>" + esc(motivo) + "</strong></p>")
+        : "<p>O arquivo será gravado no servidor como <strong>" + esc(nomeDestino) + "</strong>.</p>";
       const resumo =
         "<p>Template: <strong>" + esc(nomeDestino) + "</strong></p>" +
         "<p>Validação: <strong>✓ PDF válido</strong> — " + val.info.paginas + " página(s), " + Math.round(val.info.bytes / 1024) + " KB" +
         (val.avisos.length ? "</p><p>⚠ " + esc(val.avisos.join(" · ")) : "") + "</p>" +
         (comparacoes.length ? "<div class='notice warn'>" + comparacoes.map(esc).join("<br>") + "<br>Revise as coordenadas no Editor Visual se o layout mudou.</div>" : "") +
-        (destinoAtual ? "<p>Versão atual será preservada no histórico (rollback disponível). Motivo: <strong>" + esc(motivo) + "</strong></p>" :
-          "<p>O arquivo será gravado no servidor como <strong>" + esc(nomeDestino) + "</strong>.</p>");
+        avisoVersao;
       const ok = await confirmModal(destinoAtual ? "Substituir template (nova versão)" : "Adicionar PDF", resumo, destinoAtual ? "Publicar nova versão" : "Enviar");
       if (!ok) return null;
 
@@ -1612,7 +1749,14 @@
           nome: nomeDestino, data: new Date().toISOString(),
           sha256: hash, bytes: val.info.bytes, info: val.info, motivo: motivo
         };
-        versoes[nomeDestino] = { atual: nova, anterior: anterior, historico: anterior ? [anterior].concat((versoes[nomeDestino].historico || [])) : (versoes[nomeDestino] ? versoes[nomeDestino].historico || [] : []) };
+        // `pdfs.manter_versoes` desligado: guarda só atual + anterior
+        // (rollback para a última versão segue disponível; sem trilha acumulada).
+        const manterHistorico = configLigada("pdfs.manter_versoes");
+        const historicoAnterior = versoes[nomeDestino] ? (versoes[nomeDestino].historico || []) : [];
+        versoes[nomeDestino] = {
+          atual: nova, anterior: anterior,
+          historico: (manterHistorico && anterior) ? [anterior].concat(historicoAnterior) : []
+        };
         await persistOverlaySilencioso("substituicao_pdf", nomeDestino,
           { overlayKey: "templates_versoes", itens: [{ chave: nomeDestino, anterior: anterior ? { atual: anterior } : null }] },
           "v" + nova.versao + " publicada (" + val.info.paginas + " pág., sha256 " + String(hash).slice(0, 12) + "…). Motivo: " + motivo +
@@ -2320,7 +2464,7 @@
         const id = b.getAttribute("data-rm-cidade");
         const nova = (state.overlay.cidades_novas || []).find(function (n) { return "n" + n.id === id; });
         if (!nova) return;
-        const ok = await confirmModal("Remover cidade (overlay)",
+        const ok = await confirmarDestrutivo("Remover cidade (overlay)",
           "<p>Será removida apenas a entrada administrativa (overlay) de <strong>" + esc(nova.cidade) + "</strong>. O JSON original do repositório não é alterado pelo painel.</p>", "Remover");
         if (!ok) return;
         const removida = Object.assign({}, nova);
@@ -2453,7 +2597,7 @@
       fields: [
         { key: "cidade", label: "Cidade", type: "text", value: r.cidade, required: true, maxLength: 120 },
         { key: "uf", label: "UF", type: "text", value: r.uf, required: true, maxLength: 2, uppercase: true,
-          validate: function (v) { return (v && v.length === 2) ? null : "UF deve ter exatamente 2 letras (ex.: SP)."; } },
+          validate: function (v) { return (!configLigada("formularios.validar_uf") || (v && v.length === 2)) ? null : "UF deve ter exatamente 2 letras (ex.: SP)."; } },
         { key: "regional", label: "Regional", type: "text", value: r.regional, maxLength: 4, uppercase: true, help: "Se vazio, usa a UF." },
         { key: "ficha", label: "Ficha a utilizar", type: "select", value: r.ficha, options: fichas, required: true }
       ],
@@ -2567,18 +2711,22 @@
   }
 
   /** Classifica registros: válidos / duplicados / inválidos (para o preview). */
-  function classificarCidadesImportadas(registros) {
+  /** `opts.validarUf === false` desliga a exigência de UF (Configurações →
+   *  “Validar UF em cadastros e importações”). */
+  function classificarCidadesImportadas(registros, opts) {
     const validos = [], duplicados = [], invalidos = [];
     const vistasNaImportacao = {};
+    const validarUf = !opts || opts.validarUf !== false;
     for (const r of registros) {
       const k = normalizarChaveCidade(r.cidade);
       if (!k || k.length < 2) { invalidos.push(Object.assign({ motivo: "cidade ausente" }, r)); continue; }
-      if (!r.uf || r.uf.trim().length !== 2 || !ufValida(r.uf)) { invalidos.push(Object.assign({ motivo: "UF ausente ou inválida (use a sigla de um dos 27 estados)" }, r)); continue; }
+      if (validarUf && (!r.uf || r.uf.trim().length !== 2 || !ufValida(r.uf))) { invalidos.push(Object.assign({ motivo: "UF ausente ou inválida (use a sigla de um dos 27 estados)" }, r)); continue; }
       if (r.ficha && !(FICHA_UTILIZAR_PARA_ARQUIVO[normalizarFicha(r.ficha)])) { invalidos.push(Object.assign({ motivo: "ficha informada não existe (use: " + Object.keys(FICHA_UTILIZAR_PARA_ARQUIVO).join(", ") + ")" }, r)); continue; }
       if (vistasNaImportacao[k]) { duplicados.push(Object.assign({ motivo: "duplicado no arquivo" }, r)); continue; }
       vistasNaImportacao[k] = true;
       if (state.cityMap[k]) { duplicados.push(Object.assign({ motivo: "já cadastrada" }, r)); continue; }
-      validos.push({ cidade: r.cidade.trim(), uf: r.uf.trim().toUpperCase(), regional: (r.regional || "").trim().toUpperCase() || r.uf.trim().toUpperCase(), ficha: normalizarFicha(r.ficha) || "FICHA REEMBOLSO" });
+      const ufLimpa = String(r.uf || "").trim().toUpperCase();
+      validos.push({ cidade: r.cidade.trim(), uf: ufLimpa, regional: (r.regional || "").trim().toUpperCase() || ufLimpa, ficha: normalizarFicha(r.ficha) || "FICHA REEMBOLSO" });
     }
     return { validos: validos, duplicados: duplicados, invalidos: invalidos };
   }
@@ -2590,7 +2738,7 @@
       const texto = await file.text();
       const parsed = parseCidadesTexto(texto);
       if (parsed.erro) { preview.innerHTML = '<div class="notice err">' + esc(parsed.erro) + "</div>"; return; }
-      const cls = classificarCidadesImportadas(parsed.registros);
+      const cls = classificarCidadesImportadas(parsed.registros, { validarUf: configLigada("formularios.validar_uf") });
       if (!parsed.registros.length) { preview.innerHTML = '<div class="notice err">Nenhum registro encontrado no arquivo.</div>'; return; }
       const total = parsed.registros.length;
 
@@ -2634,7 +2782,7 @@
     const ficha = $("cidFicha").value;
     const msg = $("cidMsg");
     if (!nome || nome.length < 2) { msg.innerHTML = '<div class="notice err">Informe o nome da cidade (mínimo 2 letras).</div>'; return; }
-    if (!uf || uf.length !== 2) { msg.innerHTML = '<div class="notice err">Informe a UF com exatamente 2 letras (ex.: SP).</div>'; return; }
+    if (configLigada("formularios.validar_uf") && (!uf || uf.length !== 2)) { msg.innerHTML = '<div class="notice err">Informe a UF com exatamente 2 letras (ex.: SP).</div>'; return; }
     const k = normalizarChaveCidade(nome);
     if (state.cityMap[k]) {
       msg.innerHTML = '<div class="notice err">Não foi possível adicionar: já existe uma cidade cadastrada com essa combinação de nome/UF (normalização "' + esc(k) + '"). Edite a entrada existente na tabela.</div>';
@@ -2882,14 +3030,9 @@
   function fbIdsExistentes(docKey) {
     const json = fbDocEfetivo(docKey);
     if (!json || !json.campos) return {};
-    const flat = [];
-    flattenFields(json.campos, "", flat);
-    const ids = {};
-    for (const f of flat) {
-      const segs = f.key.split(".");
-      ids[segs[segs.length - 1]] = true;
-    }
-    return ids;
+    // ids reais do schema (inclui grupos sem coordenadas) — evita que um campo
+    // novo nasça com id já usado por um grupo existente.
+    return idsCamposSchema(json.campos, {}, "");
   }
 
   /** Painel lateral (drawer) do builder — criação e edição de campos. */
@@ -3110,7 +3253,7 @@
     const msg = "<p>Excluir o campo <strong>" + esc(keyCurto) + "</strong> do schema de " + esc(DOCS[docKey].label) + "?</p>" + extra +
       (v.ok ? "<p class='section-desc'>A exclusão fica como pendência do overlay e pode ser desfeita (Histórico) até a publicação.</p>"
             : "<div class='notice err'>" + v.bloqueios.map(esc).join("<br>") + "</div>");
-    const ok = await confirmModal("Excluir campo", msg, v.ok ? "Excluir" : null);
+    const ok = await confirmarDestrutivo("Excluir campo", msg, v.ok ? "Excluir" : null);
     if (!ok || !v.ok) return;
     const lote = fbLote(docKey);
     const anterior = JSON.parse(JSON.stringify(lote));
@@ -3715,7 +3858,7 @@
     $("sisModo").innerHTML = state.modo === "api"
       ? "API administrativa ativa (" + esc(state.origem) + "). Configurações gravadas em <code>data/admin-config.json</code> com backups automáticos em <code>data/backups/</code>."
       : "Produção estática — modo exportação. A aplicação pública lê os JSONs do repositório; para efetivar alterações, exporte o JSON e versione-o. Para gravação direta, disponibilize a API <code>/api/admin/*</code> (implementada em <code>scripts/test-server.mjs</code> e pronta para serverless).";
-    $("sisSobre").innerHTML = "Painel Administrativo — Formulários de Admissão.<br>" +
+    $("sisSobre").innerHTML = "Painel Administrativo — " + esc(configGet("geral.nome_sistema")) + ".<br>" +
       "Leitura de dados: JSONs reais do repositório.<br>" +
       "Templates PDF: " + PDFS.length + " em uso.<br>" +
       "Persistência: overlay administrativo (nunca os JSONs originais; nunca localStorage).<br>" +
@@ -3896,6 +4039,9 @@
       exportarOverlayPuro: exportarOverlayPuro,
       calcularPendentes: calcularPendentes,
       publicarPendentes: publicarPendentes,
+      chavePublicacao: chavePublicacao,
+      estaPublicado: estaPublicado,
+      urlRepositorio: urlRepositorio,
       descartarPendentesPuro: descartarPendentesPuro,
       compararPdfComAnterior: compararPdfComAnterior,
       coordenadaForaDaPagina: coordenadaForaDaPagina,
@@ -3903,6 +4049,8 @@
       formulariosComMetricas: formulariosComMetricas,
       proximaVersaoTemplate: proximaVersaoTemplate,
       configGet: configGet,
+      configLigada: configLigada,
+      configValorParaOverlay: configValorParaOverlay,
       configSetPath: configSetPath,
       construirIndiceBusca: construirIndiceBusca,
       buscarIndice: buscarIndice,
@@ -3923,6 +4071,13 @@
       fbReconstruirDoc: fbReconstruirDoc,
       fbListaCamposCustom: fbListaCamposCustom,
       fbIdsExistentes: fbIdsExistentes,
+      idsCamposSchema: idsCamposSchema,
+      // Auditoria (scripts/audit-panel.mjs): pipeline real em node:vm
+      carregarTudo: carregarTudo,
+      coletarProblemas: coletarProblemas,
+      coletarIntegridade: coletarIntegridade,
+      metricasFormularios: metricasFormularios,
+      CONFIG_DEFS: CONFIG_DEFS,
       fbSecoesExistentes: fbSecoesExistentes
     }
   };
