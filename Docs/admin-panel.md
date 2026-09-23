@@ -260,7 +260,7 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 
 1. Painel → **Cidades** → **+ Nova cidade**;
 2. Preencha cidade, UF, regional e ficha → **Adicionar cidade**;
-3. A duplicidade é bloqueada usando a **mesma normalização da aplicação** (sem acentos, maiúsculas, espaços colapsados) e a correção histórica FICHA REEBOLSO → FICHA REEMBOLSO é preservada;
+3. A duplicidade é bloqueada usando a **mesma normalização da aplicação** (sem acentos, maiúsculas, espaços colapsados); as correções históricas de grafia FICHA REEBOLSO → FICHA REEMBOLSO e FICHA SA_FO → **FICHA SAFO** são preservadas;
 4. Para alterar a ficha de uma cidade existente, use **Alterar ficha** na linha da tabela.
 
 ## Como exportar / importar configuração
@@ -272,7 +272,8 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 
 | Mensagem | Causa | Ação |
 |---|---|---|
-| "Modo exportação" no Dashboard | API administrativa não disponível no ambiente | Use `node scripts/test-server.mjs` (dev) ou exporte/versione o JSON |
+| "Modo exportação" no Dashboard | API administrativa não disponível no ambiente (é **aviso de operação**, não erro) | Use `node scripts/test-server.mjs` para gravar de verdade em dev; em produção estática, siga "Como salvar de fato" abaixo |
+| "N cidade(s) com ficha não mapeada para PDF" | A ficha da cidade não existe em `FICHA_UTILIZAR_PARA_ARQUIVO` (painel) | Confira a grafia: a chave é **`FICHA SAFO`** (arquivo físico `FICHA SA_FO.pdf`). Clique no aviso para abrir **Cidades** já filtrada e use **Alterar ficha** / **trocar ficha em massa** |
 | "Upload de PDF exige o modo API" | Produção estática sem backend | Versione o PDF no repositório |
 | "Cidade já cadastrada" | Normalização colidiu com entrada existente | Edite a ficha da entrada existente |
 | "Falha ao carregar template" | PDF ausente/inacessível | Rode **Verificar integridade** (Segurança) |
@@ -284,7 +285,19 @@ Sistema de coordenadas preservado: origem no canto **inferior esquerdo**, Y cres
 - Modelo de **overlay administrativo** sobre os JSONs:
   - **Modo API** (desenvolvimento / com backend): grava em `data/admin-config.json` com **backup automático** a cada salvamento (`data/backups/`), uploads em `data/uploads/`, auditoria em `data/historico.json`. Implementado em `scripts/test-server.mjs` (`/api/admin/*`), pronto para portar para serverless na Vercel.
   - **Modo exportação** (produção estática): overlay vive na sessão (sessionStorage, mesmo padrão do guard); **Exportar JSON** → versionar no repositório para efetivar na aplicação pública.
-- Para que uma alteração do painel chegue ao PDF do candidato no modo exportação, o caminho é: **Painel → Exportar JSON → commit → deploy → aplicação pública**. No modo API, o backend pode servir o overlay para a aplicação pública (evolução prevista).
+### Como salvar de fato (o que chega à aplicação pública)
+
+O overlay é um estado **do painel**: ele sobrevive à sessão (rascunho em `sessionStorage`) e pode ser exportado/importado, mas **a aplicação pública não lê o overlay hoje** — ela lê os arquivos do repositório. Portanto "salvar" tem dois sentidos distintos:
+
+| O que você editou | Onde a alteração é efetivada |
+|---|---|
+| Cidades / fichas | `cidades_brasil.json` e `cidades_infinity.json` (commit) — o `Exportar` da seção Cidades gera relatório/CSV para conferência, não substitui o JSON do repositório |
+| Campos e coordenadas | `*_campos.json` do formulário (commit) — via Field Builder/CSV quando aplicável |
+| Templates PDF | O PDF do repositório (commit) — upload exige modo API |
+| Configurações do painel | Só o painel (overlay). Não alteram a aplicação pública |
+
+- **Modo API** (dev ou backend): `PUT /api/admin/config` grava `data/admin-config.json` com backup automático + `data/uploads/` + `data/historico.json`.
+- **Modo exportação** (produção estática): **Dados → Exportar JSON** baixa `admin-config-AAAA-MM-DD.json` para **backup/transferência entre ambientes** (reimportável por **Importar configuração**). Para efetivar na aplicação pública, a alteração precisa chegar aos JSONs do repositório (tabela acima) e ser commitada.
 
 ## Segurança
 

@@ -518,6 +518,27 @@ async function testarPainelV2(assert) {
 
   // 14.6 — normalização de ficha preserva correção histórica REEBOLSO→REEMBOLSO
   assert("normalizarFicha corrige REEBOLSO", T.normalizarFicha("FICHA REEBOLSO") === "FICHA REEMBOLSO", "fix broken");
+  // FICHA SAFO é a chave usada nas bases e na aplicação pública; o arquivo físico
+  // tem underscore (FICHA SA_FO.pdf). A grafia com underscore é aceita e convertida.
+  assert("normalizarFicha aceita grafia FICHA SA_FO → FICHA SAFO", T.normalizarFicha("FICHA SA_FO") === "FICHA SAFO", "fix broken");
+
+  // 14.6b — mapa de fichas em sincronia com os dados reais e com a aplicação pública.
+  // Sem isso a Saúde do Sistema acusa "cidade(s) com ficha não mapeada para PDF"
+  // e o fluxo Outros Planos fica sem template para aquelas cidades.
+  const mapaFichas = T.FICHA_UTILIZAR_PARA_ARQUIVO;
+  assert("mapa de fichas exposto para a suíte", !!mapaFichas && Object.keys(mapaFichas).length > 0, "missing");
+  for (const base of ["cidades_brasil.json", "cidades_infinity.json"]) {
+    const rows = JSON.parse(readFile(join(ROOT, base), "utf8"));
+    const semMapa = rows
+      .map(r => T.normalizarFicha(r["FICHA A UTILIZAR"]))
+      .filter(f => !mapaFichas[f]);
+    assert(`toda ficha usada em ${base} existe no mapa do painel`,
+      semMapa.length === 0, "sem mapa: " + JSON.stringify(Array.from(new Set(semMapa))));
+  }
+  const publicaSrc = readFile(join(ROOT, "assistencia_medica.html"), "utf8");
+  const foraDaPublica = Object.keys(mapaFichas).filter(k => !publicaSrc.includes('"' + k + '"'));
+  assert("mapa de fichas do painel espelha a aplicação pública",
+    foraDaPublica.length === 0, "chaves ausentes em assistencia_medica.html: " + JSON.stringify(foraDaPublica));
 
   // 14.7 — pdfs_meta aplicado sobre o array-base (Tarefa 3)
   st.overlay.pdfs_meta = { "FICHA BH.pdf": { tipo: "Regional (custom)" } };

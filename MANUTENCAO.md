@@ -37,6 +37,8 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 
 Quando o número do processo (ex. F-075, PR-011, revisão 37) mudar no **documento PDF oficial**, atualize o **cabeçalho visível** no HTML (subtítulo) e, se for o caso, o nome do arquivo do template e a constante `TEMPLATE_PATH` na ficha.
 
+> **Nomenclatura das fichas regionais:** a **chave** usada em `cidades_brasil.json`, `cidades_infinity.json` e no valor de `FICHA A UTILIZAR` é `FICHA SAFO` (sem underscore), enquanto o **arquivo físico** se chama `FICHA SA_FO.pdf`. As duas pontas precisam de chave idêntica (`FICHA_UTILIZAR_PARA_ARQUIVO` em `assistencia_medica.html` e em `admin/panel.js`). Se divergirem, a ficha não é encontrada e a cidade fica sem template. A suíte (`scripts/run-test.mjs`, teste 14.6b) trava essa sincronia contra os dados reais.
+
 ---
 
 ## 3. Sistema de coordenadas no PDF (pdf-lib)

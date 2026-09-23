@@ -70,7 +70,7 @@
     "FICHA GNDI": "FICHA GNDI.pdf",
     "FICHA GOIANIA": "FICHA GOIANIA.pdf",
     "FICHA REEMBOLSO": "FICHA REEMBOLSO.pdf",
-    "FICHA SA_FO": "FICHA SA_FO.pdf",
+    "FICHA SAFO": "FICHA SA_FO.pdf",
     "FICHA SJC": "FICHA SJC.pdf"
   };
   const PDFS = [
@@ -519,6 +519,10 @@
   function normalizarFicha(tipo) {
     let t = String(tipo || "").trim().toUpperCase().replace(/\s+/g, " ");
     if (t === "FICHA REEBOLSO") t = "FICHA REEMBOLSO";
+    // O arquivo físico é FICHA SA_FO.pdf, mas a chave nas bases de cidades e na
+    // aplicação pública é "FICHA SAFO" (sem underscore). Aceita a grafia com
+    // underscore para não criar uma ficha inexistente no fluxo Outros Planos.
+    if (t === "FICHA SA_FO") t = "FICHA SAFO";
     return t;
   }
 
@@ -3903,6 +3907,7 @@
       construirIndiceBusca: construirIndiceBusca,
       buscarIndice: buscarIndice,
       cidadeLinhaCSV: cidadeLinhaCSV,
+      FICHA_UTILIZAR_PARA_ARQUIVO: FICHA_UTILIZAR_PARA_ARQUIVO,
       // v3 — Field Builder (§10)
       slugCampoId: slugCampoId,
       novoCampoCustom: novoCampoCustom,
