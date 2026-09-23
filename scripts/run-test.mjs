@@ -365,6 +365,14 @@ async function runTests() {
   console.log("\n📋 Teste 14: Painel v2 — formModal, saúde, cidades, pdfs_meta, diff, histórico");
   await testarPainelV2(assert);
 
+  // ── TEST 15: Reestruturação v3 (entidades, templates versionados, validação) ──
+  console.log("\n📋 Teste 15: Painel v3 — entidades, abas, versões, validação, palette");
+  await testarPainelV3(assert, vmMod);
+
+  // ── TEST 16: Field Builder (§10) — CRUD de campos com IDs estáveis ──
+  console.log("\n📋 Teste 16: Field Builder — criar/renomear/excluir campos (IDs estáveis)");
+  await testarPainelV3FieldBuilder(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -385,6 +393,10 @@ runTests().catch(e => { console.error(e); server.close(); process.exit(1); });
 //      DOM e a lógica pura é exercitada via AdminPanel.__teste.
 // Sem dependência nova e sem build step (regra §0).
 // ═══════════════════════════════════════════════════════════════════
+// Módulo vm e leitor compartilhados entre as suítes v2/v3
+let vmMod = null;
+let vmReadFile = null;
+
 function criarStubsDom() {
   function el() {
     return {
@@ -421,6 +433,8 @@ function criarStubsDom() {
 async function testarPainelV2(assert) {
   const vm = await import("node:vm");
   const readFile = (await import("node:fs")).readFileSync;
+  vmMod = vm;
+  vmReadFile = readFile;
 
   // ── 14.a — estruturais ──
   const adminR2 = await fetch(`http://127.0.0.1:${PORT}/admin`);
@@ -624,3 +638,309 @@ async function testarPainelV2(assert) {
     assert("registrarEvento em host estático não faz POST cego", postFeito === false && r5 === false, `post=${postFeito}`);
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// TESTE 15 — Reestruturação v3 ("Reestruturação do painel.md")
+// Estrutural (HTML/CSS servidos) + comportamental (panel.js em node:vm).
+// ═══════════════════════════════════════════════════════════════════
+async function testarPainelV3(assert) {
+  const vm = vmMod || (await import("node:vm"));
+  const readFile = vmReadFile || (await import("node:fs")).readFileSync;
+
+  // ── 15.a — estruturais ──
+  const adminR3 = await fetch(`http://127.0.0.1:${PORT}/admin`);
+  assert("v3: navegação por entidades (Visão Geral/Formulários/Templates/Cidades)",
+    adminR3.body.includes('data-section="dashboard"') && adminR3.body.includes('data-section="formularios"') &&
+    adminR3.body.includes('data-section="pdfs"') && adminR3.body.includes('data-section="cidades"') &&
+    adminR3.body.includes('data-section="configuracoes"') && adminR3.body.includes('data-section="validacao"'),
+    "missing sections");
+  assert("v3: sub-menu Mais ferramentas", adminR3.body.includes("data-submenu-toggle") && adminR3.body.includes("adminSubmenu"), "missing");
+  assert("v3: detalhe do formulário com abas (§9)", adminR3.body.includes('id="formDetail"') && adminR3.body.includes('data-tab="geral"') && adminR3.body.includes('data-tab="campos"') && adminR3.body.includes('data-tab="template"') && adminR3.body.includes('data-tab="historico"'), "missing");
+  assert("v3: Alterações Pendentes no dashboard (§23)", adminR3.body.includes('id="dashPendentes"') && adminR3.body.includes('id="pendentesPanel"'), "missing");
+  assert("v3: Command Palette Ctrl+K (§28)", adminR3.body.includes('id="cmdkOverlay"') && adminR3.body.includes('id="cmdkInput"'), "missing");
+  assert("v3: seção Validação (§24)", adminR3.body.includes('id="sec-validacao"') && adminR3.body.includes('id="validacaoLista"'), "missing");
+  assert("v3: seção Configurações (§22)", adminR3.body.includes('id="sec-configuracoes"') && adminR3.body.includes('id="configLista"'), "missing");
+  assert("v3: snap-to-grid no editor (§11)", adminR3.body.includes('id="edSnap"') && adminR3.body.includes('id="edSnapGrid"'), "missing");
+  assert("v3: barra de seleção múltipla do editor (§11)", adminR3.body.includes('id="edMultiBar"') && adminR3.body.includes('id="edMultiAlinhar"'), "missing");
+  assert("v3: menu de exportação de cidades (§17)", adminR3.body.includes('id="cidExportMenu"') && adminR3.body.includes('id="btnExportCidades"'), "missing");
+  assert("v3: container de versões de templates (§18)", adminR3.body.includes('id="versoesContainer"'), "missing");
+  const cssR3 = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
+  assert("v3: CSS de abas/palette/detalhe", cssR3.body.includes(".tabs") && cssR3.body.includes(".cmdk-overlay") && cssR3.body.includes(".detail-header") && cssR3.body.includes(".resize-handle"), "missing");
+  const panelCode3 = readFile(join(ROOT, "admin", "panel.js"), "utf8");
+  assert("v3: panel.js sem localStorage", !LS_USE_RE.test(panelCode3), "localStorage usage found!");
+
+  // ── 15.b — comportamentais (node:vm) ──
+  const stubs3 = criarStubsDom();
+  const sandbox3 = {
+    window: {}, document: stubs3, console, setTimeout() {}, clearTimeout() {},
+    fetch: async () => ({ ok: false, status: 0, json: async () => ({}), text: async () => "" }),
+    URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+    Blob: class {}, Math, Date, JSON, Object, Array, Number, String, Set, Promise, Error,
+    encodeURIComponent, decodeURIComponent
+  };
+  sandbox3.window.document = stubs3;
+  sandbox3.globalThis = sandbox3;
+  const ctx3 = vm.createContext(sandbox3);
+  vm.runInContext(panelCode3, ctx3, { filename: "panel.js" });
+  const T3 = sandbox3.window.AdminPanel && sandbox3.window.AdminPanel.__teste;
+  assert("v3: panel.js executa em node:vm", !!T3, "missing export");
+  if (!T3) return;
+  const st3 = T3.state;
+
+  // 15.1 — migração: overlay v1/v2 sem chaves novas → defaults (§32/33)
+  assert("v3: overlay v3 tem chaves novas inicializadas",
+    st3.overlay.forms_meta && st3.overlay.templates_versoes && st3.overlay.configuracoes, "missing keys");
+
+  // 15.2 — calcularPendentes cobre todos os grupos (§23)
+  st3.overlay = {
+    campos_ficha: { c1: { x: 1 } }, campos_declaracao: { c2: { x: 2 } },
+    cidades: { CIDADE_A: { ficha: "FICHA BH" } }, cidades_novas: [{ id: 7, cidade: "Nova", uf: "BA", regional: "BA", ficha: "FICHA BH" }],
+    pdfs_meta: { "X.pdf": { tipo: "t" } }, forms_meta: { F1: { nome: "n" } }, templates_versoes: { "T.pdf": { atual: { versao: 2 } } }, configuracoes: { geral: { manutencao: true } }
+  };
+  const pend = T3.calcularPendentes(st3.overlay, null);
+  assert("v3: pendentes cobrem 8 grupos", pend.length === 8, `got ${pend.length}: ${JSON.stringify(pend.map(p => p.overlayKey))}`);
+  assert("v3: pendente de cidades_novas usa chave n+id", pend.some(p => p.overlayKey === "cidades_novas" && p.chave === "n7"), "wrong key");
+
+  // 15.3 — publicar marca os itens (append-only) e zera a lista (§23)
+  const pub = T3.publicarPendentes(st3.overlay, null, "t@atento.com");
+  assert("v3: publicar marca todos os pendentes", pub.publicados === 8 && Object.keys(pub.marcados).length === 8, `got ${pub.publicados}`);
+  const pend2 = T3.calcularPendentes(st3.overlay, pub.marcados);
+  assert("v3: após publicar não há pendentes", pend2.length === 0, `got ${pend2.length}`);
+  // publicar de novo não muda nada (idempotente)
+  const pub2 = T3.publicarPendentes(st3.overlay, pub.marcados, "t@atento.com");
+  assert("v3: publicar é idempotente", pub2.publicados === 0, `got ${pub2.publicados}`);
+
+  // 15.4 — descartar: remove patches pendentes (marcados=null → tudo pendente);
+  // cidades_novas sem substituto na base permanece (§23)
+  const cityMapFake = {}; // "Nova" NÃO existe na base → deve ser preservada
+  const resDisc = T3.descartarPendentesPuro(st3.overlay, cityMapFake, null);
+  assert("v3: descartar limpa TODOS os grupos pendentes", Object.keys(resDisc.overlay.campos_ficha).length === 0 && Object.keys(resDisc.overlay.cidades).length === 0 && Object.keys(resDisc.overlay.configuracoes).length === 0 && Object.keys(resDisc.overlay.pdfs_meta).length === 0, "wrong");
+  assert("v3: descartar preserva cidade_nova sem substituto na base", resDisc.overlay.cidades_novas.length === 1, `got ${resDisc.overlay.cidades_novas.length}`);
+  assert("v3: descartar remove versões pendentes de templates", Object.keys(resDisc.overlay.templates_versoes).length === 0, "wrong");
+
+  // 15.5 — comparação estrutural de PDF (§19) — função pura
+  const cmp1 = T3.compararPdfComAnterior({ paginas: 2, bytes: 100000, dimensoes: [{ w: 595, h: 842 }] }, { paginas: 4, bytes: 100000, dimensoes: [{ w: 595, h: 842 }] });
+  assert("v3: comparação detecta 2 páginas a menos", cmp1.length === 1 && cmp1[0].includes("2 página(s) a menos"), cmp1.join(" | "));
+  const cmp2 = T3.compararPdfComAnterior({ paginas: 2, bytes: 100000, dimensoes: [{ w: 595, h: 842 }] }, { paginas: 2, bytes: 100000, dimensoes: [{ w: 612, h: 792 }] });
+  assert("v3: comparação detecta mudança de dimensões", cmp2.some(s => s.includes("Dimensões")), cmp2.join(" | "));
+  const cmp3 = T3.compararPdfComAnterior({ paginas: 2, bytes: 200000, dimensoes: [{ w: 595, h: 842 }] }, { paginas: 2, bytes: 100000, dimensoes: [{ w: 595, h: 842 }] });
+  assert("v3: comparação detecta mudança de tamanho > 40%", cmp3.some(s => s.includes("40%")), cmp3.join(" | "));
+  const cmp4 = T3.compararPdfComAnterior(null, null);
+  assert("v3: comparação sem dados anteriores → sem avisos", Array.isArray(cmp4) && cmp4.length === 0, "wrong");
+
+  // 15.6 — coordenada fora da página (§24)
+  assert("v3: coordenada fora da página detectada", T3.coordenadaForaDaPagina({ x: -5, y: 10 }, { w: 595, h: 842 }) === true, "should be true");
+  assert("v3: coordenada dentro da página OK", T3.coordenadaForaDaPagina({ x: 100, y: 100, largura: 100, altura: 12 }, { w: 595, h: 842 }) === false, "should be false");
+  assert("v3: dimensão não-positiva é inválida", T3.coordenadaForaDaPagina({ x: 10, y: 10, largura: 0, altura: 12 }, { w: 595, h: 842 }) === true, "should be true");
+
+  // 15.7 — UF válida (27 estados)
+  assert("v3: UF válida (SP, BA, DF)", T3.ufValida("SP") && T3.ufValida("ba") && T3.ufValida("DF"), "wrong");
+  assert("v3: UF inválida (XX, ZP, vazia)", !T3.ufValida("XX") && !T3.ufValida("ZP") && !T3.ufValida(""), "wrong");
+
+  // 15.8 — formulariosComMetricas (§8): contagem de cidades por template
+  const forms = T3.formulariosComMetricas(
+    [
+      { codigo: "F-075", nome: "Ficha", rota: "/f075", arquivo: "f.html", status: "Ativo", docKey: "ficha_cadastral", pdfFile: "FICHA X.pdf" },
+      { codigo: "F-089", nome: "Assist", rota: "/f089", arquivo: "a.html", status: "Ativo", docKey: null, pdfFile: null }
+    ],
+    {}, { ficha_cadastral: 42 }, { "FICHA X": "FICHA X.pdf" },
+    [{ ficha: "FICHA X" }, { ficha: "FICHA X" }, { ficha: "FICHA Y" }], {}, {}
+  );
+  assert("v3: métricas de formulário (campos e cidades)", forms[0].nCampos === 42 && forms[0].nCidades === 2 && forms[1].nCampos === null && forms[1].nCidades === null, JSON.stringify(forms.map(f => [f.nCampos, f.nCidades])));
+
+  // 15.9 — versionamento de templates: próxima versão (§18)
+  st3.overlay.templates_versoes = { "T.pdf": { atual: { versao: 3 }, anterior: { versao: 2 }, historico: [{ versao: 2 }, { versao: 1 }] } };
+  const prox = T3.proximaVersaoTemplate(st3.overlay.templates_versoes["T.pdf"]);
+  assert("v3: próxima versão = atual + 1", prox === 4, `got ${prox}`);
+  assert("v3: template sem versões → v1", T3.proximaVersaoTemplate(null) === 1, "wrong");
+
+  // 15.10 — configurações: get/set com default (§22)
+  st3.overlay.configuracoes = {};
+  assert("v3: config default quando ausente", T3.configGet("pdfs.limite_mb") === 20, `got ${T3.configGet("pdfs.limite_mb")}`);
+  st3.overlay.configuracoes = T3.configSetPath(st3.overlay.configuracoes, "pdfs.limite_mb", 10);
+  assert("v3: configSetPath grava por path", T3.configGet("pdfs.limite_mb") === 10, `got ${T3.configGet("pdfs.limite_mb")}`);
+  st3.overlay.configuracoes = T3.configSetPath(st3.overlay.configuracoes, "geral.manutencao", true);
+  assert("v3: bool de config lido corretamente", T3.configGet("geral.manutencao") === true, "wrong");
+  st3.overlay.configuracoes = T3.configSetPath(st3.overlay.configuracoes, "pdfs.limite_mb", 999); // fora do range → clamp
+  assert("v3: config int limitada ao max", T3.configGet("pdfs.limite_mb") === 50, `got ${T3.configGet("pdfs.limite_mb")}`);
+
+  // 15.11 — index/da busca global (§28)
+  st3.cityArr = [{ cidade: "Salvador", uf: "BA", regional: "BA", ficha: "FICHA BH", fonte: "t" }];
+  st3.cityMap = { SALVADOR: "FICHA BH" };
+  const indice = T3.construirIndiceBusca();
+  assert("v3: índice de busca contém cidade e formulário", indice.some(i => i.tipo === "Cidade" && i.titulo === "Salvador") && indice.some(i => i.tipo === "Formulário"), "wrong");
+  const achados = T3.buscarIndice(indice, "salvador");
+  assert("v3: busca encontra cidade sem acento/case", achados.length === 1 && achados[0].titulo === "Salvador", JSON.stringify(achados.map(a => a.titulo)));
+  const achados2 = T3.buscarIndice(indice, "çã");
+  assert("v3: busca com acento normaliza", achados2.length >= 1, "wrong");
+
+  // 15.12 — importação de cidades valida ficha inexistente (§16)
+  const cls3 = T3.classificarCidadesImportadas([
+    { cidade: "Barreiras", uf: "BA", regional: "", ficha: "FICHA BH" },
+    { cidade: "Jaguarari", uf: "BA", regional: "", ficha: "FICHA INEXISTENTE" }
+  ]);
+  assert("v3: importação rejeita ficha inexistente", cls3.invalidos.length === 1 && cls3.invalidos[0].motivo.includes("ficha"), JSON.stringify(cls3.invalidos));
+
+  // 15.13 — exportação de cidades: linha CSV com escape (§17)
+  const linhaCsv = T3.cidadeLinhaCSV({ cidade: 'Vila "X", Y', uf: "BA", regional: "BA", ficha: "FICHA BH" });
+  assert("v3: CSV escapa aspas e vírgulas", linhaCsv === '"Vila ""X"", Y","BA","BA","FICHA BH"', linhaCsv);
+
+  // 15.14 — lista de uploads do adapter (sem API → [])
+  {
+    const docStub = criarStubsDom();
+    const sb = {
+      window: {}, document: docStub,
+      console: { log() {}, warn() {}, error() {} },
+      setTimeout() {}, clearTimeout() {},
+      fetch: async () => { throw new TypeError("Failed to fetch"); },
+      URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+      Blob: class {}, FileReader: class { readAsText() {} },
+      Math, Date, JSON, Object, Array, Number, String, Set, Promise, Error,
+      encodeURIComponent, decodeURIComponent
+    };
+    sb.window.document = docStub;
+    sb.globalThis = sb;
+    const ctx = vm.createContext(sb);
+    vm.runInContext(readFile(join(ROOT, "admin", "persistence.js"), "utf8"), ctx, { filename: "persistence.js" });
+    const uploads = await sb.window.AdminPersistence.listarUploads();
+    assert("v3: listarUploads sem API → []", Array.isArray(uploads) && uploads.length === 0, `got ${JSON.stringify(uploads)}`);
+  }
+}
+
+/**
+ * TEST 16 — Field Builder (§10): CRUD de campos com IDs estáveis.
+ * Criação, renomeação (ID novo, antigo preservado), exclusão com trava de
+ * dependência, aplicação idempotente no JSON e integração com o overlay
+ * (pendências, descarte, exportação, importação).
+ */
+async function testarPainelV3FieldBuilder(assert) {
+  const vm = vmMod || (await import("node:vm"));
+  const readFile = vmReadFile || (await import("node:fs")).readFileSync;
+
+  // estrutural: drawer + botões do builder no HTML
+  const adminFB = await fetch(`http://127.0.0.1:${PORT}/admin`);
+  assert("fb: botão ＋ Campo na aba Campos (§10)", adminFB.body.includes('id="fdNovoCampo"') && adminFB.body.includes('id="fdCamposBuilder"'), "missing");
+  assert("fb: botão novo campo no editor visual", adminFB.body.includes('id="edNovoCampo"'), "missing");
+  const cssFB = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
+  assert("fb: CSS do drawer", cssFB.body.includes(".fb-drawer"), "missing");
+
+  const stubsFB = criarStubsDom();
+  const sbFB = {
+    window: {}, document: stubsFB, console, setTimeout() {}, clearTimeout() {},
+    fetch: async () => ({ ok: false, status: 0, json: async () => ({}), text: async () => "" }),
+    URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+    Blob: class {}, Math, Date, JSON, Object, Array, Number, String, Set, Promise, Error,
+    encodeURIComponent, decodeURIComponent
+  };
+  sbFB.window.document = stubsFB;
+  sbFB.globalThis = sbFB;
+  const ctxFB = vm.createContext(sbFB);
+  vm.runInContext(readFile(join(ROOT, "admin", "panel.js"), "utf8"), ctxFB, { filename: "panel.js" });
+  const FB = sbFB.window.AdminPanel && sbFB.window.AdminPanel.__teste;
+  if (!FB) { assert("fb: panel.js executa em node:vm", false, "missing export"); return; }
+  const stFB = FB.state;
+
+  // fixture: schema base do repositório (docBase = JSON original)
+  stFB.docBase.ficha_cadastral = {
+    titulo: "Ficha",
+    campos: {
+      dados_pessoais: {
+        descricao: "Dados",
+        campos: {
+          nome_completo: { label: "Nome completo", tipo: "texto", pagina: 1, coordenadas: { x: 100, y: 200, largura: 300, altura: 14 } },
+          tem_dependente: { label: "Possui dependente?", tipo: "grupo_radio", opcoes: { SIM: "Sim", NAO: "Não" }, pagina: 1, coordenadas: { x: 100, y: 220, largura: 200, altura: 12 } },
+          nome_dependente: { label: "Nome do dependente", tipo: "texto", dependencia: { campo: "tem_dependente", valor: "SIM" }, pagina: 1, coordenadas: { x: 100, y: 240, largura: 300, altura: 14 } }
+        }
+      }
+    }
+  };
+  stFB.docData.ficha_cadastral = { json: JSON.parse(JSON.stringify(stFB.docBase.ficha_cadastral)), flat: [], page: 1, sel: null, dirty: false };
+
+  // 16.1 — slugCampoId: normalização e colisão → sufixo estável
+  const ids = { nome_completo: true };
+  assert("fb: slug normaliza acentos/maiúsculas", FB.slugCampoId("Telefone Comercial") === "telefone_comercial");
+  assert("fb: slug resolve colisão com sufixo _2", FB.slugCampoId("Nome Completo", ids) === "nome_completo_2");
+  assert("fb: slug vazio → campo", FB.slugCampoId("!!!", {}) === "campo");
+
+  // 16.2 — criar campo: id gerado contra o estado EFETIVO (colisão com base)
+  const lote1 = FB.novoCampoCustom("Nome Completo", { existentes: FB.fbIdsExistentes("ficha_cadastral"), x: 50, y: 60, largura: 220, altura: 12 });
+  assert("fb: criação evita colisão com id base", lote1.id === "nome_completo_2", lote1.id);
+  assert("fb: novoCampoCustom tem defaults coerentes", lote1.tipo === "texto" && lote1.pagina === 1 && lote1.origem === "painel", JSON.stringify(lote1));
+
+  // 16.3 — validarCampoSchema: erros e avisos
+  const vOk = FB.validarCampoSchema(lote1);
+  assert("fb: campo válido → sem erros", vOk.erros.length === 0, JSON.stringify(vOk.erros));
+  const vRuim = FB.validarCampoSchema({ label: "", tipo: "woozle", pagina: 0, coordenadas: { x: -1, y: 0, largura: 0, altura: 0 } });
+  assert("fb: validação captura rótulo/tipo/página/coords", vRuim.erros.length >= 5, JSON.stringify(vRuim.erros));
+  const vRadio = FB.validarCampoSchema({ label: "Escolha", tipo: "grupo_radio", pagina: 1, coordenadas: { x: 1, y: 1, largura: 10, altura: 10 } });
+  assert("fb: radio sem opções é erro", vRadio.erros.some(e => e.includes("opções")), JSON.stringify(vRadio.erros));
+
+  // 16.4 — exclusão: trava por dependência (§10)
+  const deps = FB.coletarDependenciasSchema(stFB.docBase.ficha_cadastral.campos, [], "");
+  assert("fb: coletarDependencias encontra dependencia", deps.length === 1 && deps[0].campoKey === "tem_dependente", JSON.stringify(deps));
+  const exBloq = FB.validarExclusaoCampo("tem_dependente", deps);
+  assert("fb: exclusão de campo com dependencia é bloqueada", !exBloq.ok && exBloq.bloqueios.length === 1, JSON.stringify(exBloq));
+  const exOk = FB.validarExclusaoCampo("nome_completo", deps);
+  assert("fb: exclusão de campo livre é permitida", exOk.ok, JSON.stringify(exOk.bloqueios));
+
+  // 16.5 — aplicarCamposCustomEmJson: criar + excluir + idempotência
+  const json1 = JSON.parse(JSON.stringify(stFB.docBase.ficha_cadastral));
+  const lote = {};
+  const criado = FB.novoCampoCustom("Telefone comercial", { existentes: FB.fbIdsExistentes("ficha_cadastral"), x: 60, y: 300, largura: 200, altura: 12 });
+  lote[criado.id] = criado;
+  lote.nome_completo = { excluir: true };
+  const ops1 = FB.aplicarCamposCustomEmJson(json1, lote);
+  assert("fb: aplicação cria campo na seção dedicada", ops1.criados.length === 1 && FB.campoPresenteRec(json1.campos, "telefone_comercial"), JSON.stringify(ops1));
+  assert("fb: aplicação exclui campo", ops1.excluidos.includes("nome_completo") && !FB.campoPresenteRec(json1.campos, "nome_completo"), JSON.stringify(ops1));
+  const ops2 = FB.aplicarCamposCustomEmJson(json1, lote);
+  assert("fb: aplicação é idempotente (2ª passada não duplica nem reporta criação)", ops2.criados.length === 0 && ops2.excluidos.length === 0, JSON.stringify(ops2));
+  const secaoCustom = json1.campos.campos_adicionais;
+  assert("fb: seção de destino é criada com descrição", secaoCustom && secaoCustom.campos && secaoCustom.campos.telefone_comercial, JSON.stringify(Object.keys(json1.campos)));
+
+  // 16.6 — renomeação: recria com novo id, preserva conteúdo, mantém id antigo no registro
+  // (convenção: o lote é chaveado pelo ID NOVO; renomeadoDe aponta para o antigo)
+  const json2 = JSON.parse(JSON.stringify(stFB.docBase.ficha_cadastral));
+  const loteRen = { nome_do_dependente: { renomeadoDe: "nome_dependente", id: "nome_do_dependente", label: "Nome do dependente (completo)", tipo: "texto", pagina: 1, obrigatorio: true, coordenadas: { x: 100, y: 240, largura: 300, altura: 14 }, secao: "dados_pessoais" } };
+  const opsRen = FB.aplicarCamposCustomEmJson(json2, loteRen);
+  assert("fb: renomeação move o campo para o novo id", opsRen.renomeados.length === 1 && FB.campoPresenteRec(json2.campos, "nome_do_dependente") && !FB.campoPresenteRec(json2.campos, "nome_dependente"), JSON.stringify(opsRen));
+  let encontrado = null;
+  (function achar(n) { if (!n || typeof n !== "object") return; if (n.dependencia) encontrado = n; for (const k of Object.keys(n)) achar(n[k]); })(json2.campos);
+  assert("fb: dependencia sobrevive à renomeação (mesmo objeto)", !!encontrado && encontrado.dependencia.campo === "tem_dependente", JSON.stringify(encontrado));
+
+  // 16.7 — renomeação migra o patch de coordenadas (overlay campos_ficha)
+  stFB.overlay = { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {} };
+  stFB.overlay.campos_ficha = { "dados_pessoais.campos.nome_dependente": { x: 123 } };
+  const mig = JSON.parse(JSON.stringify(stFB.overlay.campos_ficha));
+  if (mig["dados_pessoais.campos.nome_dependente"]) { mig["dados_pessoais.campos.nome_do_dependente"] = mig["dados_pessoais.campos.nome_dependente"]; delete mig["dados_pessoais.campos.nome_dependente"]; }
+  assert("fb: migração de patch segue o caminho do novo id", mig["dados_pessoais.campos.nome_do_dependente"] && mig["dados_pessoais.campos.nome_do_dependente"].x === 123 && !mig["dados_pessoais.campos.nome_dependente"], JSON.stringify(mig));
+
+  // 16.8 — overlay campos_custom entra em pendências, descarte e exportação
+  stFB.overlay.campos_custom = { ficha_cadastral: lote };
+  const pendFB = FB.calcularPendentes(stFB.overlay, null);
+  assert("fb: campos_custom gera pendência", pendFB.some(p => p.overlayKey === "campos_custom" && p.chave === "ficha_cadastral"), JSON.stringify(pendFB.map(p => p.overlayKey)));
+  const expFB = FB.exportarOverlayPuro();
+  assert("fb: exportação inclui campos_custom", expFB.campos_custom && expFB.campos_custom.ficha_cadastral === lote, "missing");
+  const resDiscFB = FB.descartarPendentesPuro(stFB.overlay, {}, null);
+  assert("fb: descarte remove lote pendente de campos_custom", Object.keys(resDiscFB.overlay.campos_custom).length === 0, JSON.stringify(Object.keys(resDiscFB.overlay.campos_custom)));
+
+  // 16.9 — validarDocCampos: valida schema efetivo (gate de publicação §24)
+  const jsonRuim = { campos: { s: { campos: { a: { label: "A", coordenadas: { x: -5, y: 10, largura: 10, altura: 10 }, pagina: 1 }, b: { label: "B", tipo: "grupo_radio", opcoes: {}, coordenadas: { x: 5, y: 10, largura: 10, altura: 10 }, pagina: 1 }, c: { label: "C", dependencia: { campo: "zzz_inexistente" }, coordenadas: { x: 5, y: 10, largura: 10, altura: 10 }, pagina: 1 } } } } };
+  const vDoc = FB.validarDocCampos(jsonRuim, null);
+  assert("fb: validarDocCampos captura coord negativa, grupo vazio e dependencia órfã", vDoc.erros.length >= 3, JSON.stringify(vDoc.erros));
+  const jsonOk2 = { campos: { s: { campos: { a: { label: "A", tipo: "texto", coordenadas: { x: 10, y: 10, largura: 10, altura: 10 }, pagina: 1 } } } } };
+  const vDocOk = FB.validarDocCampos(jsonOk2, null);
+  assert("fb: schema válido → sem erros", vDocOk.erros.length === 0, JSON.stringify(vDocOk.erros));
+
+  // 16.10 — fbDocEfetivo: base + overlay sem mutar o docBase
+  stFB.overlay.campos_custom = { ficha_cadastral: { telefone_comercial: criado } };
+  const efetivo = FB.fbDocEfetivo("ficha_cadastral");
+  assert("fb: doc efetivo aplica overlay", FB.campoPresenteRec(efetivo.campos, "telefone_comercial"), "missing");
+  assert("fb: docBase permanece intacto", !FB.campoPresenteRec(stFB.docBase.ficha_cadastral.campos, "telefone_comercial"), "docBase mutated!");
+  stFB.overlay.campos_custom = {};
+
+  // 16.11 — diff de importação cobre campos_custom
+  stFB.overlay = { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {} };
+  const dImp = FB.diffImportacao({ campos_custom: { ficha_cadastral: lote } });
+  assert("fb: diffImportacao detecta lote de campos_custom novo", dImp.campos_custom.novos.length === 1 && dImp.campos_custom.novos[0].k === "ficha_cadastral", JSON.stringify(dImp.campos_custom));
+}
+

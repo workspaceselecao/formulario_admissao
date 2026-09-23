@@ -144,6 +144,33 @@
   }
 
   // ══════════════════════════════════════════════════════
+  // UPLOADS (lista — modo API; versões de template §18)
+  // ══════════════════════════════════════════════════════
+  /** Lista uploads registrados no servidor. Sem API → []. */
+  async function listarUploads() {
+    try {
+      const res = await fetch("/api/admin/uploads", { cache: "no-store" });
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (e) { return []; }
+  }
+
+  /** §26 — rollback físico: recoloca a versão anterior como arquivo atual. */
+  async function restaurarUploadArquivo(nomeOriginal, arquivoVersao) {
+    const res = await fetch("/api/admin/uploads/restaurar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: nomeOriginal, arquivoVersao: arquivoVersao })
+    });
+    if (!res.ok) {
+      let msg = "HTTP " + res.status;
+      try { const j = await res.json(); if (j && j.erro) msg = j.erro; } catch (e) { /* ignore */ }
+      throw new Error(msg);
+    }
+    return await res.json();
+  }
+
+  // ══════════════════════════════════════════════════════
   // HISTÓRICO / AUDITORIA
   // ══════════════════════════════════════════════════════
   async function registrarEvento(evento) {
@@ -220,6 +247,8 @@
     listarBackups,
     urlBackup,
     uploadPdf,
+    listarUploads,
+    restaurarUploadArquivo,
     registrarEvento,
     carregarHistorico,
     baixarJSON,

@@ -15,25 +15,36 @@
     <img src="/logomarca.png" alt="Logomarca">
     <div class="admin-header-main">
       <h1>Painel Administrativo</h1>
-      <div class="subtitle">Configuração dos Formulários de Admissão</div>
+      <div class="subtitle">Gerenciamento de formulários, templates, campos e cidades</div>
     </div>
+    <div class="cmdk-hint" id="cmdkHint" role="status" aria-live="polite" hidden></div>
     <span class="admin-user" id="adminUserEmail" title="Sessão administrativa"></span>
     <button type="button" class="admin-logout" onclick="atentoAdminEndSession()">Sair</button>
   </header>
 
   <div class="admin-shell">
     <aside class="admin-side" aria-label="Seções do painel">
-      <button type="button" data-section="dashboard" class="active">▦ Dashboard</button>
-      <button type="button" data-section="pdfs">▤ PDFs</button>
-      <button type="button" data-section="coordenadas">✥ Coordenadas</button>
-      <button type="button" data-section="cidades">◐ Cidades</button>
-      <button type="button" data-section="assistencia">✚ Assistência</button>
+      <!-- Organização por ENTIDADES (§6): formulários, templates, cidades,
+           configurações — não por arquivos internos. Coordenadas/Assistência/
+           Dados/Regras/Segurança/Sistema permanecem acessíveis via sub-menu. -->
+      <button type="button" data-section="dashboard" class="active">▦ Visão Geral</button>
       <button type="button" data-section="formularios">✎ Formulários</button>
-      <button type="button" data-section="regras">§ Regras</button>
-      <button type="button" data-section="dados">⌗ Dados</button>
-      <button type="button" data-section="seguranca">⛨ Segurança</button>
+      <button type="button" data-section="pdfs">▤ Templates</button>
+      <button type="button" data-section="coordenadas">✥ Editor Visual</button>
+      <button type="button" data-section="cidades">◐ Cidades &amp; Regionais</button>
+      <button type="button" data-section="configuracoes">⚙ Configurações</button>
+      <button type="button" data-section="validacao">✓ Validação</button>
       <button type="button" data-section="historico">⏱ Histórico</button>
-      <button type="button" data-section="sistema">⚙ Sistema</button>
+      <button type="button" data-section="seguranca">⛨ Segurança</button>
+      <div class="side-sub">
+        <button type="button" data-submenu-toggle aria-expanded="false" aria-controls="adminSubmenu">▸ Mais ferramentas</button>
+        <div id="adminSubmenu" class="side-sub-list" hidden>
+          <button type="button" data-section="assistencia">✚ Assistência</button>
+          <button type="button" data-section="dados">⌗ Dados &amp; Backups</button>
+          <button type="button" data-section="regras">§ Regras</button>
+          <button type="button" data-section="sistema">ℹ Sistema</button>
+        </div>
+      </div>
       <div class="side-note">
         Alterações de configuração são registradas no Histórico.
         Proteção client-side — mesma natureza do guard.js (ver
@@ -54,6 +65,12 @@
           <div id="dashSaude" class="section-desc" aria-live="polite">Verificando integridade…</div>
         </div>
         <div class="cards-grid" id="dashCards"></div>
+        <!-- §23 — Alterações Pendentes: rascunho → publicar/descartar -->
+        <div class="panel" id="pendentesPanel">
+          <h3>Alterações Pendentes</h3>
+          <p class="section-desc">Edições salvas no overlay administrativo que ainda não foram publicadas (modo exportação: efetivar via JSON versionado).</p>
+          <div id="dashPendentes"></div>
+        </div>
         <div class="panel">
           <h3>Status das configurações</h3>
           <div id="dashStatus"></div>
@@ -76,6 +93,8 @@
           <button type="button" class="btn secondary" id="btnUploadPdf">+ Adicionar PDF</button>
           <input type="file" id="pdfUploadInput" accept="application/pdf,.pdf" hidden>
         </div>
+        <!-- §18 — versões por template (uploads versionados, modo API) -->
+        <div id="versoesContainer"></div>
         <div class="panel table-wrap" style="padding:0">
           <table class="data" id="pdfTable">
             <thead><tr>
@@ -115,8 +134,17 @@
             <option value="declaracao_plano_saude">Declaração Plano de Saúde — declaracao_plano_saude_campos.json</option>
           </select>
           <select id="edPage" style="min-width:120px"></select>
+          <label class="chk-inline" for="edSnap"><input type="checkbox" id="edSnap" checked> Snap to grid</label>
+          <select id="edSnapGrid" style="min-width:110px" aria-label="Grade de encaixe">
+            <option value="1">1 pt</option>
+            <option value="5" selected>5 pts</option>
+            <option value="10">10 pts</option>
+          </select>
           <button type="button" class="btn secondary" id="edTestPreview">Visualizar PDF de teste</button>
           <button type="button" class="btn secondary" id="edGoCampos">Ver tabela de campos</button>
+        </div>
+        <div class="legend-selos">
+          <span class="badge muted">Atalhos</span> setas = mover (1 pt) · Shift+setas = 5 pts · Alt+setas = ajuste fino (0,5 pt) · Ctrl/Cmd+clique = seleção múltipla · L = alinhar · Shift+L = distribuir · R = restaurar
         </div>
         <div class="editor-layout">
           <div class="pdf-viewport">
@@ -154,6 +182,20 @@
               <button type="button" class="btn secondary" id="edRestore" disabled title="Reverte apenas este campo ao valor salvo no overlay (ou ao original), preservando as demais edições pendentes">↩ Restaurar este campo</button>
             </div>
             <div id="edPending" style="margin-top:12px"></div>
+            <!-- §11 — seleção múltipla: alinhar/distribuir/restaurar -->
+            <div class="bulk-bar" id="edMultiBar" hidden style="margin-top:12px">
+              <span id="edMultiInfo">0 selecionado(s)</span>
+              <label for="edMultiEixo" class="sr-only">Eixo</label>
+              <select id="edMultiEixo"><option value="x">Horizontal (X)</option><option value="y">Vertical (Y)</option></select>
+              <button type="button" class="btn small" id="edMultiAlinhar">Alinhar</button>
+              <button type="button" class="btn small" id="edMultiDistribuir">Distribuir</button>
+              <button type="button" class="btn small secondary" id="edMultiRestaurar">↩ Restaurar</button>
+              <button type="button" class="btn small secondary" id="edMultiLimpar">Limpar seleção</button>
+            </div>
+            <!-- §10 — Field Builder: criação de campo a partir do editor visual -->
+            <div class="editor-actions" style="margin-top:12px">
+              <button type="button" class="btn secondary" id="edNovoCampo" title="§10 — Field Builder: cria um campo novo com ID estável e abre o editor na seção criada">＋ Novo campo (Field Builder)</button>
+            </div>
           </div>
         </div>
       </section>
@@ -174,6 +216,11 @@
           <button type="button" class="btn secondary" id="btnNovaCidade">+ Nova cidade</button>
           <button type="button" class="btn secondary" id="btnImportCidades">⬆ Importar CSV/JSON</button>
           <input type="file" id="cidImportFile" accept=".csv,.json,text/csv,application/json" hidden>
+          <button type="button" class="btn secondary" id="btnExportCidades">⬇ Exportar</button>
+          <div class="export-menu" id="cidExportMenu" hidden>
+            <button type="button" data-export="json">JSON</button>
+            <button type="button" data-export="csv">CSV</button>
+          </div>
         </div>
         <div class="legend-selos">
           <span class="badge editable">✎ Editável</span> toda a tabela é editável pelo painel (overlay) — os JSONs de origem nunca são alterados
@@ -228,6 +275,31 @@
         </div>
       </section>
 
+      <!-- ══════════ VALIDAÇÃO (§24) ══════════ -->
+      <section id="sec-validacao" class="admin-section">
+        <h2>Validação</h2>
+        <p class="section-desc">
+          Verificação de integridade da configuração: campos, cidades e templates.
+          Erros críticos <strong>bloqueiam a publicação</strong>; avisos exigem confirmação (§24).
+        </p>
+        <div class="panel">
+          <h3>Relatório de integridade</h3>
+          <div id="validacaoLista">Abra esta seção para verificar.</div>
+        </div>
+      </section>
+
+      <!-- ══════════ CONFIGURAÇÕES (§22) ══════════ -->
+      <section id="sec-configuracoes" class="admin-section">
+        <h2>Configurações</h2>
+        <p class="section-desc">
+          Parâmetros administrativos por categoria (Geral, Formulários, PDFs, Cidades, Segurança).
+          Alterações são salvas no overlay administrativo e registradas no Histórico.
+        </p>
+        <div class="panel">
+          <div id="configLista">Carregando…</div>
+        </div>
+      </section>
+
       <!-- ══════════ ASSISTÊNCIA ══════════ -->
       <section id="sec-assistencia" class="admin-section">
         <h2>Assistência Médica</h2>
@@ -253,22 +325,71 @@
         </div>
       </section>
 
-      <!-- ══════════ FORMULÁRIOS ══════════ -->
+      <!-- ══════════ FORMULÁRIOS (§8–9: entidade central) ══════════ -->
       <section id="sec-formularios" class="admin-section">
-        <h2>Formulários</h2>
-        <p class="section-desc">Fluxos efetivamente presentes no código. Configurações de label/obrigatoriedade/máscara são lidas dos HTMLs — alterá-las dinamicamente depende de desenvolvimento (somente leitura).</p>
-        <div class="legend-selos">
-          <span class="badge readonly">🔒 Somente leitura — código</span> todos os registros desta tabela são definidos no código (alterar depende de desenvolvimento)
+        <div id="formListView">
+          <h2>Formulários</h2>
+          <p class="section-desc">Fluxos efetivamente presentes no código, com template, quantidade de campos e cidades associadas. Estrutura/rotas são definidas no código (somente leitura); template e status de publicação são gerenciáveis.</p>
+          <div class="legend-selos">
+            <span class="badge readonly">🔒 Estrutura — código</span> rotas/arquivos definidos no código ·
+            <span class="badge editable">✎ Editável</span> template e metadados via painel
+          </div>
+          <div class="toolbar">
+            <input type="search" id="formSearch" placeholder="Pesquisar formulário…" style="flex:1;min-width:180px">
+          </div>
+          <div class="panel table-wrap" style="padding:0">
+            <table class="data" id="formTable">
+              <thead><tr><th>Formulário</th><th>Código</th><th>Rota</th><th>Template</th><th class="num">Campos</th><th class="num">Cidades</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
-        <div class="panel table-wrap" style="padding:0">
-          <table class="data" id="formTable">
-            <thead><tr><th>Formulário</th><th>Rota</th><th>Arquivo</th><th>Template / dados</th><th>Status</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="panel">
-          <h3>Regras de negócio (classificação)</h3>
-          <div id="regrasLista"></div>
+        <!-- §9 — área dedicada do formulário (abas) -->
+        <div id="formDetail" hidden>
+          <div class="detail-header">
+            <button type="button" class="btn small secondary" id="fdVoltar">← Formulários</button>
+            <div class="detail-title">
+              <h2 id="fdNome">—</h2>
+              <div class="section-desc" id="fdMeta">—</div>
+            </div>
+            <div class="detail-actions">
+              <button type="button" class="btn small secondary" id="fdEditar">✎ Editar</button>
+              <button type="button" class="btn small secondary" id="fdTestar">▶ Testar</button>
+              <button type="button" class="btn small" id="fdDuplicar">⧉ Duplicar</button>
+            </div>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Áreas do formulário">
+            <button type="button" role="tab" data-tab="geral" aria-selected="true" class="active">Geral</button>
+            <button type="button" role="tab" data-tab="campos" aria-selected="false">Campos</button>
+            <button type="button" role="tab" data-tab="template" aria-selected="false">Template</button>
+            <button type="button" role="tab" data-tab="regras" aria-selected="false">Regras</button>
+            <button type="button" role="tab" data-tab="cidades" aria-selected="false">Cidades</button>
+            <button type="button" role="tab" data-tab="historico" aria-selected="false">Histórico</button>
+          </div>
+          <div class="panel tab-pane active" id="fdPane-geral" role="tabpanel" aria-label="Geral">
+            <div class="form-grid" id="fdGeral"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-campos" role="tabpanel" aria-label="Campos">
+            <p class="section-desc">Campos com coordenadas deste formulário. Clique em <strong>Editar layout</strong> para abrir o editor visual com a lista sincronizada.</p>
+            <div class="toolbar">
+              <button type="button" class="btn secondary" id="fdIrLayout">✥ Editar layout</button>
+              <button type="button" class="btn" id="fdNovoCampo" title="§10 — Field Builder: cria um campo novo com ID estável (o ID nunca muda em renomeações)">＋ Campo</button>
+            </div>
+            <div id="fdCamposTabela"></div>
+            <div id="fdCamposBuilder"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-template" role="tabpanel" aria-label="Template">
+            <div id="fdTemplate"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-regras" role="tabpanel" aria-label="Regras">
+            <div id="fdRegras"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-cidades" role="tabpanel" aria-label="Cidades">
+            <div id="fdCidades"></div>
+          </div>
+          <div class="panel tab-pane" id="fdPane-historico" role="tabpanel" aria-label="Histórico">
+            <div id="fdHistorico"></div>
+          </div>
         </div>
       </section>
 
@@ -385,6 +506,15 @@
           <button type="submit" class="btn" id="formModalOk">Salvar</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- §28 — Command Palette (Ctrl+K) -->
+  <div class="cmdk-overlay" id="cmdkOverlay" role="presentation" aria-hidden="true">
+    <div class="cmdk" role="dialog" aria-modal="true" aria-label="Busca global">
+      <input type="text" id="cmdkInput" placeholder="Buscar formulários, cidades, templates, campos…" autocomplete="off" aria-label="Buscar no painel">
+      <div class="cmdk-results" id="cmdkResults" role="listbox" aria-label="Resultados"></div>
+      <div class="cmdk-footer">Esc fecha · Enter abre o primeiro resultado</div>
     </div>
   </div>
 

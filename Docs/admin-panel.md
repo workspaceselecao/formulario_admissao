@@ -1,5 +1,15 @@
 # Painel Administrativo — Manual e Documentação Técnica
 
+> **Reestruturação v3 (entidades):** a navegação segue o modelo de entidades —
+> **Visão Geral · Formulários · Templates · Editor Visual · Cidades & Regionais ·
+> Configurações · Validação · Histórico · Segurança** — com as ferramentas
+> técnicas (Assistência, Dados & Backups, Regras, Sistema) no sub-menu
+> **“Mais ferramentas”**. Novidades: detalhe do formulário com abas,
+> versionamento de templates PDF, validação pré-publicação, Alterações
+> Pendentes (publicar/descartar), Command Palette **Ctrl+K**, snap-to-grid e
+> seleção múltipla no editor, exportação de cidades, duplicação e Modo de
+> Teste com formulário de dados fictícios. Detalhes abaixo.
+
 **Rota:** `/admin` (servido do arquivo físico `admin/index.html` — índice do diretório)
 **Acesso:** autenticação **apartada** de dois fatores — qualquer e-mail com domínio **exatamente `@atento.com`** + um dos **códigos de acesso exclusivos do painel** (formato `ATN-XXXX-XXXX-XXXX`). Os códigos dos formulários públicos **não** autorizam este painel.
 
@@ -17,6 +27,141 @@
 > do mesmo tipo do `guard.js`. Não é autenticação server-side e não deve ser
 > apresentada como controle de acesso forte. Para operações destrutivas em
 > produção, a evolução recomendada é autenticação server-side.
+
+## Detalhe do formulário (§9 — v3)
+
+**Formulários** lista cada fluxo com código, rota, template (+ nº da versão),
+quantidade de campos e cidades associadas. **Abrir** mostra a área dedicada com
+abas **Geral / Campos / Template / Regras / Cidades / Histórico** e ações
+**Editar** (nome de exibição, via `overlay.forms_meta`), **Testar** (abre o
+Modo de Teste no Editor Visual) e **Duplicar** (cria um registro administrativo
+`forms_meta[CODIGO-COPIA]` — a estrutura/rota do formulário continua definida no
+código; nada é executado a partir da configuração). O botão **← Formulários** volta à lista.
+
+## Field Builder: criar, renomear e excluir campos (§10 — v3)
+
+A aba **Campos** do detalhe de formulário ganhou CRUD de campos com **IDs estáveis**:
+
+- **＋ Campo** abre o drawer lateral com rótulo, tipo (texto, número, CPF,
+  telefone, data, e-mail, seleção, radio, checkbox, imagem, assinatura), página,
+  obrigatoriedade, coordenadas, seção de destino e opções (`valor|Rótulo`, uma
+  por linha, para radio/checkbox/seleção). No **Editor Visual** há o mesmo
+  atalho (**＋ Novo campo**);
+- **ID estável:** o identificador é gerado **uma única vez** a partir do rótulo
+  (sem acentos, minúsculo, `snake_case`, colisão → sufixo `_2`, `_3`… checando o
+  JSON **efetivo**). Em renomeações um **novo ID é gerado** e o antigo nunca é
+  reutilizado — o rótulo é só display; patches de coordenadas do id antigo
+  migram para o novo caminho;
+- **Exclusão segura:** bloqueada quando o campo é alvo de `dependencia` no
+  schema (evita dependência órfã na aplicação pública); campos base entram como
+  `{ "excluir": true }` e podem ser desfeitos no Histórico;
+- **Gravação no overlay:** cada operação cria pendência em
+  `overlay.campos_custom[docKey]` (lote por schema), com evento append-only e
+  reverso no Histórico. O JSON do repositório **permanece intacto** até a
+  exportação — contrato “estrutura é código”;
+- **Aplicação idempotente:** o overlay é aplicado sobre o JSON base a cada
+  reconstrução (criar → seção dedicada `campos_adicionais` por padrão;
+  renomear → recria com novo ID preservando conteúdo; excluir → remove). Aplicar
+  duas vezes produz o mesmo resultado;
+- **Publicação validada:** o gate de publicação (§24) valida o schema efetivo
+  completo — coordenadas inválidas, grupo de opções vazio e `dependencia`
+  apontando para campo inexistente são **erros críticos** que travam a
+  publicação; campos fora da página são avisos.
+
+## Templates: versionamento e validação (§18/§19 — v3)
+
+Substituir um PDF agora executa o fluxo **upload → validar → motivo → testar → publicar**:
+
+1. **Validação automática** do arquivo: assinatura `%PDF-`, tamanho (limite
+   configurável em **Configurações → PDFs**), páginas e dimensões (pdf-lib).
+   Erro estrutural **bloqueia** o upload com mensagem acionável;
+2. **Comparação estrutural** com a versão publicada: páginas a menos/mais,
+   mudança de dimensões por página e variação de tamanho > 40% geram avisos
+   explícitos (ex.: “Este PDF possui 2 páginas a menos que a versão publicada”);
+3. **Motivo obrigatório** da substituição (registrado no histórico);
+4. **Nova versão** registrada em `overlay.templates_versoes[arquivo]` =
+   `{ atual, anterior, historico }` com data, sha256, bytes e info de páginas;
+5. No modo API o servidor mantém o arquivo físico de **cada versão**
+   (`data/uploads/nome__TIMESTAMP.pdf` + `data/uploads.json`) —
+   `GET /api/admin/uploads` lista as versões;
+6. **Rollback** (§26): “Restaurar vN” **não apaga** a versão atual — cria
+   `vN+1 = restauração de vN` e recoloca o arquivo físico anterior
+   (`POST /api/admin/uploads/restaurar`). Trilha de auditoria sempre preservada.
+
+A lista de versões por template fica abaixo da tabela de Templates.
+
+## Editor Visual: snap, atalhos e multi-seleção (§11/§12 — v3)
+
+* **Snap to grid** (1/5/10 pts) com caixa de seleção na toolbar;
+* **Atalhos:** setas = mover 1 pt · **Shift+setas** = 5 pts · **Alt+setas** = 0,5 pt
+  (ajuste fino) · **R** = restaurar campo selecionado · **Esc** = limpar seleção múltipla;
+* **Redimensionar** pelo canto inferior direito da caixa selecionada;
+* **Seleção múltipla** (Ctrl/Cmd+clique, limitada à página visível) com barra
+  **Alinhar / Distribuir / Restaurar / Limpar** por eixo X ou Y;
+* Lista lateral e canvas permanecem sincronizados nos dois sentidos (T4).
+
+## Modo de Teste (§13 — v3)
+
+**Editor Visual → Visualizar PDF de teste** abre o formulário de dados fictícios
+(nome, CPF, telefone, e-mail, datas — pré-preenchidos) e gera o **PDF preenchido**
+com esses valores. Opção **“Abrir também o PDF original”** para comparação
+**original | preenchido**. Nenhum dado real é usado ou retido.
+
+## Cidades: duplicar e exportar (§15/§17 — v3)
+
+* **Duplicar** em qualquer linha cria uma nova entrada no overlay
+  (`cidade (cópia)`) com a mesma ficha;
+* **Exportar** (JSON ou CSV, com BOM para Excel) respeita **os filtros ativos**
+  (busca, UF, ficha, filtro da Saúde) — o arquivo inclui a coluna `origem`;
+* Importação valida **UF inválida (27 estados)** e **ficha inexistente**.
+
+## Alterações Pendentes e publicação (§23/§24 — v3)
+
+O Dashboard mostra o painel **Alterações Pendentes**: tudo que está no overlay e
+ainda não foi marcado como publicado (`pendentesMarcados`).
+
+* **Publicar** executa a **validação pré-publicação**: erro crítico (campo sem
+  coordenada, cidade com ficha sem template) **bloqueia**; aviso (coordenada fora
+  da página, UF suspeita) exige confirmação. Publicar registra um **marco**
+  append-only — nada é apagado;
+* **Descartar** remove os patches pendentes por grupo; cidades novas sem
+  substituto na base são **preservadas** para não deixar mapeamento sem template;
+* O relatório completo de integridade também está na seção **Validação**.
+
+## Command Palette (§28 — v3)
+
+**Ctrl+K** (ou ⌘K) abre a busca global: formulários, cidades, templates, campos
+(sem acento/case) e seções. **Enter** abre o primeiro resultado; **Esc** fecha.
+A dica “Ctrl + K para buscar” fica visível no cabeçalho.
+
+## Configurações (§22 — v3)
+
+Parâmetros por categoria (**Geral, Formulários, PDFs, Cidades, Segurança**),
+salvos em `overlay.configuracoes` com leitura via default
+(`configGet`/`configSetPath`; int limitada ao range definido). Toda alteração
+registra evento no histórico.
+
+## Modelo de dados — overlay v3 (§32/§33)
+
+```json
+{
+  "campos_ficha": {},
+  "campos_declaracao": {},
+  "campos_custom": {},
+  "cidades": {},
+  "cidades_novas": [],
+  "pdfs_meta": {},
+  "forms_meta": {},
+  "templates_versoes": {},
+  "configuracoes": {}
+}
+```
+
+`forms_meta`, `templates_versoes`, `configuracoes` e `campos_custom` são **novos
+e opcionais** — overlays v1/v2 são migrados por normalização na carga (nenhum dado
+é descartado e nenhuma chave antiga muda de formato). A exportação v3 inclui as
+chaves novas; a importação aceita arquivos v1/v2 (campos ausentes = sem alteração)
+e apresenta o diff por grupo antes de aplicar.
 
 ## Saúde do Sistema (Dashboard)
 

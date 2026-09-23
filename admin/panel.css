@@ -417,3 +417,167 @@ table.data td.chk input[type="checkbox"] { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* ══════════════════════════════════════════════════════
+   Reestruturação por entidades — §6–9, §18, §23, §28
+   ══════════════════════════════════════════════════════ */
+
+/* Sub-menu lateral (ferramentas técnicas) */
+.side-sub { margin-top: auto; }
+.side-sub > button {
+  font-family: inherit; font-size: 11.5px; font-weight: 600;
+  color: var(--text-light); background: transparent; border: none;
+  padding: 10px 12px; cursor: pointer; width: 100%; text-align: left;
+  letter-spacing: .3px; border-radius: 8px;
+}
+.side-sub > button:hover { background: var(--accent-soft); }
+.side-sub-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+.side-sub-list button {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; text-align: left; padding: 9px 12px 9px 22px;
+  border: none; border-radius: 8px; background: transparent; color: var(--text-mid);
+  font-family: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer;
+}
+.side-sub-list button:hover { background: var(--accent-soft); color: var(--accent-dark); }
+.side-sub-list button.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+/* Cabeçalho do detalhe de formulário (§9) */
+.detail-header {
+  display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.detail-header .detail-title { flex: 1; min-width: 220px; }
+.detail-header .detail-title h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 2px; }
+.detail-header .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Abas (role=tablist) */
+.tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  border-bottom: 2px solid var(--border); margin-bottom: 16px;
+}
+.tabs button {
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  padding: 9px 16px; border: none; background: transparent;
+  color: var(--text-mid); cursor: pointer; border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+}
+.tabs button:hover { color: var(--accent-dark); background: var(--accent-soft); }
+.tabs button.active { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* Dados chave-valor do detalhe (aba Geral) */
+.kv-list { display: flex; flex-direction: column; gap: 0; }
+.kv-list .kv {
+  display: flex; gap: 12px; padding: 8px 0;
+  border-bottom: 1px solid #eee7e0; font-size: 12.5px; align-items: baseline;
+}
+.kv-list .kv:last-child { border-bottom: none; }
+.kv-list .kv .k { min-width: 140px; color: var(--text-light); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.kv-list .kv .v { flex: 1; overflow-wrap: anywhere; color: var(--text); }
+
+/* Command Palette (§28 — Ctrl+K) */
+.cmdk-hint {
+  font-size: 11.5px; color: var(--text-mid);
+  background: var(--ok-bg); border: 1px solid var(--ok-border); color: var(--ok);
+  border-radius: 999px; padding: 5px 12px; font-weight: 600;
+}
+.cmdk-overlay {
+  position: fixed; inset: 0; z-index: 1500;
+  background: rgba(26, 23, 20, 0.55); backdrop-filter: blur(3px);
+  display: none; align-items: flex-start; justify-content: center; padding: 80px 16px 16px;
+}
+.cmdk-overlay.show { display: flex; }
+.cmdk {
+  width: min(640px, 100%); max-height: 70vh; overflow: auto;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 14px;
+}
+.cmdk input[type="text"] {
+  width: 100%; font-family: inherit; font-size: 15px;
+  padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+  background: #fff; color: var(--text); outline: none;
+}
+.cmdk input[type="text"]:focus { border-color: var(--accent); }
+.cmdk-results { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+.cmdk-results:empty::after {
+  content: "Nenhum resultado — pesquise por formulário, cidade, template, campo ou seção.";
+  display: block; font-size: 12.5px; color: var(--text-light); padding: 14px 6px;
+}
+.cmdk-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  font-family: inherit; font-size: 13px; padding: 10px 12px;
+  border: none; background: transparent; border-radius: 8px; cursor: pointer; color: var(--text);
+}
+.cmdk-item:hover, .cmdk-item.sel { background: var(--accent-soft); }
+.cmdk-item .ck { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  background: var(--accent-soft); color: var(--accent); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; }
+.cmdk-item .ct { color: var(--text-light); font-size: 11.5px; overflow-wrap: anywhere; }
+.cmdk-footer { font-size: 10.5px; color: var(--text-light); margin-top: 10px; text-align: center; }
+
+/* Menu de exportação (§17) */
+.export-menu {
+  position: relative; display: flex; flex-direction: column;
+  background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+  box-shadow: var(--shadow-lg); overflow: hidden; min-width: 130px;
+}
+.export-menu button {
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  padding: 9px 14px; border: none; background: transparent;
+  color: var(--accent); text-align: left; cursor: pointer;
+}
+.export-menu button:hover { background: var(--accent-soft); }
+
+/* Snap-to-grid e redimensionamento do editor (§11) */
+.chk-inline {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 500; color: var(--text-mid); cursor: pointer;
+}
+.chk-inline input { cursor: pointer; }
+.field-box .resize-handle {
+  position: absolute; right: 0; bottom: 0; width: 12px; height: 12px;
+  background: var(--accent); border-top-left-radius: 6px; cursor: nwse-resize;
+  display: none;
+}
+.field-box.selected .resize-handle { display: block; }
+.field-box.dragging { opacity: .85; }
+
+/* Card de versões de template (§18) */
+.versao-linha {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 12px; color: var(--text-mid); padding: 7px 0;
+  border-bottom: 1px solid #eee7e0;
+}
+.versao-linha:last-child { border-bottom: none; }
+.versao-linha .vh { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-light); overflow-wrap: anywhere; }
+.versao-comparacao { margin-top: 10px; }
+
+/* Pendências no dashboard (§23) */
+.pend-linha {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  font-size: 12.5px; padding: 8px 0; border-bottom: 1px solid #eee7e0;
+}
+.pend-linha:last-child { border-bottom: none; }
+.pend-linha .p-chave { font-weight: 600; overflow-wrap: anywhere; }
+.pend-linha .p-detalhe { color: var(--text-mid); overflow-wrap: anywhere; }
+
+/* Field Builder (§10) — drawer de criação/edição de campos */
+.fb-drawer {
+  margin-top: 12px; padding: 14px; border: 1px solid #e5dcd2;
+  border-left: 3px solid var(--accent, #7a5c3e); border-radius: 10px;
+  background: #fdfaf6;
+}
+.fb-drawer[hidden] { display: none; }
+.fb-drawer .form-grid { margin-bottom: 8px; }
+.fb-drawer textarea {
+  width: 100%; font-family: ui-monospace, monospace; font-size: 11.5px;
+  padding: 6px 8px; border: 1px solid #ddd2c6; border-radius: 6px;
+  background: #fff; color: var(--text, #333); resize: vertical;
+}
+.fb-drawer label { font-size: 11.5px; color: var(--text-mid, #666); display: block; margin-bottom: 3px; }
+.fb-drawer input[type="text"], .fb-drawer input[type="number"], .fb-drawer select {
+  width: 100%; padding: 6px 8px; border: 1px solid #ddd2c6; border-radius: 6px;
+  font-size: 12px; background: #fff; color: var(--text, #333); box-sizing: border-box;
+}
+.fb-drawer input:disabled, .fb-drawer select:disabled { background: #f1ece5; color: var(--text-light, #999); }

@@ -29,6 +29,7 @@
 import { createServer } from "node:http";
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync } from "node:fs";
 import { join, extname, resolve, basename } from "node:path";
+import crypto from "node:crypto";
 
 const PORT = parseInt(process.env.PORT || "3456", 10);
 const ROOT = join(import.meta.dirname, "..");
@@ -37,6 +38,7 @@ const BACKUPS_DIR = join(DATA_DIR, "backups");
 const UPLOADS_DIR = join(DATA_DIR, "uploads");
 const CONFIG_PATH = join(DATA_DIR, "admin-config.json");
 const HISTORICO_PATH = join(DATA_DIR, "historico.json");
+const UPLOADS_JSON_PATH = join(DATA_DIR, "uploads.json");
 const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
 function ensureDataDirs() {
@@ -95,6 +97,44 @@ function timestampName(prefix, ext) {
   const d = new Date();
   const p = (n) => String(n).padStart(2, "0");
   return `${prefix}-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${ext}`;
+}
+
+function sha256Hex(buf) {
+  return crypto.createHash("sha256").update(buf).digest("hex");
+}
+
+function loadUploadsIndex() {
+  try { return JSON.parse(readFileSync(UPLOADS_JSON_PATH, "utf8")); }
+  catch { return { versoes: [] }; }
+}
+
+function saveUploadsIndex(idx) {
+  writeFileSync(UPLOADS_JSON_PATH, JSON.stringify(idx, null, 2));
+}
+
+/**
+ * Registra uma versão física do upload (§18): o arquivo gravado é
+ * renomeado para incluir o timestamp — versões anteriores nunca são
+ * sobrescritas (o caminho é parte do registro; rollback = copiar de volta).
+ */
+function registrarVersaoUpload(nome, bytes) {
+  const idx = loadUploadsIndex();
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const stamp = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  const dot = nome.lastIndexOf(".");
+  const base = dot > 0 ? nome.slice(0, dot) : nome;
+  const ext = dot > 0 ? nome.slice(dot) : "";
+  const arquivoVersao = `${base}__${stamp}${ext}`;
+  writeFileSync(join(UPLOADS_DIR, arquivoVersao), bytes);
+  idx.versoes.unshift({
+    nome, arquivo: arquivoVersao,
+    data: new Date().toISOString(), bytes: bytes.length,
+    sha256: sha256Hex(bytes)
+  });
+  idx.versoes = idx.versoes.slice(0, 200);
+  saveUploadsIndex(idx);
+  return idx.versoes[0];
 }
 
 function sanitizarNomeArquivo(nome) {
@@ -169,7 +209,31 @@ async function handleAdminApi(req, res, pathname, searchParams) {
     if (!buf.subarray(0, 5).toString("latin1").startsWith("%PDF-")) { sendJSON(res, 400, { erro: "Arquivo não é um PDF válido (assinatura ausente)" }); return; }
     if (buf.length > MAX_PDF_BYTES) { sendJSON(res, 413, { erro: "PDF excede 20 MB" }); return; }
     writeFileSync(join(UPLOADS_DIR, nome), buf);
-    sendJSON(res, 200, { ok: true, nome, bytes: buf.length, destino: `data/uploads/${nome}` });
+    const versao = registrarVersaoUpload(nome, buf);
+    sendJSON(res, 200, { ok: true, nome, bytes: buf.length, destino: `data/uploads/${nome}`, versao });
+    return;
+  }
+
+  if (pathname === "/api/admin/uploads") {
+    if (req.method !== "GET") { sendJSON(res, 405, { erro: "Método não suportado" }); return; }
+    const idx = loadUploadsIndex();
+    sendJSON(res, 200, idx.versoes || []);
+    return;
+  }
+
+  // §26 — rollback físico: recopia a versão anterior por cima do arquivo atual
+  if (pathname === "/api/admin/uploads/restaurar") {
+    if (req.method !== "POST") { sendJSON(res, 405, { erro: "Método não suportado" }); return; }
+    const body = (await readBody(req, 64 * 1024)).toString("utf8");
+    let json;
+    try { json = JSON.parse(body); } catch { sendJSON(res, 400, { erro: "JSON inválido" }); return; }
+    const nome = basename(sanitizarNomeArquivo(String(json.nome || "")));
+    const versao = basename(sanitizarNomeArquivo(String(json.arquivoVersao || "")));
+    const pVersao = join(UPLOADS_DIR, versao);
+    if (!versao || !existsSync(pVersao)) { sendJSON(res, 404, { erro: "versão física não encontrada no servidor (data/uploads/)" }); return; }
+    writeFileSync(join(UPLOADS_DIR, nome), readFileSync(pVersao));
+    registrarVersaoUpload(nome, readFileSync(pVersao)); // registra a restauração como nova versão
+    sendJSON(res, 200, { ok: true, restaurado: nome, de: versao });
     return;
   }
 
