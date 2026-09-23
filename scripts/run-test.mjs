@@ -679,6 +679,14 @@ async function testarPainelV2(assert) {
   assert("resumo de exportação conta as coordenadas pendentes de levar ao repo",
     T.resumoExportacaoRepositorio().nPatch === 1 && T.resumoExportacaoRepositorio().nenhuma === false,
     JSON.stringify(T.resumoExportacaoRepositorio()));
+  // O patch do overlay guarda metadados do painel (`label`) junto da coordenada;
+  // eles não podem vazar para o `coordenadas` do schema do repositório.
+  st.overlay.campos_ficha["dados_pessoais.campos.nome"] = { largura: 120, label: "Nome completo" };
+  const gerMeta = T.docEfetivoParaRepositorio("ficha_cadastral");
+  const coordMeta = gerMeta.campos.dados_pessoais.campos.nome.coordenadas;
+  assert("exportação copia só x/y/largura/altura (sem metadados do painel)",
+    coordMeta.largura === 120 && !("label" in coordMeta) && Object.keys(coordMeta).sort().join(",") === "altura,largura,x,y",
+    JSON.stringify(coordMeta));
   st.overlay.campos_ficha = {};
 
   // cidades no formato do repositório (com e sem UF) + cidade nova do overlay

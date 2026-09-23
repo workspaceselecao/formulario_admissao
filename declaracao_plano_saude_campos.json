@@ -13,14 +13,24 @@
           "label": "Assinatura manuscrita",
           "tipo": "imagem",
           "pagina": 2,
-          "coordenadas": { "x": 88, "y": 160, "largura": 265, "altura": 54 },
+          "coordenadas": {
+            "x": 88,
+            "y": 160,
+            "largura": 265,
+            "altura": 54
+          },
           "obrigatorio": true
         },
         "nome_legivel": {
           "label": "Assinatura (nome por extenso)",
           "tipo": "texto",
           "pagina": 2,
-          "coordenadas": { "x": 40, "y": 146, "largura": 312, "altura": 20 },
+          "coordenadas": {
+            "x": 40,
+            "y": 146,
+            "largura": 312,
+            "altura": 20
+          },
           "obrigatorio": true,
           "observacao": "Posição quando há rubrica manuscrita"
         },
@@ -28,7 +38,12 @@
           "label": "Assinatura (nome por extenso, sem rubrica)",
           "tipo": "texto",
           "pagina": 2,
-          "coordenadas": { "x": 40, "y": 146, "largura": 312, "altura": 20 },
+          "coordenadas": {
+            "x": 40,
+            "y": 146,
+            "largura": 312,
+            "altura": 20
+          },
           "obrigatorio": false,
           "observacao": "Mesma área quando marca 'Não assinar'"
         },
@@ -36,7 +51,12 @@
           "label": "Data da declaração",
           "tipo": "data",
           "pagina": 2,
-          "coordenadas": { "x": 383, "y": 173, "largura": 54, "altura": 10 },
+          "coordenadas": {
+            "x": 383,
+            "y": 173,
+            "largura": 54,
+            "altura": 10
+          },
           "obrigatorio": true,
           "mascara": "99/99/9999"
         },
@@ -44,7 +64,12 @@
           "label": "Rodapé: evidência da assinatura eletrônica (página 2)",
           "tipo": "texto",
           "pagina": 2,
-          "coordenadas": { "x": 21, "y": 12, "largura": 564, "altura": 8 },
+          "coordenadas": {
+            "x": 21,
+            "y": 12,
+            "largura": 564,
+            "altura": 8
+          },
           "obrigatorio": false,
           "observacao": "Margens do rodapé; posição recalculada na geração do PDF (carimbo automático)."
         }

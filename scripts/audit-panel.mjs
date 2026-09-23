@@ -233,11 +233,23 @@ if (typeof T.construirIndiceBusca === "function" && typeof T.buscarIndice === "f
 // arquivo gerado precisa ser IDÊNTICO ao do repositório (mesmo conteúdo e mesma
 // ordem de chaves). É o que prova que o botão “Exportar arquivos do repositório”
 // produz algo que pode substituir o arquivo real.
+const PROPS_COORD = ["x", "y", "largura", "altura"];
 for (const [key, arquivo] of [["ficha_cadastral", "ficha_cadastral_campos.json"], ["declaracao_plano_saude", "declaracao_plano_saude_campos.json"]]) {
   const gerado = T.docEfetivoParaRepositorio(key);
   const real = JSON.parse(readFileSync(join(ROOT, arquivo), "utf8"));
   check(`overlay vazio ⇒ ${arquivo} gerado é idêntico ao do repositório`,
     JSON.stringify(gerado) === JSON.stringify(real), "o JSON gerado divergiu do arquivo do repositório");
+  // O patch do overlay carrega metadados do painel (ex.: `label`); eles NÃO
+  // podem vazar para `coordenadas` do schema do repositório.
+  const extras = [];
+  (function walk(n, p) {
+    if (!n || typeof n !== "object") return;
+    if (n.coordenadas && typeof n.coordenadas === "object") {
+      for (const k of Object.keys(n.coordenadas)) if (PROPS_COORD.indexOf(k) === -1) extras.push(p + ".coordenadas." + k);
+    }
+    for (const k of Object.keys(n)) walk(n[k], p ? p + "." + k : k);
+  })(gerado.campos, "campos");
+  check(`${arquivo} gerado não leva metadados do painel para coordenadas`, extras.length === 0, extras.slice(0, 5).join(" | "));
 }
 for (const [comUf, arquivo] of [[false, "cidades_brasil.json"], [true, "cidades_infinity.json"]]) {
   const gerado = T.cidadesEfetivasParaRepositorio(comUf);

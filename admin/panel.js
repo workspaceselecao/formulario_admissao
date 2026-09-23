@@ -537,11 +537,19 @@
     }
   }
 
+  /** Aplica ao campo SOMENTE as propriedades de coordenada do patch.
+   *  O patch do overlay carrega metadados do painel (ex.: `label`) que não
+   *  pertencem ao schema — copiá-los inteiros contaminava o JSON do repositório. */
+  function aplicarPatchCoordenada(coords, patch) {
+    for (const p of PROPS_COORD) if (p in patch) coords[p] = patch[p];
+    return coords;
+  }
+
   function applyOverlayToDoc(docKey, json) {
     const overlayMap = state.overlay[DOCS[docKey].overlayKey] || {};
     for (const f of (docDataFlat(docKey, json) || [])) {
       const patch = overlayMap[f.key];
-      if (patch) Object.assign(f.coords, patch);
+      if (patch) aplicarPatchCoordenada(f.coords, patch);
     }
     // §10 — Field Builder: reconstrói o JSON EFETIVO aplicando criações,
     // renomeações e exclusões do overlay campos_custom (aditivo; o JSON
@@ -2985,7 +2993,7 @@
     flattenFields(json.campos, "", flat);
     for (const f of flat) {
       const p = patches[f.key];
-      if (p) Object.assign(f.coords, p);
+      if (p) aplicarPatchCoordenada(f.coords, p); // só x/y/largura/altura
     }
     return json;
   }
