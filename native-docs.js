@@ -1118,7 +1118,12 @@
   }
 
   function desenharCheckbox(folha, el, pagina, dados, ctx) {
-    const marcado = el.marcado === true || (el.binding && resolverValor(dados, el.binding) === true) || (el.binding && String(resolverValor(dados, el.binding)) === "sim");
+    // Marcado vem de `el.marcado` (definição) ou dos DADOS: por `binding` ou,
+    // para caixas sem binding (importadas do formulário, que o Preencher endereça
+    // por id), por `marcacao.<id>` — a chave que o catálogo do Preencher usa.
+    const chave = el.binding || (el.id ? "marcacao." + el.id : null);
+    const valor = chave ? resolverValor(dados, chave) : null;
+    const marcado = el.marcado === true || valor === true || String(valor) === "sim";
     const caixa = caixaParaPdf(el, pagina);
     if (caixa.width > 0) {
       folha.drawRectangle({

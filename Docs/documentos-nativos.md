@@ -111,7 +111,29 @@ as camadas — nenhum outro ponto converte Y.
 * **Salvar alterações** grava no overlay (pendência administrativa) e registra o diff no
   log do documento. **Reverter** descarta o que ainda não foi salvo.
 
-### 4.3 Reconstruir o mobiliário da referência (o que o schema não descreve)
+### 4.3 Preencher o modelo (só os campos, sem geometria)
+
+O editor é uma ferramenta de **layout** — para quem só quer preencher o formulário, ele
+é dispendioso (achar o elemento, entender binding, coordenadas). A aba
+**✎ Preencher** mostra **apenas os campos que o modelo tem**, com o rótulo de cada um,
+em colunas, agrupados por seção (Dados Pessoais, Endereço, Deficiência, Dados
+Bancários, Dependentes, Vale Transporte, Assinatura):
+
+* **texto** — caixa de digitação por campo (`field` da definição);
+* **marcação** — rádio por grupo de caixas (`checkbox`), com as opções que o
+  formulário oficial mostra (SIM/NÃO, tipos de deficiência, bancos e tipos de conta,
+  vale alimentação/refeição).
+
+Nada é perguntado fora do modelo, e nada do modelo preenchível fica de fora: o
+catálogo é extraído da definição (`AdminPreencher.catalogoDaDefinicao`) e os rótulos
+vêm do **schema** (`ficha_cadastral_campos.json`) — a mesma fonte de labels da
+aplicação pública. **Os valores não mudam a definição**: vão como DADOS para o mesmo
+engine (`renderizarPdf(def, dados, …)`), e o botão **▶ Gerar PDF preenchido** abre o
+PDF pronto. Os grupos de marcação são reconhecidos pela geometria do formulário
+(linha de cabeçalho acima das caixas — "Possui Deficiência?", "Bradesco:",
+"Santander:") — e cada grupo aceita exatamente uma marca.
+
+### 4.4 Reconstruir o mobiliário da referência (o que o schema não descreve)
 
 O documento nativo do F-075 já nasce **fiel nos campos** (ver §6), mas o formulário
 oficial também tem textos fixos, linhas, caixas e logotipo. Dois caminhos:
@@ -123,7 +145,7 @@ oficial também tem textos fixos, linhas, caixas e logotipo. Dois caminhos:
   “Ajustar página às dimensões medidas” quando as dimensões divergem.
 * **Reconstrução manual** no editor (linha/retângulo/imagem/tabela).
 
-### 4.4 Comparar e medir a fidelidade
+### 4.5 Comparar e medir a fidelidade
 
 O comparador tem **duas medidas**, e as duas aparecem juntas:
 
@@ -148,7 +170,7 @@ deslocamento (duas páginas idênticas devolvem `0,0`, não ruído);
 Diferença alta no começo é **esperado** enquanto o formulário não estiver reconstruído.
 `Abrir os dois PDFs` permite conferir visualmente fora do painel.
 
-### 4.5 Versões, integridade e log
+### 4.6 Versões, integridade e log
 
 * **Congelar versão e publicar** grava: status escolhido, motivo, autor, data, número
   da versão (patch), nº de elementos e **hash SHA-256** da definição (§42). A versão
@@ -161,7 +183,7 @@ Diferença alta no começo é **esperado** enquanto o formulário não estiver r
   versões + log). **Importar definição** valida, mostra as alterações e só aplica
   depois da confirmação (§40) — nunca sobrescreve em silêncio.
 
-### 4.6 Assets e fontes
+### 4.7 Assets e fontes
 
 * **Assets**: imagens do repositório (`logomarca.png`, `icone.png`,
   `carta_bradesco_logo.png`, `carta_bradesco_assinatura.png`, `carta_bradesco_carimbo.png`)
@@ -172,7 +194,7 @@ Diferença alta no começo é **esperado** enquanto o formulário não estiver r
   dessa lista **não é substituída em silêncio**: a validação acusa. Texto fora do WinAnsi
   (emoji, “✔”) é normalizado/removido — nunca quebra a geração.
 
-### 4.7 Tipografia oficial por run (§15.1)
+### 4.8 Tipografia oficial por run (§15.1)
 
 O PDF oficial **não diz** qual fonte o formulário usa: o pdf.js só reporta o subconjunto
 embutido (`AAAAAA+Arial-BoldMT`). Quem declara é o **documento editável** (o `.docx`
@@ -284,7 +306,7 @@ node scripts/gerar-nativo-f075.mjs --conferir   # só confere (exit 1 se sair da
    edições ficam no overlay e voltam pelo botão *Dados & Backups → ⬇
    ficha_cadastral_nativo.json*.
 5. `scripts/referencia/f075-tipografia.json` — **tipografia declarada por run** (extraída
-   do documento editável por `scripts/extrair-tipografia-f075.mjs`, ver §4.7). O gerador
+   do documento editável por `scripts/extrair-tipografia-f075.mjs`, ver §4.8). O gerador
    casa cada bloco medido com o parágrafo do documento e anota `fonteOficial` +
    `tipografiaOficial`; o que divergir fica em `metadados.tipografiaOficial.divergencias`.
 

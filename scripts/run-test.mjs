@@ -384,6 +384,9 @@ async function runTests() {
   // ── TEST 19: tipografia oficial por run (§15.1) e traço do mobiliário ──
   await testarTipografiaOficial(assert);
 
+  // ── TEST 20: Preencher — só os campos do modelo ──
+  await testarPreencher(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -1729,5 +1732,69 @@ async function testarTipografiaOficial(assert) {
     Array.isArray(meta19.divergencias) && meta19.divergencias.length > 0 &&
     meta19.substituicoes.some((s) => /narrow/i.test(s.pedida) && s.desvio > 0.15),
     JSON.stringify(meta19.substituicoes));
+}
+
+// ══════════════════════════════════════════════════════
+// Teste 20 — PREENCHER: só os campos do modelo (sem geometria)
+// ══════════════════════════════════════════════════════
+async function testarPreencher(assert) {
+  console.log("\n📋 Teste 20: Preencher — catálogo de campos e geração a partir dos valores");
+  (0, eval)(readFileSync(join(ROOT, "admin", "preencher.js"), "utf8"));
+  const P20 = globalThis.AdminPreencher && globalThis.AdminPreencher.__teste;
+  assert("preencher: módulo carrega e expõe a API", !!P20 && !!P20.catalogoDaDefinicao, "sem AdminPreencher");
+  if (!P20) return;
+  const zlib20 = await import("node:zlib");
+  const zlibInflar = (b) => zlib20.inflateSync(b);
+
+  const defNat = JSON.parse(readFileSync(join(ROOT, "ficha_cadastral_nativo.json"), "utf8"));
+  const cat20 = P20.catalogoDaDefinicao(defNat, {});
+  assert("preencher: catálogo cobre TODOS os campos preenchíveis da definição",
+    cat20.totais.campos === defNat.elementos.filter((e) => e.type === "field").length,
+    JSON.stringify(cat20.totais) + " vs " + defNat.elementos.filter((e) => e.type === "field").length + " fields");
+  assert("preencher: catálogo cobre TODAS as caixas de marcação",
+    cat20.totais.caixas === defNat.elementos.filter((e) => e.type === "checkbox").length,
+    JSON.stringify(cat20.totais));
+  assert("preencher: nada é perguntado fora do modelo (sem campo inventado)",
+    cat20.secoes.every((s) => s.campos.every((c) => defNat.elementos.some((e) => e.id === c.id))), "elemento fantasma");
+
+  // valoresDaTela: dados no formato do engine + UMA caixa marcada por grupo
+  const ler20 = (id) => ({ dados_pessoais_nome: "ROBERTO DA SILVA", dependentes_0_nome: "MARIA" }[id] || null);
+  const grupos20 = cat20.secoes.flatMap((s) => s.grupos);
+  const marcas20 = {};
+  for (const g of grupos20) if (g.opcoes.length) marcas20[g.rotulo] = g.opcoes[0].id;
+  const dados20 = P20.valoresDaTela(cat20, ler20, marcas20);
+  assert("preencher: valores da tela vão para o binding certo (dados no formato do engine)",
+    dados20["ficha_cadastral.dados_pessoais.nome"] === "ROBERTO DA SILVA" &&
+    dados20["ficha_cadastral.dependentes.0.nome"] === "MARIA", JSON.stringify(dados20).slice(0, 140));
+  const marcadas20 = Object.keys(dados20).filter((k) => dados20[k] === true);
+  const desmarcadas20 = Object.keys(dados20).filter((k) => dados20[k] === false);
+  assert("preencher: cada grupo tem EXATAMENTE uma caixa marcada",
+    marcadas20.length === grupos20.length && marcadas20.length + desmarcadas20.length === cat20.totais.caixas,
+    marcadas20.length + " marcadas / " + desmarcadas20.length + " desmarcadas / " + grupos20.length + " grupos");
+
+  // O engine desenha o que a tela pediu (o Preencher não tem lógica própria de PDF)
+  const pdfLib20 = await import("pdf-lib");
+  (0, eval)(readFileSync(join(ROOT, "native-docs.js"), "utf8"));
+  const N20 = globalThis.NativeDocs;
+  const imgs20 = {};
+  for (const a of defNat.assets || []) { try { imgs20[a.arquivo] = new Uint8Array(readFileSync(join(ROOT, a.arquivo))); } catch { /* opcional */ } }
+  const ger20 = await N20.renderizarPdf(defNat, dados20, pdfLib20, { imagens: imgs20 }, { forcar: true });
+  const buf20 = Buffer.from(ger20.bytes);
+  let conteudo20 = "";
+  const txt20 = buf20.toString("latin1");
+  for (const m of txt20.matchAll(/stream\r?\n/g)) {
+    const ini = m.index + m[0].length;
+    const fim = txt20.indexOf("endstream", ini);
+    try { conteudo20 += zlibInflar(buf20.subarray(ini, fim)); } catch { /* sem deflate */ }
+  }
+  const hexDe = (t) => Buffer.from(t, "latin1").toString("hex").toUpperCase();
+  assert("preencher: o PDF gerado contém o valor digitado",
+    conteudo20.toUpperCase().indexOf(hexDe("ROBERTO DA SILVA")) !== -1, "valor não encontrado no stream");
+  assert("preencher: exatamente UMA marca por grupo aparece no PDF",
+    (conteudo20.match(/<58>\s*Tj/g) || []).length === grupos20.length,
+    (conteudo20.match(/<58>\s*Tj/g) || []).length + " X para " + grupos20.length + " grupos");
+  assert("preencher: resumo conta preenchidos corretamente",
+    P20.resumoPreenchimento(cat20, ler20, marcas20).preenchidos === 2 + grupos20.length,
+    JSON.stringify(P20.resumoPreenchimento(cat20, ler20, marcas20)));
 }
 

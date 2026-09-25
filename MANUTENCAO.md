@@ -248,7 +248,8 @@ Para o **código** exato (constantes, nomes de funções, filtros de cidade), a 
 - `ficha_cadastral.html` — `TEMPLATE_PATH`, carregamento de `ficha_cadastral_campos.json`, `gerarPDF` e CEP.
 - `native-docs.js` — `definicaoDeSchema`, `renderizarPdf`, `validarDefinicao`, `converterY`, `congelarVersao`, `compararDefinicoes`, `elementosDeItensDeTexto`, `extrairGraficos`, `elementosDeGraficos`, `aplicarContrasteDeTarja`, `snapshotDeReferencia`, `compararComReferencia`; manual em `Docs/documentos-nativos.md`.
 - `scripts/gerar-nativo-f075.mjs` + `scripts/referencia/f075-pagina1.json` — reconstrução medida do mobiliário do F-075 (ver `Docs/documentos-nativos.md` §6).
-- `scripts/extrair-tipografia-f075.mjs` + `scripts/referencia/f075-tipografia.json` — tipografia oficial por run e a resolução honesta de fonte do engine (§15.1, ver `Docs/documentos-nativos.md` §4.7).
+- `scripts/extrair-tipografia-f075.mjs` + `scripts/referencia/f075-tipografia.json` — tipografia oficial por run e a resolução honesta de fonte do engine (§15.1, ver `Docs/documentos-nativos.md` §4.8).
+- `admin/preencher.js` — ferramenta **Preencher** (aba `✎ Preencher` em Documentos Nativos): catálogo dos campos preenchíveis da definição nativa, rótulos vindos do schema, grupos de marcação reconhecidos pela geometria do formulário; os valores vão como DADOS para o mesmo engine (`renderizarPdf`), sem alterar a definição. Lógica pura em `AdminPreencher.__teste` (Teste 20).
 - **Cuidado de realm ao testar o renderer:** o pdf-lib valida objetos aninhados (`drawLine`/`options.start`) contra o `Object` do próprio realm. Com o engine em `node:vm` e o pdf-lib do host, **toda régua é descartada em silêncio** e o PDF sai sem linha nenhuma. Testes de traçado precisam carregar o engine no realm do host (Teste 19), como o painel faz.
 
 ---
