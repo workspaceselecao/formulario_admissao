@@ -377,6 +377,13 @@ async function runTests() {
   console.log("\n📋 Teste 17: Auditoria do painel contra os dados reais do repositório");
   await testarAuditoriaPainel(assert);
 
+  // ── TEST 18: Gerador nativo de PDFs (IMPLEMENTAÇÃO DE GERADOR NATIVO D.md) ──
+  console.log("\n📋 Teste 18: Gerador nativo de PDFs — definição, renderer, fidelidade, versões");
+  await testarGeradorNativo(assert);
+
+  // ── TEST 19: tipografia oficial por run (§15.1) e traço do mobiliário ──
+  await testarTipografiaOficial(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -412,6 +419,432 @@ async function testarAuditoriaPainel(assert) {
     "exit=" + r.code + " | \n" + r.out.split("\n").filter((l) => /❌|→/.test(l)).join("\n") + r.err);
   assert("auditoria roda o pipeline real e reporta as verificações", /carrega os 2 schemas de campos/.test(r.out) && falhas === 0,
     "falhas=" + falhas);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TESTE 18 — Gerador nativo de PDFs padronizados
+//
+// O documento deixa de depender do PDF externo como estrutura: aqui a suíte
+// prova (a) que a definição criada a partir do schema REAL do F-075 reproduz a
+// geometria do PDF atual campo a campo, (b) que o renderer produz um PDF real,
+// determinístico e independente do template, (c) que a validação §31 barra o que
+// impede geração e que a importação de referência marca tudo como
+// REQUER CALIBRAÇÃO, e (d) que o painel integra o documento ao overlay, às
+// pendências e ao gate de publicação sem bloquear o fluxo atual.
+// ═══════════════════════════════════════════════════════════════════
+async function testarGeradorNativo(assert) {
+  const vm = (await import("node:vm"));
+  const { readFileSync } = (await import("node:fs"));
+  const { webcrypto } = (await import("node:crypto"));
+  let pdfLib = null;
+  try { pdfLib = await import("pdf-lib"); } catch { pdfLib = null; }
+
+  // ── 18.a — estruturais (o que o navegador realmente recebe) ──
+  const adminDN = await fetch(`http://127.0.0.1:${PORT}/admin`);
+  assert("gerador: seção Documentos Nativos na navegação",
+    adminDN.body.includes('data-section="documentos"') && adminDN.body.includes('id="sec-documentos"'), "missing");
+  assert("gerador: subseções §35 (Templates Nativos/Comparação/Importar PDF/Versões/Logs/Assets)",
+    ["templates", "comparacao", "referencia", "versoes", "logs", "recursos"].every((t) => adminDN.body.includes(`data-dntab="${t}"`)), "missing tabs");
+  assert("gerador: editor com propriedades numéricas, zoom e snap (§18/§19)",
+    ["dnX", "dnY", "dnW", "dnH", "dnZoom", "dnSnap", "dnPageStack", "dnCanvas", "dnLista"].every((id) => adminDN.body.includes(`id="${id}"`)), "missing controls");
+  assert("gerador: painel carrega /native-docs.js (engine compartilhado)", adminDN.body.includes('src="/native-docs.js"'), "missing script");
+  const engineR = await fetch(`http://127.0.0.1:${PORT}/native-docs.js`);
+  assert("gerador: /native-docs.js servido e com API do renderer",
+    engineR.status === 200 && engineR.body.includes("renderizarPdf") && engineR.body.includes("definicaoDeSchema"), `status ${engineR.status}`);
+  assert("gerador: engine sem localStorage (regra do projeto)", !LS_USE_RE.test(engineR.body), "localStorage usage found!");
+  const cssDN = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
+  assert("gerador: CSS das caixas, alça e comparação",
+    cssDN.body.includes(".dn-el") && cssDN.body.includes(".dn-handle") && cssDN.body.includes(".cmp-grid"), "missing");
+
+  // ── 18.b — engine em node:vm com pdf-lib real ──
+  const docStub = criarStubsDom();
+  const sb = {
+    window: {}, document: docStub, console, setTimeout() {}, clearTimeout() {},
+    fetch: async () => ({ ok: false, status: 0, json: async () => ({}), text: async () => "" }),
+    URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+    Blob: class {}, Math, Date, JSON, Object, Array, Number, String, Set, Map, Promise, Error,
+    encodeURIComponent, decodeURIComponent, TextEncoder, crypto: webcrypto
+  };
+  sb.window.document = docStub;
+  sb.window.crypto = webcrypto; // §42 — WebCrypto é o caminho do sha256
+  sb.globalThis = sb;
+  const ctx = vm.createContext(sb);
+  vm.runInContext(readFileSync(join(ROOT, "native-docs.js"), "utf8"), ctx, { filename: "native-docs.js" });
+  const N = sb.window.NativeDocs;
+  assert("gerador: engine expõe a API em node:vm (com versão de schema)", !!N && N.SCHEMA_VERSION === "1.0", "missing export");
+  if (!N) return;
+
+  const schema = JSON.parse(readFileSync(join(ROOT, "ficha_cadastral_campos.json"), "utf8"));
+  const PAGE = { width: 595.5, height: 842.25 };
+  const def = N.definicaoDeSchema(schema, { documentId: "f075", documentName: "Ficha Cadastral (F-075)", width: PAGE.width, height: PAGE.height, autor: "suite" });
+  const folhas = N.folhasComCoordenadas(schema.campos, "");
+  assert("gerador: bootstrap cria 1 elemento por campo com coordenadas do schema",
+    def.elementos.length === folhas.length && folhas.length > 30, `def=${def.elementos.length} schema=${folhas.length}`);
+  assert("gerador: todos os elementos usam um tipo suportado (§7)",
+    def.elementos.every((e) => N.TIPOS.indexOf(e.type) !== -1), "tipo inválido");
+  const vDef = N.validarDefinicao(def);
+  assert("gerador: definição criada do schema real sem erro crítico (§31)", vDef.erros.length === 0, JSON.stringify(vDef.erros.slice(0, 3)));
+  assert("gerador: bootstrap marca REQUER CALIBRAÇÃO em vez de inventar o resto (§52)",
+    vDef.avisos.some((a) => a.indexOf("REQUER CALIBRAÇÃO") !== -1), "sem aviso de calibração");
+
+  // 18.1 — fidelidade geométrica: mesma baseline e mesmo x do desenho atual
+  let divergentes = 0;
+  for (const f of folhas) {
+    const c = f.no.coordenadas;
+    const el = def.elementos.filter((e) => e.chaveSchema === f.path)[0];
+    const esperadoY = c.y + Math.min((c.altura || 0) * 0.78, 9 * 1.12) - (c.y > 120 ? 9 : 0);
+    const meuY = PAGE.height - N.baselineTopo(el);
+    if (Math.abs(esperadoY - meuY) > 0.001 || Math.abs((c.x + 0.5) - (el.x + el.offsetX)) > 0.001) divergentes++;
+  }
+  assert("gerador: geometria fiel ao PDF atual (x e baseline, campo a campo)", divergentes === 0, divergentes + " divergente(s)");
+  assert("gerador: Y é convertido do topo numa única camada (§5)",
+    Math.abs(N.converterY(100, 842.25, 20) - 722.25) < 0.001 && Math.abs(N.caixaParaPdf({ x: 10, y: 100, width: 50, height: 20 }, PAGE).y - 722.25) < 0.001,
+    String(N.converterY(100, 842.25, 20)));
+  assert("gerador: fonte/tamanho/offsets do perfil da aplicação gravados no elemento (§8)",
+    def.elementos.every((e) => e.font.size === 9 && e.offsetX === 0.5 && e.ancoraV === "campo"), "perfil não gravado");
+
+  if (!pdfLib) { assert("gerador: pdf-lib disponível para gerar PDF", false, "instale pdf-lib"); return; }
+
+  // 18.2 — renderer: PDF real, dimensões exatas, determinístico e sem template
+  const dados = {};
+  dados[def.elementos[0].binding] = "FULANO DE TAL";
+  const gerado = await N.renderizarPdf(def, dados, pdfLib, { imagens: {} }, {});
+  const buf = Buffer.from(gerado.bytes);
+  assert("gerador: produz um PDF real e independente (%PDF-)", buf.slice(0, 5).toString() === "%PDF-", buf.slice(0, 5).toString());
+  const docPdf = await pdfLib.PDFDocument.load(gerado.bytes);
+  const pg = docPdf.getPage(0);
+  assert("gerador: PDF com as dimensões exatas da definição (§6/§31)",
+    Math.abs(pg.getWidth() - PAGE.width) < 0.01 && Math.abs(pg.getHeight() - PAGE.height) < 0.01,
+    pg.getWidth() + "x" + pg.getHeight());
+  assert("gerador: PDF tem 1 página (não herda páginas do template externo)", docPdf.getPageCount() === 1, String(docPdf.getPageCount()));
+  assert("gerador: só desenha campo com valor real (nunca inventa dado)",
+    gerado.desenhados === 1 && gerado.ignorados.length === def.elementos.length - 1,
+    JSON.stringify({ d: gerado.desenhados, i: gerado.ignorados.length }));
+  const geradoVazio = await N.renderizarPdf(def, {}, pdfLib, { imagens: {} }, {});
+  assert("gerador: sem dados, nada é desenhado (0 elementos)", geradoVazio.desenhados === 0, String(geradoVazio.desenhados));
+  const gerado2 = await N.renderizarPdf(def, dados, pdfLib, { imagens: {} }, {});
+  assert("gerador: geração determinística (mesma entrada ⇒ mesmos bytes)",
+    Buffer.compare(Buffer.from(gerado2.bytes), buf) === 0, "bytes diferentes");
+  assert("gerador: geração bloqueada para definição inválida, forçável só de propósito (§31)",
+    await (async () => {
+      const invalida = N.novaDefinicao({ documentId: "inv", width: 300, height: 400, elementos: [{ id: "a", type: "field", x: 1, y: 1 }] });
+      try { await N.renderizarPdf(invalida, {}, pdfLib, {}, {}); return false; } catch { return true; }
+    })(), "não bloqueou");
+
+  // 18.3 — validação §31: o que barra e o que só avisa
+  const baseT = () => N.novaDefinicao({ documentId: "t", width: 300, height: 400 });
+  const comEls = (els) => Object.assign(baseT(), { elementos: els });
+  const rect = (id, extra) => Object.assign({ id, type: "rectangle", x: 10, y: 10, width: 20, height: 20 }, extra || {});
+  assert("gerador: ID duplicado é erro crítico",
+    N.validarDefinicao(comEls([rect("a"), rect("a")])).erros.some((e) => e.indexOf("duplicado") !== -1), "não barrou");
+  assert("gerador: dimensão divergente do template é erro crítico",
+    N.validarDefinicao(Object.assign(baseT(), { page: { width: 100, height: 200, esperado: { width: 595.28, height: 841.89 }, tolerancia: 1 } })).erros.some((e) => e.indexOf("divergem") !== -1), "não barrou");
+  assert("gerador: elemento fora da página é aviso (não trava a publicação)",
+    N.validarDefinicao(comEls([rect("fora", { x: 900, y: 900 })])).avisos.some((a) => a.indexOf("fora da página") !== -1) &&
+    N.validarDefinicao(comEls([rect("fora2", { x: 900, y: 900 })])).erros.length === 0, "classificação errada");
+  assert("gerador: campo sem binding, fonte inexistente e imagem sem dimensão são erros",
+    N.validarDefinicao(comEls([{ id: "f", type: "field", x: 1, y: 1 }])).erros.some((e) => e.indexOf("binding") !== -1) &&
+    N.validarDefinicao(comEls([Object.assign(rect("t"), { type: "text", content: "x", font: { family: "Comic Sans", size: 9 } })])).erros.some((e) => e.indexOf("família de fonte") !== -1) &&
+    N.validarDefinicao(comEls([Object.assign(rect("t"), { type: "text", content: "x", font: { family: "Helvetica", size: 9 } })])).erros.length === 0 &&
+    N.validarDefinicao(comEls([{ id: "i", type: "image", arquivo: "x.png", x: 1, y: 1 }])).erros.some((e) => e.indexOf("width/height") !== -1),
+    "validação incompleta");
+  assert("gerador: JSON declarativo — eval/new Function e on* barrados (§43)",
+    N.validarDefinicao(comEls([{ id: "x", type: "text", content: "eval(1)", x: 1, y: 1 }])).erros.some((e) => e.indexOf("executável") !== -1) &&
+    N.validarDefinicao(Object.assign(baseT(), { elementos: [Object.assign(rect("y"), { onload: "alert(1)" })] })).erros.some((e) => e.indexOf("manipulador de evento") !== -1),
+    "não barrou conteúdo executável");
+  assert("gerador: toda definição registra versão de schema e status válido (§23/§24)",
+    def.schemaVersion === "1.0" && N.STATUS_DOC.indexOf(def.metadados.status) !== -1 && !!def.documentVersion, "sem versão");
+
+  // 18.4 — versionamento, integridade e log (§24/§41/§42)
+  const reg = N.novoRegistro(def, { autor: "suite", modo: "external", motivoInicial: "criado do schema" });
+  const e1 = await N.congelarVersao(reg, { status: "PUBLICADO", autor: "suite", motivo: "publicação de teste" });
+  assert("gerador: versão incrementa como patch (§24)", e1.versao === "1.0.1", e1.versao);
+  assert("gerador: hash de integridade SHA-256 do documento (§42)",
+    String(e1.hash).indexOf("sha256:") === 0 && e1.hash.length === 71, e1.hash);
+  assert("gerador: versão guarda o pacote completo (restaurável §39)",
+    !!e1.definicao && e1.definicao.elementos.length === def.elementos.length, "sem snapshot");
+  assert("gerador: log do documento registra a versão (§41)",
+    reg.log.length >= 2 && reg.log[0].alteracao.indexOf("v1.0.1") === 0, JSON.stringify(reg.log[0]));
+  reg.meta.modo = "native";
+  assert("gerador: modo nativo só com PUBLICADO + definição válida",
+    N.modoEfetivo(reg).modo === "native", N.modoEfetivo(reg).motivo);
+  const regInv = JSON.parse(JSON.stringify(reg));
+  regInv.definicao.elementos.push(rect(regInv.definicao.elementos[0].id));
+  assert("gerador: definição inválida volta para external automaticamente (§49)",
+    N.modoEfetivo(regInv).modo === "external" && N.modoEfetivo(regInv).motivo.indexOf("erro") !== -1, N.modoEfetivo(regInv).motivo);
+
+  // 18.5 — comparador (§30) e importação de referência (§27)
+  const antes = JSON.parse(JSON.stringify(def));
+  const depois = JSON.parse(JSON.stringify(def));
+  depois.elementos[0].x += 5;
+  depois.elementos[0].width -= 3;
+  const cmp = N.compararDefinicoes(antes, depois);
+  assert("gerador: comparador detecta deslocamento e dimensão (§30)",
+    cmp.total === 1 && cmp.alterados.length === 1 && cmp.alterados[0].campos.length === 2, JSON.stringify(cmp).slice(0, 200));
+  assert("gerador: resumo do comparador é legível no log", /x 20 → 25/.test(cmp.resumo), cmp.resumo);
+  const item = N.normalizarItemTexto({ str: "NOME", transform: [10, 0, 0, 10, 20, 700], width: 30, height: 10 }, [1, 0, 0, -1, 0, 842]);
+  assert("gerador: item de texto do pdf.js normalizado para o topo (§27)",
+    item.x === 20 && item.yBase === 142 && item.tamanho === 10, JSON.stringify(item));
+  const itens = [
+    { texto: "FICHA", x: 40, yBase: 100, tamanho: 9, largura: 20 },
+    { texto: "CADASTRAL", x: 61, yBase: 100, tamanho: 9, largura: 40 },
+    { texto: "OUTRA LINHA", x: 40, yBase: 120, tamanho: 9, largura: 50 }
+  ];
+  const elsImp = N.elementosDeItensDeTexto(itens, { width: 595, height: 842 }, { page: 1 });
+  assert("gerador: família do PDF não confunde sans-serif com serif",
+    N.familiaPadrao("sans-serif") === "Helvetica" && N.familiaPadrao("serif") === "Times" &&
+      N.familiaPadrao("AAAAAA+Arial-BoldMT") === "Helvetica" && N.familiaPadrao("CAAAAA+FreeSerif") === "Times" &&
+      N.familiaPadrao("CourierNewPSMT") === "Courier",
+    [N.familiaPadrao("sans-serif"), N.familiaPadrao("serif")].join(","));
+  assert("gerador: cor de operador aceita as duas escalas (0–1 e 0–255)",
+    N.corDoOperador([255, 255, 255]) === "#ffffff" && N.corDoOperador([1, 0, 0]) === "#ff0000" && N.corDoOperador([0, 0, 0]) === "#000000",
+    [N.corDoOperador([255, 255, 255]), N.corDoOperador([1, 0, 0])].join(" / "));
+  assert("gerador: símbolos de caixa de marcação são reconhecidos (❑ ☐ ✓)",
+    N.ehCaixaDeMarcacao("❑") === true && N.ehCaixaDeMarcacao("☐") === true && N.ehCaixaDeMarcacao("✓") === true &&
+      N.ehCaixaDeMarcacao("Corrente") === false && N.ehCaixaDeMarcacao("100%") === false,
+    "classificação de símbolo errada");
+  assert("gerador: importação agrupa fragmentos da mesma linha",
+    elsImp.length === 2 && elsImp[0].content === "FICHA CADASTRAL", JSON.stringify(elsImp.map((e) => e.content)));
+  assert("gerador: importado entra como REQUER CALIBRAÇÃO (§27/§52)",
+    elsImp.every((e) => e.origem === "importado" && e.confirmado === false), "sem marcação");
+  const relImp = N.relatorioImportacao(itens, elsImp);
+  assert("gerador: relatório diz explicitamente o que NÃO foi identificado",
+    relImp.naoIdentificado.length >= 3 && relImp.nota.indexOf("CALIBRAÇÃO") !== -1 && relImp.naoIdentificado.join(" ").indexOf("tabelas") !== -1,
+    JSON.stringify(relImp.naoIdentificado));
+  // 18.5b — mobiliário: o relatório CONTA o que foi extraído (não afirma genericamente)
+  const grafTeste = { regras: [{ tipo: "segmento" }], imagens: [{ ref: "i" }], recortes: 3, recortadas: 1, descartadas: 0, naoSuportado: ["curva (bézier) aproximada pelo ponto final"] };
+  const relGraf = N.relatorioImportacao(itens, elsImp, grafTeste);
+  assert("gerador: relatório conta réguas/imagens/recortes do mobiliário",
+    relGraf.nRegras === 1 && relGraf.nImagens === 1 && relGraf.nRecortes === 3 && relGraf.nDescartadas === 0 &&
+      relGraf.naoIdentificado.join(" ").indexOf("bézier") !== -1 && relGraf.naoIdentificado.join(" ").indexOf("logotipos") === -1,
+    JSON.stringify(relGraf));
+
+  // 18.6 — camadas (§20) e agrupamento (§21)
+  const dCam = N.novaDefinicao({ documentId: "c", width: 300, height: 400, elementos: [rect("a"), rect("b")] });
+  N.moverCamada(dCam, "a", "frente");
+  assert("gerador: ordem de camadas altera o desenho, não o dado (§20)",
+    dCam.elementos[1].id === "a" && dCam.elementos[1].zIndex === 1 && dCam.elementos[0].id === "b", JSON.stringify(dCam.elementos.map((e) => e.id)));
+  const grupo = N.agruparElementos(dCam, ["a", "b"], "cabecalho");
+  assert("gerador: agrupar (§21)", !!grupo && dCam.elementos.length === 1 && grupo.elementos.length === 2 && grupo.id === "cabecalho", "agrupamento falhou");
+  N.moverGrupo(dCam, "cabecalho", 10, 5);
+  assert("gerador: mover grupo desloca todos os filhos proporcionalmente",
+    grupo.elementos.every((e) => e.x === 20 && e.y === 15), JSON.stringify(grupo.elementos.map((e) => [e.x, e.y])));
+
+  // ── 18.c — integração com o painel (overlay, pendências, gate, configurações) ──
+  const stubsP = criarStubsDom();
+  const sbP = {
+    window: {}, document: stubsP, console, setTimeout() {}, clearTimeout() {},
+    fetch: async () => ({ ok: false, status: 0, json: async () => ({}), text: async () => "" }),
+    URL: { createObjectURL() { return ""; }, revokeObjectURL() {} },
+    Blob: class {}, Math, Date, JSON, Object, Array, Number, String, Set, Map, Promise, Error,
+    encodeURIComponent, decodeURIComponent, TextEncoder, crypto: webcrypto
+  };
+  sbP.window.document = stubsP;
+  sbP.window.crypto = webcrypto;
+  sbP.globalThis = sbP;
+  // carregarTudo lê os JSONs reais do repositório (a auditoria faz o mesmo)
+  sbP.fetch = async (url) => {
+    const p = String(url || "").replace(/^\.\.\//, "").replace(/^\//, "");
+    let f = p;
+    try { f = decodeURIComponent(p); } catch { /* segue com o bruto */ }
+    const full = join(ROOT, f);
+    if (!existsSync(full)) return { ok: false, status: 404, json: async () => ({}), text: async () => "" };
+    const b = readFileSync(full);
+    return {
+      ok: true, status: 200, headers: { get: () => "application/json" },
+      json: async () => JSON.parse(b.toString("utf8")), text: async () => b.toString("utf8"),
+      arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
+    };
+  };
+  sbP.window.AdminPersistence = {
+    async carregarConfig() { return { overlay: null, modo: "api", origem: "suite" }; },
+    async salvarOverlay() { return { persistido: true }; },
+    async listarBackups() { return []; },
+    async listarUploads() { return []; },
+    async carregarHistorico() { return []; },
+    async registrarEvento() { return true; },
+    baixarJSON() {},
+    lerArquivoJSON() { return null; }
+  };
+  const ctxP = vm.createContext(sbP);
+  vm.runInContext(readFileSync(join(ROOT, "native-docs.js"), "utf8"), ctxP, { filename: "native-docs.js" });
+  vm.runInContext(readFileSync(join(ROOT, "admin", "panel.js"), "utf8"), ctxP, { filename: "panel.js" });
+  const TP = sbP.window.AdminPanel && sbP.window.AdminPanel.__teste;
+  assert("gerador: painel expõe o inventário nativo (schema → template por documento)",
+    !!TP && Array.isArray(TP.NATIVOS_FONTES) && TP.NATIVOS_FONTES.length >= 1 &&!!TP.NATIVOS_FONTES[0].schemaArquivo, "missing");
+  if (TP) {
+    await TP.carregarTudo();
+    const defP = TP.dnDefinicaoPara("ficha_cadastral", [{ w: PAGE.width, h: PAGE.height }], { autor: "suite" });
+    assert("gerador: painel cria a definição a partir do schema EFETIVO carregado",
+      !!defP && defP.elementos.length === folhas.length && defP.page.width === PAGE.width,
+      defP ? defP.elementos.length + " elementos" : "null");
+    TP.state.overlay.docs_nativos = { f075: N.novoRegistro(defP, { autor: "suite", modo: "external" }) };
+    assert("gerador: documento nativo entra na exportação do overlay",
+      !!TP.exportarOverlayPuro().docs_nativos.f075, "missing");
+    const pendDN = TP.calcularPendentes(TP.exportarOverlayPuro(), null).filter((p) => p.overlayKey === "docs_nativos");
+    assert("gerador: alteração no documento vira pendência (§23)", pendDN.length === 1, "sem pendência");
+    const probDN = TP.coletarProblemas();
+    assert("gerador: documento em rascunho/external NÃO bloqueia a publicação (§49)",
+      probDN.criticos.filter((c) => c.indexOf("Documento nativo") === 0).length === 0, JSON.stringify(probDN.criticos.slice(0, 2)));
+    const regP = TP.state.overlay.docs_nativos.f075;
+    regP.meta.modo = "native";
+    regP.definicao.elementos.push({ id: regP.definicao.elementos[0].id, type: "rectangle", x: 1, y: 1, width: 5, height: 5 });
+    const probDN2 = TP.coletarProblemas();
+    assert("gerador: modo nativo em RASCUNHO com erro crítico avisa mas não bloqueia (§49)",
+      probDN2.criticos.filter((c) => c.indexOf("Documento nativo") === 0).length === 0 &&
+      probDN2.avisos.some((a) => a.indexOf("Documento nativo") === 0 && a.indexOf("ID duplicado") !== -1),
+      JSON.stringify(probDN2.avisos.slice(0, 2)));
+    regP.definicao.metadados.status = "PUBLICADO";
+    const probDN3 = TP.coletarProblemas();
+    assert("gerador: modo nativo PUBLICADO com definição inválida BLOQUEIA (§24/§31)",
+      probDN3.criticos.some((c) => c.indexOf("Documento nativo") === 0 && c.indexOf("ID duplicado") !== -1),
+      JSON.stringify(probDN3.criticos.slice(0, 2)));
+    regP.definicao.elementos.pop();
+    regP.definicao.metadados.status = "RASCUNHO";
+    assert("gerador: configurações do gerador existem e são lidas",
+      TP.CONFIG_DEFS.filter((d) => d.key.indexOf("documentos.") === 0).length === 3 && TP.configGet("documentos.modo_padrao") === "external",
+      "configs ausentes");
+    const dImp = TP.diffImportacao({ docs_nativos: { f075: regP } });
+    // Linha de base do repositório não é alteração pendente; alteração de verdade é.
+    const pendBase = TP.calcularPendentes({ docs_nativos: { f075: { meta: { origemRepo: true, alterado: false }, definicao: regP.definicao, versoes: [], log: [] } } }, {});
+    const pendAlterado = TP.calcularPendentes({ docs_nativos: { f075: { meta: { origemRepo: true, alterado: true }, definicao: regP.definicao, versoes: [], log: [] } } }, {});
+    assert("gerador: documento do repositório intacto NÃO aparece como pendência",
+      pendBase.filter((p) => p.overlayKey === "docs_nativos").length === 0, JSON.stringify(pendBase.map((p) => p.chave)));
+    assert("gerador: documento do repositório EDITADO aparece como pendência de exportação",
+      pendAlterado.filter((p) => p.overlayKey === "docs_nativos").length === 1, JSON.stringify(pendAlterado.map((p) => p.chave)));
+    assert("gerador: importação de configuração cobre docs_nativos",
+      dImp.docs_nativos.identicos === 1 || dImp.docs_nativos.alterados.length === 1, JSON.stringify(dImp.docs_nativos));
+    assert("gerador: resumo do documento é legível (não despeja o objeto no diff)",
+      TP.resumoValorDocNativo(regP).indexOf("v1.0.0") === 0 && TP.resumoValorDocNativo(regP).indexOf("elemento") !== -1,
+      TP.resumoValorDocNativo(regP));
+    assert("gerador: descarte de pendências remove o documento do overlay",
+      TP.descartarPendentesPuro(TP.exportarOverlayPuro(), TP.state.cityMap, null).overlay.docs_nativos.f075 === undefined, "não descartou");
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 18.10 — MOBILIÁRIO DA REFERÊNCIA (extração real) E O DOCUMENTO DO
+  //         F-075 RECONSTRUÍDO: o aceite é o deslocamento MEDIDO (§27.2/§27.3)
+  // ═══════════════════════════════════════════════════════════════
+  {}
+  const OPS_FAKE = { moveTo: 13, lineTo: 14, curveTo: 15, curveTo2: 16, curveTo3: 17, closePath: 18, rectangle: 19, constructPath: 91,
+    save: 10, restore: 11, transform: 12, setFillRGBColor: 20, setStrokeRGBColor: 21, setGState: 22, fill: 30, eoFill: 31, stroke: 40,
+    fillStroke: 41, clip: 50, eoClip: 51, endPath: 52, paintImageXObject: 60, paintFormXObjectBegin: 61, paintFormXObjectEnd: 62, beginGroup: 70, endGroup: 71 };
+  const opsLink = (lista) => ({ fnArray: lista.map((o) => o[0]), argsArray: lista.map((o) => o[1] === undefined ? [] : o[1]) });
+  const VIEWPORT = [1, 0, 0, -1, 0, 800];   // matriz de viewport do pdf.js (escala 1)
+  // retângulo fino preenchido → linha; retângulo grande → caixa; caminho de recorte
+  // (W n) não desenha; `ca = 0` (máscara) não desenha; setGState chega em PARES.
+  const graf = N.extrairGraficos(opsLink([
+    // régua: `re` com (x,y,w,h) — o retângulo fino preenchido
+    [OPS_FAKE.constructPath, [[19], [10, 100, 500, 1], [10, 600, 100, 101]]],
+    [OPS_FAKE.fill, []],
+    // caixa preenchida preta (tarja)
+    [OPS_FAKE.constructPath, [[19], [10, 200, 200, 80], [10, 210, 280, 280]]],
+    [OPS_FAKE.fill, []],
+    // recorte pequeno (W n) dentro de um estado: só recorta, não desenha
+    [OPS_FAKE.save, []],
+    [OPS_FAKE.constructPath, [[19], [400, 400, 100, 100], [400, 500, 500, 500]]],
+    [OPS_FAKE.eoClip, []],
+    [OPS_FAKE.endPath, []],
+    // preenchimento ENORME dentro do recorte: quase tudo fora ⇒ não desenha
+    [OPS_FAKE.setGState, [[['ca', 1]]]],
+    [OPS_FAKE.constructPath, [[19], [0, 0, 4000, 4000], [0, 4000, 0, 4000]]],
+    [OPS_FAKE.fill, []],
+    [OPS_FAKE.restore, []],
+    // máscara invisível (ca=0): não é mobiliário
+    [OPS_FAKE.setGState, [[['ca', 0]]]],
+    [OPS_FAKE.constructPath, [[19], [10, 300, 300, 20], [10, 310, 320, 320]]],
+    [OPS_FAKE.fill, []],
+    [OPS_FAKE.setGState, [[['ca', 1]]]],
+    // segmento traçado (moveTo/lineTo + stroke)
+    [OPS_FAKE.constructPath, [[13, 14], [10, 300, 300, 500], [10, 700, 300, 700]]],
+    [OPS_FAKE.stroke, []]
+  ]), OPS_FAKE, VIEWPORT, {});
+  // No espaço da definição o Y vem do TOPO: ponto (x, y) → (x, 800 − y)
+  assert("mobiliário: `re` vira régua com o tamanho real (largura/altura, não um 2º ponto)",
+    graf.regras.length === 3 && graf.regras[0].tipo === "segmento" &&
+      Math.abs(graf.regras[0].x1 - 10) < 0.01 && Math.abs(graf.regras[0].y1 - 699.5) < 0.01 &&
+      Math.abs(graf.regras[0].x2 - 510) < 0.01 && Math.abs((Number(graf.regras[0].width) || 0) - 500) < 0.5 && graf.regras[0].cor === "#000000",
+    JSON.stringify(graf.regras[0]));
+  assert("mobiliário: retângulo grande vira caixa (não vira régua)",
+    graf.regras.some((r) => r.tipo === "caixa" && Math.abs(r.width - 200) < 0.01 && Math.abs(r.height - 80) < 0.01), JSON.stringify(graf.regras.map((r) => [r.tipo, r.width, r.height])));
+  assert("mobiliário: caminho só de recorte (W n) não vira elemento e é contado",
+    graf.recortes === 1, "recortes=" + graf.recortes);
+  assert("mobiliário: preenchimento fora do recorte e máscara transparente (ca=0) são descartados e contados",
+    graf.transparentes === 1 && graf.recortadas === 1, JSON.stringify({ t: graf.transparentes, r: graf.recortadas }));
+  assert("mobiliário: segmento traçado (moveTo/lineTo/stroke) vira régua com a espessura do estado gráfico (lw)",
+    graf.regras.some((r) => r.tipo === "segmento" && Math.abs(r.y1 - 500) < 0.01 && Math.abs(r.y2 - 300) < 0.01 && Math.abs(r.largura - 1) < 0.01 && Math.abs(r.x2 - 300) < 0.01),
+    JSON.stringify(graf.regras.filter((r) => r.tipo === "segmento").map((r) => [r.y1, r.y2, r.largura])));
+  assert("mobiliário: transformação/CTM é aplicada ao caminho (Y do topo)",
+    graf.regras.every((r) => (r.tipo === "segmento" ? r.y1 >= -0.01 && r.y1 <= 800 : true)), "fora da página");
+  const mob = N.elementosDeGraficos(graf, { prefixoImagem: "teste" });
+  assert("mobiliário: elementos saem como line/rectangle/image com origem importado",
+    mob.elementos.every((e) => ["line", "rectangle", "image"].indexOf(e.type) !== -1 && e.origem === "importado"),
+    JSON.stringify(mob.elementos.map((e) => e.type)));
+  // tarja escura ⇒ texto claro (o caso "Atenção"/"Importante" do F-075)
+  const tarja = [{ tipo: "caixa", x: 0, y: 0, width: 100, height: 10, cor: "#000000", modo: "preenchido" }];
+  const comCor = N.aplicarContrasteDeTarja(
+    [{ texto: "Importante", x: 1, yBase: 9, tamanho: 8, largura: 40 }, { texto: "Nome", x: 1, yBase: 40, tamanho: 8, largura: 20 }], tarja, {});
+  assert("mobiliário: texto sobre tarja escura vira claro e o resto continua escuro",
+    comCor[0].cor === "#ffffff" && comCor[1].cor === "#000000", JSON.stringify(comCor.map((c) => c.cor)));
+  assert("mobiliário: caixa de marcação do PDF vira elemento checkbox",
+    N.elementosDeItensDeTexto([{ texto: "❑", x: 10, yBase: 100, tamanho: 8, largura: 6 }], PAGE, {}).every((e) => e.type === "checkbox"), "não virou checkbox");
+
+  // Documento do repositório × referência congelada (a reconstrução publicada)
+  const caminhoRef = join(ROOT, "scripts", "referencia", "f075-pagina1.json");
+  const caminhoDef = join(ROOT, "ficha_cadastral_nativo.json");
+  assert("F-075 nativo: referência congelada existe no repositório", existsSync(caminhoRef), caminhoRef);
+  assert("F-075 nativo: definição versionada existe no repositório", existsSync(caminhoDef), caminhoDef);
+  if (existsSync(caminhoRef) && existsSync(caminhoDef)) {
+    const snap = JSON.parse(readFileSync(caminhoRef, "utf8"));
+    const defN = JSON.parse(readFileSync(caminhoDef, "utf8"));
+    assert("F-075 nativo: referência declara os itens do mobiliário (texto, régua, imagem)",
+      snap.textos.length >= 90 && snap.regras.length >= 5 && snap.imagens.length === 9,
+      JSON.stringify({ t: snap.textos.length, r: snap.regras.length, i: snap.imagens.length }));
+    const ehCaixaOuSegmento = (r) => r.tipo === "segmento" ? true : (r.width > 0 && r.height > 0);
+    assert("F-075 nativo: toda régua/caixa da referência tem geometria utilizável",
+      snap.regras.every(ehCaixaOuSegmento), "geometria inválida");
+    const tipos = {};
+    for (const e of defN.elementos) tipos[e.type] = (tipos[e.type] || 0) + 1;
+    assert("F-075 nativo: definição traz mobiliário + 1 elemento por item da referência",
+      tipos.text + tipos.checkbox >= snap.textos.length && tipos.line + tipos.rectangle >= snap.regras.length && tipos.image === snap.imagens.length,
+      JSON.stringify(tipos));
+    const vN = N.validarDefinicao(defN);
+    assert("F-075 nativo: definição do repositório sem erro crítico (§31)",
+      vN.erros.length === 0, JSON.stringify(vN.erros.slice(0, 3)));
+    assert("F-075 nativo: campos dinâmicos continuam com a geometria do schema",
+      defN.elementos.filter((e) => e.type === "field").length >= 30 && defN.elementos.every((e) => e.origem !== "schema" || (e.ancoraV === "campo" && e.zIndex >= 100)),
+      "campo sem perfil da aplicação");
+    // ACEITE: deslocamento medido item por item contra a referência (tolerância 1 pt)
+    const rel = N.compararComReferencia(defN, snap, { tolerancia: 1 });
+    assert("F-075 nativo: comparação geométrica não deixa item sem par",
+      rel.semPar === 0 && rel.casados === snap.textos.length + snap.regras.length + snap.imagens.length,
+      "sem par " + rel.semPar + " de " + rel.casados);
+    assert("F-075 nativo: deslocamento medido está DENTRO da tolerância de 1 pt (§27.3)",
+      rel.dentro === true && rel.maxDx <= 1 && rel.maxDy <= 1, rel.resumo);
+    assert("F-075 nativo: mobiliário fica na banda de camadas abaixo dos campos (\u00a720)",
+      defN.elementos.filter((e) => e.origem === "importado").every((e) => e.zIndex < 100) &&
+        defN.elementos.filter((e) => e.origem === "schema").every((e) => e.zIndex >= 100),
+      JSON.stringify({ imp: defN.elementos.filter((e) => e.origem === "importado").map((e) => e.zIndex).slice(-3), sch: defN.elementos.filter((e) => e.origem === "schema").map((e) => e.zIndex).slice(0, 3) }));
+    assert("F-075 nativo: cada item medido guarda o desvio contra a referência",
+      defN.elementos.filter((e) => e.desvioMedido).length === rel.casados &&
+        defN.elementos.filter((e) => e.desvioMedido && Math.abs(e.desvioMedido.dx) <= 1 && Math.abs(e.desvioMedido.dy) <= 1).every((e) => e.confirmado === true),
+      JSON.stringify(defN.elementos.filter((e) => e.desvioMedido).length));
+    assert("F-075 nativo: assets do mobiliário existem na raiz do repositório",
+      (defN.assets || []).length === 9 && (defN.assets || []).every((a) => existsSync(join(ROOT, a.arquivo))),
+      JSON.stringify((defN.assets || []).map((a) => a.arquivo)));
+    assert("F-075 nativo: metadados registram a referência e o deslocamento medido",
+      defN.metadados && defN.metadados.referencia && defN.metadados.referencia.deslocamentoMaximoPt.dx <= 1 &&
+        defN.metadados.referencia.toleranciaPt === 1 && defN.metadados.pendenteCalibracao === false,
+      JSON.stringify(defN.metadados && defN.metadados.referencia));
+    // Gerador reproduz exatamente o arquivo versionado (build determinístico)
+    const ger = spawn(process.execPath, [join(ROOT, "scripts", "gerar-nativo-f075.mjs"), "--conferir"], { encoding: "utf8" });
+    let saidaGer = "";
+    ger.stdout.on("data", (d) => { saidaGer += d; });
+    ger.on("close", (code) => {
+      assert("F-075 nativo: gerador reproduz a definição com deslocamento dentro da tolerância",
+        code === 0 && saidaGer.indexOf("sem par: 0") !== -1, "exit " + code + " · " + saidaGer.split("\n").slice(-2).join(" "));
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1187,5 +1620,114 @@ async function testarPainelV3FieldBuilder(assert) {
   stFB.overlay = { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {} };
   const dImp = FB.diffImportacao({ campos_custom: { ficha_cadastral: lote } });
   assert("fb: diffImportacao detecta lote de campos_custom novo", dImp.campos_custom.novos.length === 1 && dImp.campos_custom.novos[0].k === "ficha_cadastral", JSON.stringify(dImp.campos_custom));
+}
+
+// ══════════════════════════════════════════════════════
+// Teste 19 — TIPOGRAFIA OFICIAL POR RUN (§15.1) E TRAÇO DO MOBILIÁRIO
+// ══════════════════════════════════════════════════════
+// CUIDADO DE REALM (custou 6 pp de medição): o pdf-lib valida objetos
+// aninhados — options.start/end de drawLine — contra o `Object` do PRÓPRIO
+// realm. Com o engine carregado em node:vm e o pdf-lib vindo do host, TODA
+// régua é rejeitada ("must be of type {x, y}, but was actually of type NaN") e
+// o PDF sai sem nenhuma linha, sem erro visível. Por isso este bloco carrega o
+// engine no realm do host, exatamente como o painel faz (engine e pdf-lib no
+// mesmo contexto).
+async function testarTipografiaOficial(assert) {
+  console.log("\n📋 Teste 19: tipografia oficial por run e traço do mobiliário");
+  const pdfLib19 = await import("pdf-lib");
+  const zlib19 = await import("node:zlib");
+  (0, eval)(readFileSync(join(ROOT, "native-docs.js"), "utf8"));
+  const N19 = globalThis.NativeDocs;
+  assert("tipografia: engine carrega no realm do host (como no painel)", !!N19 && !!N19.resolverFonte, "sem API de tipografia");
+
+  // 19.1 — nome de fonte do PDF/DOCX → família oficial (subconjunto, sufixo, alias)
+  assert("tipografia: nome do PDF resolve para a família oficial",
+    N19.chaveOficial("AAAAAA+Arial-BoldMT") === "arial" &&
+    N19.chaveOficial("DAAAAA+HelveticaLTPro-Roman") === "helvetica" &&
+    N19.chaveOficial("Arial Narrow") === "arial narrow" &&
+    N19.chaveOficial("Wingdings") === "wingdings" &&
+    N19.chaveOficial("Fonte Que Nao Existe") === null,
+    [N19.chaveOficial("AAAAAA+Arial-BoldMT"), N19.chaveOficial("Arial Narrow"), N19.chaveOficial("Wingdings")].join(","));
+
+  // 19.2 — Arial é equivalente MÉTRICO de Helvetica (medido: 99,5%); Arial
+  // Narrow NÃO é (medido: 18% mais estreita) e por isso avisa em vez de calar.
+  const rArial = N19.resolverFonte({ font: { family: "Arial", size: 8, weight: "normal" } }, {});
+  const rNarrow = N19.resolverFonte({ font: { family: "Arial Narrow", size: 8, weight: "normal" } }, {});
+  const rWing = N19.resolverFonte({ font: { family: "Wingdings", size: 8 } }, {});
+  const rTimes = N19.resolverFonte({ font: { family: "Times New Roman", size: 8, weight: "bold" } }, {});
+  assert("tipografia: Arial cai em Helvetica sem desvio declarado",
+    rArial.chave === "Helvetica" && rArial.oficial.desvio === 0 && !rArial.aviso, JSON.stringify(rArial));
+  assert("tipografia: Arial Narrow NÃO é substituída em silêncio (aviso + 18%)",
+    rNarrow.chave === "Helvetica" && rNarrow.oficial.desvio > 0.15 && !!rNarrow.aviso, JSON.stringify(rNarrow).slice(0, 120));
+  assert("tipografia: Wingdings é marcada como simbólica (o glifo vira checkbox)",
+    rWing.oficial.simbolica === true, JSON.stringify(rWing));
+  assert("tipografia: Times New Roman resolve para a fonte padrão serifada", rTimes.chave === "Times-Bold", rTimes.chave);
+
+  // 19.3 — com a fonte licenciada em assets.fontes, a oficial é usada de verdade
+  const rAsset = N19.resolverFonte({ font: { family: "Arial Narrow", size: 8, weight: "bold" } }, { "Arial Narrow-Bold": {} });
+  assert("tipografia: asset licenciado vence o substituto padrão",
+    rAsset.chave === "Arial Narrow-Bold" && rAsset.embutida === true, JSON.stringify(rAsset).slice(0, 120));
+
+  // 19.4 — renderer do documento REAL do repositório: réguas desenhadas,
+  // retângulos preenchidos SEM contorno inventado.
+  const defReal = JSON.parse(readFileSync(join(ROOT, "ficha_cadastral_nativo.json"), "utf8"));
+  const imgs19 = {};
+  const { readdirSync: listar19 } = await import("node:fs");
+  for (const nome of listar19(ROOT)) {
+    if (/^f075_nativo_\d+\.png$/.test(nome)) imgs19[nome] = new Uint8Array(readFileSync(join(ROOT, nome)));
+  }
+  const ger19 = await N19.renderizarPdf(defReal, {}, pdfLib19, { imagens: imgs19 }, { forcar: true });
+  const buf19 = Buffer.from(ger19.bytes);
+  const txt19 = Buffer.from(buf19).toString("latin1");
+  let conteudo19 = "";
+  for (const m of txt19.matchAll(/stream\r?\n/g)) {
+    const ini = m.index + m[0].length;
+    const fim = txt19.indexOf("endstream", ini);
+    try { conteudo19 += zlib19.inflateSync(buf19.subarray(ini, fim)).toString("latin1"); } catch { /* sem deflate */ }
+  }
+  const contar = (re) => (conteudo19.match(re) || []).length;
+  assert("renderer: réguas do mobiliário SAEM no PDF (traçado `S` presente)",
+    contar(/\bS\b/g) >= 7, "S=" + contar(/\bS\b/g));
+  // Só os retângulos: o pdf-lib emite `B` (preenche E traça) quando borderWidth é
+  // passado, mesmo sem borderColor — e o traço assume a cor padrão do PDF (preto),
+  // pintando 4.312 px de tinta que não existe no formulário oficial. `f` = só
+  // preenchimento (as caixas brancas medidas na referência).
+  const soRet = Object.assign({}, defReal, { elementos: defReal.elementos.filter((e) => e.type === "rectangle") });
+  const gerRet = await N19.renderizarPdf(soRet, {}, pdfLib19, { imagens: {} }, { forcar: true });
+  const bufRet = Buffer.from(gerRet.bytes);
+  const txtRet = bufRet.toString("latin1");
+  let contRet = "";
+  for (const m of txtRet.matchAll(/stream\r?\n/g)) {
+    const ini = m.index + m[0].length;
+    const fim = txtRet.indexOf("endstream", ini);
+    try { contRet += zlib19.inflateSync(bufRet.subarray(ini, fim)).toString("latin1"); } catch { /* sem deflate */ }
+  }
+  const cb = (contRet.match(/\bB\b/g) || []).length;
+  const cf = (contRet.match(/\bf\b/g) || []).length;
+  assert("renderer: retângulo preenchido sem `stroke` não ganha contorno preto inventado",
+    cb === 0 && cf >= 10, "B=" + cb + " f=" + cf);
+  assert("renderer: fontes substituídas são REPORTADAS (nunca em silêncio)",
+    Array.isArray(ger19.fontesSubstituidas) && ger19.fontesSubstituidas.some((s) => /narrow/i.test(s.pedida)),
+    JSON.stringify((ger19.fontesSubstituidas || []).map((s) => s.pedida)));
+
+  // 19.5 — a tipografia oficial está declarada no documento versionado
+  const meta19 = defReal.metadados && defReal.metadados.tipografiaOficial;
+  assert("tipografia: documento nativo registra a fonte oficial por família",
+    !!meta19 && meta19.porFamilia && meta19.porFamilia.Arial > 0 && meta19.porFamilia["Arial Narrow"] > 0,
+    JSON.stringify(meta19 && meta19.porFamilia));
+  const textos19 = defReal.elementos.filter((e) => e.type === "text" && e.fonteOficial);
+  assert("tipografia: cada bloco com par no documento editável declara a fonte oficial",
+    textos19.length >= 70 && textos19.every((e) => e.tipografiaOficial && e.tipografiaOficial.familia === e.fonteOficial),
+    String(textos19.length));
+  const tip19 = JSON.parse(readFileSync(join(ROOT, "scripts", "referencia", "f075-tipografia.json"), "utf8"));
+  const nSimbolicos19 = tip19.runs.filter((r) => r.simbolica).length;
+  const caixas19 = defReal.elementos.filter((e) => e.type === "checkbox");
+  assert("tipografia: cada caixa de marcação vem de um run Wingdings do documento (1:1)",
+    nSimbolicos19 === caixas19.length && caixas19.every((c) => c.fonteOficial === "Wingdings"),
+    nSimbolicos19 + " runs x " + caixas19.length + " caixas");
+  assert("tipografia: divergências entre o documento e o PDF ficam registradas",
+    Array.isArray(meta19.divergencias) && meta19.divergencias.length > 0 &&
+    meta19.substituicoes.some((s) => /narrow/i.test(s.pedida) && s.desvio > 0.15),
+    JSON.stringify(meta19.substituicoes));
 }
 

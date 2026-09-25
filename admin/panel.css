@@ -581,3 +581,54 @@ table.data td.chk input[type="checkbox"] { cursor: pointer; }
   font-size: 12px; background: #fff; color: var(--text, #333); box-sizing: border-box;
 }
 .fb-drawer input:disabled, .fb-drawer select:disabled { background: #f1ece5; color: var(--text-light, #999); }
+
+/* ══════════════════════════════════════════════════════
+   Documentos Nativos (gerador) — preview real, caixas e comparação
+   O preview é o PDF gerado pela engine renderizado com pdf.js: as caixas
+   (.dn-el) ficam em posição absoluta usando px do viewport (escala 1 pt = 1 px
+   na escala 1; o zoom multiplica as duas coisas junto).
+   ══════════════════════════════════════════════════════ */
+#dnCanvas { max-width: none; }
+.pdf-page-stack .dn-el {
+  position: absolute; border: 1.5px dashed #2b7cb8;
+  background: rgba(43, 124, 184, 0.10); color: #1c5f92;
+  font-size: 9.5px; font-weight: 700; overflow: hidden; white-space: nowrap;
+  padding: 1px 3px; cursor: grab; user-select: none;
+}
+.pdf-page-stack .dn-el:hover { background: rgba(43, 124, 184, 0.22); }
+.pdf-page-stack .dn-el.selected {
+  border-style: solid; border-color: var(--accent);
+  background: rgba(1, 66, 106, 0.18); color: var(--accent); z-index: 6; cursor: grabbing;
+}
+.pdf-page-stack .dn-el.pendente { border-color: var(--warn); color: var(--warn); background: rgba(146, 64, 14, 0.10); }
+.pdf-page-stack .dn-el.tipo-line { border-style: dotted; }
+.pdf-page-stack .dn-el.tipo-field { border-color: #16794f; color: #14603f; background: rgba(22, 121, 79, 0.10); }
+.pdf-page-stack .dn-el.tipo-field.selected { border-color: var(--accent); color: var(--accent); background: rgba(1, 66, 106, 0.18); }
+.pdf-page-stack .dn-el.tipo-image,
+.pdf-page-stack .dn-el.tipo-signature { border-color: #7c3aed; color: #5b21b6; background: rgba(124, 58, 237, 0.10); }
+.pdf-page-stack .dn-el.tipo-table { border-color: #0f766e; color: #0f766e; background: rgba(15, 118, 110, 0.10); }
+.dn-handle {
+  position: absolute; right: 0; bottom: 0; width: 10px; height: 10px;
+  background: var(--accent); cursor: nwse-resize;
+}
+/* Lista de elementos do documento */
+.dn-item {
+  display: grid; grid-template-columns: 64px 1fr; gap: 1px 8px; width: 100%;
+  text-align: left; font-family: inherit; font-size: 11.5px; padding: 7px 9px;
+  border: none; border-bottom: 1px solid #eee7e0; background: #fff;
+  color: var(--text-mid); cursor: pointer;
+}
+.dn-item:hover { background: var(--accent-soft); }
+.dn-item.sel { background: rgba(1, 66, 106, 0.10); color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.dn-item .dn-tipo { grid-row: 1 / 3; align-self: center; font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: var(--text-light); }
+.dn-item .dn-id { font-weight: 600; overflow-wrap: anywhere; }
+.dn-item .dn-det { font-size: 10.5px; color: var(--text-light); overflow-wrap: anywhere; }
+/* Comparação visual (§25/§30) */
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cmp-rotulo { font-size: 11px; font-weight: 600; color: var(--text-mid); margin-bottom: 6px; }
+.cmp-canvas { background: #525659; border: 1px solid var(--border); border-radius: 6px; max-width: 100%; }
+.cmp-grid.sobreposto { display: block; position: relative; }
+.cmp-grid.sobreposto > div:nth-child(2) { position: absolute; top: 26px; left: 0; right: 0; }
+.cmp-grid.sobreposto > div:nth-child(2) .cmp-rotulo { display: none; }
+.cmp-grid.sobreposto > div:nth-child(2) .cmp-canvas { display: block; margin: 0 auto; }
+@media (max-width: 900px) { .cmp-grid { grid-template-columns: 1fr; } }

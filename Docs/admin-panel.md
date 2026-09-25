@@ -1,8 +1,13 @@
 # Painel Administrativo — Manual e Documentação Técnica
 
+> **Documentos Nativos (novo):** a seção **▣ Documentos Nativos** implementa o
+> gerador de PDF descrito em `IMPLEMENTAÇÃO DE GERADOR NATIVO D.md` — o documento
+> passa a ser uma definição (página + elementos em pt) e o PDF vira resultado da
+> aplicação. Manual completo: **[`Docs/documentos-nativos.md`](documentos-nativos.md)**.
+
 > **Reestruturação v3 (entidades):** a navegação segue o modelo de entidades —
-> **Visão Geral · Formulários · Templates · Editor Visual · Cidades & Regionais ·
-> Configurações · Validação · Histórico · Segurança** — com as ferramentas
+> **Visão Geral · Formulários · Templates · Documentos Nativos · Editor Visual ·
+> Cidades & Regionais · Configurações · Validação · Histórico · Segurança** — com as ferramentas
 > técnicas (Assistência, Dados & Backups, Regras, Sistema) no sub-menu
 > **“Mais ferramentas”**. Novidades: detalhe do formulário com abas,
 > versionamento de templates PDF, validação pré-publicação, Alterações
@@ -189,6 +194,42 @@ e opcionais** — overlays v1/v2 são migrados por normalização na carga (nenh
 chaves novas; a importação aceita arquivos v1/v2 (campos ausentes = sem alteração)
 e apresenta o diff por grupo antes de aplicar.
 
+## Documentos Nativos (gerador de PDF)
+
+Seção **▣ Documentos Nativos**, com as subseções **Templates Nativos · Comparação ·
+Importar PDF · Versões · Logs · Assets & Fontes** (§35 do documento de implementação).
+
+* **＋ Documento a partir do schema** cria a definição a partir do schema de campos
+  real (`ficha_cadastral_campos.json`, `declaracao_plano_saude_campos.json`) usando a
+  **dimensão medida** do template oficial — a geometria dos campos é convertida para o
+  sistema do gerador (`x` da esquerda, `y` do **topo**, pt) **preservando a posição do
+  PDF atual** (mesma baseline e mesmo `x`, verificado pela auditoria).
+* **Preview = o PDF de verdade**, gerado pela engine (`native-docs.js`) e renderizado
+  com pdf.js. Edição por arraste (com snap) e por **valores numéricos de precisão
+  decimal**; zoom 50–200% (visual, não muda a escala real); camadas, agrupar,
+  duplicar, excluir, adicionar elementos (texto, campo, linha, retângulo, elipse,
+  tabela, imagem, assinatura, checkbox).
+* **Calibração:** tudo que o schema não descreve (textos fixos, linhas, caixas, logo,
+  assinatura) entra como **REQUER CALIBRAÇÃO** — via *Importar PDF (referência)* ou
+  reconstrução manual — e nada é inventado.
+* **Comparação** mede a diferença nas **áreas impressas** (o fundo branco não entra na
+  conta), o deslocamento estimado (dx/dy em pt, com desempate pelo menor deslocamento
+  — páginas idênticas devolvem `0,0`) e usa a tolerância de `Configurações → Documentos`,
+  com sobreposição por transparência.
+* **Congelar versão e publicar** grava status, motivo, autor, versão (patch) e hash
+  **SHA-256**, com a definição completa restaurável na aba **Versões**; a aba **Logs**
+  mostra a trilha do documento.
+* **Exportar/Importar definição** (`document-definition-<id>.json`) — a importação
+  valida, mostra as alterações e só aplica após confirmação.
+* **Modo híbrido:** cada documento declara `external` (padrão, template atual) ou
+  `native`. O modo **efetivo** só é `native` com status **PUBLICADO** e definição sem
+  erro crítico; fora disso a aplicação pública continua no template externo (§49).
+  O gate de publicação só **bloqueia** documento declarado `native` **e** `PUBLICADO`.
+* Configurações novas: `documentos.modo_padrao`, `documentos.tolerancia_visual_pt`,
+  `documentos.exigir_confirmacao_importados` (todas com consumidor no código).
+* Enquanto a migração não termina, **o caminho de produção continua sendo o Editor
+  Visual + Dados → Exportar arquivos do repositório**.
+
 ## Auditoria contra os dados reais
 
 `node scripts/audit-panel.mjs` executa o **mesmo pipeline do painel**
@@ -198,7 +239,10 @@ alguma verificação não bate com os dados reais (falsos positivos). Ele també
 confere que **nenhuma configuração é controle fantasma** (toda chave de
 `CONFIG_DEFS` é lida em algum fluxo).
 
-Cobre, entre outras: gate de publicação sem erro/aviso com overlay vazio; Saúde
+Cobre, entre outras: perfil de fidelidade do gerador nativo espelhando as constantes
+reais do `ficha_cadastral.html`; bootstrap do F-075/F-089 a partir dos schemas reais
+com a **mesma baseline e o mesmo `x`** em todos os campos; PDF nativo com as dimensões
+exatas do template e determinístico; gate de publicação sem erro/aviso com overlay vazio; Saúde
 rápida (sem rede) e completa (com `HEAD` real nos arquivos); toda cidade com
 ficha mapeada e UF válida; métricas por formulário; inventário de PDFs existente;
 schemas reais aprovados no gate, com as dimensões reais dos PDFs; Command Palette

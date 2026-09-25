@@ -114,6 +114,29 @@
   };
   /** Mapa código → arquivo físico do template (§9 aba Template e métricas). */
   const FORM_PDF_ARQUIVO = { "F-075": FICHA_PDF, "F-089": DECLARACAO_PDF };
+
+  /**
+   * GERADOR NATIVO (IMPLEMENTAÇÃO DE GERADOR NATIVO D.md) — fontes por documento.
+   * `docKey` liga o documento ao schema carregado no painel (é de onde o
+   * bootstrap tira a geometria real dos campos) e `pdfFile` ao template oficial
+   * usado como referência na comparação visual. Nada aqui é inventado: se o
+   * schema não tiver o campo, ele simplesmente não vira elemento.
+   */
+  // `defArquivo`   = definição nativa VERSIONADA no repositório (linha de base do
+  //                  documento: carregada quando o overlay ainda não tem o doc).
+  // `referenciaArquivo` = geometria congelada do PDF oficial, usada pelo
+  //                  comparador geométrico (deslocamento em pt).
+  const NATIVOS_FONTES = [
+    { documentId: "f075", nome: "Ficha Cadastral (F-075)", docKey: "ficha_cadastral", schemaArquivo: "ficha_cadastral_campos.json", pdfFile: FICHA_PDF, defArquivo: "ficha_cadastral_nativo.json", referenciaArquivo: "scripts/referencia/f075-pagina1.json" },
+    { documentId: "f089", nome: "Declaração Plano de Saúde (F-089)", docKey: "declaracao_plano_saude", schemaArquivo: "declaracao_plano_saude_campos.json", pdfFile: DECLARACAO_PDF }
+  ];
+  /** Imagens do mobiliário extraídas da referência do F-075 (uma por XObject). */
+  const ASSETS_F075 = ["f075_nativo_01.png", "f075_nativo_02.png", "f075_nativo_03.png", "f075_nativo_04.png", "f075_nativo_05.png", "f075_nativo_06.png", "f075_nativo_07.png", "f075_nativo_08.png", "f075_nativo_09.png"];
+  /** Assets de imagem do repositório disponíveis para o documento nativo (§14). */
+  const ASSETS_REPO = ["logomarca.png", "icone.png", "carta_bradesco_logo.png", "carta_bradesco_assinatura.png", "carta_bradesco_carimbo.png"]
+    .concat(ASSETS_F075);
+  /** Zoom visual (§18) — muda só a escala de exibição, nunca a escala real. */
+  const DN_ZOOM = [50, 75, 100, 150, 200];
   const FORMULARIOS = [
     // `docKey` liga o formulário ao schema de campos (contagem de campos) e
     // `pdfFiles` ao(s) template(s) que o alimentam (contagem de cidades).
@@ -158,7 +181,7 @@
     modo: null, origem: null,
     // v3: forms_meta, templates_versoes e configuracoes são novos e opcionais
     // (normalizados em carregarTudo) — overlays v1/v2 continuam válidos.
-    overlay: { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {} },
+    overlay: { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, docs_nativos: {} },
     docData: {},        // por docKey: {json, flat:[], pageSizes:[], pdfjsDoc, page, sel, dirty}
     docBase: {},        // por docKey: JSON original do repositório (sem overlay) — fonte para reconstrução e validação
     cityMap: {}, cityArr: [], citySource: null,
@@ -173,7 +196,14 @@
     formSel: null,               // código do formulário aberto no detalhe (§9)
     formTab: "geral",
     edSelMulti: [],              // seleção múltipla do editor (objetos campo, mesma página)
-    pendentesMarcados: null      // null = nunca publicado; { acao: {iso} } = marcos
+    pendentesMarcados: null,     // null = nunca publicado; { acao: {iso} } = marcos
+    // ── Gerador nativo (documentos) ──
+    dnSel: null,                 // id do elemento selecionado
+    dnSelMulti: [],              // ids para agrupar (§21)
+    dnZoom: 100,                 // zoom visual (§18)
+    dnOriginal: null,            // definição como estava ao carregar (diff/reverter)
+    dnSnap: 5,                   // grade de encaixe (pt; 0 = desligado)
+    dnAssets: {},                // cache de bytes das imagens do repositório
   };
   const $ = function (id) { return document.getElementById(id); };
   const esc = function (s) {
@@ -606,7 +636,21 @@
       if (!state.overlay.templates_versoes) state.overlay.templates_versoes = {};
       if (!state.overlay.configuracoes) state.overlay.configuracoes = {};
       if (!state.overlay.campos_custom) state.overlay.campos_custom = {};
+      // Gerador nativo: chave nova e opcional (overlay antigo continua válido).
+      // Cada registro é normalizado para { meta, definicao, versoes, log } — um
+      // documento vindo de overlay parcial nunca quebra o editor.
+      if (!state.overlay.docs_nativos) state.overlay.docs_nativos = {};
+      for (const idDn of Object.keys(state.overlay.docs_nativos)) {
+        const reg = state.overlay.docs_nativos[idDn] || {};
+        state.overlay.docs_nativos[idDn] = {
+          meta: Object.assign({ modo: "external", status: "RASCUNHO" }, reg.meta || {}),
+          definicao: reg.definicao || null,
+          versoes: reg.versoes || [],
+          log: reg.log || []
+        };
+      }
     }
+
 
     // JSONs de campos — o original fica preservado em docBase (o overlay é
     // aplicado por cima a cada reconstrução; Field Builder §10)
@@ -617,6 +661,37 @@
       state.docBase[key] = JSON.parse(JSON.stringify(json));
       applyOverlayToDoc(key, json);
       state.docData[key] = { json: json, flat: docDataFlat(key, json), page: 1, sel: null, dirty: false };
+    }
+
+    // Documento nativo VERSIONADO no repositório (linha de base do gerador).
+    // Carregado quando existe; ausente = documento só do overlay (compatível).
+    state.dnSeed = {};
+    for (const f of NATIVOS_FONTES) {
+      if (!f.defArquivo) continue;
+      try { state.dnSeed[f.documentId] = await fetchJSON("../" + f.defArquivo); } catch (e) { /* seed opcional */ }
+    }
+    // Sem documento no overlay, a definição do repositório entra como registro
+    // `origemRepo`: o editor trabalha normalmente e o overlay só passa a contar
+    // como alteração pendente quando alguém salvar o documento (ver dnSalvar).
+    for (const fonte of NATIVOS_FONTES) {
+      const seed = state.dnSeed[fonte.documentId];
+      if (!seed || state.overlay.docs_nativos[fonte.documentId]) continue;
+      state.overlay.docs_nativos[fonte.documentId] = {
+        meta: {
+          modo: (seed.metadados && seed.metadados.modo) || "external",
+          status: (seed.metadados && seed.metadados.status) || "RASCUNHO",
+          origemRepo: true,
+          alterado: false,
+          atualizadoEm: (seed.metadados && seed.metadados.alteradoEm) || null
+        },
+        definicao: seed,
+        versoes: [],
+        log: [{
+          quando: (seed.metadados && seed.metadados.alteradoEm) || new Date().toISOString(),
+          autor: "repositório",
+          alteracao: "definição carregada de " + fonte.defArquivo + " (linha de base do repositório)"
+        }]
+      };
     }
 
     // Cidades — base: cidades_brasil.json (tem REGIONAL/CIDADE/FICHA, NÃO tem UF)
@@ -708,7 +783,8 @@
       pdfs_meta: state.overlay.pdfs_meta || {},
       forms_meta: state.overlay.forms_meta || {},
       templates_versoes: state.overlay.templates_versoes || {},
-      configuracoes: state.overlay.configuracoes || {}
+      configuracoes: state.overlay.configuracoes || {},
+      docs_nativos: state.overlay.docs_nativos || {}
     };
   }
 
@@ -741,7 +817,26 @@
     for (const key of Object.keys(o.templates_versoes || {})) add("templates_versoes", key, key, resumoValor(o.templates_versoes[key]));
     for (const key of Object.keys(o.configuracoes || {})) add("configuracoes", key, key, resumoValor(o.configuracoes[key]));
     for (const key of Object.keys(o.campos_custom || {})) add("campos_custom", key, "Campos — " + key, resumoValorCamposCustom(o.campos_custom[key]));
+    // Gerador nativo: um pendente por DOCUMENTO (a definição inteira é a unidade).
+    // Documento carregado do REPOSITÓRIO e ainda não alterado no painel não é
+    // alteração pendente — é a linha de base (senão todo painel abriria
+    // mostrando o F-075 como "novo", sem ninguém ter mexido em nada).
+    for (const key of Object.keys(o.docs_nativos || {})) {
+      const regDn = o.docs_nativos[key] || {};
+      if (regDn.meta && regDn.meta.origemRepo && !regDn.meta.alterado) continue;
+      add("docs_nativos", key, "Documento nativo — " + key, resumoValorDocNativo(regDn));
+    }
     return pend;
+  }
+
+  /** Resumo curto de um documento nativo (versão · status · tamanho). */
+  function resumoValorDocNativo(reg) {
+    const d = reg && reg.definicao;
+    if (!d) return "(vazio)";
+    const r = global.NativeDocs ? global.NativeDocs.resumoDefinicao(d) : null;
+    return "v" + (d.documentVersion || "?") + " · " + ((d.metadados && d.metadados.status) || "?") +
+      " · " + (r ? r.nElementos : (d.elementos || []).length) + " elemento(s)" +
+      " · modo " + ((reg.meta && reg.meta.modo) || "external");
   }
 
   /** Resumo legível de um lote de campos customizados (lista de pendências). */
@@ -796,7 +891,8 @@
         forms_meta: manterMap("forms_meta"),
         templates_versoes: manterMap("templates_versoes"),
         configuracoes: manterMap("configuracoes"),
-        campos_custom: manterMap("campos_custom")
+        campos_custom: manterMap("campos_custom"),
+        docs_nativos: manterMap("docs_nativos")
       },
       descartados: pend.length
     };
@@ -853,6 +949,7 @@
     if (name === "formularios") { renderFormularios(); renderFormDetail(); }
     if (name === "validacao") renderValidacao();
     if (name === "configuracoes") renderConfiguracoes();
+    if (name === "documentos") renderDocumentos();
     if (name === "coordenadas") {
       // Auto-recuperação: se o template não carregou no init (ex.: CDN lenta
       // na abertura), tenta de novo ao entrar na seção — antes falava só no init.
@@ -956,6 +1053,36 @@
       for (const e of v.erros) criticos.push("Schema de " + DOCS[key].label + ": " + e);
       for (const a of v.avisos) avisos.push("Schema de " + DOCS[key].label + ": " + a);
     }
+    // Gerador nativo (§31): validação da definição. Só BLOQUEIA quando o
+    // documento está de fato em modo nativo/publicado — em rascunho ou external
+    // a aplicação pública continua usando o template, então o problema é aviso
+    // (§49: a migração não pode quebrar o fluxo atual).
+    if (global.NativeDocs) {
+      for (const idDn of Object.keys(state.overlay.docs_nativos || {})) {
+        const reg = state.overlay.docs_nativos[idDn];
+        if (!reg || !reg.definicao) continue;
+        const v = global.NativeDocs.validarDefinicao(reg.definicao);
+        const efetivo = global.NativeDocs.modoEfetivo(reg);
+        const prefixo = "Documento nativo " + (reg.definicao.documentName || idDn) + ": ";
+        // Bloqueia quando o documento foi DECLARADO nativo E está PUBLICADO — é
+        // o caso em que a aplicação pode gerar a partir dele. Em rascunho/external
+        // o problema é aviso (o template externo segue em uso, §49). Não se usa
+        // aqui `modoEfetivo`, que já recusa documento inválido — senão o erro que
+        // precisa ser corrigido nunca apareceria como crítico.
+        const statusDn = (reg.definicao.metadados && reg.definicao.metadados.status) || "RASCUNHO";
+        const bloqueia = (reg.meta && reg.meta.modo) === "native" && statusDn === "PUBLICADO";
+        for (const e of v.erros) { if (bloqueia) criticos.push(prefixo + e); else avisos.push(prefixo + e + " (inativo agora — modo external)"); }
+        for (const a of v.avisos) avisos.push(prefixo + a);
+        if (!bloqueia && reg.meta && reg.meta.modo === "native") avisos.push(prefixo + "modo \"native\" declarado mas inativo — " + efetivo.motivo + ".");
+        if (configLigada("documentos.exigir_confirmacao_importados") && v.ok) {
+          const pendentes = global.NativeDocs.elementosTodos(reg.definicao).filter(function (e) { return e.origem === "importado" && e.confirmado !== true; });
+          for (const e of pendentes) {
+            const msg = prefixo + "elemento \"" + e.id + "\" importado de referência e não confirmado (REQUER CALIBRAÇÃO).";
+            if (bloqueia) criticos.push(msg); else avisos.push(msg);
+          }
+        }
+      }
+    }
     return { criticos: criticos, avisos: avisos };
   }
 
@@ -988,7 +1115,10 @@
     { key: "formularios.exigir_template", label: "Bloquear publicação com cidade sem template", categoria: "Formulários", tipo: "bool", default: true, efeito: "Gate de publicação (crítico × aviso)" },
     { key: "pdfs.limite_mb", label: "Limite de upload de PDF (MB)", categoria: "PDFs", tipo: "int", min: 1, max: 50, default: 20, efeito: "Validação do upload de template" },
     { key: "pdfs.manter_versoes", label: "Manter histórico de versões dos templates", categoria: "PDFs", tipo: "bool", default: true, efeito: "Substituição de template (trilha de versões/rollback)" },
-    { key: "seguranca.confirmar_destrutivas", label: "Exigir confirmação em operações destrutivas", categoria: "Segurança", tipo: "bool", default: true, efeito: "Descartar pendências, excluir campo, remover cidade, rollback de template" }
+    { key: "seguranca.confirmar_destrutivas", label: "Exigir confirmação em operações destrutivas", categoria: "Segurança", tipo: "bool", default: true, efeito: "Descartar pendências, excluir campo, remover cidade, rollback de template" },
+    { key: "documentos.modo_padrao", label: "Modo de geração padrão", categoria: "Documentos", tipo: "lista", default: "external", opcoes: [{ v: "external", t: "external — template oficial (padrão)" }, { v: "native", t: "native — documento nativo" }], efeito: "Criação de documento nativo e modo declarado do registro" },
+    { key: "documentos.tolerancia_visual_pt", label: "Tolerância da comparação (pt)", categoria: "Documentos", tipo: "int", min: 0, max: 20, default: 1, efeito: "Comparador original × nativo (pixels E deslocamento geométrico item por item contra a referência congelada)" },
+    { key: "documentos.exigir_confirmacao_importados", label: "Bloquear documento nativo com elemento importado não confirmado", categoria: "Documentos", tipo: "bool", default: false, efeito: "Gate de publicação do documento nativo" }
   ];
   /**
    * Chaves consolidadas: `cidades.validar_uf` era uma SEGUNDA chave com o mesmo
@@ -1017,6 +1147,11 @@
       const n = parseInt(raw, 10);
       if (isNaN(n)) return def.default;
       return Math.min(def.max, Math.max(def.min, n));
+    }
+    // Lista fechada: valor fora das opções volta ao default (não cria estado inválido)
+    if (def && def.tipo === "lista") {
+      const valido = (def.opcoes || []).some(function (o) { return o.v === raw; });
+      return valido ? raw : def.default;
     }
     return raw;
   }
@@ -1076,6 +1211,10 @@
           html += '<select id="cfg_' + esc(d.key) + '">' +
             '<option value="true"' + selTrue + '>Ativado</option>' +
             '<option value="false"' + selFalse + '>Desativado</option></select>';
+        } else if (d.tipo === "lista") {
+          html += '<select id="cfg_' + esc(d.key) + '">' + (d.opcoes || []).map(function (op) {
+            return '<option value="' + esc(op.v) + '"' + (String(val) === op.v ? " selected" : "") + '>' + esc(op.t || op.v) + "</option>";
+          }).join("") + "</select>";
         } else if (d.tipo === "int") {
           html += '<input type="number" id="cfg_' + esc(d.key) + '" value="' + esc(val) + '" min="' + d.min + '" max="' + d.max + '" style="width:110px">';
         } else {
@@ -1307,6 +1446,7 @@
       { k: "Alterações pendentes", v: nAlteracoes, s: state.modo === "api" ? "gravadas no servidor" : "no overlay da sessão" },
       { k: "Cidades sem associação", v: semAssoc, s: "sem ficha → PDF mapeada" },
       { k: "Formulários sem PDF", v: semPdf, s: "template ausente" },
+      { k: "Documentos nativos", v: Object.keys(state.overlay.docs_nativos || {}).length, s: "gerador de PDF (§51)" },
       { k: "Modo de persistência", v: state.modo === "api" ? "API" : "Export", s: state.origem || "" }
     ];
     $("dashCards").innerHTML = cards.map(function (c) {
@@ -1458,6 +1598,38 @@
       if (rapido) { okN++; continue; }
       if (await head(urlRepositorio(f.arquivo))) okN++;
       else { errN++; itens.push({ nivel: "err", texto: "Arquivo do formulário inacessível: " + f.arquivo, go: function () { showSection("formularios"); } }); }
+    }
+
+    // 5) Documentos nativos (gerador): definição válida, calibração e ativos
+    const N = dnNativo();
+    if (N) {
+      for (const idDn of Object.keys(state.overlay.docs_nativos || {})) {
+        const reg = state.overlay.docs_nativos[idDn];
+        if (!reg || !reg.definicao) continue;
+        const def = reg.definicao;
+        const nomeDn = def.documentName || idDn;
+        const v = N.validarDefinicao(def);
+        const statusDn = (def.metadados && def.metadados.status) || "RASCUNHO";
+        const nativoAtivo = (reg.meta && reg.meta.modo) === "native" && statusDn === "PUBLICADO";
+        if (v.erros.length) {
+          if (nativoAtivo) {
+            errN++;
+            itens.push({ nivel: "err", texto: "Documento nativo " + nomeDn + ": " + v.erros.length + " erro(s) crítico(s) — travando a publicação", go: function () { showSection("documentos"); dnSelecionarDoc(idDn); } });
+          } else {
+            warnN++;
+            itens.push({ nivel: "warn", texto: "Documento nativo " + nomeDn + " (" + statusDn.toLowerCase() + "): " + v.erros.length + " erro(s) na definição", go: function () { showSection("documentos"); dnSelecionarDoc(idDn); } });
+          }
+        } else okN++;
+        if (def.metadados && def.metadados.pendenteCalibracao) {
+          warnN++;
+          itens.push({ nivel: "warn", texto: "Documento nativo " + nomeDn + ": REQUER CALIBRAÇÃO (textos fixos, linhas e caixas do formulário oficial)", go: function () { showSection("documentos"); dnSelecionarDoc(idDn); } });
+        }
+        const semAtivo = N.elementosTodos(def).filter(function (e) { return e.arquivo && !ASSETS_REPO.some(function (a) { return a === e.arquivo; }); });
+        if (semAtivo.length) {
+          warnN++;
+          itens.push({ nivel: "warn", texto: "Documento nativo " + nomeDn + ": " + semAtivo.length + " imagem(ns) fora dos assets do repositório", go: function () { showSection("documentos"); dnSelecionarDoc(idDn); } });
+        }
+      }
     }
 
     return { quando: new Date().toISOString(), itens: itens, okN: okN, warnN: warnN, errN: errN };
@@ -3504,6 +3676,18 @@
     toast(nome + " gerado — substitua o arquivo na raiz do repositório e faça o commit.");
   }
 
+  /** Exporta a definição nativa EFETIVA (linha de base + edições do painel). */
+  function exportarNativoRepositorio(docId) {
+    const reg = (state.overlay.docs_nativos || {})[docId];
+    const fonte = NATIVOS_FONTES.filter(function (f) { return f.documentId === docId; })[0];
+    if (!reg || !reg.definicao || !fonte || !fonte.defArquivo) { toast("Nenhum documento nativo com arquivo de repositório.", false); return; }
+    const def = JSON.parse(JSON.stringify(reg.definicao));
+    // O overlay não versiona `origemRepo/alterado` (é estado do painel, não do arquivo)
+    global.AdminPersistence.baixarJSON(def, fonte.defArquivo);
+    logEvento({ acao: "exportacao", entidade: fonte.defArquivo, alteracao: "definição nativa efetiva para versionar no repositório" });
+    toast(fonte.defArquivo + " gerado — substitua o arquivo na raiz do repositório e faça o commit.");
+  }
+
   function exportarCidadesRepositorio(comUf) {
     const nome = comUf ? "cidades_infinity.json" : "cidades_brasil.json";
     const linhas = cidadesEfetivasParaRepositorio(comUf);
@@ -3561,6 +3745,7 @@
       templates_versoes: diffOverlayMaps(atual.templates_versoes || {}, o.templates_versoes || {}),
       configuracoes: diffOverlayMaps(atual.configuracoes || {}, o.configuracoes || {}),
       campos_custom: diffOverlayMaps(atual.campos_custom || {}, o.campos_custom || {}),
+      docs_nativos: diffOverlayMaps(atual.docs_nativos || {}, o.docs_nativos || {}),
       cidades_novas: (function () {
         const existentes = {};
         for (const n of (atual.cidades_novas || [])) existentes[normalizarChaveCidade(n.cidade)] = n;
@@ -3586,27 +3771,30 @@
       }
       const o = json.overlay;
       const d = diffImportacao(o);
-      const nTotalNovos = d.campos_ficha.novos.length + d.campos_declaracao.novos.length + d.cidades.novos.length + d.pdfs_meta.novos.length + d.cidades_novas.novos.length + d.forms_meta.novos.length + d.templates_versoes.novos.length + d.configuracoes.novos.length + d.campos_custom.novos.length;
-      const nTotalAlt = d.campos_ficha.alterados.length + d.campos_declaracao.alterados.length + d.cidades.alterados.length + d.pdfs_meta.alterados.length + d.forms_meta.alterados.length + d.templates_versoes.alterados.length + d.configuracoes.alterados.length + d.campos_custom.alterados.length;
+      const nTotalNovos = d.campos_ficha.novos.length + d.campos_declaracao.novos.length + d.cidades.novos.length + d.pdfs_meta.novos.length + d.cidades_novas.novos.length + d.forms_meta.novos.length + d.templates_versoes.novos.length + d.configuracoes.novos.length + d.campos_custom.novos.length + d.docs_nativos.novos.length;
+      const nTotalAlt = d.campos_ficha.alterados.length + d.campos_declaracao.alterados.length + d.cidades.alterados.length + d.pdfs_meta.alterados.length + d.forms_meta.alterados.length + d.templates_versoes.alterados.length + d.configuracoes.alterados.length + d.campos_custom.alterados.length + d.docs_nativos.alterados.length;
       // Itens idênticos não alteram nada, mas precisam aparecer na conta: sem
       // isso, “Configurações (1) · 1 idêntico” parecia 1 mudança pendente.
-      const nTotalIdenticos = d.campos_ficha.identicos + d.campos_declaracao.identicos + d.cidades.identicos + d.pdfs_meta.identicos + d.forms_meta.identicos + d.templates_versoes.identicos + d.configuracoes.identicos + d.campos_custom.identicos;
+      const nTotalIdenticos = d.campos_ficha.identicos + d.campos_declaracao.identicos + d.cidades.identicos + d.pdfs_meta.identicos + d.forms_meta.identicos + d.templates_versoes.identicos + d.configuracoes.identicos + d.campos_custom.identicos + d.docs_nativos.identicos;
       const nMudancas = nTotalNovos + nTotalAlt;
 
       // ── Tarefa 5 — diff campo a campo com checkboxes (marcados por padrão) ──
-      const rotulos = { campos_ficha: "Coordenadas F-075", campos_declaracao: "Coordenadas Declaração", cidades: "Patches de cidade", pdfs_meta: "Metadados de PDF", forms_meta: "Metadados de formulários", templates_versoes: "Versões de templates", configuracoes: "Configurações", campos_custom: "Campos do Field Builder (§10)" };
+      const rotulos = { campos_ficha: "Coordenadas F-075", campos_declaracao: "Coordenadas Declaração", cidades: "Patches de cidade", pdfs_meta: "Metadados de PDF", forms_meta: "Metadados de formulários", templates_versoes: "Versões de templates", configuracoes: "Configurações", campos_custom: "Campos do Field Builder (§10)", docs_nativos: "Documentos nativos (gerador)" };
       function blocoMap(key) {
         const dd = d[key];
         if (!dd.total) return "";
         const nMud = dd.novos.length + dd.alterados.length;
         let html = "<h4 style='margin:10px 0 4px;font-size:12.5px'>" + rotulos[key] + " (" + dd.total + " no arquivo" +
           (nMud ? " · " + nMud + " mudança(s)" : " · sem mudanças") + ")</h4>";
+        // Documento nativo não é resumível por JSON.stringify (definição inteira):
+        // usa o resumo legível em vez de despejar o objeto na tela.
+        const resumo = function (v) { return key === "docs_nativos" ? resumoValorDocNativo(v) : resumoValor(v); };
         const item = function (ck, val, marcado, label) {
           return "<div class='diff-line'><label style='display:flex;gap:8px;align-items:flex-start;cursor:pointer'>" +
             "<input type='checkbox' data-imp='" + key + "|" + esc(ck) + "'" + (marcado ? " checked" : "") + "> <span>" + label + "</span></label></div>";
         };
-        for (const n of dd.novos) html += item(n.k, n.v, true, "<span class='path'>" + esc(n.k) + "</span> <span class='new'>novo</span> — " + esc(resumoValor(n.v)));
-        for (const a of dd.alterados) html += item(a.k, a.para, true, "<span class='path'>" + esc(a.k) + "</span> <span class='old'>" + esc(resumoValor(a.de)) + "</span> → <span class='new'>" + esc(resumoValor(a.para)) + "</span>");
+        for (const n of dd.novos) html += item(n.k, n.v, true, "<span class='path'>" + esc(n.k) + "</span> <span class='new'>novo</span> — " + esc(resumo(n.v)));
+        for (const a of dd.alterados) html += item(a.k, a.para, true, "<span class='path'>" + esc(a.k) + "</span> <span class='old'>" + esc(resumo(a.de)) + "</span> → <span class='new'>" + esc(resumo(a.para)) + "</span>");
         if (dd.identicos) html += "<details style='margin:6px 0'><summary style='font-size:11.5px;color:var(--text-light);cursor:pointer'>" + dd.identicos + " idêntico(s) (recolhidos — não alteram nada)</summary></details>";
         return html;
       }
@@ -3617,7 +3805,7 @@
           (nTotalIdenticos ? " (" + nTotalIdenticos + " item(ns) conferido(s), nenhuma diferença)." : " (overlay vazio nos dois lados).") +
           " Isso é o esperado ao exportar e reimportar a <em>mesma sessão</em> sem alterar nada. Para ver mudanças, altere algo depois de exportar " +
           "ou importe este arquivo em outro ambiente — outra aba/navegador, outra máquina ou o painel em modo API.</div>";
-      html += blocoMap("campos_ficha") + blocoMap("campos_declaracao") + blocoMap("cidades") + blocoMap("pdfs_meta") + blocoMap("forms_meta") + blocoMap("templates_versoes") + blocoMap("configuracoes") + blocoMap("campos_custom");
+      html += blocoMap("campos_ficha") + blocoMap("campos_declaracao") + blocoMap("cidades") + blocoMap("pdfs_meta") + blocoMap("forms_meta") + blocoMap("templates_versoes") + blocoMap("configuracoes") + blocoMap("campos_custom") + blocoMap("docs_nativos");
       if (d.cidades_novas.novos.length || d.cidades_novas.duplicados.length) {
         html += "<h4 style='margin:10px 0 4px;font-size:12.5px'>Cidades novas (" + d.cidades_novas.novos.length + " novas · " + d.cidades_novas.duplicados.length + " já existentes)</h4>";
         for (const n of d.cidades_novas.novos) {
@@ -3640,7 +3828,7 @@
         if (!ok) return;
 
         // aplica apenas o que continuar marcado, mesclando no overlay atual
-        const destinos = { campos_ficha: {}, campos_declaracao: {}, cidades: {}, pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, campos_custom: {} };
+        const destinos = { campos_ficha: {}, campos_declaracao: {}, cidades: {}, pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, campos_custom: {}, docs_nativos: {} };
         const novasSelecionadas = new Set();
         for (const m of marcados) {
           const pipe = m.indexOf("|");
@@ -3658,7 +3846,8 @@
           forms_meta: Object.assign({}, state.overlay.forms_meta, destinos.forms_meta),
           templates_versoes: Object.assign({}, state.overlay.templates_versoes, destinos.templates_versoes),
           configuracoes: Object.assign({}, state.overlay.configuracoes, destinos.configuracoes),
-          campos_custom: Object.assign({}, state.overlay.campos_custom, destinos.campos_custom)
+          campos_custom: Object.assign({}, state.overlay.campos_custom, destinos.campos_custom),
+          docs_nativos: Object.assign({}, state.overlay.docs_nativos, destinos.docs_nativos)
         };
         for (const key of Object.keys(DOCS)) applyOverlayToDoc(key, state.docData[key].json);
         applyCidadesOverlay(); rebuildCityMap();
@@ -3826,7 +4015,7 @@
           else map[item.chave] = Object.assign({}, item.anterior);
           aplicados.push("cidades:" + item.chave);
         }
-      } else if (item.overlayKey === "forms_meta" || item.overlayKey === "configuracoes" || item.overlayKey === "templates_versoes" || item.overlayKey === "campos_custom") {
+      } else if (item.overlayKey === "forms_meta" || item.overlayKey === "configuracoes" || item.overlayKey === "templates_versoes" || item.overlayKey === "campos_custom" || item.overlayKey === "docs_nativos") {
         // v3 — chaves novas seguem o mesmo padrão append-only de pdfs_meta
         // (campos_custom: substituição TOTAL do lote — não merge — pois é uma
         // entidade por docKey, e undo de criação = anterior null → delete)
@@ -3843,6 +4032,7 @@
       for (const item of itens) {
         if (item.overlayKey === "cidades" && state.overlay.cidades[item.chave] != null) { delete state.overlay.cidades[item.chave]; aplicados.push("cidades:" + item.chave + " (removido)"); }
         if (item.overlayKey === "pdfs_meta" && state.overlay.pdfs_meta[item.chave] != null) { delete state.overlay.pdfs_meta[item.chave]; aplicados.push("pdfs_meta:" + item.chave + " (removido)"); }
+        if (item.overlayKey === "docs_nativos" && state.overlay.docs_nativos[item.chave] != null) { delete state.overlay.docs_nativos[item.chave]; aplicados.push("docs_nativos:" + item.chave + " (removido)"); }
       }
     }
     if (!aplicados.length) { toast("Não foi possível reverter este evento automaticamente — use \"Ir para o registro\" para reversão manual.", false); return; }
@@ -3899,11 +4089,19 @@
     }
     const secoes = [
       ["dashboard", "Visão Geral"], ["formularios", "Formulários"], ["pdfs", "Templates"],
+      ["documentos", "Documentos Nativos"],
       ["coordenadas", "Editor Visual"], ["cidades", "Cidades & Regionais"], ["configuracoes", "Configurações"],
       ["validacao", "Validação"], ["historico", "Histórico"], ["seguranca", "Segurança"],
       ["dados", "Dados & Backups"], ["regras", "Regras"], ["assistencia", "Assistência"], ["sistema", "Sistema"]
     ];
     for (const s of secoes) itens.push({ tipo: "Seção", titulo: s[1], sub: "navegar", acao: function () { showSection(s[0]); } });
+    // Documentos nativos: o documento, com a contagem real de elementos
+    for (const idDn of Object.keys(state.overlay.docs_nativos || {})) {
+      const reg = state.overlay.docs_nativos[idDn];
+      if (!reg || !reg.definicao) continue;
+      const d = reg.definicao;
+      itens.push({ tipo: "Documento nativo", titulo: d.documentName || idDn, sub: "v" + d.documentVersion + " · " + (d.elementos || []).length + " elemento(s)", acao: function () { showSection("documentos"); dnSelecionarDoc(idDn); } });
+    }
     return itens;
   }
 
@@ -3960,13 +4158,1418 @@
     });
   }
 
+  // ══════════════════════════════════════════════════════
+  // GERADOR NATIVO DE PDFs PADRONIZADOS
+  // (IMPLEMENTAÇÃO DE GERADOR NATIVO D.md — seção Documentos Nativos)
+  //
+  // O engine (definição declarativa, validação, renderer pdf-lib, versionamento,
+  // comparador, importação de referência e bootstrap a partir do schema) vive em
+  // /native-docs.js — sem DOM, reutilizável pela aplicação pública. Aqui fica a
+  // camada administrativa: preview do PDF REAL gerado, edição (arraste + precisão
+  // numérica), versões, comparação com o original e importação de referência.
+  //
+  // Regras respeitadas: nada de localStorage (§2/§49 — persistência segue pelo
+  // overlay), os JSONs do repositório continuam intocados e o documento só vale
+  // oficialmente como "native" quando está PUBLICADO e sem erro crítico.
+  // ══════════════════════════════════════════════════════
+  let dnPreviewToken = 0;
+  let dnPreviewTimer = null;
+  let dnUltimoBytes = null;
+  let dnUltimoRelatorio = null;
+  let dnCmpBlobs = null;
+  let dnComparacaoGeometricaUltima = null;   // último relatório geométrico (referência × definição)
+  let dnOriginalRegistro = null;
+  let dnHandlersOk = false;
+  let dnRefPendente = null;
+
+  function dnNativo() { return global.NativeDocs || null; }
+  function dnAutor() { return (global.atentoAdminEmail && global.atentoAdminEmail()) || "painel"; }
+  function dnArred(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+  function dnClone(v) { return v == null ? v : JSON.parse(JSON.stringify(v)); }
+  function dnRegistros() { return state.overlay.docs_nativos || (state.overlay.docs_nativos = {}); }
+  function dnRegistro(docId) { return docId ? (dnRegistros()[docId] || null) : null; }
+  function dnDocIdSel() { const s = $("dnDoc"); return s && s.value ? s.value : null; }
+  function dnRegSel() { return dnRegistro(dnDocIdSel()); }
+  function dnDefSel() { const r = dnRegSel(); return r && r.definicao ? r.definicao : null; }
+  function dnFontePor(docId) { return NATIVOS_FONTES.filter(function (f) { return f.documentId === docId; })[0] || null; }
+  function dnFontePorDocKey(docKey) { return NATIVOS_FONTES.filter(function (f) { return f.docKey === docKey; })[0] || null; }
+  function dnPaginaAtual() { const s = $("dnPage"); return Math.max(1, parseInt((s && s.value) || 1, 10) || 1); }
+  function dnPaginaSel() { const d = dnDefSel(), N = dnNativo(); return (d && N) ? N.paginaDe(d, dnPaginaAtual()) : null; }
+  function dnSnap(v) { const g = Number(state.dnSnap) || 0; return g > 0 ? Math.round((Number(v) || 0) / g) * g : dnArred(v); }
+
+  /**
+   * Definição criada a partir do schema EFETIVO (base + Field Builder) e das
+   * dimensões MEDIDAS do template (pdf.js). Sem dimensão medida não se cria
+   * documento: inventar tamanho de página violaria a regra de ouro (§47/§52).
+   */
+  function dnDefinicaoPara(docKey, pageSizes, opts) {
+    const N = dnNativo();
+    const fonte = dnFontePorDocKey(docKey);
+    const json = fbDocEfetivo(docKey);
+    const size = (pageSizes || [])[0];
+    if (!N || !fonte || !json || !size) return null;
+    return N.definicaoDeSchema(json, {
+      documentId: fonte.documentId,
+      documentName: fonte.nome,
+      width: size.w, height: size.h,
+      autor: (opts && opts.autor) || dnAutor(),
+      schemaArquivo: fonte.schemaArquivo,
+      prefixoBinding: docKey,
+      assets: []
+    });
+  }
+
+  /** Nome de arquivo aceito para asset: sem diretório, sem caminho relativo. */
+  function dnArquivoSeguro(nome) {
+    const n = String(nome || "").trim();
+    if (!n || n.indexOf("/") !== -1 || n.indexOf("..") !== -1 || n.indexOf(":") !== -1) return null;
+    return n;
+  }
+
+  /** Bytes das imagens do documento (assets do repositório), cacheados por sessão. */
+  async function dnCarregarImagens(def) {
+    const N = dnNativo();
+    const arquivos = [];
+    const add = function (n) { const s = dnArquivoSeguro(n); if (s && arquivos.indexOf(s) === -1) arquivos.push(s); };
+    for (const a of ((def && def.assets) || [])) if (a && a.arquivo) add(a.arquivo);
+    if (N && def) for (const el of N.elementosTodos(def)) if (el && el.arquivo) add(el.arquivo);
+    const imagens = {};
+    for (const arq of arquivos) {
+      if (state.dnAssets[arq]) { imagens[arq] = state.dnAssets[arq]; continue; }
+      try {
+        const r = await fetch(urlRepositorio(arq), { cache: "no-store" });
+        if (!r.ok) continue;
+        state.dnAssets[arq] = new Uint8Array(await r.arrayBuffer());
+        imagens[arq] = state.dnAssets[arq];
+      } catch (e) { /* asset opcional — o renderer reporta a ausência */ }
+    }
+    return { imagens: imagens };
+  }
+
+  function dnAgendarPreview() {
+    clearTimeout(dnPreviewTimer);
+    dnPreviewTimer = setTimeout(function () { dnRenderPreview().catch(function () { }); }, 250);
+  }
+
+  /**
+   * Preview = o PDF de verdade, gerado agora pela engine e renderizado com o
+   * pdf.js. Não existe "imitação" no editor: o que aparece na tela é a saída
+   * final (§32 — a validação definitiva é o PDF gerado).
+   */
+  async function dnRenderPreview() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const canvas = $("dnCanvas");
+    if (!N || !def || !canvas) return;
+    if (!global.PDFLib || !global.pdfjsLib) {
+      toast("pdf-lib/pdf.js não carregaram (CDN) — o preview do documento fica indisponível.", false);
+      return;
+    }
+    const token = ++dnPreviewToken;
+    let gerado;
+    try {
+      const assets = await dnCarregarImagens(def);
+      gerado = await N.renderizarPdf(def, dnDadosDeTeste(def), global.PDFLib, assets, { forcar: true });
+    } catch (e) {
+      toast("Falha ao gerar o PDF nativo: " + e.message, false);
+      return;
+    }
+    if (token !== dnPreviewToken) return;
+    dnUltimoBytes = gerado.bytes;
+    dnUltimoRelatorio = gerado;
+    dnRenderResumo();
+    const escala = state.dnZoom / 100;
+    let px = { escala: escala };
+    try {
+      const pdf = await global.pdfjsLib.getDocument({ data: gerado.bytes.slice(0) }).promise;
+      const pg = await pdf.getPage(Math.min(dnPaginaAtual(), pdf.numPages));
+      const vp = pg.getViewport({ scale: escala });
+      canvas.width = vp.width; canvas.height = vp.height;
+      // O zoom é visual (§18): o canvas é exibido em px reais do viewport para as
+      // caixas ficarem exatamente sobre o que o PDF mostra (1 pt = 1 px na escala 1).
+      canvas.style.width = vp.width + "px";
+      canvas.style.height = vp.height + "px";
+      await pg.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+      px = { escala: escala, largura: vp.width, altura: vp.height };
+    } catch (e) { /* canvas é best-effort: as caixas usam a escala declarada */ }
+    if (token !== dnPreviewToken) return;
+    dnRenderBoxes(def, px);
+  }
+
+  /** Caixas dos elementos sobre o PDF gerado (1 pt = 1 px no viewport escala 1). */
+  function dnRenderBoxes(def, px) {
+    const stack = $("dnPageStack");
+    const N = dnNativo();
+    if (!stack || !N) return;
+    stack.querySelectorAll(".dn-el").forEach(function (b) { b.remove(); });
+    const escala = (px && px.escala) || state.dnZoom / 100;
+    const busca = ((($("dnBuscaElemento") || {}).value) || "").toLowerCase();
+    for (const el of N.elementosTodos(def)) {
+      if ((Number(el.page) || 1) !== dnPaginaAtual()) continue;
+      if (busca && String((el.id || "") + " " + (el.binding || "") + " " + (el.type || "") + " " + (el.content || "")).toLowerCase().indexOf(busca) === -1) continue;
+      const box = document.createElement("div");
+      const selecionado = state.dnSel === el.id || state.dnSelMulti.indexOf(el.id) !== -1;
+      box.className = "dn-el tipo-" + el.type + (selecionado ? " selected" : "") + (el.confirmado === false ? " pendente" : "");
+      const w = Math.max(6, (Number(el.width) || 0) * escala);
+      const h = Math.max(6, (Number(el.height) || 0) * escala);
+      box.style.left = (Number(el.x) || 0) * escala + "px";
+      box.style.top = (Number(el.y) || 0) * escala + "px";
+      box.style.width = w + "px";
+      box.style.height = h + "px";
+      box.title = el.type + " · " + el.id + (el.binding ? " · " + el.binding : "") +
+        "  (x " + dnArred(el.x) + ", y " + dnArred(el.y) + ", " + dnArred(el.width) + "x" + dnArred(el.height) + " pt)";
+      box.dataset.elId = el.id;
+      box.textContent = el.id;
+      dnAttachDrag(box, el, escala);
+      dnAttachResize(box, el, escala);
+      box.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        if (ev.ctrlKey || ev.metaKey) {
+          const i = state.dnSelMulti.indexOf(el.id);
+          if (i === -1) state.dnSelMulti.push(el.id); else state.dnSelMulti.splice(i, 1);
+        } else {
+          state.dnSelMulti = [];
+          state.dnSel = el.id;
+        }
+        dnRenderBoxes(def, px);
+        dnRenderLista();
+        dnRenderProps();
+      });
+      stack.appendChild(box);
+    }
+    if (!stack.querySelector(".dn-el")) {
+      const aviso = document.createElement("div");
+      aviso.className = "notice info";
+      aviso.style.cssText = "position:absolute;top:10px;left:10px;right:10px";
+      aviso.textContent = "Nenhum elemento nesta página. Use Importar PDF (referência) ou Adicionar elemento.";
+      stack.appendChild(aviso);
+    }
+  }
+
+  /** Geometria copiável de um elemento (linhas têm 4 coordenadas). */
+  function dnGeom(el) {
+    return { x: Number(el.x) || 0, y: Number(el.y) || 0, x1: Number(el.x1) || 0, y1: Number(el.y1) || 0, x2: Number(el.x2) || 0, y2: Number(el.y2) || 0 };
+  }
+
+  /** §19 — arraste no preview, com snap; a geometria final continua em pt. */
+  function dnAttachDrag(box, el, escala) {
+    box.addEventListener("pointerdown", function (ev) {
+      if (ev.button !== 0) return;
+      ev.preventDefault();
+      box.setPointerCapture(ev.pointerId);
+      const ini = { px: ev.clientX, py: ev.clientY, g: dnGeom(el) };
+      const def = dnDefSel();
+      const mover = function (e2) {
+        const dx = (e2.clientX - ini.px) / escala;
+        const dy = (e2.clientY - ini.py) / escala;
+        el.x = dnSnap(ini.g.x + dx);
+        el.y = dnSnap(ini.g.y + dy);
+        if (el.type === "line") {
+          const ddx = el.x - ini.g.x, ddy = el.y - ini.g.y;
+          el.x1 = dnArred(ini.g.x1 + ddx); el.y1 = dnArred(ini.g.y1 + ddy);
+          el.x2 = dnArred(ini.g.x2 + ddx); el.y2 = dnArred(ini.g.y2 + ddy);
+        }
+        box.style.left = (Number(el.x) || 0) * escala + "px";
+        box.style.top = (Number(el.y) || 0) * escala + "px";
+        dnPreencherProps(el);
+      };
+      const soltar = function (e3) {
+        box.removeEventListener("pointermove", mover);
+        box.removeEventListener("pointerup", soltar);
+        box.removeEventListener("pointercancel", soltar);
+        state.dnSel = el.id;
+        dnRenderBoxes(def, { escala: escala });
+        dnAgendarPreview();
+        if (e3 && e3.type !== "pointercancel") toast("Elemento reposicionado — use Salvar alterações para gravar no overlay.");
+      };
+      box.addEventListener("pointermove", mover);
+      box.addEventListener("pointerup", soltar);
+      box.addEventListener("pointercancel", soltar);
+    });
+  }
+
+  /** §18/§19 — redimensionar pelo canto inferior direito. */
+  function dnAttachResize(box, el, escala) {
+    const alca = document.createElement("span");
+    alca.className = "dn-handle";
+    box.appendChild(alca);
+    alca.addEventListener("pointerdown", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      alca.setPointerCapture(ev.pointerId);
+      const ini = { px: ev.clientX, py: ev.clientY, w: Number(el.width) || 0, h: Number(el.height) || 0 };
+      const def = dnDefSel();
+      const mover = function (e2) {
+        el.width = Math.max(0, dnSnap(ini.w + (e2.clientX - ini.px) / escala));
+        el.height = Math.max(0, dnSnap(ini.h + (e2.clientY - ini.py) / escala));
+        box.style.width = Math.max(6, el.width * escala) + "px";
+        box.style.height = Math.max(6, el.height * escala) + "px";
+        dnPreencherProps(el);
+      };
+      const soltar = function () {
+        alca.removeEventListener("pointermove", mover);
+        alca.removeEventListener("pointerup", soltar);
+        dnRenderBoxes(def, { escala: escala });
+        dnAgendarPreview();
+      };
+      alca.addEventListener("pointermove", mover);
+      alca.addEventListener("pointerup", soltar);
+    });
+  }
+
+  /**
+   * Dados fictícios para o preview/PDF de teste. Só preenche o que tem
+   * correspondência conhecida (nada é inventado): o resto fica vazio, como
+   * ficaria para um candidato que não informou aquele dado.
+   */
+  const DN_MAPA_TESTE = {
+    nome: "nomecompleto", nomecompleto: "nomecompleto", craxa: "craxa", "craxá": "craxa",
+    fone: "fone", telefone: "fone", celular: "celular", email: "email",
+    estadocivil: "estadocivil", dtnasc: "datanascimento", datanascimento: "datanascimento", data: "data"
+  };
+  function dnDadosDeTeste(def) {
+    const N = dnNativo();
+    const dados = Object.assign({}, DADOS_TESTE);
+    if (!N || !def) return dados;
+    for (const el of N.elementosTodos(def)) {
+      if (el.type !== "field" || !el.binding) continue;
+      const partes = String(el.binding).split(".");
+      const chave = partes[partes.length - 1];
+      const alvo = DN_MAPA_TESTE[chave] || DN_MAPA_TESTE[String(chave).toLowerCase()];
+      if (alvo && DADOS_TESTE[alvo] != null) dados[el.binding] = DADOS_TESTE[alvo];
+    }
+    return dados;
+  }
+
+  /** Cabeçalho do editor: versão, status, modo efetivo, tamanho e pendências. */
+  function dnRenderResumo() {
+    const N = dnNativo();
+    const box = $("dnResumo");
+    const def = dnDefSel();
+    const reg = dnRegSel();
+    if (!box) return;
+    if (!def || !N) { box.innerHTML = ""; return; }
+    const r = N.resumoDefinicao(def);
+    const efetivo = N.modoEfetivo(reg);
+    const rel = dnUltimoRelatorio;
+    box.innerHTML = '<div class="legend-selos">' +
+      '<span class="badge ok">v' + esc(def.documentVersion) + "</span> " +
+      '<span class="badge ' + (r.status === "PUBLICADO" ? "ok" : "muted") + '">' + esc(r.status) + "</span> " +
+      '<span class="badge ' + (efetivo.modo === "native" ? "ok" : "readonly") + '">geração: ' + esc(efetivo.modo) + "</span> " +
+      '<span class="badge muted">' + dnArred(def.page.width) + " × " + dnArred(def.page.height) + " pt</span> " +
+      '<span class="badge muted">' + r.nElementos + " elemento(s) · " + r.nCampos + " campo(s)</span>" +
+      (r.pendenteCalibracao ? ' <span class="badge warn">REQUER CALIBRAÇÃO</span>' : "") +
+      (r.importadosNaoConfirmados ? ' <span class="badge warn">' + r.importadosNaoConfirmados + " importado(s) não confirmado(s)</span>" : "") +
+      "</div>" +
+      '<div class="section-desc" style="margin-top:6px">Modo efetivo: ' + esc(efetivo.motivo) + "." +
+      (rel ? " Última geração: " + rel.desenhados + " elemento(s) desenhado(s), " + rel.ignorados.length + " ignorado(s)." : "") +
+      (rel && rel.ignorados.length ? " Ignorados: " + esc(rel.ignorados.slice(0, 4).map(function (i) { return i.id; }).join(", ")) : "") + "</div>" +
+      (r.nErros ? '<div class="notice err" style="margin-top:6px">' + r.nErros + " erro(s) crítico(s) na definição — veja a seção <strong>Validação</strong>.</div>" : "") +
+      (r.nAvisos ? '<div class="notice warn" style="margin-top:6px">' + r.nAvisos + " aviso(s) — em geral calibração pendente (textos fixos, linhas e caixas do formulário oficial não estão descritos no schema).</div>" : "");
+  }
+
+  function dnRenderPaginas() {
+    const N = dnNativo();
+    const sel = $("dnPage");
+    const def = dnDefSel();
+    if (!sel || !N || !def) return;
+    const pgs = N.paginasDaDefinicao(def);
+    sel.innerHTML = pgs.map(function (p, i) {
+      return '<option value="' + (i + 1) + '"' + ((i + 1) === dnPaginaAtual() ? " selected" : "") + ">Página " + (i + 1) + " de " + pgs.length + "</option>";
+    }).join("");
+  }
+
+  function dnRenderLista() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const box = $("dnLista");
+    if (!box || !N || !def) return;
+    const busca = ((($("dnBuscaElemento") || {}).value) || "").toLowerCase();
+    const els = N.elementosTodos(def).filter(function (el) {
+      if (!busca) return true;
+      return String((el.id || "") + " " + (el.binding || "") + " " + (el.type || "") + " " + (el.content || "")).toLowerCase().indexOf(busca) !== -1;
+    });
+    box.innerHTML = els.slice(0, 300).map(function (el) {
+      const marcado = state.dnSel === el.id || state.dnSelMulti.indexOf(el.id) !== -1;
+      const detalhe = el.binding || el.content || (el.arquivo || "");
+      return '<button type="button" role="option" class="dn-item' + (marcado ? " sel" : "") + '" data-dn-el="' + esc(el.id) + '">' +
+        '<span class="dn-tipo">' + esc(el.type) + "</span>" +
+        "<span class=\"dn-id\">" + esc(el.id) + "</span>" +
+        '<span class="dn-det">' + esc(String(detalhe).slice(0, 40)) + "</span></button>";
+    }).join("") || '<div class="section-desc">Nenhum elemento' + (busca ? " para esta busca" : "") + ".</div>";
+    box.querySelectorAll("[data-dn-el]").forEach(function (b) {
+      b.addEventListener("click", function (ev) {
+        const id = b.getAttribute("data-dn-el");
+        if (ev.ctrlKey || ev.metaKey) {
+          const i = state.dnSelMulti.indexOf(id);
+          if (i === -1) state.dnSelMulti.push(id); else state.dnSelMulti.splice(i, 1);
+        } else {
+          state.dnSelMulti = [];
+          state.dnSel = id;
+        }
+        dnRenderLista();
+        dnRenderProps();
+        dnRenderBoxes(dnDefSel(), { escala: state.dnZoom / 100 });
+      });
+    });
+  }
+
+  /** Elemento selecionado (objeto real dentro da definição). */
+  function dnElSel() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    if (!N || !def || !state.dnSel) return null;
+    return N.elementoPorId(def, state.dnSel);
+  }
+
+  function dnPreencherProps(el) {
+    const set = function (id, v) { const e = $(id); if (e) e.value = v == null ? "" : v; };
+    if (!el) return;
+    set("dnX", dnArred(el.x));
+    set("dnY", dnArred(el.y));
+    set("dnW", dnArred(el.width));
+    set("dnH", dnArred(el.height));
+    set("dnTamanho", (el.font && el.font.size) || el.fontSize || "");
+    set("dnPagina", el.page || 1);
+    set("dnCor", el.color || "");
+    set("dnConteudo", el.type === "field" ? (el.binding || "") : (el.content || ""));
+    const rot = $("dnRotacao"); if (rot) rot.value = el.rotation == null ? "" : el.rotation;
+    const fu = $("dnFonte"); if (fu) fu.value = (el.font && el.font.family) || "Helvetica";
+    const al = $("dnAlinhamento"); if (al) al.value = el.alignment || "left";
+    const an = $("dnAncora"); if (an) an.value = el.ancoraV || "campo";
+    const tr = $("dnTruncar"); if (tr) tr.checked = el.truncar !== false;
+    const co = $("dnConfirmado"); if (co) co.checked = el.confirmado === true;
+  }
+
+  function dnRenderProps() {
+    const el = dnElSel();
+    const ids = ["dnX", "dnY", "dnW", "dnH", "dnFonte", "dnTamanho", "dnAlinhamento", "dnAncora", "dnPagina", "dnCor", "dnConteudo", "dnTruncar", "dnConfirmado", "dnRotacao", "dnSalvar", "dnReverter", "dnDuplicar", "dnFrente", "dnTras", "dnExcluir"];
+    for (const id of ids) { const e = $(id); if (e) e.disabled = !el; }
+    const info = $("dnElInfo");
+    const titulo = $("dnElTitulo");
+    if (titulo) titulo.textContent = el ? "Propriedades — " + el.type : "Propriedades do elemento";
+    if (info) {
+      info.innerHTML = el
+        ? "<strong>" + esc(el.id) + "</strong> · id (não muda em renomeações) · origem: " + esc(el.origem || "manual") +
+          (el.chaveSchema ? " · schema: <code>" + esc(el.chaveSchema) + "</code>" : "") +
+          (el.confirmado === false ? ' <span class="badge warn">REQUER CALIBRAÇÃO</span>' : "")
+        : "Selecione um elemento na lista ou no preview. Ctrl/Cmd + clique seleciona vários para agrupar.";
+    }
+    dnPreencherProps(el);
+    const tr = $("dnTruncar"); if (tr) tr.disabled = !el || (el.type !== "text" && el.type !== "field");
+  }
+
+  /** Marca o documento como alterado e agenda o novo preview. */
+  function dnAlterou(el) {
+    const N = dnNativo();
+    const def = dnDefSel();
+    if (!N || !def) return;
+    dnRenderLista();
+    dnRenderBoxes(def, { escala: state.dnZoom / 100 });
+    dnAgendarPreview();
+  }
+
+  // ── Ações de elemento (§7/§21) ──
+  function dnDuplicarEl() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const el = dnElSel();
+    if (!N || !def || !el) return;
+    const copia = dnClone(el);
+    copia.id = N.proximoIdElemento(def, el.id + " copia");
+    copia.x = dnSnap((Number(el.x) || 0) + 10);
+    copia.y = dnSnap((Number(el.y) || 0) + 10);
+    copia.origem = "manual";
+    copia.confirmado = false;
+    if (copia.type === "line") { copia.x1 = (Number(el.x1) || 0) + 10; copia.y1 = (Number(el.y1) || 0) + 10; copia.x2 = (Number(el.x2) || 0) + 10; copia.y2 = (Number(el.y2) || 0) + 10; }
+    def.elementos.push(copia);
+    state.dnSel = copia.id;
+    dnAlterou();
+    dnRenderProps();
+    toast("Elemento duplicado como " + copia.id + " — salve para gravar.");
+  }
+
+  async function dnExcluirEl() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const el = dnElSel();
+    if (!N || !def || !el) return;
+    const ok = await confirmarDestrutivo("Excluir elemento",
+      "<p>Excluir <strong>" + esc(el.id) + "</strong> do documento? A remoção só é revertida restaurando uma versão ou descartando as alterações pendentes.</p>", "Excluir");
+    if (!ok) return;
+    const remover = function (lista, id) {
+      for (let i = lista.length - 1; i >= 0; i--) {
+        if (lista[i].id === id) { lista.splice(i, 1); continue; }
+        if (lista[i].type === "group") remover(lista[i].elementos || [], id);
+      }
+    };
+    remover(def.elementos, el.id);
+    state.dnSel = null;
+    dnAlterou();
+    dnRenderProps();
+    toast("Elemento removido do documento — salve para gravar no overlay.");
+  }
+
+  function dnMoverCamada(direcao) {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const el = dnElSel();
+    if (!N || !def || !el) return;
+    if (el.grupo) { toast("Elemento dentro de grupo: mova a camada do grupo (selecione o grupo na lista).", false); return; }
+    if (N.moverCamada(def, el.id, direcao)) { dnAlterou(); toast("Camada alterada (" + direcao + ")."); }
+    else toast("Este elemento já está no extremo da ordem de desenho.", false);
+  }
+
+  function dnAgrupar() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    if (!N || !def) return;
+    if (state.dnSelMulti.length < 2) { toast("Selecione 2+ elementos (Ctrl/Cmd + clique) para agrupar.", false); return; }
+    const g = N.agruparElementos(def, state.dnSelMulti, null);
+    if (!g) { toast("Não foi possível agrupar (grupo dentro de grupo não é suportado).", false); return; }
+    state.dnSelMulti = [];
+    state.dnSel = g.id;
+    dnAlterou();
+    dnRenderProps();
+    toast("Elementos agrupados como " + g.id + " — mover o grupo move todos os filhos.");
+  }
+
+  function dnAdicionar(tipo, texto, arquivo) {
+    const N = dnNativo();
+    const def = dnDefSel();
+    if (!N || !def) return;
+    const pagina = dnPaginaAtual();
+    const id = N.proximoIdElemento(def, tipo + " " + (texto || arquivo || ""));
+    const base = { id: id, type: tipo, page: pagina, x: 40, y: 40, zIndex: 500, origem: "manual", confirmado: false, opacity: 1 };
+    let el = base;
+    if (tipo === "text") el = Object.assign(base, { content: texto || "TEXTO NOVO", width: 200, height: 12, font: { family: "Helvetica", size: 9, weight: "normal", style: "normal" }, color: "#000000", alignment: "left" });
+    else if (tipo === "field") el = Object.assign(base, { binding: "", width: 200, height: 12, font: { family: "Helvetica", size: 9 }, alignment: "left", ancoraV: "campo", offsetX: PERFIL_O_PT_X() });
+    else if (tipo === "line") el = Object.assign(base, { x: 40, y: 40, x1: 40, y1: 40, x2: 500, y2: 40, stroke: "#000000", strokeWidth: 0.75, lineStyle: "solid" });
+    else if (tipo === "rectangle" || tipo === "ellipse" || tipo === "circle") el = Object.assign(base, { width: 200, height: 40, fill: null, stroke: "#000000", strokeWidth: 0.5, radius: 0 });
+    else if (tipo === "table") el = Object.assign(base, { width: 300, height: 60, columns: [{ titulo: "Coluna 1", width: 150 }, { titulo: "Coluna 2", width: 150 }], rows: [[{ texto: "—" }, { texto: "—" }]], alturaLinha: 16, fontSize: 9, cabecalho: true, strokeWidth: 0.5, stroke: "#000000" });
+    else if (tipo === "image") el = Object.assign(base, { arquivo: arquivo || "logomarca.png", width: 120, height: 45, fit: "contain" });
+    else if (tipo === "signature") el = Object.assign(base, { binding: "", arquivo: arquivo || "", width: 180, height: 38, font: { family: "Helvetica", size: 9 }, ancoraV: "meio" });
+    else if (tipo === "checkbox") el = Object.assign(base, { width: 8, height: 8, marcado: true, strokeWidth: 0.5, stroke: "#000000" });
+    def.elementos.push(el);
+    if (tipo === "image" && (def.assets || []).every(function (a) { return a.arquivo !== el.arquivo; })) {
+      def.assets = (def.assets || []).concat([{ id: N.slugId(el.arquivo), tipo: "imagem", arquivo: el.arquivo }]);
+    }
+    state.dnSel = el.id;
+    state.dnSelMulti = [];
+    dnAlterou();
+    dnRenderProps();
+    toast("Elemento " + el.id + " adicionado — ajuste a geometria e salve.");
+  }
+
+  function PERFIL_O_PT_X() { const N = dnNativo(); return N && N.PERFIL_APP ? N.PERFIL_APP.offsetX : 0.5; }
+
+  /** Abre bytes de PDF numa aba (objeto URL revogado depois). */
+  function dnAbrirBytes(bytes, nome) {
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(function () { URL.revokeObjectURL(url); }, 120000);
+    return { url: url, nome: nome || "documento.pdf" };
+  }
+
+  /** §36/§37 — cria o documento nativo a partir do schema real (F-075 primeiro). */
+  async function dnCriarDoSchema() {
+    const N = dnNativo();
+    if (!N) return;
+    const opcoes = NATIVOS_FONTES.map(function (f) { return { v: f.docKey, t: f.nome + " — " + f.schemaArquivo }; });
+    const valores = await formModal({
+      title: "Novo documento nativo a partir do schema",
+      help: "A geometria vem das coordenadas reais dos campos. Textos fixos, linhas, caixas e logotipos do formulário oficial não estão descritos no repositório: o documento nasce marcado como REQUER CALIBRAÇÃO.",
+      fields: [{ key: "docKey", label: "Schema de campos", type: "select", value: opcoes[0].v, options: opcoes }],
+      okLabel: "Criar documento"
+    });
+    if (!valores) return;
+    const fonte = dnFontePorDocKey(valores.docKey);
+    if (!fonte) return;
+    if (dnRegistro(fonte.documentId)) {
+      dnSelecionarDoc(fonte.documentId);
+      toast("Já existe um documento nativo para este schema — abrindo o existente.", false);
+      return;
+    }
+    let pageSizes = state.docData[valores.docKey] && state.docData[valores.docKey].pageSizes;
+    if (!pageSizes || !pageSizes.length) {
+      try {
+        await loadDocForEditor(valores.docKey);
+        pageSizes = state.docData[valores.docKey].pageSizes;
+      } catch (e) {
+        toast("Não foi possível medir o template " + fonte.pdfFile + " (" + e.message + ").", false);
+        return;
+      }
+    }
+    const def = dnDefinicaoPara(valores.docKey, pageSizes, { autor: dnAutor() });
+    if (!def) { toast("Schema não carregado — recarregue o painel.", false); return; }
+    const modo = configGet("documentos.modo_padrao") === "native" ? "native" : "external";
+    const registro = N.novoRegistro(def, {
+      autor: dnAutor(), modo: modo, quando: def.metadados.criadoEm,
+      motivoInicial: "criado do schema " + fonte.schemaArquivo + " com " + def.elementos.length +
+        " campo(s) e dimensão medida " + dnArred(def.page.width) + "×" + dnArred(def.page.height) + " pt (modo " + modo + ")"
+    });
+    dnRegistros()[fonte.documentId] = registro;
+    await persistOverlaySilencioso("documento_nativo_criado", fonte.documentId,
+      { overlayKey: "docs_nativos", itens: [{ chave: fonte.documentId, anterior: null }] },
+      "documento nativo " + fonte.documentId + " criado do schema (" + def.elementos.length + " campo(s), modo " + modo + ")");
+    renderDocumentos();
+    toast("Documento nativo criado com " + def.elementos.length + " campo(s) fiéis ao PDF atual. Calibre o restante do formulário.");
+  }
+
+  function dnExportarDefinicao() {
+    const def = dnDefSel();
+    const reg = dnRegSel();
+    if (!def) { toast("Nenhum documento nativo selecionado.", false); return; }
+    const pacote = {
+      kind: "document-definition",
+      gerado_em: new Date().toISOString(),
+      gerado_por: dnAutor(),
+      meta: reg ? reg.meta : null,
+      versoes: reg ? reg.versoes : [],
+      log: reg ? reg.log : [],
+      assets: (def.assets || []).map(function (a) { return { arquivo: a.arquivo, id: a.id, nota: "os bytes continuam no repositório (native-docs.js lê por nome)" }; }),
+      definicao: def
+    };
+    global.AdminPersistence.baixarJSON(pacote, "document-definition-" + def.documentId + ".json");
+    logEvento({ acao: "exportacao", entidade: def.documentName, alteracao: "definição nativa exportada (v" + def.documentVersion + ", " + (def.elementos || []).length + " elemento(s)) — o PDF passou a ser resultado da aplicação (§51)" });
+    toast("Definição exportada — versionar no repositório.");
+  }
+
+  /** §40 — validar, mostrar alterações, confirmar, importar (nunca silencioso). */
+  async function dnImportarDefinicao(file) {
+    const N = dnNativo();
+    if (!N) return;
+    try {
+      const json = await global.AdminPersistence.lerArquivoJSON(file);
+      const def = json && (json.definicao || json);
+      if (!def || !def.documentId || !def.page || !Array.isArray(def.elementos)) {
+        $("dnResumo").innerHTML = '<div class="notice err">Estrutura inválida — esperado um document-definition exportado por este painel. Nada foi alterado.</div>';
+        return;
+      }
+      const v = N.validarDefinicao(def);
+      const atual = dnRegistro(def.documentId);
+      const diff = atual && atual.definicao ? N.compararDefinicoes(atual.definicao, def) : null;
+      const ok = await confirmModal("Importar definição",
+        "<p><strong>" + esc(def.documentName || def.documentId) + "</strong> · v" + esc(def.documentVersion) +
+        " · " + (def.elementos || []).length + " elemento(s) · página " + dnArred(def.page.width) + "×" + dnArred(def.page.height) + " pt.</p>" +
+        (atual ? "<p>Substitui o documento existente (" + esc((atual.definicao && atual.definicao.documentVersion) || "?") + ").</p>" : "<p>Novo documento no overlay.</p>") +
+        (diff ? "<p>Alterações: <strong>" + diff.adicionados.length + " novo(s)</strong>, <strong>" + diff.removidos.length + " removido(s)</strong>, <strong>" + diff.alterados.length + " alterado(s)</strong>.</p>" : "") +
+        (v.erros.length ? "<div class='notice err'>" + v.erros.length + " erro(s) crítico(s): " + esc(v.erros.slice(0, 3).join(" | ")) + "</div>" : "") ,
+        "Importar");
+      if (!ok) return;
+      const anterior = atual ? dnClone(atual) : null;
+      const registro = atual || N.novoRegistro(def, { autor: dnAutor(), modo: "external" });
+      registro.definicao = def;
+      registro.meta = Object.assign({}, registro.meta, { atualizadoEm: new Date().toISOString(), atualizadoPor: dnAutor(), status: (def.metadados && def.metadados.status) || "RASCUNHO" });
+      N.registrarLog(registro, "definição importada de " + file.name + (diff ? " — " + diff.resumo : ""), dnAutor());
+      dnRegistros()[def.documentId] = registro;
+      await persistOverlaySilencioso("documento_nativo_importado", def.documentId,
+        { overlayKey: "docs_nativos", itens: [{ chave: def.documentId, anterior: anterior }] },
+        "definição nativa importada de " + file.name);
+      renderDocumentos();
+      dnSelecionarDoc(def.documentId);
+      toast("Definição importada para o overlay — nada foi sobrescrito silenciosamente.");
+    } catch (e) {
+      toast("Falha ao importar definição: " + e.message, false);
+    }
+  }
+
+  /** §32 — PDF de teste de verdade (independente do template). */
+  async function dnGerarPdfTeste() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    if (!N || !def) { toast("Nenhum documento nativo selecionado.", false); return; }
+    if (!global.PDFLib) { toast("pdf-lib não carregou (CDN).", false); return; }
+    try {
+      const assets = await dnCarregarImagens(def);
+      const gerado = await N.renderizarPdf(def, dnDadosDeTeste(def), global.PDFLib, assets, { forcar: true });
+      dnAbrirBytes(gerado.bytes, def.documentId + "-nativo.pdf");
+      await logEvento({ acao: "preview_teste", entidade: def.documentName, alteracao: "PDF nativo gerado: " + gerado.paginas + " página(s), " + gerado.desenhados + " elemento(s) desenhado(s)" });
+      toast("PDF nativo gerado — " + gerado.desenhados + " elemento(s) desenhado(s).");
+    } catch (e) {
+      toast("Falha ao gerar o PDF nativo: " + e.message, false);
+    }
+  }
+
+  /** §23/§24 — salvar alterações do documento no overlay (não é publicação). */
+  async function dnSalvar() {
+    const N = dnNativo();
+    const docId = dnDocIdSel();
+    const reg = dnRegSel();
+    const def = dnDefSel();
+    if (!N || !reg || !def) return;
+    const diff = N.compararDefinicoes(state.dnOriginal || { elementos: [] }, def);
+    if (!diff.total) { toast("Nenhuma alteração para salvar neste documento."); return; }
+    reg.meta.atualizadoEm = new Date().toISOString();
+    reg.meta.atualizadoPor = dnAutor();
+    // Deixa de ser "linha de base intacta": passa a contar como pendência de
+    // exportação para o repositório (o arquivo versionado voltou a divergir).
+    if (reg.meta.origemRepo) reg.meta.alterado = true;
+    N.registrarLog(reg, "alterado: " + (diff.resumo || diff.total + " diferença(s)"), dnAutor());
+    await persistOverlaySilencioso("documento_nativo_alterado", docId,
+      { overlayKey: "docs_nativos", itens: [{ chave: docId, anterior: dnOriginalRegistro }] },
+      diff.resumo || diff.total + " diferença(s) no documento nativo");
+    dnOriginalRegistro = dnClone(reg);
+    state.dnOriginal = dnClone(def);
+    renderDocumentos();
+    toast("Documento salvo no overlay — " + diff.total + " diferença(s).");
+  }
+
+  function dnReverter() {
+    const N = dnNativo();
+    const reg = dnRegSel();
+    if (!N || !reg || !state.dnOriginal) { toast("Nada para reverter.", false); return; }
+    reg.definicao = dnClone(state.dnOriginal);
+    renderDocumentos();
+    toast("Alterações não salvas revertidas para o estado carregado.");
+  }
+
+  /** §24 — congelar versão e definir status/modo do documento. */
+  async function dnPublicar() {
+    const N = dnNativo();
+    const docId = dnDocIdSel();
+    const reg = dnRegSel();
+    const def = dnDefSel();
+    if (!N || !reg || !def) return;
+    const modo = ($("dnModo") || {}).value || "external";
+    const status = ($("dnStatus") || {}).value || "RASCUNHO";
+    const v = N.validarDefinicao(def);
+    if (modo === "native" && !v.ok) {
+      await confirmModal("Ativar modo nativo bloqueado",
+        "<p>A definição tem <strong>" + v.erros.length + " erro(s) crítico(s)</strong> e não pode gerar oficialmente:</p><pre>" + esc(v.erros.slice(0, 8).join(" | ")) + "</pre>", "Entendi");
+      return;
+    }
+    if (modo === "native") {
+      const pend = N.elementosTodos(def).filter(function (e) { return e.confirmado === false; }).length;
+      const ok = await confirmModal("Ativar modo nativo",
+        "<p>O documento passa a ser a fonte oficial de geração deste formulário. " +
+        (pend ? "<strong>" + pend + " elemento(s)</strong> seguem marcados como REQUER CALIBRAÇÃO. " : "") +
+        "Enquanto o status não for <strong>PUBLICADO</strong> (ou se a definição tiver erro crítico), a aplicação continua no template externo.</p>",
+        "Ativar modo nativo");
+      if (!ok) return;
+    }
+    const valores = await formModal({
+      title: "Congelar versão — " + def.documentName,
+      fields: [{ key: "motivo", label: "Motivo da versão", type: "text", required: true, value: status === "PUBLICADO" ? "publicação" : "revisão", maxLength: 160 }],
+      okLabel: "Congelar versão"
+    });
+    if (!valores) return;
+    const anterior = dnClone(reg);
+    reg.meta.modo = modo;
+    const entrada = await N.congelarVersao(reg, { status: status, autor: dnAutor(), motivo: valores.motivo });
+    await persistOverlaySilencioso("documento_nativo_versao", docId,
+      { overlayKey: "docs_nativos", itens: [{ chave: docId, anterior: anterior }] },
+      "v" + entrada.versao + " (" + entrada.status + ") · modo " + modo + " · " + valores.motivo);
+    dnOriginalRegistro = dnClone(reg);
+    state.dnOriginal = dnClone(def);
+    renderDocumentos();
+    toast("Versão v" + entrada.versao + " congelada (" + entrada.status + ", modo " + modo + ").");
+  }
+
+  // ── Comparação (§25/§30) e importação de referência (§26/§27) ──
+  async function dnRenderPdfEm(pdfjsDoc, pagina, canvas, escala) {
+    const pg = await pdfjsDoc.getPage(Math.min(pagina, pdfjsDoc.numPages));
+    const vp = pg.getViewport({ scale: escala });
+    canvas.width = vp.width; canvas.height = vp.height;
+    await pg.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+    return vp;
+  }
+
+  /**
+   * §30 — teste de regressão visual: divergência + deslocamento estimado.
+   *
+   * Duas decisões importantes para o número significar alguma coisa:
+   *  1) a comparação de divergência só olha as **áreas impressas** (pixels com
+   *     tinta em qualquer uma das páginas) — se contasse o fundo branco, que é a
+   *     maior parte de um formulário, uma página vazia “pareceria” 99% igual;
+   *  2) o deslocamento é a translação de B que melhor alinha o desenho, com
+   *     desempate pelo menor deslocamento — sem isso, duas páginas idênticas
+   *     devolveriam um deslocamento aleatório no limite da janela de busca.
+   */
+  function dnMedirDiferenca(cvA, cvB, escala, toleranciaPt) {
+    const w = Math.min(cvA.width, cvB.width), h = Math.min(cvB.height, cvB.height);
+    if (!w || !h) return null;
+    const A = cvA.getContext("2d").getImageData(0, 0, w, h).data;
+    const B = cvB.getContext("2d").getImageData(0, 0, w, h).data;
+    const cinza = function (d, i) { return d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114; };
+    const LIMIAR_TINTA = 235; // acima disso é fundo (branco)
+    const passo = w * h > 400000 ? 3 : 2;
+
+    // 1) divergência apenas nas áreas impressas
+    let comTinta = 0, divergentes = 0;
+    for (let y = 0; y < h; y += passo) {
+      for (let x = 0; x < w; x += passo) {
+        const i = (y * w + x) * 4;
+        const ga = cinza(A, i), gb = cinza(B, i);
+        if (ga > LIMIAR_TINTA && gb > LIMIAR_TINTA) continue; // fundo nos dois
+        comTinta++;
+        if (Math.abs(ga - gb) > 40) divergentes++;
+      }
+    }
+
+    // 2) deslocamento: menor deslocamento com o menor custo de alinhamento
+    const tol = Number(toleranciaPt) || 1;
+    const e = escala || 1;
+    const raio = Math.max(4, Math.min(24, Math.round(tol * e * 8)));
+    let melhor = null;
+    for (let dy = -raio; dy <= raio; dy++) {
+      for (let dx = -raio; dx <= raio; dx++) {
+        let soma = 0, cnt = 0;
+        for (let y = raio; y < h - raio; y += passo * 2) {
+          for (let x = raio; x < w - raio; x += passo * 2) {
+            const i = (y * w + x) * 4, j = ((y + dy) * w + (x + dx)) * 4;
+            const ga = cinza(A, i), gb = cinza(B, j);
+            if (ga > LIMIAR_TINTA && gb > LIMIAR_TINTA) continue;
+            soma += Math.abs(ga - gb);
+            cnt++;
+          }
+        }
+        if (!cnt) continue;
+        const custo = soma / cnt;
+        const dist = Math.abs(dx) + Math.abs(dy);
+        if (!melhor || custo < melhor.custo - 1e-9 || (Math.abs(custo - melhor.custo) <= 1e-9 && dist < melhor.dist)) {
+          melhor = { custo: custo, dx: dx, dy: dy, dist: dist };
+        }
+      }
+    }
+    const m = melhor || { custo: 0, dx: 0, dy: 0 };
+    return {
+      percentual: comTinta ? Math.round(1000 * divergentes / comTinta) / 10 : 0,
+      amostras: comTinta,
+      raioPx: raio,
+      dx: Math.round(m.dx / e * 100) / 100,
+      dy: Math.round(m.dy / e * 100) / 100,
+      custo: Math.round(m.custo * 10) / 10
+    };
+  }
+
+  async function dnComparar() {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const fonte = dnFontePor(dnDocIdSel());
+    const box = $("dnCmpResultado");
+    if (!N || !def || !fonte || !global.pdfjsLib) { toast("Comparação indisponível (pdf.js/template).", false); return; }
+    box.innerHTML = "Gerando os dois PDFs e comparando…";
+    try {
+      const tol = Number(($("dnCmpTolerancia") || {}).value || configGet("documentos.tolerancia_visual_pt") || 1);
+      const pagina = dnPaginaAtual();
+      const pdfOrig = await global.pdfjsLib.getDocument({ url: encodeURI(urlRepositorio(fonte.pdfFile)) }).promise;
+      const assets = await dnCarregarImagens(def);
+      const gerado = await N.renderizarPdf(def, dnDadosDeTeste(def), global.PDFLib, assets, { forcar: true });
+      const pdfNat = await global.pdfjsLib.getDocument({ data: gerado.bytes.slice(0) }).promise;
+      const base = await pdfOrig.getPage(1);
+      const escala = Math.min(1.4, 620 / base.getViewport({ scale: 1 }).width);
+      await dnRenderPdfEm(pdfOrig, pagina, $("dnCmpOriginal"), escala);
+      await dnRenderPdfEm(pdfNat, pagina, $("dnCmpNativo"), escala);
+      const r = dnMedirDiferenca($("dnCmpOriginal"), $("dnCmpNativo"), escala, tol);
+      dnCmpBlobs = { original: fonte.pdfFile, nativo: funcNativoBlob(gerado.bytes, def.documentId) };
+      $("btnDnCompararAbrir").disabled = false;
+      const okDesloc = r && Math.abs(r.dx) <= tol && Math.abs(r.dy) <= tol;
+      const semTexto = r && r.amostras === 0;
+      // Comparação GEOMÉTRICA contra a referência congelada: mede o deslocamento
+      // item por item em pontos (independe de tinta/dados preenchidos).
+      const geo = await dnComparacaoGeometrica(def, fonte, r ? r : null);
+      box.innerHTML = (geo ? geo.html : "") + '<div class="notice ' + (semTexto ? "warn" : (r && r.percentual < 5 && okDesloc ? "ok" : "err")) + '">' +
+        "<strong>Diferença nas áreas impressas: " + (r ? r.percentual : "—") + "%</strong> · " +
+        "deslocamento estimado do nativo: <strong>dx " + (r ? r.dx : "—") + " pt · dy " + (r ? r.dy : "—") + " pt</strong> " +
+        "(tolerância " + tol + " pt) · " + (r ? r.amostras : 0) + " ponto(s) com tinta comparado(s) " +
+        (r ? "· janela de busca ± " + r.raioPx + " px" : "") + ".<br>" +
+        (semTexto ? "A página nativa ainda não tem tinta (nenhum campo preenchido) — rode a comparação com campos preenchidos ou calibre o formulário. " : "") +
+        "O template oficial tem textos fixos, linhas e caixas que o schema não descreve — diferença alta aqui é esperado até a calibração (§52). " +
+        "O PDF original serve só de referência de engenharia: a geração não depende dele.</div>";
+      await logEvento({
+        acao: "comparacao_nativa", entidade: def.documentName,
+        alteracao: "diferença " + (r ? r.percentual : "?") + "% · deslocamento dx " + (r ? r.dx : "?") + "pt dy " + (r ? r.dy : "?") + "pt (tolerância " + tol + "pt)" +
+          (geo ? " · geometria × referência: dx " + geo.rel.maxDx + "pt dy " + geo.rel.maxDy + "pt, " + geo.rel.semPar + " sem par (" + (geo.rel.dentro ? "dentro da tolerância" : "FORA da tolerância") + ")" : "")
+      });
+      dnComparacaoGeometricaUltima = geo ? geo.rel : null;
+    } catch (e) {
+      box.innerHTML = '<div class="notice err">Falha na comparação: ' + esc(e.message) + "</div>";
+    }
+  }
+
+  /**
+   * Comparador geométrico: pega a referência congelada do documento (arquivo no
+   * repositório ou a última importada nesta sessão) e mede, item por item, o
+   * deslocamento do elemento equivalente da definição. É o critério de aceite da
+   * reconstrução do mobiliário — "dentro da tolerância" aqui é medido, não visto.
+   */
+  async function dnComparacaoGeometrica(def, fonte, visual) {
+    const N = dnNativo();
+    if (!N || !def || typeof N.compararComReferencia !== "function") return null;
+    let snap = (dnRefPendente && dnRefPendente.snapshot) || null;
+    if (!snap && fonte && fonte.referenciaArquivo) {
+      try { snap = await fetchJSON("../" + fonte.referenciaArquivo); } catch (e) { snap = null; }
+    }
+    if (!snap) return null;
+    const tol = Number(configGet("documentos.tolerancia_visual_pt")) || Number(N.TOLERANCIA_PT) || 1;
+    const rel = N.compararComReferencia(def, snap, { tolerancia: tol });
+    const linhas = ["<strong>Geometria × referência</strong> (" + esc(snap.arquivo || "referência") + " p." + (snap.pageIndex || 1) + "): " + esc(rel.resumo) + "."];
+    for (const g of ["textos", "regras", "imagens"]) {
+      for (const p of rel[g].piores.slice(0, 3)) linhas.push("• " + esc(g) + ": " + (p.dx === null ? "SEM PAR — " : "dx " + p.dx + " pt, dy " + p.dy + " pt — ") + esc(p.rotulo) + (p.id ? " (" + esc(p.id) + ")" : ""));
+    }
+    return {
+      rel: rel,
+      html: '<div class="notice ' + (rel.dentro ? "ok" : "err") + '" style="margin-bottom:8px">' + linhas.join("<br>") + "</div>"
+    };
+  }
+
+  function funcNativoBlob(bytes) {
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    return URL.createObjectURL(blob);
+  }
+
+  /**
+   * §26/§27 — importa o PDF original como REFERÊNCIA (nunca como dependência).
+   *
+   * Lê o MOBILIÁRIO inteiro — textos fixos, réguas, caixas, tarjas, imagens e
+   * caixas de marcação — da geometria real dos operadores de desenho, não só o
+   * texto. O que a extração não vê (recortes, máscaras transparentes, curvas) é
+   * declarado no relatório: nenhuma reconstrução silenciosamente inventada.
+   */
+  async function dnImportarReferencia(file) {
+    const N = dnNativo();
+    const def = dnDefSel();
+    const box = $("dnRefRelatorio");
+    if (!N || !def) { toast("Selecione/crie um documento nativo antes de importar a referência.", false); return; }
+    if (!global.pdfjsLib) { toast("pdf.js não carregou (CDN) — importação de referência indisponível.", false); return; }
+    box.innerHTML = "Lendo a referência (textos, réguas, caixas e imagens)…";
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const pdf = await global.pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
+      const pagina = dnPaginaAtual();
+      const pg = await pdf.getPage(Math.min(pagina, pdf.numPages));
+      const vp = pg.getViewport({ scale: 1 });
+      const ops = await pg.getOperatorList();
+      const tc = await pg.getTextContent();
+      const fontes = await dnFontesDaReferencia(pg, tc);
+      const graficos = N.extrairGraficos(ops, global.pdfjsLib.OPS, vp.transform, {});
+      const crus = (tc.items || []).map(function (it) { return N.normalizarItemTexto(it, vp.transform, { fontes: fontes }); });
+      // Contraste do texto vem da própria geometria (tarja escura ⇒ texto claro)
+      const coloridos = N.aplicarContrasteDeTarja(crus, graficos.regras, {});
+      const blocos = N.agruparItensDeTexto(coloridos, {});
+      const snapshot = N.snapshotDeReferencia({ itens: blocos, graficos: graficos, page: { width: vp.width, height: vp.height }, pageIndex: pagina, arquivo: file.name });
+      snapshot.recortes = graficos.recortes;
+      snapshot.recortadas = graficos.recortadas;
+      snapshot.transparentes = graficos.transparentes || 0;
+      const itens = snapshot.textos.map(function (t) { return Object.assign({}, t, { texto: t.conteudo }); });
+      const textos = N.elementosDeItensDeTexto(itens, { width: vp.width, height: vp.height }, { page: pagina, prefixoId: "ref", jaAgrupado: true });
+      const mob = N.elementosDeGraficos(N.graficosDeSnapshot(snapshot), { page: pagina, prefixoImagem: (dnFontePor(dnDocIdSel()) ? dnFontePor(dnDocIdSel()).documentId : "ref") + "_nativo" });
+      const novos = mob.elementos.concat(textos);
+      const rel = N.relatorioImportacao(itens, novos, graficos);
+      // Imagens da referência: viram PNG (bytes em memória para o preview/geração
+      // imediata). O arquivo em si precisa ser gravado na raiz do repositório.
+      const pngs = await dnExtrairPngs(pg, snapshot.imagens, mob.assets);
+      for (const p of pngs) state.dnAssets[p.arquivo] = p.bytes;
+      const pag = N.paginaDe(def, pagina);
+      const divergente = Math.abs(vp.width - pag.width) > 1 || Math.abs(vp.height - pag.height) > 1;
+      dnRefPendente = {
+        elementos: novos, assets: mob.assets, pngs: pngs, snapshot: snapshot,
+        arquivo: file.name, page: { width: vp.width, height: vp.height },
+        confirmar: !!($("dnRefConfirmar") && $("dnRefConfirmar").checked)
+      };
+      box.innerHTML = '<div class="notice info"><strong>Referência lida:</strong> página ' + pagina + " · " + rel.nItens +
+        " texto(s) → <strong>" + textos.length + " bloco(s)</strong> · <strong>" + rel.nRegras + "</strong> régua(s)/caixa(s) · <strong>" + rel.nImagens +
+        "</strong> imagem(ns)</strong>." + (rel.nRecortes ? " Ignorados: " + rel.nRecortes + " recorte(s) de página" : "") +
+        (snapshot.transparentes ? ", " + snapshot.transparentes + " máscara(s) transparente(s)" : "") +
+        (snapshot.recortadas ? ", " + snapshot.recortadas + " traçado(s) fora do recorte" : "") + ".<br>" + esc(rel.nota) + "</div>" +
+        (divergente
+          ? '<div class="notice err">Dimensões divergentes: a referência tem <strong>' + dnArred(vp.width) + "×" + dnArred(vp.height) +
+            " pt</strong> e a definição usa <strong>" + dnArred(pag.width) + "×" + dnArred(pag.height) + " pt</strong>. " +
+            '<button type="button" class="btn small secondary" id="btnDnAjustarPagina">Ajustar página às dimensões medidas</button></div>'
+          : "") +
+        (rel.fontes.length ? "<h4 style='margin:10px 0 4px;font-size:12.5px'>Fontes da referência → fonte padrão usada</h4>" +
+          '<div class="section-desc">' + rel.fontes.map(function (f) { return "• " + esc(f) + " → " + esc(N.familiaPadrao(f)) + " (+ negrito/itálico quando o nome indica)"; }).join("<br>") + "</div>" : "") +
+        "<h4 style='margin:10px 0 4px;font-size:12.5px'>Não identificado automaticamente (reconstruir no editor)</h4>" +
+        '<div class="section-desc">' + rel.naoIdentificado.map(function (t) { return "• " + esc(t); }).join("<br>") + "</div>" +
+        (pngs.length ? "<h4 style='margin:10px 0 4px;font-size:12.5px'>Imagens extraídas da referência</h4>" +
+          '<div class="section-desc">' + pngs.map(function (p) { return "• " + esc(p.arquivo) + " — " + p.largura + "×" + p.altura + " px (" + esc(p.ref || "inline") + ")"; }).join("<br>") +
+          "<br>Estas imagens (logotipos e faixas de tabela que no PDF oficial são raster) precisam existir na <strong>raiz do repositório</strong>. " +
+          "Elas já estão em memória para o preview e a geração; use o botão abaixo para baixar e comitar.</div>" +
+          '<button type="button" class="btn small secondary" id="btnDnBaixarAssets" style="margin-top:8px">⬇ Baixar ' + pngs.length + " imagem(ns) como PNG</button>" : "") +
+        '<button type="button" class="btn small secondary" id="btnDnBaixarRef" style="margin-top:8px">⬇ Salvar referência extraída (JSON)</button>' +
+        '<div class="section-desc" style="margin-top:4px">A referência extraída é <strong>o gabarito</strong> do comparador geométrico e a entrada de ' +
+        "<code>scripts/gerar-nativo-f075.mjs</code>: salve em <code>scripts/referencia/</code> para o build do repositório reconstruir exatamente o que você acabou de ler.</div>" +
+        "<h4 style='margin:10px 0 4px;font-size:12.5px'>Primeiros blocos identificados</h4>" +
+        (novos.length ? '<div class="section-desc">' + novos.slice(0, 12).map(function (el) {
+          return "• " + esc(el.type) + " em x " + dnArred(el.x) + ", y " + dnArred(el.y) + (el.content ? " · " + esc(el.content.slice(0, 50)) : (el.font ? " · " + el.font.size + " pt" : ""));
+        }).join("<br>") + "</div>" +
+          '<button type="button" class="btn" id="btnDnAplicarRef" style="margin-top:10px">Adicionar ' + novos.length + " elemento(s) ao documento</button>" : "");
+      const elAjuste = $("btnDnAjustarPagina");
+      if (elAjuste) elAjuste.addEventListener("click", function () { dnAjustarPagina(vp.width, vp.height); });
+      const elBaixar = $("btnDnBaixarAssets");
+      if (elBaixar) elBaixar.addEventListener("click", function () { dnBaixarPngs(dnRefPendente && dnRefPendente.pngs); });
+      const elBaixarRef = $("btnDnBaixarRef");
+      if (elBaixarRef) elBaixarRef.addEventListener("click", function () {
+        if (!dnRefPendente || !dnRefPendente.snapshot) return;
+        const idDoc = (dnFontePor(dnDocIdSel()) || {}).documentId || "documento";
+        global.AdminPersistence.baixarJSON(dnRefPendente.snapshot, "referencia-" + idDoc + "-p" + dnRefPendente.snapshot.pageIndex + ".json");
+        toast("Referência extraída baixada — é o gabarito do comparador geométrico.");
+      });
+      const elAplicar = $("btnDnAplicarRef");
+      if (elAplicar) elAplicar.addEventListener("click", comLoading(elAplicar, dnAplicarReferencia));
+    } catch (e) {
+      box.innerHTML = '<div class="notice err">Falha ao ler o PDF de referência: ' + esc(e.message) + "</div>";
+    }
+  }
+
+  /** Nome real das fontes embutidas (o `fontName` do pdf.js é um id interno). */
+  async function dnFontesDaReferencia(pg, tc) {
+    const fontes = {};
+    for (const fn of Object.keys((tc && tc.styles) || {})) {
+      let nome = null;
+      try {
+        await new Promise(function (res) {
+          try { pg.commonObjs.get(fn, function (o) { nome = o && (o.name || o.loadedName); res(); }); } catch (e) { res(); }
+        });
+      } catch (e) { /* sem commonObjs a família medida do pdf.js já serve */ }
+      const fam = ((tc.styles || {})[fn] || {}).fontFamily || "";
+      const real = nome || fam || fn;
+      fontes[fn] = {
+        nome: real,
+        family: fam,
+        weight: /bold|black|heavy|semibold/i.test(real) ? "bold" : "normal",
+        style: /italic|oblique/i.test(real) ? "italic" : "normal"
+      };
+    }
+    return fontes;
+  }
+
+  /**
+   * XObjects de imagem da referência → PNG em memória (e oferecidos para baixar).
+   * A conversão passa pelo canvas do pdf.js (o mesmo renderizador do preview);
+   * nada de reimplementar decodificação de imagem.
+   */
+  async function dnExtrairPngs(pg, imagens, assets) {
+    const saida = [];
+    if (!imagens || !imagens.length || !pg) return saida;
+    const vp = pg.getViewport({ scale: 1 });
+    const c = global.document.createElement("canvas");
+    c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+    // O render resolve os XObjects em `pg.objs` (sem isso o get fica pendente)
+    await pg.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+    const porRef = {};
+    (assets || []).forEach(function (a) { porRef[a.nota] = a.arquivo; });
+    for (let i = 0; i < imagens.length; i++) {
+      const ref = imagens[i].ref;
+      if (!ref) continue;
+      let img = null;
+      pg.objs.get(ref, function (o) { img = o; });
+      for (let t = 0; t < 40 && !img; t++) await new Promise(function (r) { setTimeout(r, 60); });
+      if (!img) continue;
+      const larg = img.width || (img.bitmap && img.bitmap.width);
+      const alt = img.height || (img.bitmap && img.bitmap.height);
+      if (!larg || !alt) continue;
+      const bruto = global.document.createElement("canvas");
+      bruto.width = larg; bruto.height = alt;
+      const bctx = bruto.getContext("2d");
+      if (img.data) { const id = bctx.createImageData(larg, alt); id.data.set(img.data); bctx.putImageData(id, 0, 0); }
+      else bctx.drawImage(img.bitmap, 0, 0);
+      // Faixas largas (tabelas) ficam pela metade: 2× a resolução de colocação é
+      // o suficiente para impressão e evita arquivos de centenas de KB.
+      const fator = larg > 600 ? 0.5 : 1;
+      const w = Math.max(1, Math.round(larg * fator)), h = Math.max(1, Math.round(alt * fator));
+      const cc = global.document.createElement("canvas");
+      cc.width = w; cc.height = h;
+      const ctx = cc.getContext("2d");
+      ctx.imageSmoothingQuality = "high";
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(bruto, 0, 0, w, h);
+      const url = cc.toDataURL("image/png");
+      const b64 = url.slice(url.indexOf(",") + 1);
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k);
+      const asset = (assets || [])[i] || {};
+      saida.push({ arquivo: asset.arquivo || ("ref_nativo_" + String(i + 1).padStart(2, "0") + ".png"), ref: ref, largura: w, altura: h, bytes: bytes, dataUrl: url });
+    }
+    return saida;
+  }
+
+  /** Baixa cada PNG extraído (arquivos que precisam ser versionados na raiz). */
+  function dnBaixarPngs(pngs) {
+    if (!pngs || !pngs.length) { toast("Nenhuma imagem extraída para baixar.", false); return; }
+    for (const p of pngs) {
+      const a = global.document.createElement("a");
+      a.href = p.dataUrl;
+      a.download = p.arquivo;
+      global.document.body.appendChild(a);
+      a.click();
+      global.document.body.removeChild(a);
+    }
+    toast(pngs.length + " imagem(ns) baixada(s) — coloque na raiz do repositório para o gerador achá-las. Enquanto não estiverem lá, o preview usa os bytes desta sessão.");
+  }
+
+  async function dnAjustarPagina(width, height) {
+    const N = dnNativo();
+    const reg = dnRegSel();
+    const def = dnDefSel();
+    if (!N || !reg || !def) return;
+    const ok = await confirmarDestrutivo("Ajustar página do documento",
+      "<p>Definir a página como <strong>" + dnArred(width) + "×" + dnArred(height) + " pt</strong> (medido da referência) e passar a validar contra essa dimensão?</p>",
+      "Ajustar");
+    if (!ok) return;
+    const anterior = dnClone(reg);
+    def.page.width = dnArred(width);
+    def.page.height = dnArred(height);
+    def.page.esperado = { width: dnArred(width), height: dnArred(height) };
+    def.page.orientation = width > height ? "landscape" : "portrait";
+    N.registrarLog(reg, "página ajustada para " + dnArred(width) + "×" + dnArred(height) + " pt (medido da referência)", dnAutor());
+    await persistOverlaySilencioso("documento_nativo_pagina", dnDocIdSel(),
+      { overlayKey: "docs_nativos", itens: [{ chave: dnDocIdSel(), anterior: anterior }] },
+      "página do documento ajustada para " + dnArred(width) + "×" + dnArred(height) + " pt");
+    renderDocumentos();
+    toast("Página ajustada — rode a comparação novamente.");
+  }
+
+  async function dnAplicarReferencia() {
+    const N = dnNativo();
+    const reg = dnRegSel();
+    const def = dnDefSel();
+    const p = dnRefPendente;
+    if (!N || !reg || !def || !p) return;
+    const anterior = dnClone(reg);
+    const conta = {};
+    for (const el of p.elementos) {
+      if (N.elementoPorId(def, el.id)) el.id = N.proximoIdElemento(def, el.id);
+      if (p.confirmar) el.confirmado = true;
+      // Mobiliário fica ATRÁS dos campos dinâmicos (100+), na ordem que o
+      // extrator mediu: réguas/caixas (10+), imagens (20+), textos (30+).
+      if (el.zIndex == null) el.zIndex = 10;
+      def.elementos.push(el);
+      conta[el.type] = (conta[el.type] || 0) + 1;
+    }
+    // Assets: as imagens extraídas são declaradas no documento (e precisam ser
+    // versionadas na raiz do repositório para o gerador achá-las fora do painel).
+    for (const a of (p.assets || [])) {
+      const jaTem = (def.assets || []).some(function (x) { return x && x.arquivo === a.arquivo; });
+      if (!jaTem) def.assets = (def.assets || []).concat([a]);
+    }
+    const resumo = Object.keys(conta).map(function (t) { return conta[t] + " " + t; }).join(" · ");
+    N.registrarLog(reg, "referência " + p.arquivo + ": " + resumo + (p.confirmar ? " (confirmados)" : " (REQUER CALIBRAÇÃO)"), dnAutor());
+    if (reg.meta && reg.meta.origemRepo) reg.meta.alterado = true;
+    await persistOverlaySilencioso("documento_nativo_referencia", dnDocIdSel(),
+      { overlayKey: "docs_nativos", itens: [{ chave: dnDocIdSel(), anterior: anterior }] },
+      p.elementos.length + " elemento(s) importados da referência " + p.arquivo);
+    const nImgs = (p.pngs || []).length;
+    dnRefPendente = null;
+    renderDocumentos();
+    toast(p.elementos.length + " elemento(s) adicionados (" + resumo + ")" + (nImgs ? " — baixe/commit as " + nImgs + " imagem(ns) e rode o comparador." : " — rode o comparador."));
+  }
+
+  function dnRenderVersoes() {
+    const box = $("dnVersoes");
+    const reg = dnRegSel();
+    if (!box) return;
+    const versoes = (reg && reg.versoes) || [];
+    box.innerHTML = versoes.length
+      ? '<table class="data"><thead><tr><th>Versão</th><th>Status</th><th>Quando</th><th>Autor</th><th class="num">Elementos</th><th>Hash</th><th>Motivo</th><th>Ações</th></tr></thead><tbody>' +
+        versoes.map(function (v, i) {
+          return "<tr><td>v" + esc(v.versao) + "</td><td><span class='badge " + (v.status === "PUBLICADO" ? "ok" : "muted") + "'>" + esc(v.status) + "</span></td>" +
+            "<td>" + esc(String(v.quando || "").replace("T", " ").slice(0, 16)) + "</td><td>" + esc(v.autor) + "</td>" +
+            "<td class='num'>" + esc(v.nElementos) + "</td><td><code title='" + esc(v.hash) + "'>" + esc(String(v.hash || "").slice(0, 20)) + "" + "</code></td>" +
+            "<td>" + esc(v.motivo || "—") + "</td><td>" + (i === 0 ? "<span class='badge muted'>atual</span>" : '<button type="button" class="btn small secondary" data-dn-restaura="' + esc(v.versao) + '">↩ Restaurar</button>') + "</td></tr>";
+        }).join("") + "</tbody></table>"
+      : '<div class="section-desc">Nenhuma versão congelada ainda. Use <strong>Congelar versão e publicar</strong> — cada versão guarda a definição completa e o hash de integridade.</div>';
+    box.querySelectorAll("[data-dn-restaura]").forEach(function (b) {
+      b.addEventListener("click", function () { dnRestaurarVersao(b.getAttribute("data-dn-restaura")); });
+    });
+  }
+
+  async function dnRestaurarVersao(versao) {
+    const N = dnNativo();
+    const reg = dnRegSel();
+    if (!N || !reg) return;
+    const entrada = (reg.versoes || []).filter(function (v) { return v.versao === versao; })[0];
+    if (!entrada || !entrada.definicao) { toast("Versão sem definição guardada — não é possível restaurar.", false); return; }
+    const ok = await confirmarDestrutivo("Restaurar versão v" + versao,
+      "<p>A definição atual volta a ser a de <strong>v" + esc(versao) + "</strong> (" + esc(entrada.nElementos) + " elemento(s), " + esc(entrada.status) + "). A trilha não é reescrita: ao congelar de novo, isso vira uma versão nova.</p>",
+      "Restaurar");
+    if (!ok) return;
+    const anterior = dnClone(reg);
+    reg.definicao = dnClone(entrada.definicao);
+    N.registrarLog(reg, "restaurada a versão v" + versao + " (" + entrada.status + ")", dnAutor());
+    await persistOverlaySilencioso("documento_nativo_restaurado", dnDocIdSel(),
+      { overlayKey: "docs_nativos", itens: [{ chave: dnDocIdSel(), anterior: anterior }] },
+      "documento nativo restaurado para v" + versao);
+    renderDocumentos();
+    toast("Definição restaurada para v" + versao + " (altera\u00e7\u00e3o em memória — salve/congele para gravar a nova versão).");
+  }
+
+  function dnRenderLogs() {
+    const box = $("dnLogs");
+    const reg = dnRegSel();
+    if (!box) return;
+    const log = (reg && reg.log) || [];
+    box.innerHTML = log.length
+      ? log.map(function (l) {
+        return '<div class="diff-line"><span class="path">' + esc(reg.definicao.documentId) + " v" + esc(reg.definicao.documentVersion) + "</span> · " +
+          esc(l.autor) + " · " + esc(String(l.quando || "").replace("T", " ").slice(0, 16)) + " — " + esc(l.alteracao) + "</div>";
+      }).join("")
+      : '<div class="section-desc">Sem alterações registradas para este documento.</div>';
+  }
+
+  function dnRenderRecursos() {
+    const N = dnNativo();
+    const box = $("dnRecursos");
+    const def = dnDefSel();
+    if (!box) return;
+    if (!N || !def) { box.innerHTML = '<div class="section-desc">Selecione um documento nativo.</div>'; return; }
+    const assets = def.assets || [];
+    box.innerHTML =
+      "<h4 style='margin:0 0 6px;font-size:12.5px'>Assets declarados no documento</h4>" +
+      (assets.length
+        ? assets.map(function (a) { return '<div class="diff-line">🖼 <strong>' + esc(a.arquivo) + "</strong> <span class=\"badge muted\">" + esc(a.tipo || "imagem") + "</span> <span class=\"section-desc\">" + esc(a.nota || "bytes no repositório") + "</span></div>"; }).join("")
+        : '<div class="section-desc">Nenhum asset declarado — o documento não usa imagens.</div>') +
+      "<h4 style='margin:14px 0 6px;font-size:12.5px'>Imagens disponíveis no repositório</h4>" +
+      '<div class="section-desc">' + ASSETS_REPO.map(function (a) { return "• " + esc(a); }).join("<br>") + "</div>" +
+      (def.metadados && def.metadados.referencia
+        ? "<h4 style='margin:14px 0 6px;font-size:12.5px'>Referência do mobiliário</h4>" +
+          '<div class="section-desc">' + esc(def.metadados.referencia.arquivo) + " p." + esc(def.metadados.referencia.pageIndex) +
+          " — " + esc(def.metadados.referencia.documento || "geometria extraída") + "<br>Verificado em " + esc(String(def.metadados.referencia.verificadoEm || "").slice(0, 10)) +
+          " · deslocamento máximo medido: dx " + esc(def.metadados.referencia.deslocamentoMaximoPt.dx) + " pt, dy " + esc(def.metadados.referencia.deslocamentoMaximoPt.dy) +
+          " pt (tolerância " + esc(def.metadados.referencia.toleranciaPt) + " pt) · " + esc(def.metadados.referencia.itensCasados) + " item(ns) casado(s), " + esc(def.metadados.referencia.itensSemPar) + " sem par</div>"
+        : "") +
+      "<h4 style='margin:14px 0 6px;font-size:12.5px'>Fontes</h4>" +
+      '<div class="section-desc">Fontes padrão do PDF usadas pelo gerador: ' + esc(Object.keys(N.FONTES_PADRAO).join(", ")) +
+      ". <strong>Limitação documentada (§15):</strong> estas são as 14 fontes padrão do formato PDF — não dependem do que está instalado no computador do candidato, mas também não reproduzem uma família corporativa específica. Embutir uma fonte própria exige arquivo licenciado (TTF/OTF) no build; hoje o repositório não tem nenhum." +
+      (def.metadados && def.metadados.pendenteCalibracao ? '<div class="notice warn" style="margin-top:8px">REQUER CALIBRAÇÃO: o schema descreve apenas os campos dinâmicos. Textos fixos, linhas, caixas, logotipos e assinaturas do formulário oficial precisam ser reconstruídos (editor visual ou Importar PDF) e confirmados.</div>' : "") +
+      "</div>";
+  }
+
+  function dnSelecionarDoc(docId) {
+    const sel = $("dnDoc");
+    if (sel && docId) sel.value = docId;
+    renderDocumentos();
+  }
+
+  function renderDocumentos() {
+    const N = dnNativo();
+    const sel = $("dnDoc");
+    const boxResumo = $("dnResumo");
+    if (!sel || !boxResumo) return;
+    if (!N) {
+      boxResumo.innerHTML = '<div class="notice err">O engine <code>/native-docs.js</code> não carregou — o gerador nativo fica indisponível (verifique a CDN/arquivo).</div>';
+      return;
+    }
+    const ids = Object.keys(dnRegistros());
+    sel.innerHTML = ids.length
+      ? ids.map(function (id) {
+        const r = dnRegistros()[id];
+        const d = r && r.definicao;
+        return '<option value="' + esc(id) + '"' + (sel.value === id ? " selected" : "") + ">" + esc((d && d.documentName) || id) + "</option>";
+      }).join("")
+      : '<option value="">(nenhum documento nativo ainda)</option>';
+    if (!ids.length) {
+      sel.value = "";
+      boxResumo.innerHTML = '<div class="notice info">Nenhum documento nativo. Use <strong>＋ Documento a partir do schema</strong> para criar a definição do F-075 com a geometria real dos campos — ' +
+        "as coordenadas do schema são convertidas para o sistema do gerador (Y do topo) preservando a posição do PDF atual.</div>";
+      state.dnSel = null;
+      dnRenderVersoes();
+      dnRenderLogs();
+      dnRenderRecursos();
+      const cv0 = $("dnCanvas");
+      if (cv0) { cv0.width = 10; cv0.height = 10; }
+      return;
+    }
+    if (!sel.value || ids.indexOf(sel.value) === -1) sel.value = ids[0];
+    const def = dnDefSel();
+    state.dnOriginal = def ? dnClone(def) : null;
+    dnOriginalRegistro = dnRegSel() ? dnClone(dnRegSel()) : null;
+    dnRenderPaginas();
+    dnRenderResumo();
+    dnRenderLista();
+    dnRenderProps();
+    dnRenderPublicacao();
+    dnRenderVersoes();
+    dnRenderLogs();
+    dnRenderRecursos();
+    dnRenderPreview().catch(function () { });
+  }
+
+  /**
+   * Publicação: preenche os selects com o estado GRAVADO (chamado só quando o
+   * documento muda de seleção/renderização) — diferente de dnRenderGate, que
+   * apenas lê o que está na tela. Sem essa separação, o handler de `change`
+   * re-renderizava o gate e desfazia a escolha do administrador na hora.
+   */
+  function dnRenderPublicacao() {
+    const reg = dnRegSel();
+    const def = dnDefSel();
+    if (!reg || !def) return;
+    const modoSel = $("dnModo");
+    const statusSel = $("dnStatus");
+    if (modoSel) modoSel.value = (reg.meta && reg.meta.modo) === "native" ? "native" : "external";
+    if (statusSel) statusSel.value = (def.metadados && def.metadados.status) || "RASCUNHO";
+    dnRenderGate();
+  }
+
+  /** Estado da publicação: modo, status e o que impede o modo nativo agora. */
+  function dnRenderGate() {
+    const N = dnNativo();
+    const box = $("dnGate");
+    const reg = dnRegSel();
+    const def = dnDefSel();
+    if (!box || !N || !reg || !def) return;
+    const modo = ($("dnModo") || {}).value || "external";
+    const status = ($("dnStatus") || {}).value || "RASCUNHO";
+    const v = N.validarDefinicao(def);
+    const efetivo = N.modoEfetivo(reg);
+    box.innerHTML = '<div class="notice ' + (efetivo.modo === "native" ? "ok" : (modo === "native" ? "warn" : "info")) + '">' +
+      "Geração agora: <strong>" + esc(efetivo.modo) + "</strong> — " + esc(efetivo.motivo) + ". " +
+      v.erros.length + " erro(s) crítico(s) · " + v.avisos.length + " aviso(s). " +
+      "Só documento PUBLICADO e válido gera oficialmente (§24).</div>";
+  }
+
+  /** Ligações de eventos da seção Documentos Nativos (uma vez, no init). */
+  function dnInstalarHandlers() {
+    if (dnHandlersOk) return;
+    dnHandlersOk = true;
+    const N = dnNativo();
+    if (!N) return;
+    const novoTipo = $("dnNovoTipo");
+    if (novoTipo) novoTipo.innerHTML = N.TIPOS.map(function (t) { return '<option value="' + t + '">' + t + "</option>"; }).join("");
+    const novoArq = $("dnNovoArquivo");
+    if (novoArq) novoArq.innerHTML = ASSETS_REPO.map(function (a) { return '<option value="' + a + '">' + a + "</option>"; }).join("");
+    const fonte = $("dnFonte");
+    if (fonte) fonte.innerHTML = Object.keys(N.FONTES_PADRAO).map(function (f) { return '<option value="' + f + '">' + f + "</option>"; }).join("");
+
+    const doc = $("dnDoc");
+    if (doc) doc.addEventListener("change", renderDocumentos);
+    const pag = $("dnPage");
+    if (pag) pag.addEventListener("change", function () { dnRenderLista(); dnRenderPreview().catch(function () { }); });
+    const zoom = $("dnZoom");
+    if (zoom) zoom.addEventListener("change", function () { state.dnZoom = parseInt(this.value, 10) || 100; dnRenderPreview().catch(function () { }); });
+    const snap = $("dnSnap");
+    if (snap) snap.addEventListener("change", function () { state.dnSnap = parseInt(this.value, 10) || 0; });
+    const busca = $("dnBuscaElemento");
+    if (busca) busca.addEventListener("input", function () { dnRenderLista(); dnRenderBoxes(dnDefSel(), { escala: state.dnZoom / 100 }); });
+
+    // propriedades numéricas (precisão decimal — §19) e estilo (§8)
+    const numericos = [
+      ["dnX", "x"], ["dnY", "y"], ["dnW", "width"], ["dnH", "height"], ["dnPagina", "page"], ["dnRotacao", "rotation"]
+    ];
+    for (const par of numericos) {
+      const elInput = $(par[0]);
+      if (!elInput) continue;
+      elInput.addEventListener("input", function () {
+        const el = dnElSel();
+        if (!el) return;
+        const novo = dnSnap(parseFloat(this.value) || 0);
+        const antigo = Number(el[par[1]]) || 0;
+        el[par[1]] = par[1] === "page" ? Math.max(1, Math.round(novo)) : novo;
+        if (el.type === "line" && (par[1] === "x" || par[1] === "y")) {
+          const d = el[par[1]] - antigo;
+          if (par[1] === "x") { el.x1 = dnArred((Number(el.x1) || 0) + d); el.x2 = dnArred((Number(el.x2) || 0) + d); }
+          else { el.y1 = dnArred((Number(el.y1) || 0) + d); el.y2 = dnArred((Number(el.y2) || 0) + d); }
+        }
+        dnAlterou(el);
+      });
+    }
+    const tam = $("dnTamanho");
+    if (tam) tam.addEventListener("input", function () {
+      const el = dnElSel();
+      if (!el) return;
+      el.font = Object.assign({ family: "Helvetica", size: 9, weight: "normal", style: "normal" }, el.font || {}, { size: parseFloat(this.value) || 0 });
+      dnAlterou(el);
+    });
+    const fonteSel = $("dnFonte");
+    if (fonteSel) fonteSel.addEventListener("change", function () {
+      const el = dnElSel();
+      if (!el) return;
+      const ehTimes = /^Times/i.test(this.value), ehCourier = /^Courier/i.test(this.value);
+      const neg = /Bold/i.test(this.value), ita = /(Oblique|Italic)/i.test(this.value);
+      el.font = Object.assign({}, el.font, {
+        family: ehTimes ? "Times" : (ehCourier ? "Courier" : "Helvetica"),
+        weight: neg ? "bold" : "normal", style: ita ? "italic" : "normal"
+      });
+      dnAlterou(el);
+    });
+    const alin = $("dnAlinhamento");
+    if (alin) alin.addEventListener("change", function () { const el = dnElSel(); if (!el) return; el.alignment = this.value; dnAlterou(el); });
+    const ancor = $("dnAncora");
+    if (ancor) ancor.addEventListener("change", function () { const el = dnElSel(); if (!el) return; el.ancoraV = this.value; dnAlterou(el); });
+    const cor = $("dnCor");
+    if (cor) cor.addEventListener("change", function () { const el = dnElSel(); if (!el) return; el.color = this.value; dnAlterou(el); });
+    const cont = $("dnConteudo");
+    if (cont) cont.addEventListener("change", function () {
+      const el = dnElSel();
+      if (!el) return;
+      if (el.type === "field" || el.type === "signature") el.binding = this.value;
+      else el.content = this.value;
+      dnAlterou(el);
+    });
+    const trunc = $("dnTruncar");
+    if (trunc) trunc.addEventListener("change", function () { const el = dnElSel(); if (!el) return; el.truncar = this.checked; dnAlterou(el); });
+    const conf = $("dnConfirmado");
+    if (conf) conf.addEventListener("change", function () { const el = dnElSel(); if (!el) return; el.confirmado = this.checked; dnAlterou(el); dnRenderProps(); });
+
+    const ligar = function (id, fn) { const b = $(id); if (b) b.addEventListener("click", fn); };
+    ligar("dnSalvar", dnSalvar);
+    ligar("dnReverter", dnReverter);
+    ligar("dnDuplicar", dnDuplicarEl);
+    ligar("dnFrente", function () { dnMoverCamada("frente"); });
+    ligar("dnTras", function () { dnMoverCamada("tras"); });
+    ligar("dnExcluir", dnExcluirEl);
+    ligar("btnDnAddEl", function () {
+      const t = ($("dnNovoTipo") || {}).value || "text";
+      dnAdicionar(t, (($("dnNovoTexto") || {}).value) || "", null);
+    });
+    ligar("btnDnAddImagem", function () {
+      const arq = ($("dnNovoArquivo") || {}).value || ASSETS_REPO[0];
+      dnAdicionar("image", null, arq);
+    });
+    ligar("btnDnAgrupar", dnAgrupar);
+    ligar("btnDnCriar", dnCriarDoSchema);
+    ligar("btnDnExportDef", dnExportarDefinicao);
+    ligar("btnDnImportDef", function () { const f = $("dnImportDefFile"); if (f) f.click(); });
+    const arqImp = $("dnImportDefFile");
+    if (arqImp) arqImp.addEventListener("change", function () { if (this.files && this.files[0]) dnImportarDefinicao(this.files[0]); this.value = ""; });
+    ligar("btnDnGerarPdf", dnGerarPdfTeste);
+    ligar("btnDnPublicar", dnPublicar);
+    const modoSel = $("dnModo");
+    if (modoSel) modoSel.addEventListener("change", dnRenderGate);
+    const statusSel = $("dnStatus");
+    if (statusSel) statusSel.addEventListener("change", dnRenderGate);
+
+    ligar("btnDnComparar", dnComparar);
+    ligar("btnDnCompararAbrir", function () {
+      if (!dnCmpBlobs) return;
+      window.open(encodeURI(urlRepositorio(dnCmpBlobs.original)), "_blank");
+      window.open(dnCmpBlobs.nativo, "_blank");
+    });
+    const opac = $("dnCmpOpacidade");
+    if (opac) opac.addEventListener("input", function () { const c = $("dnCmpNativo"); if (c) c.style.opacity = String(Number(this.value) / 100); });
+    const sobre = $("dnCmpOverlay");
+    if (sobre) sobre.addEventListener("change", function () {
+      const palco = $("dnCmpPalco");
+      if (palco) palco.classList.toggle("sobreposto", this.checked);
+    });
+    const tol = $("dnCmpTolerancia");
+    if (tol) tol.value = String(configGet("documentos.tolerancia_visual_pt"));
+
+    const ref = $("dnRefFile");
+    if (ref) ref.addEventListener("change", function () { if (this.files && this.files[0]) dnImportarReferencia(this.files[0]); this.value = ""; });
+
+    document.querySelectorAll("#sec-documentos .tabs button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        const alvo = b.getAttribute("data-dntab");
+        document.querySelectorAll("#sec-documentos .tabs button").forEach(function (x) { x.classList.toggle("active", x === b); x.setAttribute("aria-selected", x === b ? "true" : "false"); });
+        document.querySelectorAll("#sec-documentos .tab-pane").forEach(function (p) { p.classList.toggle("active", p.id === "dnPane-" + alvo); });
+      });
+    });
+  }
+
   function renderSistema() {
     $("sisModo").innerHTML = state.modo === "api"
       ? "API administrativa ativa (" + esc(state.origem) + "). Configurações gravadas em <code>data/admin-config.json</code> com backups automáticos em <code>data/backups/</code>."
       : "Produção estática — modo exportação. A aplicação pública lê os JSONs do repositório; para efetivar alterações, exporte o JSON e versione-o. Para gravação direta, disponibilize a API <code>/api/admin/*</code> (implementada em <code>scripts/test-server.mjs</code> e pronta para serverless).";
+    const nNativos = Object.keys(state.overlay.docs_nativos || {}).length;
     $("sisSobre").innerHTML = "Painel Administrativo — " + esc(configGet("geral.nome_sistema")) + ".<br>" +
       "Leitura de dados: JSONs reais do repositório.<br>" +
       "Templates PDF: " + PDFS.length + " em uso.<br>" +
+      "Documentos nativos (gerador): " + nNativos + " definição(ões) · engine " + (dnNativo() ? "carregado" : "ausente (native-docs.js)") + ".<br>" +
       "Persistência: overlay administrativo (nunca os JSONs originais; nunca localStorage).<br>" +
       "Proteção: client-side, mesmo padrão do guard.js — ver seção Segurança.";
   }
@@ -4052,6 +5655,8 @@
     $("btnExpSchemaFicha").addEventListener("click", function () { exportarSchemaRepositorio("ficha_cadastral"); });
     $("btnExpSchemaDecl").addEventListener("click", function () { exportarSchemaRepositorio("declaracao_plano_saude"); });
     $("btnExpCidadesBrasil").addEventListener("click", function () { exportarCidadesRepositorio(false); });
+    const btnNativoExp = $("btnExpNativoF075");
+    if (btnNativoExp) btnNativoExp.addEventListener("click", function () { exportarNativoRepositorio("f075"); });
     $("btnExpCidadesInfinity").addEventListener("click", function () { exportarCidadesRepositorio(true); });
     $("importFile").addEventListener("change", function () { if (this.files[0]) importarConfig(this.files[0]); });
 
@@ -4103,6 +5708,10 @@
 
     // Templates (v3) — versões
     renderVersoesTemplates();
+
+    // Documentos nativos (gerador) — handlers uma única vez
+    dnInstalarHandlers();
+    renderDocumentos();
 
     // Editor (v3) — snap/atalhos/palette/submenu
     instalarSubmenu();
@@ -4191,6 +5800,14 @@
       coletarProblemas: coletarProblemas,
       coletarIntegridade: coletarIntegridade,
       metricasFormularios: metricasFormularios,
+      // Gerador nativo (documentos): função pura + inventário para a suíte e a auditoria
+      NATIVOS_FONTES: NATIVOS_FONTES,
+      ASSETS_REPO: ASSETS_REPO,
+      resumoValorDocNativo: resumoValorDocNativo,
+      dnDefinicaoPara: dnDefinicaoPara,
+      dnDadosDeTeste: dnDadosDeTeste,
+      dnArquivoSeguro: dnArquivoSeguro,
+      DN_MAPA_TESTE: DN_MAPA_TESTE,
       CONFIG_DEFS: CONFIG_DEFS,
       fbSecoesExistentes: fbSecoesExistentes
     }

@@ -24,6 +24,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join, extname } from "node:path";
 import vm from "node:vm";
+import { webcrypto } from "node:crypto";
 
 const ROOT = join(import.meta.dirname, "..");
 
@@ -100,9 +101,15 @@ sb.window.AdminPersistence = {
   baixarJSON() {}
 };
 sb.window.document = docStub;
+sb.window.crypto = webcrypto; // §42 — hash sha256 do documento
 sb.globalThis = sb;
 vm.createContext(sb);
+// O engine nativo é carregado ANTES do painel: o painel fala com ele por
+// `global.NativeDocs` (mesmo contrato do navegador, onde o <script> de
+// /native-docs.js vem antes de /admin/panel.js).
+vm.runInContext(readFileSync(join(ROOT, "native-docs.js"), "utf8"), sb, { filename: "native-docs.js" });
 vm.runInContext(readFileSync(join(ROOT, "admin", "panel.js"), "utf8"), sb, { filename: "panel.js" });
+const ND = sb.window.NativeDocs;
 
 const T = sb.window.AdminPanel && sb.window.AdminPanel.__teste;
 if (!T) {
@@ -123,6 +130,18 @@ const cidadesInfinity = JSON.parse(readFileSync(join(ROOT, "cidades_infinity.jso
 check("carrega as cidades das bases do repositório",
   st.cityArr.length >= cidadesBase.length,
   `carregadas=${st.cityArr.length} brasil=${cidadesBase.length} infinity=${cidadesInfinity.length}`);
+
+// ── 1.1 Linha de base do gerador nativo vem DO REPOSITÓRIO ────────────
+// Sem isso o painel abriria "sem nenhum documento nativo" mesmo com a definição
+// do F-075 versionada — e o mock de fetch falharia em silêncio.
+const regF075 = st.overlay.docs_nativos.f075;
+check("painel carrega o documento nativo do repositório como linha de base",
+  !!regF075 && regF075.meta && regF075.meta.origemRepo === true && regF075.meta.alterado === false &&
+    regF075.definicao && (regF075.definicao.elementos || []).length > 100,
+  JSON.stringify({ tem: !!regF075, meta: regF075 && regF075.meta, n: regF075 && regF075.definicao && regF075.definicao.elementos.length }));
+check("documento do repositório carregado NÃO entra como alteração pendente",
+  T.calcularPendentes(T.exportarOverlayPuro(), {}).filter((p) => p.overlayKey === "docs_nativos").length === 0,
+  JSON.stringify(T.calcularPendentes(T.exportarOverlayPuro(), {}).filter((p) => p.overlayKey === "docs_nativos").map((p) => p.chave)));
 
 // ── 2. Gate de publicação (§24) — nenhum erro crítico falso ───────────
 const gate = T.coletarProblemas();
@@ -267,6 +286,177 @@ const panelSrc = readFileSync(join(ROOT, "admin", "panel.js"), "utf8");
 const fantasmas = T.CONFIG_DEFS.filter((d) => (panelSrc.split('"' + d.key + '"').length - 1) < 2);
 check("toda configuração é lida por algum fluxo (nenhum controle fantasma)",
   fantasmas.length === 0, fantasmas.map((d) => d.key).join(" | "));
+
+// ── 13. Gerador nativo de PDFs × dados reais ──────────────────────────
+// O gerador só vale se a definição criada do schema REAL reproduzir a
+// geometria do PDF atual e se o PDF gerado for de fato independente. Aqui a
+// auditoria confere isso contra os arquivos do repositório — inclusive lendo as
+// constantes de desenho do ficha_cadastral.html, para o perfil do engine não
+// sair de sincronia com o código que gera o PDF hoje.
+check("engine nativo (/native-docs.js) carrega e expõe a API", !!ND && typeof ND.renderizarPdf === "function" && typeof ND.definicaoDeSchema === "function",
+  ND ? Object.keys(ND).length + " chaves" : "ausente");
+check("painel expõe o inventário nativo (schema → template)",
+  Array.isArray(T.NATIVOS_FONTES) && T.NATIVOS_FONTES.length > 0 &&
+  T.NATIVOS_FONTES.every((f) => existsSync(join(ROOT, f.schemaArquivo)) && existsSync(join(ROOT, f.pdfFile))),
+  JSON.stringify((T.NATIVOS_FONTES || []).map((f) => f.schemaArquivo)));
+check("assets declarados para o gerador existem no repositório",
+  (T.ASSETS_REPO || []).every((a) => existsSync(join(ROOT, a))),
+  (T.ASSETS_REPO || []).filter((a) => !existsSync(join(ROOT, a))).join(" | "));
+check("configurações do gerador declaradas no painel",
+  T.CONFIG_DEFS.filter((d) => /^documentos\./.test(d.key)).length === 3,
+  T.CONFIG_DEFS.filter((d) => /^documentos\./.test(d.key)).map((d) => d.key).join(" | "));
+
+if (ND && pdfLib) {
+  // 13.1 — perfil de fidelidade ainda espelha o código da aplicação
+  const htmlFicha = readFileSync(join(ROOT, "ficha_cadastral.html"), "utf8");
+  const fonteHtml = parseFloat((htmlFicha.match(/const PDF_FONT_TEXTO = ([\d.]+)/) || [])[1]);
+  const offsetHtml = parseFloat((htmlFicha.match(/const OFFSET_Y_TEXTO_UMA_LINHA_PT = ([\d.]+)/) || [])[1]);
+  const limiteHtml = parseFloat((htmlFicha.match(/const LIMITE_Y_SEM_OFFSET_TEXTO_PT = ([\d.]+)/) || [])[1]);
+  const baselineHtml = (htmlFicha.match(/Math\.min\(h \* ([\d.]+), tamanhoFonte \* ([\d.]+)\)/) || []).slice(1).map(Number);
+  check("perfil do engine espelha as constantes reais do ficha_cadastral.html (§8)",
+    ND.PERFIL_APP.fontSize === fonteHtml &&
+    ND.PERFIL_APP.offsetYLinha === offsetHtml &&
+    ND.PERFIL_APP.limiteYsemOffset === limiteHtml &&
+    ND.PERFIL_APP.baselineAltura === baselineHtml[0] &&
+    ND.PERFIL_APP.baselineFonte === baselineHtml[1],
+    JSON.stringify({ engine: ND.PERFIL_APP, html: { fonteHtml, offsetHtml, limiteHtml, baselineHtml } }));
+
+  // 13.2 — bootstrap do schema real preserva a geometria existente
+  const schema = JSON.parse(readFileSync(join(ROOT, "ficha_cadastral_campos.json"), "utf8"));
+  const template = await pdfLib.PDFDocument.load(readFileSync(join(ROOT, "F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf")));
+  const pag = template.getPage(0);
+  const size = { width: pag.getWidth(), height: pag.getHeight() };
+  const def = ND.definicaoDeSchema(schema, { documentId: "f075", width: size.width, height: size.height, autor: "auditoria" });
+  const folhas = ND.folhasComCoordenadas(schema.campos, "");
+  check("bootstrap cria 1 elemento nativo por campo com coordenadas do schema real",
+    def.elementos.length === folhas.length && folhas.length >= 35,
+    "definicao=" + def.elementos.length + " schema=" + folhas.length);
+  const vDef = ND.validarDefinicao(def);
+  check("definição criada do schema real não tem erro crítico (§31)", vDef.erros.length === 0, vDef.erros.slice(0, 4).join(" | "));
+  check("definição criada do schema real não tem coordenada fora da página",
+    vDef.avisos.filter((a) => a.indexOf("fora da página") !== -1 || a.indexOf("cortado") !== -1).length === 0,
+    vDef.avisos.filter((a) => a.indexOf("fora da página") !== -1 || a.indexOf("cortado") !== -1).slice(0, 4).join(" | "));
+  check("definição nasce marcada como REQUER CALIBRAÇÃO (honestidade §52)",
+    vDef.avisos.some((a) => a.indexOf("REQUER CALIBRAÇÃO") !== -1), "sem marcação");
+
+  // 13.3 — fidelidade campo a campo (x e baseline) contra a regra da aplicação
+  const divergentes = [];
+  for (const f of folhas) {
+    const c = f.no.coordenadas;
+    const el = def.elementos.filter((e) => e.chaveSchema === f.path)[0];
+    const esperadoY = c.y + Math.min((c.altura || 0) * ND.PERFIL_APP.baselineAltura, ND.PERFIL_APP.fontSize * ND.PERFIL_APP.baselineFonte) -
+      (c.y > ND.PERFIL_APP.limiteYsemOffset ? ND.PERFIL_APP.offsetYLinha : 0);
+    const meuY = size.height - ND.baselineTopo(el);
+    if (Math.abs(esperadoY - meuY) > 0.001 || Math.abs((c.x + ND.PERFIL_APP.offsetX) - (el.x + el.offsetX)) > 0.001) {
+      divergentes.push(f.path + " (y " + esperadoY + " vs " + meuY + ")");
+    }
+  }
+  check("todo campo do schema real sai com a MESMA baseline e o MESMO x do PDF atual",
+    divergentes.length === 0, divergentes.slice(0, 5).join(" | "));
+
+  // 13.4 — o PDF gerado é real, independente e determinístico
+  const dados = {};
+  dados[def.elementos[0].binding] = "FULANO DE TAL";
+  const g1 = await ND.renderizarPdf(def, dados, pdfLib, { imagens: {} }, {});
+  const g2 = await ND.renderizarPdf(def, dados, pdfLib, { imagens: {} }, {});
+  const gVazio = await ND.renderizarPdf(def, {}, pdfLib, { imagens: {} }, {});
+  const buf1 = Buffer.from(g1.bytes);
+  check("PDF nativo gerado é um PDF de verdade", buf1.slice(0, 5).toString() === "%PDF-", buf1.slice(0, 5).toString());
+  const carregado = await pdfLib.PDFDocument.load(g1.bytes);
+  check("PDF nativo tem as dimensões EXATAS do template oficial (§6/§31)",
+    Math.abs(carregado.getPage(0).getWidth() - size.width) < 0.01 && Math.abs(carregado.getPage(0).getHeight() - size.height) < 0.01,
+    carregado.getPage(0).getWidth() + "x" + carregado.getPage(0).getHeight() + " (template " + size.width + "x" + size.height + ")");
+  check("PDF nativo independe da contagem de páginas do template externo",
+    carregado.getPageCount() === ND.paginasDaDefinicao(def).length, String(carregado.getPageCount()));
+  check("PDF nativo é determinístico (mesma entrada ⇒ mesmos bytes)",
+    Buffer.compare(Buffer.from(g2.bytes), buf1) === 0, "bytes diferentes");
+  check("geração não inventa dado: sem dados, nenhum campo é desenhado",
+    gVazio.desenhados === 0 && g1.desenhados === 1, JSON.stringify({ vazio: gVazio.desenhados, um: g1.desenhados }));
+
+  // 13.5 — F-089 (declaração, página 2) também bootstrapa sem erro
+  const schemaDecl = JSON.parse(readFileSync(join(ROOT, "declaracao_plano_saude_campos.json"), "utf8"));
+  const decl = await pdfLib.PDFDocument.load(readFileSync(join(ROOT, "DECLARACAO PLANO DE SAUDE.pdf")));
+  const defDecl = ND.definicaoDeSchema(schemaDecl, { documentId: "f089", width: decl.getPage(0).getWidth(), height: decl.getPage(0).getHeight(), autor: "auditoria" });
+  const vDecl = ND.validarDefinicao(defDecl);
+  check("declaração (F-089) bootstrapa do schema real sem erro crítico",
+    defDecl.elementos.length > 0 && vDecl.erros.length === 0, JSON.stringify({ n: defDecl.elementos.length, erros: vDecl.erros.slice(0, 3) }));
+  check("campos da declaração ficam na página 2 (como no schema real)",
+    defDecl.elementos.some((e) => e.page === 2) && ND.paginasDaDefinicao(defDecl).length >= 1,
+    JSON.stringify(defDecl.elementos.map((e) => e.page).slice(0, 6)));
+
+  // 13.6 — F-075 RECONSTRUÍDO: mobiliário do formulário oficial medido contra a
+  // referência congelada. É o aceite da reconstrução (§27.2/§27.3).
+  const refPath = join(ROOT, "scripts", "referencia", "f075-pagina1.json");
+  const natPath = join(ROOT, "ficha_cadastral_nativo.json");
+  if (existsSync(refPath) && existsSync(natPath)) {
+    const snap = JSON.parse(readFileSync(refPath, "utf8"));
+    const defNat = JSON.parse(readFileSync(natPath, "utf8"));
+    const rel = ND.compararComReferencia(defNat, snap, { tolerancia: 1 });
+    check("referência do F-075 veio do PDF oficial e declara o arquivo de origem",
+      snap.formato === "referencia-pdf/1" && /F-075/.test(String(snap.arquivo || "")) && existsSync(join(ROOT, String(snap.arquivo || ""))),
+      JSON.stringify({ formato: snap.formato, arquivo: snap.arquivo }));
+    check("referência tem o mobiliário completo (textos, réguas/caixas e imagens)",
+      snap.textos.length >= 100 && snap.regras.length >= 10 && snap.imagens.length === 9,
+      JSON.stringify({ textos: snap.textos.length, regras: snap.regras.length, imagens: snap.imagens.length }));
+    check("documento nativo do F-075 cobre TODOS os itens da referência (nenhum sem par)",
+      rel.semPar === 0 && rel.casados === snap.textos.length + snap.regras.length + snap.imagens.length, rel.resumo);
+    check("deslocamento do F-075 reconstruído está dentro da tolerância (≤ 1 pt)",
+      rel.dentro === true && rel.maxDx <= 1 && rel.maxDy <= 1, rel.resumo);
+    check("mobiliário fica SEMPRE atrás dos campos dinâmicos (camadas §20)",
+      defNat.elementos.filter((e) => e.origem === "importado").every((e) => (Number(e.zIndex) || 0) < 100) &&
+        defNat.elementos.filter((e) => e.origem === "schema").every((e) => (Number(e.zIndex) || 0) >= 100),
+      JSON.stringify(defNat.elementos.filter((e) => e.origem === "importado").map((e) => e.zIndex).slice(0, 5)));
+    check("imagens do mobiliário existem na raiz (a geração não depende do PDF)",
+      (defNat.assets || []).length === 9 && (defNat.assets || []).every((a) => existsSync(join(ROOT, a.arquivo))),
+      JSON.stringify((defNat.assets || []).map((a) => a.arquivo)));
+    check("documento nativo do repositório não sai como pendente de calibração",
+      defNat.metadados && defNat.metadados.pendenteCalibracao === false && defNat.metadados.referencia && defNat.metadados.referencia.itensSemPar === 0,
+      JSON.stringify(defNat.metadados && defNat.metadados.referencia));
+
+    // 13.7 — TIPOGRAFIA OFICIAL POR RUN (§15.1): a definição carrega a fonte que o
+    // DOCUMENTO EDITÁVEL declara por run, não só o subconjunto que o PDF embutiu.
+    // Aqui a conferência é recalculada do artefato — se o gerador parar de anotar
+    // alguma família, esta verificação acusa.
+    const tipPath = join(ROOT, "scripts", "referencia", "f075-tipografia.json");
+    if (existsSync(tipPath)) {
+      const tip = JSON.parse(readFileSync(tipPath, "utf8"));
+      const chave = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const paragrafos = (tip.paragrafos || []).map((p) => Object.assign({}, p, { k: chave(p.texto) }));
+      const oficialDe = (texto) => {
+        const c = chave(texto);
+        if (c.length < 3) return null;
+        return paragrafos.find((x) => x.k === c) || paragrafos.find((x) => x.k.indexOf(c) >= 0) ||
+          paragrafos.filter((x) => x.k.length >= 4 && c.indexOf(x.k) >= 0).sort((a, b) => b.k.length - a.k.length)[0] || null;
+      };
+      const textos = defNat.elementos.filter((e) => e.type === "text");
+      const comPar = textos.filter((e) => !!oficialDe(e.content));
+      check("tipografia oficial: todo bloco com par no documento editável declara a família",
+        comPar.length >= 70 && comPar.every((e) => e.fonteOficial && e.tipografiaOficial && e.tipografiaOficial.familia === e.fonteOficial),
+        comPar.length + " de " + textos.length + " bloco(s)");
+      const familiasDeclaradas = [...new Set(comPar.map((e) => e.fonteOficial))];
+      check("tipografia oficial: toda família declarada é reconhecida pelo engine (nada de chute)",
+        familiasDeclaradas.every((f) => !!ND.chaveOficial(f)),
+        JSON.stringify(familiasDeclaradas));
+      check("tipografia oficial: cada caixa de marcação corresponde a um run simbólico (1:1)",
+        (tip.runs || []).filter((r) => r.simbolica).length === defNat.elementos.filter((e) => e.type === "checkbox").length,
+        JSON.stringify({ runs: (tip.runs || []).filter((r) => r.simbolica).length, caixas: defNat.elementos.filter((e) => e.type === "checkbox").length }));
+      const metaTip = defNat.metadados && defNat.metadados.tipografiaOficial;
+      check("tipografia oficial: substituições (Arial Narrow) ficam declaradas com o desvio medido",
+        !!metaTip && (metaTip.substituicoes || []).some((s) => /narrow/i.test(s.pedida) && s.desvio > 0.15),
+        JSON.stringify(metaTip && metaTip.substituicoes));
+      // As divergências registradas precisam ser REAIS: cada uma tem de
+      // corresponder a um elemento que existe na definição.
+      const ids = (metaTip && metaTip.divergencias || []).map((d) => String(d).split(":")[0]);
+      check("tipografia oficial: divergências documento × PDF apontam elementos reais",
+        ids.length > 0 && ids.every((id) => defNat.elementos.some((e) => e.id === id)),
+        JSON.stringify(ids.slice(0, 3)) + " de " + ids.length);
+    } else {
+      check("tipografia oficial do F-075 presente no repositório", false, tipPath);
+    }
+  } else {
+    check("reconstrução do F-075 presente no repositório (referência + definição)", false, refPath + " / " + natPath);
+  }
+}
 
 // ── Relatório ─────────────────────────────────────────────────────────
 console.log("\nAUDITORIA DO PAINEL × DADOS REAIS DO REPOSITÓRIO\n" + "═".repeat(58));
