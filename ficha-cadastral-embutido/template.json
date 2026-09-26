@@ -162,7 +162,7 @@
     {
       "x": 362.83,
       "y": 774.12,
-      "width": 60.0,
+      "width": 60,
       "height": 0
     },
     {
@@ -820,7 +820,7 @@
       "height": 0.48
     },
     {
-      "x": 576.0,
+      "x": 576,
       "y": 333.65,
       "width": 0.24,
       "height": 0.48
@@ -1153,275 +1153,44 @@
   "whiteBoxes": [],
   "texts": [
     {
-      "text": "Ficha",
-      "x": 143.54,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Cadastral",
-      "x": 169.7,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 213.41,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Admissão",
-      "x": 226.37,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "–",
-      "x": 271.97,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Operacional",
-      "x": 279.53,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "e",
-      "x": 334.24,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Administrativo",
-      "x": 341.8,
-      "y": 810.84,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Código/Revisão:",
-      "x": 137.18,
-      "y": 784.2,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "F-075",
-      "x": 205,
-      "y": 784.2,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "(PR-011)",
-      "x": 238,
-      "y": 784.2,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "/",
-      "x": 282,
-      "y": 784.2,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "38",
-      "x": 288,
-      "y": 784.2,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Data",
-      "x": 310,
-      "y": 789.96,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "da",
-      "x": 330,
-      "y": 789.96,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "publicação:",
-      "x": 340,
-      "y": 789.96,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Vigência:",
-      "x": 340,
-      "y": 780.72,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "29/05/2026",
-      "x": 390,
-      "y": 790.68,
-      "size": 12,
-      "font": "Helvetica"
-    },
-    {
-      "text": "2",
-      "x": 390,
-      "y": 777,
-      "size": 12,
-      "font": "Helvetica"
-    },
-    {
-      "text": "anos",
-      "x": 398,
-      "y": 777,
-      "size": 12,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Importante",
-      "x": 32.76,
-      "y": 751.54,
-      "size": 9.96,
+      "text": "Ficha Cadastral de Admissão – Operacional e Administrativo",
+      "x": 135,
+      "y": 811,
+      "size": 11,
       "font": "Helvetica-Bold"
     },
     {
-      "text": ":",
-      "x": 84.38,
-      "y": 751.54,
+      "text": "Código/Revisão: F-075 (PR-011) / 38",
+      "x": 135,
+      "y": 785,
       "size": 9,
       "font": "Helvetica"
     },
     {
-      "text": "As",
-      "x": 88.94,
-      "y": 751.54,
-      "size": 9,
+      "text": "Data da publicação: 29/05/2026",
+      "x": 300,
+      "y": 790,
+      "size": 8,
       "font": "Helvetica"
     },
     {
-      "text": "informações",
-      "x": 99.63,
-      "y": 751.54,
-      "size": 9,
+      "text": "Vigência: 2 anos",
+      "x": 300,
+      "y": 778,
+      "size": 8,
       "font": "Helvetica"
     },
     {
-      "text": "devem",
-      "x": 141.83,
-      "y": 751.54,
+      "text": "Importante:",
+      "x": 18,
+      "y": 751.5,
       "size": 9,
-      "font": "Helvetica"
+      "font": "Helvetica-Bold"
     },
     {
-      "text": "ser",
-      "x": 165.95,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "corretamente",
-      "x": 178.3,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "preenchidas",
-      "x": 223.75,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "para",
-      "x": 265.98,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "cadastro",
-      "x": 282.89,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "admissão",
-      "x": 313.22,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "devido",
-      "x": 346.81,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "o",
-      "x": 370.56,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "cumprimento",
-      "x": 376.68,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "do",
-      "x": 421.42,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "decreto",
-      "x": 431.61,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "8373/2014",
-      "x": 458.23,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Programa",
-      "x": 495.19,
-      "y": 751.54,
-      "size": 9,
-      "font": "Helvetica"
-    },
-    {
-      "text": "eSocial.",
-      "x": 529.6,
-      "y": 751.54,
+      "text": "As informações devem ser corretamente preenchidas para cadastro admissão devido o cumprimento do decreto 8373/2014 Programa eSocial.",
+      "x": 70,
+      "y": 751.5,
       "size": 9,
       "font": "Helvetica"
     },
