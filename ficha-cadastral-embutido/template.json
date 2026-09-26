@@ -1,7 +1,7 @@
 {
   "page": {
-    "width": 595.32,
-    "height": 841.92
+    "width": 595.5,
+    "height": 842.25
   },
   "images": [
     {
@@ -538,7 +538,7 @@
       "height": 0.48
     },
     {
-      "x": 576.0,
+      "x": 576,
       "y": 333.65,
       "width": 0.24,
       "height": 0.48
@@ -858,7 +858,7 @@
       "text": "Código/Revisão:",
       "x": 137.18,
       "y": 784.2,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
@@ -921,21 +921,21 @@
       "text": "29/05/2026",
       "x": 368.47,
       "y": 790.68,
-      "size": 12.0,
+      "size": 12,
       "font": "Helvetica"
     },
     {
       "text": "2",
       "x": 378.31,
-      "y": 777.0,
-      "size": 12.0,
+      "y": 777,
+      "size": 12,
       "font": "Helvetica"
     },
     {
       "text": "anos",
       "x": 386.59,
-      "y": 777.0,
-      "size": 12.0,
+      "y": 777,
+      "size": 12,
       "font": "Helvetica"
     },
     {
@@ -949,126 +949,126 @@
       "text": ":",
       "x": 84.38,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "As",
       "x": 88.94,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "informações",
       "x": 99.63,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "devem",
       "x": 141.83,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "ser",
       "x": 165.95,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "corretamente",
       "x": 178.3,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "preenchidas",
       "x": 223.75,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "para",
       "x": 265.98,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "cadastro",
       "x": 282.89,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "admissão",
       "x": 313.22,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "devido",
       "x": 346.81,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "o",
       "x": 370.56,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "cumprimento",
       "x": 376.68,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "do",
       "x": 421.42,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "decreto",
       "x": 431.61,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "8373/2014",
       "x": 458.23,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "Programa",
       "x": 495.19,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
       "text": "eSocial.",
       "x": 529.6,
       "y": 751.54,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica"
     },
     {
@@ -1446,21 +1446,21 @@
       "text": "DADOS",
       "x": 19.56,
       "y": 496.39,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica-Bold"
     },
     {
       "text": "CONTA",
       "x": 19.56,
       "y": 486.07,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica-Bold"
     },
     {
       "text": "BANCÁRIA",
       "x": 19.56,
       "y": 475.75,
-      "size": 9.0,
+      "size": 9,
       "font": "Helvetica-Bold"
     },
     {
@@ -1962,7 +1962,7 @@
     },
     {
       "text": "Vale",
-      "x": 289.0,
+      "x": 289,
       "y": 170.06,
       "size": 8.04,
       "font": "Helvetica-Bold"
@@ -2158,7 +2158,7 @@
     },
     {
       "text": "dependentes",
-      "x": 478.0,
+      "x": 478,
       "y": 153.98,
       "size": 8.04,
       "font": "Helvetica"
@@ -2340,7 +2340,7 @@
     },
     {
       "text": "realizado",
-      "x": 528.0,
+      "x": 528,
       "y": 144.26,
       "size": 8.04,
       "font": "Helvetica"
