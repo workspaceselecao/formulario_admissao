@@ -3544,6 +3544,7 @@
     if (!N || !fonte) { toast("Nenhum documento embarcado selecionado.", false); return; }
     dnCarregarTemplate(fonte).then(function (pacote) {
       global.AdminPersistence.baixarJSON(pacote.template, "template.json");
+      dnRegistrarLog(fonte, "template.json exportado para versionar no repositório");
       logEvento({ acao: "exportacao", entidade: fonte.templateDir + "/template.json", alteracao: "template embarcado efetivo para versionar no repositório" });
       toast("template.json gerado — substitua em " + fonte.templateDir + "/ e comite.");
     }).catch(function (e) { toast("Falha ao exportar o template: " + e.message, false); });
@@ -4055,6 +4056,11 @@
   function dnFonteSel() { return dnFontePor(dnDocIdSel()); }
   function dnPaginaAtual() { const s = $("dnPage"); return Math.max(1, parseInt((s && s.value) || 1, 10) || 1); }
   function dnArred(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+  // Autor dos PDFs de teste e dos logs: e-mail da sessão admin (mesma fonte do logEvento);
+  // nunca lança — sem sessão, devolve vazio.
+  function dnAutor() {
+    try { return (global.atentoAdminEmail && global.atentoAdminEmail()) || ""; } catch (e) { return ""; }
+  }
   function dnUrlTemplate(fonte, nome) { return urlRepositorio(fonte.templateDir + "/" + nome); }
 
   /**
@@ -4297,6 +4303,7 @@
       const schemaCampos = (state.docData[fonte.docKey] || {}).json && state.docData[fonte.docKey].json.campos;
       const gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens }, { autor: dnAutor() });
       dnAbrirBytes(gerado.bytes, fonte.documentId + "-embarcado.pdf");
+      dnRegistrarLog(fonte, "PDF de teste gerado: " + gerado.paginas + " página(s), " + gerado.desenhados + " campo(s) preenchido(s)");
       await logEvento({ acao: "preview_teste", entidade: fonte.nome, alteracao: "PDF embarcado gerado (template " + fonte.templateDir + "): " + gerado.paginas + " página(s), " + gerado.desenhados + " campo(s) preenchido(s)" });
       toast("PDF embarcado gerado — " + gerado.desenhados + " campo(s) preenchido(s).");
     } catch (e) {
@@ -4411,6 +4418,7 @@
         (r ? " · janela de busca ± " + r.raioPx + " px" : "") + ".<br>" +
         (semTexto ? "A página embarcada está sem tinta — verifique o template embarcado. " : "") +
         "O template oficial serve só de referência de engenharia: a geração embarcada não depende dele.</div>";
+      dnRegistrarLog(fonte, "comparação com o oficial: diferença " + (r ? r.percentual : "?") + "% · dx " + (r ? r.dx : "?") + " pt · dy " + (r ? r.dy : "?") + " pt");
       await logEvento({
         acao: "comparacao_nativa", entidade: fonte.nome,
         alteracao: "diferença " + (r ? r.percentual : "?") + "% · deslocamento dx " + (r ? r.dx : "?") + "pt dy " + (r ? r.dy : "?") + "pt (tolerância " + tol + "pt)"
@@ -4512,6 +4520,7 @@
         const alvo = b.getAttribute("data-dntab");
         document.querySelectorAll("#sec-documentos .tabs button").forEach(function (x) { x.classList.toggle("active", x === b); x.setAttribute("aria-selected", x === b ? "true" : "false"); });
         document.querySelectorAll("#sec-documentos .tab-pane").forEach(function (p) { p.classList.toggle("active", p.id === "dnPane-" + alvo); });
+        if (alvo === "logs") dnRenderLogs();
       });
     });
   }

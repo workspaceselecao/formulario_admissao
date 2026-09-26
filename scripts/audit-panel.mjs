@@ -383,6 +383,14 @@ if (ED && pdfLib) {
   check("output.pdf é artefato: ignorado pelo .gitignore e não rastreado pelo git",
     /^ficha-cadastral-embutido\/output\.pdf$/m.test(gitignorePoc) && outputRastreado === "",
     "regra ausente no .gitignore ou arquivo rastreado: " + outputRastreado);
+
+  // 13.7 — nenhum identificador fantasma na seção DN do painel (bug real: dnAutor chamado sem definição)
+  const panelCodigo = readFileSync(join(ROOT, "admin", "panel.js"), "utf8");
+  const dnChamadas = new Set((panelCodigo.match(/\bdn[A-Z]\w*(?=\s*\()/g) || []));
+  const dnDefinicoes = new Set((panelCodigo.match(/\b(?:function|const|let)\s+dn[A-Z]\w*/g) || []).map(m => m.replace(/^\s*(?:function|const|let)\s+/, "")));
+  const dnFantasmas = [...dnChamadas].filter(n => !dnDefinicoes.has(n));
+  check("seção Documentos Embarcados: toda função dn*() chamada no painel está definida",
+    dnFantasmas.length === 0, dnFantasmas.length ? "sem definição: " + dnFantasmas.join(", ") : dnChamadas.size + " funções OK");
 }
 
 // ── Relatório ─────────────────────────────────────────────────────────
