@@ -25,5 +25,9 @@ Thumbs.db
 # o painel os busca via HTTP no deploy estático); apenas o output.pdf é artefato.
 ficha-cadastral-embutido/output.pdf
 
+# Ferramentas temporárias de perícia/depuração da POC (deps locais e renders de comparação)
+ficha-cadastral-embutido/.tmp_deps/
+ficha-cadastral-embutido/.tmp_render/
+
 # Painel administrativo (modo API — dados locais do test-server)
 data/
