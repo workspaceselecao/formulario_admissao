@@ -1157,42 +1157,37 @@
       "x": 135,
       "y": 811,
       "size": 11,
-      "font": "Helvetica-Bold"
+      "font": "Arial-Narrow"
     },
     {
       "text": "Código/Revisão: F-075 (PR-011) / 38",
       "x": 135,
       "y": 785,
       "size": 9,
-      "font": "Helvetica"
+      "font": "Arial-Narrow"
     },
     {
       "text": "Data da publicação: 29/05/2026",
       "x": 300,
       "y": 790,
       "size": 8,
-      "font": "Helvetica"
+      "font": "Arial-Narrow"
     },
     {
       "text": "Vigência: 2 anos",
       "x": 300,
       "y": 778,
       "size": 8,
-      "font": "Helvetica"
+      "font": "Arial-Narrow"
     },
     {
-      "text": "Importante:",
+      "text": "Importante: As informações devem ser corretamente preenchidas para cadastro admissão devido o cumprimento do decreto 8373/2014 Programa eSocial.",
       "x": 18,
       "y": 751.5,
       "size": 9,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "As informações devem ser corretamente preenchidas para cadastro admissão devido o cumprimento do decreto 8373/2014 Programa eSocial.",
-      "x": 70,
-      "y": 751.5,
-      "size": 9,
-      "font": "Helvetica"
+      "font": "Arial-Narrow",
+      "maxWidth": 542,
+      "lineHeight": 10.5
     },
     {
       "text": "DADOS",
@@ -1209,123 +1204,13 @@
       "font": "Helvetica-Bold"
     },
     {
-      "text": "Nome",
+      "text": "Nome Completo: (Preencher da mesma forma que consta no documento Certidão de Nascimento ou Casamento)",
       "x": 19.56,
       "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Completo:",
-      "x": 44.14,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(",
-      "x": 85.87,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Preencher",
-      "x": 88.58,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "da",
-      "x": 330,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "mesma",
-      "x": 138.71,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "forma",
-      "x": 167.26,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "que",
-      "x": 189.93,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "consta",
-      "x": 205.41,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "no",
-      "x": 231.3,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "documento",
-      "x": 242.33,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Certidão",
-      "x": 284.18,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 316.56,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Nascimento",
-      "x": 327.71,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "ou",
-      "x": 372.2,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Casamento",
-      "x": 383.47,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": ")",
-      "x": 424.39,
-      "y": 707.86,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
+      "size": 8,
+      "font": "Arial",
+      "maxWidth": 520,
+      "lineHeight": 9.6
     },
     {
       "text": "Nome",
@@ -2140,606 +2025,13 @@
       "font": "Helvetica-Bold"
     },
     {
-      "text": "Atenção:",
+      "text": "Atenção: A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes (filhos e/ou cônjuge) no plano de saúde. É imprescindível a apresentação do CPF de todos os dependentes. Para que o pagamento do salário família seja realizado é fundamental a apresentação da certidão de nascimento dos filhos menores de 14 anos. Para as crianças com menos de 7 anos de idade, também é necessário a carteira de vacinação. Estrangeiros: entregar a documentação específica (conforme Check List).",
       "x": 21.24,
       "y": 153.98,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "A",
-      "x": 67.34,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "ausência",
-      "x": 75.49,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "da",
-      "x": 330,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "certidão",
-      "x": 121.87,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 152.91,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "casamento,",
-      "x": 164.54,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 208.65,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "nascimento",
-      "x": 220.27,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "e",
-      "x": 263.67,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "do",
-      "x": 270.86,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "número",
-      "x": 282.49,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "do",
-      "x": 312.35,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "cartão",
-      "x": 323.85,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "SUS",
-      "x": 348.78,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "implicará",
-      "x": 368.07,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "na",
-      "x": 402.72,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "não",
-      "x": 414.35,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "inclusão",
-      "x": 430.41,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "dos",
-      "x": 462.41,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "dependentes",
-      "x": 478,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "(filhos",
-      "x": 527.04,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "e/ou",
-      "x": 551.61,
-      "y": 153.98,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "cônjuge)",
-      "x": 21.24,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "no",
-      "x": 54.1,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "plano",
-      "x": 65.14,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 86.85,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "saúde.",
-      "x": 97.89,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "É",
-      "x": 124.03,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "imprescindível",
-      "x": 131.59,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "a",
-      "x": 184.95,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "apresentação",
-      "x": 191.55,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "do",
-      "x": 242.15,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "CPF",
-      "x": 253.19,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 271.3,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "todos",
-      "x": 282.34,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "os",
-      "x": 304.04,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "dependentes.",
-      "x": 314.71,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Para",
-      "x": 365.47,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "que",
-      "x": 384.43,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "o",
-      "x": 399.9,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "pagamento",
-      "x": 406.5,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "do",
-      "x": 448.73,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "salário",
-      "x": 459.77,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "família",
-      "x": 485.55,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "seja",
-      "x": 511.1,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "realizado",
-      "x": 528,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "é",
-      "x": 562.66,
-      "y": 144.26,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "fundamental",
-      "x": 21.24,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "a",
-      "x": 68.37,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "apresentação",
-      "x": 75.8,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "da",
-      "x": 330,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "certidão",
-      "x": 139.09,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 170.63,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "nascimento",
-      "x": 182.5,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "dos",
-      "x": 226.5,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "filhos",
-      "x": 242.33,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "menores",
-      "x": 263.92,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 298.21,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "14",
-      "x": 310.08,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "anos.",
-      "x": 321.94,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Para",
-      "x": 344.49,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "as",
-      "x": 364.51,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "crianças",
-      "x": 375.9,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "com",
-      "x": 408.62,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "menos",
-      "x": 426.84,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 453.94,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "7",
-      "x": 465.8,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "anos",
-      "x": 398,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 493.62,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "idade,",
-      "x": 505.37,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "também",
-      "x": 530.72,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "é",
-      "x": 562.74,
-      "y": 135.14,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "necessário",
-      "x": 21.24,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "a",
-      "x": 62.24,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "carteira",
-      "x": 68.84,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "de",
-      "x": 97.74,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "vacinação.",
-      "x": 108.78,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Estrangeiros:",
-      "x": 149.29,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "entregar",
-      "x": 198.58,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "a",
-      "x": 230.59,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "documentação",
-      "x": 237.53,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "específica",
-      "x": 292.2,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "(conforme",
-      "x": 330.41,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Check",
-      "x": 368.66,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "List).",
-      "x": 393.48,
-      "y": 125.9,
-      "size": 8.04,
-      "font": "Helvetica"
+      "size": 8,
+      "font": "Arial",
+      "maxWidth": 545,
+      "lineHeight": 9.66
     },
     {
       "text": "_______________________________________",
@@ -2877,5 +2169,23 @@
       "y": 170.24,
       "side": 7.54
     }
-  ]
+  ],
+  "fontes": {
+    "Arial": {
+      "arquivo": "assets/arial.ttf",
+      "fallback": "Helvetica"
+    },
+    "Arial-Bold": {
+      "arquivo": "assets/arialbd.ttf",
+      "fallback": "Helvetica-Bold"
+    },
+    "Arial-Narrow": {
+      "arquivo": "assets/ARIALN.ttf",
+      "fallback": "Helvetica"
+    },
+    "Arial-Narrow-Bold": {
+      "arquivo": "assets/ARIALNB.ttf",
+      "fallback": "Helvetica-Bold"
+    }
+  }
 }

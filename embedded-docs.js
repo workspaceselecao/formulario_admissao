@@ -10,7 +10,11 @@
  *
  *   template.json  — página, imagens (logos/molduras), barras pretas,
  *                    caixas brancas, textos estáticos e caixas de marcação;
+ *                    `fontes` declara as TTF do texto estático (nome →
+ *                    { arquivo, fallback }) e textos com `maxWidth` são
+ *                    re-quebrados pela fonte real;
  *   assets/*.png   — bytes das imagens (versionados no repositório);
+ *   assets/*.ttf   — bytes das fontes declaradas em `fontes` (mesma origem);
  *   campos do schema (*_campos.json) — onde os DADOS do candidato entram.
  *
  * Nenhum PDF externo é carregado nem enviado: o próprio código desenha
@@ -21,13 +25,15 @@
  *     y > 120 (LIMITE_Y_SEM_OFFSET_TEXTO_PT), x + 0,5 pt.
  *
  * Sem DOM, sem fetch, sem localStorage: as imagens chegam prontas
- * ({ imagens: { "assets/img0.png": Uint8Array } }) — no navegador o painel
- * baixa os bytes; em Node a suíte lê do disco. Multi-página: o template
+ * ({ imagens: { "assets/img0.png": Uint8Array }, fontes: { "assets/arial.ttf": Uint8Array } })
+ * — no navegador o painel baixa os bytes; em Node a suíte lê do disco. Multi-página: o template
  * declara `paginas` (cada uma com suas camadas) e os campos apontam a
  * página via `pagina`/`page` do schema (padrão 1).
  *
  * API: EmbeddedDocs.validarTemplate · EmbeddedDocs.gerarPdf
+ *      EmbeddedDocs.quebrarTexto · EmbeddedDocs.fontesDoTemplate
  *      EmbeddedDocs.PAGINA_MAX · EmbeddedDocs.PERFIL_APP
+ *      EmbeddedDocs.FONTES_PADRAO
  * (window.EmbeddedDocs no navegador; require em Node.)
  */
 (function (root, factory) {
@@ -37,6 +43,24 @@
   "use strict";
 
   var FONTES_PADRAO = ["Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique", "Times-Roman", "Times-Bold", "Times-Italic", "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique"];
+
+  /**
+   * Declaração de fonte customizada no template: `fontes: { "Arial-Narrow":
+   * { arquivo: "assets/ARIALN.ttf", fallback: "Helvetica" } }`. `fallback` é
+   * uma das fontes padrão do PDF — usada quando o TTF não chega (asset ausente
+   * ou fontkit indisponível, ex.: suíte em Node), para nunca quebrar a geração.
+   */
+  function fontesDoTemplate(template) {
+    var f = (template || {}).fontes;
+    return (f && typeof f === "object" && !Array.isArray(f)) ? f : {};
+  }
+
+  /** Nome de fonte padrão declarado como fallback (null se ausente/inválido). */
+  function fallbackDeclarado(decl) {
+    if (!decl) return null;
+    var nome = typeof decl === "string" ? decl : decl.fallback;
+    return FONTES_PADRAO.indexOf(nome) !== -1 ? nome : null;
+  }
 
   var SCHEMA_VERSION = "1.0";
   /** Campo fica fora da página acima desta folga (pt) — validação §31. */
@@ -101,10 +125,22 @@
     if (imagensSemArquivo) erros.push(imagensSemArquivo + " imagem(ns) com `file` inválido (esperado nome de asset, ex.: assets/img0.png).");
     if (!contagens.texts) avisos.push("Template sem textos estáticos — confirme que é o template completo (layout vazio imprime só os dados).");
     if (!contagens.checkboxes && !contagens.blackBars) avisos.push("Template sem caixas de marcação nem barras — típico de extração parcial.");
+    var fontesDeclaradas = fontesDoTemplate(template);
     if (template.fontes) {
+      for (var fnt0 in fontesDeclaradas) {
+        if (!Object.prototype.hasOwnProperty.call(fontesDeclaradas, fnt0)) continue;
+        if (!fallbackDeclarado(fontesDeclaradas[fnt0])) {
+          erros.push("Fonte `" + fnt0 + "` em template.fontes sem fallback válido (use " + FONTES_PADRAO.join(", ") + ").");
+          break;
+        }
+      }
       for (var ti = 0; ti < (template.texts || []).length; ti++) {
         var f = (template.texts[ti] || {}).font;
-        if (f && FONTES_PADRAO.indexOf(f) === -1) { erros.push("Fonte não padrão do PDF em texts: `" + f + "` (use " + FONTES_PADRAO.join(", ") + ")."); break; }
+        // Aceita fonte padrão OU fonte declarada em template.fontes (TTF do repo).
+        if (f && FONTES_PADRAO.indexOf(f) === -1 && !fontesDeclaradas[f]) {
+          erros.push("Fonte não suportada em texts: `" + f + "` (use " + FONTES_PADRAO.join(", ") + " ou declare em `fontes`).");
+          break;
+        }
       }
     }
     // Campos do schema: contagem para o resumo e aviso quando o schema está vazio.
@@ -162,6 +198,29 @@
     return saida;
   }
 
+  /**
+   * Quebra o texto em linhas que cabem em `larguraMax` (word-wrap por espaço).
+   * Mesma regra do gerador Node da POC: a primeira palavra sempre cabe e
+   * palavras mais largas que a caixa não são partiadas (nada é cortado).
+   */
+  function quebrarTexto(font, texto, tamanho, larguraMax) {
+    var palavras = String(texto == null ? "" : texto).split(" ");
+    var linhas = [];
+    var atual = "";
+    for (var i = 0; i < palavras.length; i++) {
+      var pal = palavras[i];
+      var cand = atual ? atual + " " + pal : pal;
+      if (font.widthOfTextAtSize(cand, tamanho) > larguraMax && atual) {
+        linhas.push(atual);
+        atual = pal;
+      } else {
+        atual = cand;
+      }
+    }
+    if (atual) linhas.push(atual);
+    return linhas.length ? linhas : [""];
+  }
+
   /** Cálculo do Y de baseline (espaço pdf-lib, origem no canto INFERIOR esquerdo). */
   function baselinePdf(coordenada, tamanhoFonte) {
     var yBottom = num(coordenada.y);
@@ -204,6 +263,7 @@
     var ops = opcoes || {};
     var dadosMapa = dados || {};
     var imagens = (assets && assets.imagens) || {};
+    var bytesFontes = (assets && assets.fontes) || {};
     if (!PDFLib || !PDFLib.PDFDocument) return Promise.reject(new Error("pdf-lib não disponível (CDN/bundle)."));
     if (!template || typeof template !== "object") return Promise.reject(new Error("Template ausente — carregue o template.json do documento."));
 
@@ -226,14 +286,44 @@
       };
       var pageW = num(template.page.width), pageH = num(template.page.height);
       var pngCache = {};
-      var relatorio = { imagensFaltando: [], textos: 0, checkboxes: 0, barras: 0 };
+      var relatorio = { imagensFaltando: [], textos: 0, checkboxes: 0, barras: 0, fontesFallback: [] };
       var folhasPdf = [];      // página pdf-lib por índice (o PDF real)
       var paginas = paginasDoTemplate(template);
 
-      // ── 1) Camadas de fundo por página (imagens → barras → caixas brancas → textos → marcações)
-      return PDFLib.all ? Promise.all(paginas.map(function (p, idx) {
-        return desenharPagina(pdfDoc, p, idx);
-      })).then(function () { return finalizar(); }) : desenharPaginasSequencial().then(function () { return finalizar(); });
+      // Fontes customizadas declaradas em template.fontes: TTF real quando o
+      // asset chega e o fontkit está disponível; caso contrário a fonte padrão
+      // de `fallback` (nunca quebra a geração, mas com métricas diferentes).
+      var declaradas = fontesDoTemplate(template);
+      var nomesFontes = Object.keys(declaradas);
+      var fonteKit = ops.fontkit || (typeof self !== "undefined" && self.fontkit) || null;
+      var embCustom = {};
+      var correntes = nomesFontes.reduce(function (p, nome) {
+        return p.then(function () {
+          var decl = declaradas[nome];
+          var arq = decl && decl.arquivo;
+          var bruto = arq ? bytesFontes[arq] : null;
+          var fb = fallbackDeclarado(decl);
+          var registraFallback = function (motivo) {
+            relatorio.fontesFallback.push(nome + " → " + (fb || "Helvetica") + " (" + motivo + ")");
+            return null;
+          };
+          if (!arq || !bruto) return registraFallback(bruto ? "sem `arquivo` declarado" : "asset ausente");
+          if (!fonteKit || !pdfDoc.registerFontkit) return registraFallback("fontkit indisponível");
+          pdfDoc.registerFontkit(fonteKit);
+          return pdfDoc.embedFont(bruto).then(function (emb) {
+            embCustom[nome] = emb;
+            return null;
+          }).catch(function (e) {
+            return registraFallback("TTF recusado: " + ((e && e.message) || "?"));
+          });
+        });
+      }, Promise.resolve());
+      return correntes.then(function () {
+        // ── 1) Camadas de fundo por página (imagens → barras → caixas brancas → textos → marcações)
+        return PDFLib.all ? Promise.all(paginas.map(function (p, idx) {
+          return desenharPagina(pdfDoc, p, idx);
+        })).then(function () { return finalizar(); }) : desenharPaginasSequencial().then(function () { return finalizar(); });
+      });
 
       function desenharPaginasSequencial() {
         var corrente = Promise.resolve();
@@ -241,6 +331,16 @@
           (function (p, idx) { corrente = corrente.then(function () { return desenharPagina(pdfDoc, p, idx); }); })(paginas[i], i);
         }
         return corrente;
+      }
+
+      /** Fonte efetiva de um trecho: TTF declarado, fonte padrão ou fallback declarado. */
+      function resolverFonte(nome) {
+        if (!nome) return helv;
+        if (embCustom[nome]) return embCustom[nome];
+        if (mapaFontes[nome]) return mapaFontes[nome];
+        var decl = declaradas[nome];
+        var fb = fallbackDeclarado(decl);
+        return (fb && mapaFontes[fb]) || helv;
       }
 
       function desenharPagina(pdfDocLocal, camadas, idx) {
@@ -286,8 +386,20 @@
           for (var t = 0; t < textos.length; t++) {
             var tx = textos[t];
             if (!tx || !tx.text) continue;
-            var fnt = mapaFontes[tx.font] || helv;
-            folha.drawText(String(tx.text), { x: num(tx.x), y: num(tx.y), size: num(tx.size, 9), font: fnt, color: cor });
+            var fnt = resolverFonte(tx.font);
+            var tam = num(tx.size, 9);
+            var larg = num(tx.maxWidth, 0);
+            if (larg > 0) {
+              // Trecho com quebra de linha: as linhas descem de `y` a cada
+              // `lineHeight` (mesma convenção do gerador Node da POC).
+              var passo = num(tx.lineHeight, tam * 1.2);
+              var linhas = quebrarTexto(fnt, String(tx.text), tam, larg);
+              for (var q = 0; q < linhas.length; q++) {
+                folha.drawText(linhas[q], { x: num(tx.x), y: num(tx.y) - q * passo, size: tam, font: fnt, color: cor });
+              }
+            } else {
+              folha.drawText(String(tx.text), { x: num(tx.x), y: num(tx.y), size: tam, font: fnt, color: cor });
+            }
           }
           relatorio.textos += textos.length;
           var cbs = camadas.checkboxes || [];
@@ -373,6 +485,8 @@
     folhasComCoordenadas: folhasComCoordenadas,
     baselinePdf: baselinePdf,
     truncarTexto: truncarTexto,
+    quebrarTexto: quebrarTexto,
+    fontesDoTemplate: fontesDoTemplate,
     valorDaFolha: valorDaFolha,
     gerarPdf: gerarPdf
   };

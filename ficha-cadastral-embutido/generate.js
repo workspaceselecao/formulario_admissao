@@ -7,16 +7,81 @@
 const fs = require("fs");
 const path = require("path");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const fontkit = require("@pdf-lib/fontkit");
+
+// ---------------------------------------------------------------------------
+// Helper: quebra texto em linhas que cabem dentro de maxWidth
+// ---------------------------------------------------------------------------
+function wrapText(text, font, size, maxWidth) {
+  const words = text.split(" ");
+  const lines = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? current + " " + word : word;
+    const w = font.widthOfTextAtSize(candidate, size);
+    if (w > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
 
 async function generateFichaCadastral(data = {}) {
   const template = JSON.parse(fs.readFileSync(path.join(__dirname, "template.json"), "utf-8"));
 
   const pdfDoc = await PDFDocument.create();
+
+  // Registra fontkit para suporte a fontes TTF customizadas
+  pdfDoc.registerFontkit(fontkit);
+
   const page = pdfDoc.addPage([template.page.width, template.page.height]);
 
-  const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  // ---- Fontes padrão (fallback) ----
+  const helv     = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fontMap = { Helvetica: helv, "Helvetica-Bold": helvBold };
+
+  // ---- Fontes customizadas (TTF declaradas em template.fontes) ----
+  const customFontCache = {};
+  async function getCustomFont(name) {
+    if (customFontCache[name]) return customFontCache[name];
+    const decl = (template.fontes || {})[name];
+    const rel = decl && decl.arquivo;
+    if (!rel) return null;
+    const fullPath = path.join(__dirname, rel);
+    if (!fs.existsSync(fullPath)) return null;
+    const bytes = fs.readFileSync(fullPath);
+    const f = await pdfDoc.embedFont(bytes);
+    customFontCache[name] = f;
+    return f;
+  }
+
+  // Pre-carrega as fontes usadas no cabeçalho e nos textos (o `|| helv*` é o
+  // fallback declarado em template.fontes, caso o TTF não esteja no repositório).
+  const fallbackPadrao = { "Helvetica": helv, "Helvetica-Bold": helvBold };
+  async function fonteDoTemplate(nome) {
+    const decl = (template.fontes || {})[nome];
+    if (!decl) return null;
+    return (await getCustomFont(nome)) || fallbackPadrao[decl.fallback] || helv;
+  }
+
+  const arialNarrow     = (await fonteDoTemplate("Arial-Narrow"))      || helv;
+  const arialNarrowBold = (await fonteDoTemplate("Arial-Narrow-Bold")) || helvBold;
+  const arial           = (await fonteDoTemplate("Arial"))             || helv;
+  const arialBold       = (await fonteDoTemplate("Arial-Bold"))        || helvBold;
+
+  // Mapa de nomes de fonte (template.json → objeto de fonte embedado)
+  const fontMap = {
+    "Helvetica":        helv,
+    "Helvetica-Bold":   helvBold,
+    "Arial-Narrow":     arialNarrow,
+    "Arial-Narrow-Bold": arialNarrowBold,
+    "Arial":            arial,
+    "Arial-Bold":       arialBold,
+  };
 
   // 1) Camada de fundo: imagens embutidas (logos + molduras/grades das tabelas)
   const imageCache = {};
@@ -37,26 +102,34 @@ async function generateFichaCadastral(data = {}) {
     });
   }
 
-  // (Não existe mais uma etapa de "caixas brancas de acabamento" aqui.
-  // Elas formavam, no PDF original, um par preto+branco quase idêntico
-  // usado só para apagar um trecho da grade da imagem de fundo. Extraídos
-  // como dois elementos separados e redesenhados, qualquer imprecisão de
-  // arredondamento entre os dois deixava uma fresta preta visível — o
-  // efeito de "linha torta/quebrada" relatado. A imagem de fundo já traz
-  // essas linhas corretas e contínuas, então o par inteiro foi descartado
-  // na extração: ver extract_template.py, filtro `if h > 3: continue`.)
-
-  // 3) Texto estático do layout (rótulos, títulos, cabeçalho) — desenhado
-  //    palavra por palavra na posição exata extraída do PDF original
+  // 3) Texto estático do layout (rótulos, títulos, cabeçalho)
+  //    Entradas com "maxWidth" disparam word-wrap automático.
   for (const t of template.texts) {
-    page.drawText(t.text, {
-      x: t.x, y: t.y, size: t.size, font: fontMap[t.font] || helv,
-      color: rgb(0, 0, 0),
-    });
+    const font = fontMap[t.font] || helv;
+    const size = t.size;
+    const lineHeight = t.lineHeight || (size * 1.2);
+
+    if (t.maxWidth) {
+      // Texto com quebra de linha automática
+      const lines = wrapText(t.text, font, size, t.maxWidth);
+      lines.forEach((line, idx) => {
+        page.drawText(line, {
+          x: t.x,
+          y: t.y - idx * lineHeight,
+          size,
+          font,
+          color: rgb(0, 0, 0),
+        });
+      });
+    } else {
+      page.drawText(t.text, {
+        x: t.x, y: t.y, size, font,
+        color: rgb(0, 0, 0),
+      });
+    }
   }
 
-  // 4) Checkboxes: quadrados vetoriais no lugar do glyph "❑" (evita
-  //    depender de fonte customizada só por causa de um símbolo)
+  // 4) Checkboxes: quadrados vetoriais no lugar do glyph "❑"
   for (const cb of template.checkboxes) {
     page.drawRectangle({
       x: cb.x, y: cb.y, width: cb.side, height: cb.side,
@@ -64,26 +137,15 @@ async function generateFichaCadastral(data = {}) {
     });
   }
 
-  // 5) Dados dinâmicos do candidato (exemplo de uso — mesmas coordenadas
-  //    que hoje já vivem no módulo "Coordenadas" do admin)
-  // As posições abaixo usam a MESMA linha de base real dos rótulos vizinhos
-  // (a mesma fonte de coordenada corrigida no fix da linha de base), então
-  // continuam corretas mesmo se o layout for reextraído no futuro.
+  // 5) Dados dinâmicos do candidato
   if (data.nomeCompleto) {
-    // Nome vai na faixa em branco entre o rótulo "Nome Completo:" (baseline
-    // y=696.03) e a divisória que inicia a linha "Nome Social:" (y=685.30
-    // topo-baixo 156.95) — baseline própria, ~3pt acima dessa divisória.
-    page.drawText(data.nomeCompleto, { x: 19.57, y: 685.30, size: 7.5, font: helv });
+    page.drawText(data.nomeCompleto, { x: 19.57, y: 685.30, size: 7.5, font: arial });
   }
   if (data.telefone) {
-    // Mesma linha de base do rótulo "Telefone:" (y=650.65), começando
-    // logo após o texto do rótulo (x1≈50.58).
-    page.drawText(data.telefone, { x: 58, y: 650.65, size: 7.5, font: helv });
+    page.drawText(data.telefone, { x: 58, y: 650.65, size: 7.5, font: arial });
   }
   if (data.email) {
-    // Mesma linha de base do rótulo "E-mail:" (y=629.68), logo após o
-    // texto do rótulo (x1≈42.83).
-    page.drawText(data.email, { x: 50, y: 629.68, size: 7.5, font: helv });
+    page.drawText(data.email, { x: 50, y: 629.68, size: 7.5, font: arial });
   }
 
   return pdfDoc.save();

@@ -4066,6 +4066,8 @@
   /**
    * Carrega template.json + bytes dos assets (cache por sessão). Sem os dois,
    * a geração embarcada não acontece — e o painel diz exatamente o que falta.
+   * `fontes` são os TTF declarados em template.fontes (fonte do texto estático);
+   * sem eles a engine cai na fonte padrão de `fallback`.
    */
   async function dnCarregarTemplate(fonte) {
     if (!fonte) return null;
@@ -4082,7 +4084,19 @@
         if (r.ok) imagens[img.file] = new Uint8Array(await r.arrayBuffer());
       } catch (e) { /* asset ausente é reportado no relatório da geração */ }
     }
-    const pacote = { template: template, imagens: imagens, quando: new Date().toISOString() };
+    const fontes = {};
+    const faltandoFontes = [];
+    for (const nome of Object.keys(template.fontes || {})) {
+      const decl = template.fontes[nome] || {};
+      const arq = decl.arquivo || (typeof decl === "string" ? decl : null);
+      if (!arq) continue;
+      try {
+        const r = await fetch(dnUrlTemplate(fonte, arq), { cache: "no-store" });
+        if (r.ok) fontes[arq] = new Uint8Array(await r.arrayBuffer());
+        else faltandoFontes.push(arq);
+      } catch (e) { faltandoFontes.push(arq); }
+    }
+    const pacote = { template: template, imagens: imagens, fontes: fontes, faltandoFontes: faltandoFontes, quando: new Date().toISOString() };
     dnTemplateCache[fonte.documentId] = pacote;
     return pacote;
   }
@@ -4134,7 +4148,7 @@
     try {
       pacote = await dnCarregarTemplate(fonte);
       const schemaCampos = (state.docData[fonte.docKey] || {}).json && state.docData[fonte.docKey].json.campos;
-      gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens }, { autor: dnAutor() });
+      gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens, fontes: pacote.fontes }, { autor: dnAutor() });
     } catch (e) {
       const box = $("dnResumo");
       if (box) box.innerHTML = '<div class="notice err">Falha na geração embarcada: ' + esc(e.message) + "</div>";
@@ -4185,6 +4199,7 @@
       (gerado
         ? "Última geração: <strong>" + gerado.desenhados + " campo(s) preenchido(s)</strong> de " + (gerado.desenhados + gerado.ignorados.length) +
           " · " + (gerado.relatorio.imagensFaltando.length ? '<span class="badge warn">' + gerado.relatorio.imagensFaltando.length + " imagem(ns) do template ausente(s)</span> · " : "") +
+          ((gerado.relatorio.fontesFallback || []).length ? '<span class="badge warn">fonte no fallback: ' + esc(gerado.relatorio.fontesFallback.join(", ")) + "</span> · " : "") +
           "os campos em branco são os que não recebem dado de teste — o candidato preenche no formulário."
         : "O preview mostra o PDF gerado com dados de teste; use <strong>Gerar PDF de teste</strong> para baixar o arquivo.") +
       " Ajustes de coordenada: <strong>Editor Visual</strong> (mesmas chaves de overlay) → exporte o schema efetivo para versionar.</div>";
@@ -4301,7 +4316,7 @@
     try {
       const pacote = await dnCarregarTemplate(fonte);
       const schemaCampos = (state.docData[fonte.docKey] || {}).json && state.docData[fonte.docKey].json.campos;
-      const gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens }, { autor: dnAutor() });
+      const gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens, fontes: pacote.fontes }, { autor: dnAutor() });
       dnAbrirBytes(gerado.bytes, fonte.documentId + "-embarcado.pdf");
       dnRegistrarLog(fonte, "PDF de teste gerado: " + gerado.paginas + " página(s), " + gerado.desenhados + " campo(s) preenchido(s)");
       await logEvento({ acao: "preview_teste", entidade: fonte.nome, alteracao: "PDF embarcado gerado (template " + fonte.templateDir + "): " + gerado.paginas + " página(s), " + gerado.desenhados + " campo(s) preenchido(s)" });
@@ -4400,7 +4415,7 @@
       const pdfOrig = await global.pdfjsLib.getDocument({ url: encodeURI(urlRepositorio(fonte.pdfFile)) }).promise;
       const pacote = await dnCarregarTemplate(fonte);
       const schemaCampos = (state.docData[fonte.docKey] || {}).json && state.docData[fonte.docKey].json.campos;
-      const gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens }, { autor: dnAutor() });
+      const gerado = await N.gerarPdf(pacote.template, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib, { imagens: pacote.imagens, fontes: pacote.fontes }, { autor: dnAutor() });
       const pdfEmb = await global.pdfjsLib.getDocument({ data: gerado.bytes.slice(0) }).promise;
       const base = await pdfOrig.getPage(1);
       const escala = Math.min(1.4, 620 / base.getViewport({ scale: 1 }).width);

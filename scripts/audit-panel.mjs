@@ -319,11 +319,33 @@ if (ED && pdfLib) {
   const v = ED.validarTemplate(template, schema.campos);
   check("template embarcado do F-075 não tem erro crítico", v.ok === true, v.erros.slice(0, 4).join(" | "));
   check("template embarcado declara o mobiliário do formulário oficial (textos, imagens, marcações)",
-    v.resumo && v.resumo.camadas.texts >= 200 && v.resumo.camadas.images >= 3 && v.resumo.camadas.checkboxes === 17,
+    // texts: os blocos de texto longo (cabeçalho, "Importante:", "Nome Completo:",
+    // "Atenção: ...") são trechos únicos com `maxWidth`, não um fragmento por
+    // palavra como na extração crua — 132 trechos continuam cobrindo o layout.
+    v.resumo && v.resumo.camadas.texts >= 120 && v.resumo.camadas.images >= 3 && v.resumo.camadas.checkboxes === 17,
     JSON.stringify(v.resumo && v.resumo.camadas));
   check("template embarcado usa a página exata do documento oficial",
     Math.abs(v.resumo.pagina.width - 595.5) < 0.01 && Math.abs(v.resumo.pagina.height - 842.25) < 0.01,
     JSON.stringify(v.resumo.pagina));
+  // 13.2b — fontes declaradas: todo texto usa fonte padrão OU fonte declarada, e
+  // todo TTF declarado existe no reposório (fonte versionada, não artefato).
+  const nomesFontes = Object.keys(template.fontes || {});
+  const naoDeclaradas = (template.texts || []).map((t) => t.font)
+    .filter((f) => f && !ED.FONTES_PADRAO.includes(f) && !template.fontes[f]);
+  check("template embarcado não usa fonte fora das padrão/declaradas", naoDeclaradas.length === 0,
+    [...new Set(naoDeclaradas)].join(", "));
+  const ttfsFaltando = nomesFontes
+    .map((n) => (template.fontes[n] || {}).arquivo)
+    .filter(Boolean)
+    .filter((arq) => !existsSync(join(ROOT, "ficha-cadastral-embutido", arq)));
+  check("POC versionada: todas as fontes TTF declaradas no template existem no repositório", ttfsFaltando.length === 0,
+    ttfsFaltando.length ? "faltando: " + ttfsFaltando.join(", ") : nomesFontes.join(", ") + " OK");
+  // 13.2c — trechos com quebra automática: `maxWidth` cabe na página e tem
+  // `lineHeight` (sem ele a engine assume 1,2× o tamanho e o bloco encosta).
+  const wraps = (template.texts || []).filter((t) => t.maxWidth);
+  const wrapsRuins = wraps.filter((t) => !(t.lineHeight > 0) || t.x + t.maxWidth > template.page.width || t.maxWidth <= 0);
+  check("trechos com `maxWidth` têm `lineHeight` e cabem na largura da página", wraps.length >= 3 && wrapsRuins.length === 0,
+    wrapsRuins.length ? JSON.stringify(wrapsRuins.slice(0, 2)) : wraps.length + " trecho(s) com quebra");
 
   // 13.3 — fidelidade: baseline calculada pelo engine = fórmula do app público
   const folhas = ED.folhasComCoordenadas(schema.campos);

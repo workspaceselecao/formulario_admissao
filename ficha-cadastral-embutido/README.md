@@ -23,16 +23,38 @@ praticamente pixel a pixel com o original.
 
 ## Decisões técnicas (documentadas para não se perderem)
 
-1. **Fonte**: o original usa Arial (via Canva). Como Arial não pode ser
-   redistribuída, uso Helvetica (uma das 14 fontes padrão do PDF, já embutida
-   nativamente pelo `pdf-lib`) — metricamente quase idêntica à Arial, por
-   isso a fidelidade se mantém mesmo sem embutir uma fonte customizada.
-2. **Checkboxes (`❑`)**: no original é um glifo de uma fonte
+1. **Fonte**: as TTF reais (Arial, Arial Bold, Arial Narrow, Arial Narrow Bold,
+   copiadas de `C:\Windows\Fonts`) estão em `assets/*.ttf` e são declaradas no
+   próprio `template.json`:
+
+   ```json
+   "fontes": {
+     "Arial-Narrow": { "arquivo": "assets/ARIALN.ttf", "fallback": "Helvetica" }
+   }
+   ```
+
+   `generate.js` (Node) e `embedded-docs.js` (navegador) leem essa mesma
+   declaração — não existe mais mapa de fonte hardcoded em código. `fallback` é
+   a fonte padrão do PDF usada quando o TTF não chega (asset ausente ou
+   fontkit indisponível): a geração nunca quebra, só as métricas mudam e o
+   relatório avisa (`relatorio.fontesFallback`, mostrado no painel). Embeddar
+   TTF no pdf-lib exige `registerFontkit`: no painel o fontkit vem do CDN
+   (`@pdf-lib/fontkit`), na POC é a dependência `@pdf-lib/fontkit`.
+   **As TTF são fonte versionada** — se não forem commitadas, o deploy cai no
+   fallback (a auditoria `audit-panel.mjs` acusa a ausência).
+2. **Trechos longos**: os blocos do cabeçalho ("Ficha Cadastral…",
+   "Importante: …", "Nome Completo: …") e o aviso "Atenção: …" são **trechos
+   únicos** com `maxWidth`/`lineHeight`, não um fragmento por palavra. A
+   extração crua do PDF entregava uma entrada por palavra (e com coordenadas
+   tortas — a palavra "da" da primeira linha do "Atenção" vinha em `x = 330` no
+   meio da linha); o texto agora é re-quebrado pela fonte real, o que conserta a
+   posição e o corpo do texto de uma vez.
+3. **Checkboxes (`❑`)**: no original é um glifo de uma fonte
    (`FreeSerif`) especificamente incluída só para esse símbolo. Troquei por
    um quadrado vetorial desenhado (`drawRectangle` sem preenchimento) na
    mesma posição/tamanho — visualmente equivalente e evita ter que embutir
    mais uma fonte só por causa de um caractere.
-3. **Molduras/grades das tabelas**: ao exportar do Canva, os títulos e
+4. **Molduras/grades das tabelas**: ao exportar do Canva, os títulos e
    textos viraram texto real (vetorial), mas as bordas/linhas de várias
    tabelas foram "achatadas" em imagens raster (eu confirmei isso abrindo
    cada uma). Em vez de tentar redesenhar cada linha manualmente (arriscado
@@ -41,7 +63,7 @@ praticamente pixel a pixel com o original.
    arquivo externo enviado por candidato/admin). É a mesma lógica de manter
    um logo como asset — só que agora existe *dentro* do projeto, versionado,
    e não depende de recriar um PDF pronto inteiro a cada ajuste de layout.
-4. As poucas linhas divisórias que o Canva exportou como vetor real (ex.:
+5. As poucas linhas divisórias que o Canva exportou como vetor real (ex.:
    as linhas simples da seção "Dados Pessoais") foram mantidas como
    retângulos pretos finos desenhados via código — 100% vetorial.
 

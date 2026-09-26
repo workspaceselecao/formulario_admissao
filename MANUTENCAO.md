@@ -61,6 +61,8 @@ Se adicionar um **campo novo** no formulário web, tem de existir **entrada corr
 
 > **Gerador embarcado (`embedded-docs.js`)** desenha os textos estáticos e as camadas do formulário direto do template declarativo e escreve os dados nos campos do schema — as coordenadas dos `*_campos.json` são usadas EXATAMENTE como estão (origem no canto inferior esquerdo, igual ao pdf-lib; nada é re-medido). O perfil de texto da aplicação (fonte 9 pt, `x + 0,5`, `min(altura × 0,78; fonte × 1,12)`, ajuste de 9 pt acima de `y = 120`) está em `EmbeddedDocs.PERFIL_APP` e é conferido **contra o `ficha_cadastral.html`** pela auditoria: se o código de geração mudar, a auditoria acusa.
 
+> **Fonte e quebra de linha no template.** `template.texts[].font` aceita uma fonte padrão do PDF **ou** um nome declarado em `template.fontes` (`{ "arquivo": "assets/X.ttf", "fallback": "Helvetica" }`). O TTF só é embutido se os bytes chegarem em `assets.fontes` **e** o fontkit estiver carregado (CDN `@pdf-lib/fontkit` no painel; sem ele a engine usa `fallback` e reporta em `relatorio.fontesFallback`). Trechos com `maxWidth` são re-quebrados pela fonte real com `lineHeight` (padrão `tamanho × 1,2`), descendo linha a linha a partir de `y`.
+
 ---
 
 ## 4. Ficha cadastral — onde atualizar o quê
@@ -242,7 +244,7 @@ Para o **código** exato (constantes, nomes de funções, filtros de cidade), a 
 
 - `assistencia_medica.html` — `TEMPLATE_ASSISTENCIA_PDF`, `carregarTemplateAssistencia`, `buscarMunicipiosPorUf`, `carregarMunicipiosIBGE`, `gerarPDF`.
 - `ficha_cadastral.html` — `TEMPLATE_PATH`, carregamento de `ficha_cadastral_campos.json`, `gerarPDF` e CEP.
-- `embedded-docs.js` — `validarTemplate`, `gerarPdf`, `folhasComCoordenadas`, `baselinePdf`, `truncarTexto`, `valorDaFolha`, `PERFIL_APP`.
+- `embedded-docs.js` — `validarTemplate`, `gerarPdf`, `folhasComCoordenadas`, `baselinePdf`, `truncarTexto`, `quebrarTexto`, `valorDaFolha`, `fontesDoTemplate`, `PERFIL_APP`.
 - `ficha-cadastral-embutido/extract_template.py` — extração de `template.json` + `assets/` a partir de qualquer PDF oficial (POC documentada no `README.md` do diretório).
 - **Cuidado de realm ao testar o renderer:** o pdf-lib valida objetos aninhados contra o `Object`/`Array` do próprio realm. Com o engine dentro de `node:vm`, `addPage` falha com NaN — testes do renderer devem carregar o engine **no realm do host** (eval indireto), como `audit-panel.mjs` faz. E o pdf-lib grava `ModDate/CreationDate` com o relógio do momento: para comparar bytes entre duas gerações, as datas precisam estar congeladas (o engine faz isso por padrão).
 
