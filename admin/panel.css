@@ -583,34 +583,11 @@ table.data td.chk input[type="checkbox"] { cursor: pointer; }
 .fb-drawer input:disabled, .fb-drawer select:disabled { background: #f1ece5; color: var(--text-light, #999); }
 
 /* ══════════════════════════════════════════════════════
-   Documentos Nativos (gerador) — preview real, caixas e comparação
-   O preview é o PDF gerado pela engine renderizado com pdf.js: as caixas
-   (.dn-el) ficam em posição absoluta usando px do viewport (escala 1 pt = 1 px
-   na escala 1; o zoom multiplica as duas coisas junto).
+   Documentos Embarcados (geração 100% embarcada) — preview real e comparação
+   O preview é o PDF gerado pela engine (template.json + schema) renderizado
+   com pdf.js; o localizador de campos reusa a lista do Editor Visual.
    ══════════════════════════════════════════════════════ */
 #dnCanvas { max-width: none; }
-.pdf-page-stack .dn-el {
-  position: absolute; border: 1.5px dashed #2b7cb8;
-  background: rgba(43, 124, 184, 0.10); color: #1c5f92;
-  font-size: 9.5px; font-weight: 700; overflow: hidden; white-space: nowrap;
-  padding: 1px 3px; cursor: grab; user-select: none;
-}
-.pdf-page-stack .dn-el:hover { background: rgba(43, 124, 184, 0.22); }
-.pdf-page-stack .dn-el.selected {
-  border-style: solid; border-color: var(--accent);
-  background: rgba(1, 66, 106, 0.18); color: var(--accent); z-index: 6; cursor: grabbing;
-}
-.pdf-page-stack .dn-el.pendente { border-color: var(--warn); color: var(--warn); background: rgba(146, 64, 14, 0.10); }
-.pdf-page-stack .dn-el.tipo-line { border-style: dotted; }
-.pdf-page-stack .dn-el.tipo-field { border-color: #16794f; color: #14603f; background: rgba(22, 121, 79, 0.10); }
-.pdf-page-stack .dn-el.tipo-field.selected { border-color: var(--accent); color: var(--accent); background: rgba(1, 66, 106, 0.18); }
-.pdf-page-stack .dn-el.tipo-image,
-.pdf-page-stack .dn-el.tipo-signature { border-color: #7c3aed; color: #5b21b6; background: rgba(124, 58, 237, 0.10); }
-.pdf-page-stack .dn-el.tipo-table { border-color: #0f766e; color: #0f766e; background: rgba(15, 118, 110, 0.10); }
-.dn-handle {
-  position: absolute; right: 0; bottom: 0; width: 10px; height: 10px;
-  background: var(--accent); cursor: nwse-resize;
-}
 /* Lista de elementos do documento */
 .dn-item {
   display: grid; grid-template-columns: 64px 1fr; gap: 1px 8px; width: 100%;

@@ -30,7 +30,7 @@
       <button type="button" data-section="dashboard" class="active">▦ Visão Geral</button>
       <button type="button" data-section="formularios">✎ Formulários</button>
       <button type="button" data-section="pdfs">▤ Templates</button>
-      <button type="button" data-section="documentos">▣ Documentos Nativos</button>
+      <button type="button" data-section="documentos">▣ Documentos Embarcados</button>
       <button type="button" data-section="coordenadas">✥ Editor Visual</button>
       <button type="button" data-section="cidades">◐ Cidades &amp; Regionais</button>
       <button type="button" data-section="configuracoes">⚙ Configurações</button>
@@ -123,52 +123,40 @@
         </div>
       </section>
 
-      <!-- ══════════ DOCUMENTOS NATIVOS (IMPLEMENTAÇÃO DE GERADOR NATIVO D.md) ══════════
-           O PDF passa a ser RESULTADO da definição do documento, não dependência.
-           Subseções (§35): Templates Nativos · Comparação · Importar PDF · Versões ·
-           Logs · Assets & Fontes. Assets/Fontes são leitura + decisão documentada. -->
+      <!-- ══════════ DOCUMENTOS EMBARCADOS (geração 100% embarcada) ══════════
+           O PDF é gerado pela própria aplicação a partir do template declarativo
+           (template.json + assets PNG, extraídos do documento oficial) + os campos
+           do schema de coordenadas — NENHUM PDF externo é carregado nem enviado.
+           Engine: /embedded-docs.js · POC: /ficha-cadastral-embutido. -->
       <section id="sec-documentos" class="admin-section">
-        <h2>Documentos Nativos</h2>
+        <h2>Documentos Embarcados</h2>
         <p class="section-desc">
-          O documento oficial descrito como <strong>geometria</strong> (elementos, página, estilos) e o PDF
-          gerado pela própria aplicação — sem depender do template externo como estrutura
-          (<code>native-docs.js</code>). X vem da esquerda, Y do <strong>topo</strong>, unidade em <strong>pt</strong>.
-          Nada é inventado: o que o schema não descreve entra como
-          <span class="badge warn">REQUER CALIBRAÇÃO</span>.
+          O formulário oficial é <strong>recriado pela aplicação</strong> a partir do template declarativo
+          (<code>template.json</code> + <code>assets/*.png</code>) e os dados do candidato entram nas coordenadas
+          dos campos do schema — sem carregar PDF pronto. X vem da esquerda, Y do <strong>topo</strong>, unidade em
+          <strong>pt</strong>. O que você vê no preview é o PDF de verdade, gerado agora pela engine
+          (<code>embedded-docs.js</code>). Ajustes de coordenada são feitos no <strong>Editor Visual</strong>
+          (os dois leem o mesmo overlay) e versionados no repositório.
         </p>
-        <div class="tabs" role="tablist" aria-label="Áreas de documentos nativos">
-          <button type="button" role="tab" data-dntab="templates" aria-selected="true" class="active">Templates Nativos</button>
+        <div class="tabs" role="tablist" aria-label="Áreas de documentos embarcados">
+          <button type="button" role="tab" data-dntab="templates" aria-selected="true" class="active">Templates Embarcados</button>
           <button type="button" role="tab" data-dntab="comparacao" aria-selected="false">Comparação</button>
-          <button type="button" role="tab" data-dntab="referencia" aria-selected="false">Importar PDF</button>
-          <button type="button" role="tab" data-dntab="versoes" aria-selected="false">Versões</button>
           <button type="button" role="tab" data-dntab="logs" aria-selected="false">Logs</button>
-          <button type="button" role="tab" data-dntab="recursos" aria-selected="false">Assets &amp; Fontes</button>
         </div>
 
-        <!-- ── Templates Nativos: lista, editor visual e propriedades ── -->
+        <!-- ── Templates Embarcados: preview do PDF real + localizador de campos ── -->
         <div class="panel tab-pane active" id="dnPane-templates">
           <div class="toolbar">
-            <select id="dnDoc" style="min-width:260px" aria-label="Documento nativo"></select>
+            <select id="dnDoc" style="min-width:280px" aria-label="Documento embarcado"></select>
             <select id="dnPage" style="min-width:130px" aria-label="Página do documento"></select>
             <label for="dnZoom" class="sr-only">Zoom</label>
-            <select id="dnZoom" style="min-width:100px" title="§18 — zoom visual (não altera a escala real do documento)">
+            <select id="dnZoom" style="min-width:100px" title="Zoom visual — não altera a escala real do documento">
               <option value="50">Zoom 50%</option>
               <option value="75">Zoom 75%</option>
               <option value="100" selected>Zoom 100%</option>
               <option value="150">Zoom 150%</option>
               <option value="200">Zoom 200%</option>
             </select>
-            <label for="dnSnap" class="sr-only">Grade de encaixe</label>
-            <select id="dnSnap" style="min-width:110px" title="§18 — snap de grade ao arrastar">
-              <option value="0">Snap off</option>
-              <option value="1">Snap 1 pt</option>
-              <option value="5" selected>Snap 5 pt</option>
-              <option value="10">Snap 10 pt</option>
-            </select>
-            <button type="button" class="btn secondary" id="btnDnCriar" title="Cria a definição a partir do schema de campos real, preservando a geometria existente (F-075 como prova de conceito, §37)">＋ Documento a partir do schema</button>
-            <button type="button" class="btn secondary" id="btnDnExportDef">⬇ Exportar definição</button>
-            <button type="button" class="btn secondary" id="btnDnImportDef">⬆ Importar definição</button>
-            <input type="file" id="dnImportDefFile" accept="application/json,.json" hidden>
             <button type="button" class="btn" id="btnDnGerarPdf">▶ Gerar PDF de teste</button>
           </div>
           <div id="dnResumo" class="section-desc"></div>
@@ -180,98 +168,40 @@
             </div>
             <div class="panel editor-form">
               <div class="field-search">
-                <label for="dnBuscaElemento">Elementos</label>
-                <input type="search" id="dnBuscaElemento" placeholder="Buscar por id, tipo ou binding…" autocomplete="off">
-                <div class="field-list" id="dnLista" role="listbox" aria-label="Elementos do documento"></div>
+                <label for="dnBuscaElemento">Campos do documento</label>
+                <input type="search" id="dnBuscaElemento" placeholder="Buscar por chave, rótulo ou coordenada…" autocomplete="off">
+                <div class="field-list-count" id="dnListaContagem"></div>
+                <div class="field-list" id="dnLista" role="listbox" aria-label="Campos do documento"></div>
               </div>
               <hr class="editor-sep">
-              <h3 id="dnElTitulo">Propriedades do elemento</h3>
-              <div id="dnElInfo" class="section-desc" style="margin-bottom:10px">Selecione um elemento na lista ou no preview.</div>
+              <h3 id="dnElTitulo">Campo selecionado</h3>
+              <div id="dnElInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo na lista para ver a coordenada e abrir no Editor Visual.</div>
               <div class="form-grid">
-                <div><label for="dnX">X (pt)</label><input type="number" id="dnX" step="0.5" disabled></div>
-                <div><label for="dnY">Y (pt, do topo)</label><input type="number" id="dnY" step="0.5" disabled></div>
-                <div><label for="dnW">Largura</label><input type="number" id="dnW" step="0.5" disabled></div>
-                <div><label for="dnH">Altura</label><input type="number" id="dnH" step="0.5" disabled></div>
-                <div><label for="dnFonte">Fonte</label><select id="dnFonte" disabled></select></div>
-                <div><label for="dnTamanho">Tamanho</label><input type="number" id="dnTamanho" step="0.5" disabled></div>
-                <div><label for="dnAlinhamento">Alinhamento</label>
-                  <select id="dnAlinhamento" disabled>
-                    <option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option>
-                  </select></div>
-                <div><label for="dnAncora">Ancoragem vertical</label>
-                  <select id="dnAncora" disabled>
-                    <option value="campo">Campo (perfil da aplicação)</option>
-                    <option value="base">Base da caixa</option>
-                    <option value="topo">Topo da caixa</option>
-                    <option value="meio">Meio da caixa</option>
-                  </select></div>
-                <div><label for="dnPagina">Página</label><input type="number" id="dnPagina" min="1" step="1" disabled></div>
-                <div><label for="dnCor">Cor</label><input type="text" id="dnCor" placeholder="#000000" disabled></div>
-                <div><label for="dnRotacao">Rotação (°)</label><input type="number" id="dnRotacao" step="1" disabled></div>
-                <div style="grid-column:1/-1"><label for="dnConteudo">Conteúdo / binding</label><input type="text" id="dnConteudo" disabled title="Texto fixo (elemento text) ou caminho do dado (elemento field)"></div>
-              </div>
-              <div class="legend-selos" style="margin-top:6px">
-                <label class="chk-inline" for="dnTruncar"><input type="checkbox" id="dnTruncar" disabled> Truncar com "..." na largura</label>
-                <label class="chk-inline" for="dnConfirmado"><input type="checkbox" id="dnConfirmado" disabled> Calibrado/confirmado</label>
+                <div><label for="dnX">X (pt)</label><input type="text" id="dnX" disabled></div>
+                <div><label for="dnY">Y (pt, base)</label><input type="text" id="dnY" disabled></div>
+                <div><label for="dnW">Largura</label><input type="text" id="dnW" disabled></div>
+                <div><label for="dnH">Altura</label><input type="text" id="dnH" disabled></div>
+                <div><label for="dnPagina">Página</label><input type="text" id="dnPagina" disabled></div>
+                <div><label for="dnRotacao">Pendência</label><input type="text" id="dnRotacao" disabled></div>
               </div>
               <div class="editor-actions" style="flex-wrap:wrap;gap:6px">
-                <button type="button" class="btn small" id="dnSalvar" disabled>Salvar alterações</button>
-                <button type="button" class="btn small secondary" id="dnReverter" disabled>↩ Reverter</button>
-                <button type="button" class="btn small secondary" id="dnDuplicar" disabled>⧉ Duplicar</button>
-                <button type="button" class="btn small secondary" id="dnFrente" disabled title="§20 — trazer para frente">↑ Camada</button>
-                <button type="button" class="btn small secondary" id="dnTras" disabled title="§20 — enviar para trás">↓ Camada</button>
-                <button type="button" class="btn small danger" id="dnExcluir" disabled>Excluir elemento</button>
-              </div>
-              <hr class="editor-sep">
-              <h3>Novo elemento</h3>
-              <div class="form-grid">
-                <div><label for="dnNovoTipo">Tipo</label>
-                  <select id="dnNovoTipo"></select></div>
-                <div><label for="dnNovoArquivo">Imagem (assets do repositório)</label>
-                  <select id="dnNovoArquivo"></select></div>
-                <div><label for="dnNovoTexto">Conteúdo (texto fixo)</label>
-                  <input type="text" id="dnNovoTexto" placeholder="Ex.: FICHA DE ADMISSÃO"></div>
-              </div>
-              <div class="editor-actions">
-                <button type="button" class="btn" id="btnDnAddEl">＋ Adicionar elemento</button>
-                <button type="button" class="btn secondary" id="btnDnAddImagem" title="Adiciona um elemento de imagem a partir de um arquivo do repositório">＋ Adicionar imagem</button>
-                <button type="button" class="btn secondary" id="btnDnAgrupar" title="§21 — agrupa os elementos selecionados (Ctrl/Cmd+clique na lista)">⊞ Agrupar seleção</button>
-              </div>
-              <hr class="editor-sep">
-              <h3>Publicação do documento</h3>
-              <div class="form-grid">
-                <div><label for="dnModo">Modo de geração</label>
-                  <select id="dnModo">
-                    <option value="external">external — template atual (padrão)</option>
-                    <option value="native">native — documento nativo</option>
-                  </select></div>
-                <div><label for="dnStatus">Status</label>
-                  <select id="dnStatus">
-                    <option value="RASCUNHO">RASCUNHO</option>
-                    <option value="VALIDACAO">VALIDAÇÃO</option>
-                    <option value="PUBLICADO">PUBLICADO</option>
-                    <option value="ARQUIVADO">ARQUIVADO</option>
-                  </select></div>
-              </div>
-              <div id="dnGate" class="section-desc"></div>
-              <div class="editor-actions">
-                <button type="button" class="btn" id="btnDnPublicar">Congelar versão e publicar</button>
+                <button type="button" class="btn small" id="dnIrEditor" disabled>✥ Ajustar no Editor Visual</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ── Comparação (§25/§30): original × nativo, com diff e deslocamento ── -->
+        <!-- ── Comparação: original × embarcado, com diff e deslocamento ── -->
         <div class="panel tab-pane" id="dnPane-comparacao">
-          <h3>Comparação visual — template oficial × PDF nativo</h3>
+          <h3>Comparação visual — template oficial × PDF embarcado</h3>
           <p class="section-desc">
             Renderiza as duas páginas na mesma escala e compara pixel a pixel. O deslocamento
             estimado e o percentual divergente são medidos com a tolerância configurada — é o teste
-            de regressão visual (§30), e a validação definitiva acontece aqui, no PDF gerado (§32).
+            de regressão visual do template embarcado.
           </p>
           <div class="toolbar">
             <label class="chk-inline" for="dnCmpOverlay"><input type="checkbox" id="dnCmpOverlay"> Sobrepor (transparência)</label>
-            <label for="dnCmpOpacidade" class="sr-only">Opacidade do nativo</label>
+            <label for="dnCmpOpacidade" class="sr-only">Opacidade do embarcado</label>
             <input type="range" id="dnCmpOpacidade" min="0" max="100" value="50" style="width:140px">
             <label for="dnCmpTolerancia" class="sr-only">Tolerância visual (pt)</label>
             <input type="number" id="dnCmpTolerancia" step="0.5" min="0" value="1" style="width:90px" title="Tolerância visual (pt)">
@@ -281,46 +211,18 @@
           <div id="dnCmpResultado" class="section-desc"></div>
           <div class="cmp-grid" id="dnCmpPalco">
             <div><div class="cmp-rotulo">Template oficial</div><canvas id="dnCmpOriginal" class="cmp-canvas"></canvas></div>
-            <div><div class="cmp-rotulo">PDF nativo (gerado agora)</div><canvas id="dnCmpNativo" class="cmp-canvas"></canvas></div>
+            <div><div class="cmp-rotulo">PDF embarcado (gerado agora)</div><canvas id="dnCmpNativo" class="cmp-canvas"></canvas></div>
           </div>
         </div>
 
-        <!-- ── Importar PDF como referência (§26/§27) ── -->
-        <div class="panel tab-pane" id="dnPane-referencia">
-          <h3>Importar PDF como referência</h3>
-          <p class="section-desc">
-            O PDF original serve apenas de REFERÊNCIA de engenharia. A ferramenta extrai o que
-            consegue identificar com segurança (tamanho da página e blocos de texto com posição e
-            tamanho) e diz explicitamente o que não dá para reconstruir sozinha. Tudo entra como
-            <span class="badge warn">REQUER CALIBRAÇÃO</span> e só é confirmado por você.
-          </p>
-          <div class="toolbar">
-            <input type="file" id="dnRefFile" accept="application/pdf,.pdf">
-            <label class="chk-inline" for="dnRefConfirmar"><input type="checkbox" id="dnRefConfirmar"> Marcar os textos importados como confirmados</label>
-          </div>
-          <div id="dnRefRelatorio" class="section-desc"></div>
-        </div>
-
-        <!-- ── Versões (§24/§39) ── -->
-        <div class="panel tab-pane" id="dnPane-versoes">
-          <h3>Versões do documento</h3>
-          <p class="section-desc">Cada congelamento guarda a definição completa (pacote do documento), o hash de integridade e o motivo. Restaurar cria uma versão nova — a trilha nunca é reescrita.</p>
-          <div id="dnVersoes"></div>
-        </div>
-
-        <!-- ── Logs (§41) ── -->
+        <!-- ── Logs: alterações do documento (a trilha administrativa fica no Histórico) ── -->
         <div class="panel tab-pane" id="dnPane-logs">
           <h3>Log de alterações do documento</h3>
-          <p class="section-desc">Documento · versão · autor · data · alteração (o Histórico geral do painel continua registrando os eventos administrativos).</p>
+          <p class="section-desc">Documento · autor · data · alteração (o Histórico geral do painel continua registrando os eventos administrativos; o template embarcado é versionado no repositório).</p>
           <div id="dnLogs"></div>
         </div>
-
-        <!-- ── Assets & Fontes (§14/§15) ── -->
-        <div class="panel tab-pane" id="dnPane-recursos">
-          <h3>Assets &amp; Fontes</h3>
-          <div id="dnRecursos"></div>
-        </div>
       </section>
+
 
       <!-- ══════════ COORDENADAS ══════════ -->
       <section id="sec-coordenadas" class="admin-section">
@@ -630,7 +532,7 @@
             <button type="button" class="btn" id="btnExpSchemaDecl">⬇ declaracao_plano_saude_campos.json</button>
             <button type="button" class="btn secondary" id="btnExpCidadesBrasil">⬇ cidades_brasil.json</button>
             <button type="button" class="btn secondary" id="btnExpCidadesInfinity">⬇ cidades_infinity.json</button>
-            <button type="button" class="btn secondary" id="btnExpNativoF075">⬇ ficha_cadastral_nativo.json (documento nativo)</button>
+            <button type="button" class="btn secondary" id="btnExpTemplateEmbarcado">⬇ template do documento embarcado (template.json)</button>
           </div>
         </div>
         <div class="panel">
@@ -738,7 +640,7 @@
 
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-  <script src="/native-docs.js"></script>
+  <script src="/embedded-docs.js"></script>
   <script src="/admin/persistence.js"></script>
   <script src="/admin/panel.js"></script>
 </body>

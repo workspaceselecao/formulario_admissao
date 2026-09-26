@@ -1,0 +1,2160 @@
+{
+  "page": {
+    "width": 595.5,
+    "height": 842.25
+  },
+  "images": [
+    {
+      "file": "assets/img0.png",
+      "x": 23.61,
+      "y": 779.88,
+      "width": 91.34,
+      "height": 21.96
+    },
+    {
+      "file": "assets/img1.png",
+      "x": 119.99,
+      "y": 760.81,
+      "width": 308.37,
+      "height": 63.77
+    },
+    {
+      "file": "assets/img2.png",
+      "x": 9.04,
+      "y": 632.37,
+      "width": 570.97,
+      "height": 30.01
+    },
+    {
+      "file": "assets/img3.png",
+      "x": 9.04,
+      "y": 174.58,
+      "width": 570.21,
+      "height": 117.04
+    },
+    {
+      "file": "assets/img4.png",
+      "x": 8.32,
+      "y": 133.38,
+      "width": 570.97,
+      "height": 24.01
+    },
+    {
+      "file": "assets/img5.png",
+      "x": 9.04,
+      "y": 461.99,
+      "width": 570.97,
+      "height": 141.8
+    },
+    {
+      "file": "assets/img6.png",
+      "x": 9.04,
+      "y": 308.15,
+      "width": 570.97,
+      "height": 139.55
+    },
+    {
+      "file": "assets/img7.png",
+      "x": 444.61,
+      "y": 775.08,
+      "width": 72.53,
+      "height": 36.84
+    },
+    {
+      "file": "assets/img8.png",
+      "x": 524.6,
+      "y": 775.03,
+      "width": 42.57,
+      "height": 40.37
+    }
+  ],
+  "blackBars": [
+    {
+      "x": 19.57,
+      "y": 130.87,
+      "width": 31.73,
+      "height": 0.67
+    },
+    {
+      "x": 14.05,
+      "y": 709.98,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 14.05,
+      "y": 684.82,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 14.05,
+      "y": 625.71,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 16.85,
+      "y": 738.82,
+      "width": 41.36,
+      "height": 0.67
+    },
+    {
+      "x": 13.56,
+      "y": 731.07,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 13.94,
+      "y": 749.79,
+      "width": 560.12,
+      "height": 1.5
+    },
+    {
+      "x": 13.56,
+      "y": 731.11,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 14.04,
+      "y": 710.04,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 14.04,
+      "y": 684.89,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 14.04,
+      "y": 625.8,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 16.84,
+      "y": 588.86,
+      "width": 152.19,
+      "height": 15.8
+    },
+    {
+      "x": 61.41,
+      "y": 532.22,
+      "width": 152.19,
+      "height": 15.8
+    },
+    {
+      "x": 260.26,
+      "y": 530.86,
+      "width": 274.35,
+      "height": 11.38
+    },
+    {
+      "x": 89.36,
+      "y": 506.71,
+      "width": 189.27,
+      "height": 15.8
+    },
+    {
+      "x": 87.4,
+      "y": 482.31,
+      "width": 189.27,
+      "height": 15.8
+    },
+    {
+      "x": 45.91,
+      "y": 147.46,
+      "width": 29.48,
+      "height": 11.38
+    },
+    {
+      "x": 234.16,
+      "y": 147.46,
+      "width": 29.48,
+      "height": 11.38
+    },
+    {
+      "x": 394.96,
+      "y": 147.77,
+      "width": 29.48,
+      "height": 11.38
+    }
+  ],
+  "whiteBoxes": [
+    {
+      "x": 395.11,
+      "y": 147.5,
+      "width": 29.47,
+      "height": 11.38
+    },
+    {
+      "x": 45.93,
+      "y": 147.2,
+      "width": 29.47,
+      "height": 11.38
+    },
+    {
+      "x": 234.25,
+      "y": 147.2,
+      "width": 29.47,
+      "height": 11.38
+    },
+    {
+      "x": 87.43,
+      "y": 482.18,
+      "width": 189.32,
+      "height": 15.81
+    },
+    {
+      "x": 89.39,
+      "y": 506.58,
+      "width": 189.32,
+      "height": 15.81
+    },
+    {
+      "x": 61.44,
+      "y": 532.1,
+      "width": 152.27,
+      "height": 15.81
+    },
+    {
+      "x": 16.85,
+      "y": 588.76,
+      "width": 152.27,
+      "height": 15.81
+    },
+    {
+      "x": 260.36,
+      "y": 530.74,
+      "width": 274.47,
+      "height": 11.38
+    }
+  ],
+  "texts": [
+    {
+      "text": "Atenção",
+      "x": 19.57,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": ":",
+      "x": 51.3,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "A",
+      "x": 56.54,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "ausência",
+      "x": 64.9,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "da",
+      "x": 100.1,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "certidão",
+      "x": 112.05,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 143.67,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "casamento,",
+      "x": 155.62,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 200.2,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "nascimento",
+      "x": 212.15,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "e",
+      "x": 256.28,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "do",
+      "x": 263.76,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "número",
+      "x": 275.71,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "do",
+      "x": 305.98,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "cartão",
+      "x": 317.93,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "SUS",
+      "x": 343.29,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "implicará",
+      "x": 362.83,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "na",
+      "x": 398.01,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "não",
+      "x": 409.96,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "inclusão",
+      "x": 426.38,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "dos",
+      "x": 458.89,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "dependentes",
+      "x": 474.87,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "(filhos",
+      "x": 524.38,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "e/ou",
+      "x": 548.84,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "cônjuge)",
+      "x": 19.57,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "no",
+      "x": 52.71,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "plano",
+      "x": 63.94,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 85.91,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "saúde.",
+      "x": 97.14,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "É",
+      "x": 123.58,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "imprescindível",
+      "x": 131.23,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "a",
+      "x": 184.92,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "apresentação",
+      "x": 191.69,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "do",
+      "x": 242.71,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "CPF",
+      "x": 253.95,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 272.32,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "todos",
+      "x": 283.56,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "os",
+      "x": 305.52,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "dependentes.",
+      "x": 316.3,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Para",
+      "x": 367.34,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "que",
+      "x": 386.62,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "o",
+      "x": 402.32,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "pagamento",
+      "x": 409.09,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "do",
+      "x": 451.62,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "salário",
+      "x": 462.85,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "família",
+      "x": 488.84,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "seja",
+      "x": 514.81,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "realizado",
+      "x": 531.85,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "é",
+      "x": 19.57,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "fundamental",
+      "x": 26.63,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "a",
+      "x": 73.49,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "apresentação",
+      "x": 80.55,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "da",
+      "x": 131.88,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "certidão",
+      "x": 143.41,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 174.61,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "nascimento",
+      "x": 186.15,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "dos",
+      "x": 229.87,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "filhos",
+      "x": 245.42,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "menores",
+      "x": 266.79,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 300.67,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "14",
+      "x": 312.21,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "anos.",
+      "x": 323.74,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Para",
+      "x": 346.0,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "as",
+      "x": 365.58,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "crianças",
+      "x": 376.67,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "com",
+      "x": 409.2,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "menos",
+      "x": 426.99,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 453.72,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "7",
+      "x": 465.25,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "anos",
+      "x": 472.31,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 492.34,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "idade,",
+      "x": 503.88,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "também",
+      "x": 528.38,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "é",
+      "x": 560.02,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "necessário",
+      "x": 19.57,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "a",
+      "x": 60.7,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "carteira",
+      "x": 67.41,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "de",
+      "x": 96.46,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "vacinação.",
+      "x": 107.64,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Estrangeiros:",
+      "x": 148.33,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "entregar",
+      "x": 197.95,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "a",
+      "x": 230.14,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "documentação",
+      "x": 236.85,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "específica",
+      "x": 291.84,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "(conforme",
+      "x": 330.29,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Check",
+      "x": 368.73,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "List).",
+      "x": 393.76,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Bradesco:",
+      "x": 91.03,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Corrente",
+      "x": 137.81,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Conta",
+      "x": 179.68,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Salário",
+      "x": 203.37,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Poupança",
+      "x": 238.98,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Santander:",
+      "x": 91.66,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Corrente",
+      "x": 141.58,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Conta",
+      "x": 185.69,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Salário",
+      "x": 209.38,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Ficha",
+      "x": 126.82,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Cadastral",
+      "x": 155.82,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 204.34,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Admissão",
+      "x": 218.84,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "–",
+      "x": 269.59,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Operacional",
+      "x": 277.96,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "e",
+      "x": 338.75,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Administrativo",
+      "x": 347.12,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Data",
+      "x": 290.38,
+      "y": 783.91,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "da",
+      "x": 310.05,
+      "y": 783.91,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "publicação:",
+      "x": 321.67,
+      "y": 783.91,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Vigência:",
+      "x": 310.49,
+      "y": 773.19,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "F-075(PR-011)/38",
+      "x": 203.31,
+      "y": 777.82,
+      "size": 10.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Código/Revisão:",
+      "x": 126.82,
+      "y": 776.52,
+      "size": 9.0,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Importante:",
+      "x": 16.85,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "As",
+      "x": 63.1,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "informações",
+      "x": 74.66,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "devem",
+      "x": 120.47,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "ser",
+      "x": 146.72,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "corretamente",
+      "x": 160.06,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "preenchidas",
+      "x": 209.43,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "para",
+      "x": 255.26,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "cadastro",
+      "x": 273.5,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "admissão",
+      "x": 306.42,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "devido",
+      "x": 342.89,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "ao",
+      "x": 368.7,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "cumprimento",
+      "x": 379.83,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "do",
+      "x": 428.31,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "decreto",
+      "x": 439.43,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "8373/2014",
+      "x": 468.35,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Programa",
+      "x": 508.4,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "eSocial.",
+      "x": 545.76,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "29/05/2026",
+      "x": 366.92,
+      "y": 783.22,
+      "size": 11.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "2",
+      "x": 378.45,
+      "y": 770.89,
+      "size": 11.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "anos",
+      "x": 387.65,
+      "y": 770.89,
+      "size": 11.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "DEPENDENTES",
+      "x": 256.95,
+      "y": 449.66,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "DADOS",
+      "x": 249.62,
+      "y": 709.23,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "PESSOAIS",
+      "x": 288.51,
+      "y": 709.23,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "VALE",
+      "x": 215.29,
+      "y": 162.82,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "REFEIÇÃO/ALIMENTAÇÃO",
+      "x": 244.75,
+      "y": 162.82,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "BENEFÍCIOS",
+      "x": 210.01,
+      "y": 297.66,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "-",
+      "x": 273.93,
+      "y": 297.66,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "VALE",
+      "x": 280.07,
+      "y": 297.66,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "TRANSPORTE",
+      "x": 309.53,
+      "y": 297.66,
+      "size": 9.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "VALE",
+      "x": 73.01,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "TRANSPORTE",
+      "x": 93.62,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "ÔNIBUS",
+      "x": 93.9,
+      "y": 252.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "METRÔ/TREM",
+      "x": 83.94,
+      "y": 230.92,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "INTERMUNICIPAL",
+      "x": 77.57,
+      "y": 209.52,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "INTEGRAÇÃO",
+      "x": 83.94,
+      "y": 188.16,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome",
+      "x": 19.57,
+      "y": 671.42,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Social:",
+      "x": 40.92,
+      "y": 671.42,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(Inclusão",
+      "x": 65.81,
+      "y": 671.42,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "no",
+      "x": 98.47,
+      "y": 671.42,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "crachá)",
+      "x": 108.95,
+      "y": 671.42,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Telefone:",
+      "x": 19.57,
+      "y": 650.65,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "E-mail:",
+      "x": 19.57,
+      "y": 629.68,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Estado",
+      "x": 19.57,
+      "y": 611.71,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Civil:",
+      "x": 44.82,
+      "y": 611.71,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "NÃO",
+      "x": 93.82,
+      "y": 580.99,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "–",
+      "x": 110.9,
+      "y": 580.99,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Informar",
+      "x": 116.74,
+      "y": 580.99,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Celular:",
+      "x": 262.23,
+      "y": 650.65,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "PIS:",
+      "x": 144.74,
+      "y": 580.99,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Endereço:",
+      "x": 19.57,
+      "y": 572.62,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nº",
+      "x": 289.84,
+      "y": 572.62,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CEP:",
+      "x": 19.57,
+      "y": 553.74,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Bairro:",
+      "x": 133.99,
+      "y": 553.74,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Possui",
+      "x": 19.57,
+      "y": 534.02,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Deficiência?",
+      "x": 44.44,
+      "y": 534.02,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Data",
+      "x": 307.37,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 324.37,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "nascimento:",
+      "x": 334.41,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Data",
+      "x": 307.37,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 324.5,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "nascimento:",
+      "x": 334.63,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Data",
+      "x": 307.37,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 324.5,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "nascimento:",
+      "x": 334.63,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Data",
+      "x": 307.37,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 324.5,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "nascimento:",
+      "x": 334.63,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Data",
+      "x": 307.37,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 324.5,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "nascimento:",
+      "x": 334.63,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "QUANTIDADE",
+      "x": 270.75,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nome",
+      "x": 19.57,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Completo:",
+      "x": 40.88,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(Preencher",
+      "x": 77.32,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "da",
+      "x": 115.73,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "mesma",
+      "x": 125.81,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "forma",
+      "x": 151.79,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "que",
+      "x": 173.12,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "consta",
+      "x": 187.47,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "no",
+      "x": 211.9,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "documento",
+      "x": 222.37,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Certidão",
+      "x": 261.9,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "de",
+      "x": 292.15,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Nascimento",
+      "x": 302.24,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "ou",
+      "x": 343.73,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Casamento)",
+      "x": 354.2,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Complemento:",
+      "x": 339.44,
+      "y": 572.62,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Cidade:",
+      "x": 339.44,
+      "y": 553.74,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "TIPO",
+      "x": 384.45,
+      "y": 533.1,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "DEFICIÊNCIA",
+      "x": 402.71,
+      "y": 533.1,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CPF",
+      "x": 429.71,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(do",
+      "x": 445.63,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "dependente):",
+      "x": 458.45,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CPF",
+      "x": 429.71,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(do",
+      "x": 445.63,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "dependente):",
+      "x": 458.45,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CPF",
+      "x": 429.71,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(do",
+      "x": 445.63,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "dependente):",
+      "x": 458.45,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CPF",
+      "x": 429.71,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(do",
+      "x": 445.63,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "dependente):",
+      "x": 458.45,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CPF",
+      "x": 429.71,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(do",
+      "x": 445.63,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "dependente):",
+      "x": 458.45,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "VALOR",
+      "x": 450.63,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "UNITÁRIO",
+      "x": 477.02,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "FÍSICA",
+      "x": 270.41,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "AUDITIVA",
+      "x": 322.54,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "VISUAL",
+      "x": 388.3,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "INTELECTUAL",
+      "x": 431.03,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "MÚLTIPLA",
+      "x": 492.59,
+      "y": 525.03,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "DADOS",
+      "x": 19.57,
+      "y": 501.99,
+      "size": 9.0,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CONTA",
+      "x": 19.57,
+      "y": 492.24,
+      "size": 9.0,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "BANCÁRIA",
+      "x": 19.57,
+      "y": 482.49,
+      "size": 9.0,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "NOME",
+      "x": 96.78,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "COMPLETO",
+      "x": 123.14,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "DO",
+      "x": 170.51,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "CANDIDATO",
+      "x": 184.8,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "DATA",
+      "x": 480.76,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "100%",
+      "x": 75.41,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Vale",
+      "x": 98.22,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Alimentação",
+      "x": 116.99,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Agência:",
+      "x": 289.84,
+      "y": 514.15,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "100%",
+      "x": 265.71,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Vale",
+      "x": 288.51,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Refeição",
+      "x": 307.29,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Conta/Dígito:",
+      "x": 417.47,
+      "y": 514.02,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Flexibilizado",
+      "x": 427.07,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "(50%",
+      "x": 477.57,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "VR",
+      "x": 498.57,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "e",
+      "x": 511.98,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "50%",
+      "x": 518.69,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "VA)",
+      "x": 537.02,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "_______________________________________",
+      "x": 56.66,
+      "y": 44.81,
+      "size": 11.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "______/_______/_____",
+      "x": 430.19,
+      "y": 44.81,
+      "size": 11.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "SIM",
+      "x": 139.03,
+      "y": 526.38,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "NÃO",
+      "x": 170.67,
+      "y": 526.38,
+      "size": 8.0,
+      "font": "Helvetica"
+    },
+    {
+      "text": "SIM",
+      "x": 94.26,
+      "y": 589.98,
+      "size": 6.96,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Número",
+      "x": 287.05,
+      "y": 486.13,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "do",
+      "x": 319.67,
+      "y": 486.13,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "CPF",
+      "x": 331.72,
+      "y": 486.13,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": ":",
+      "x": 347.82,
+      "y": 486.13,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Primeiro",
+      "x": 18.26,
+      "y": 592.95,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "emprego:",
+      "x": 48.58,
+      "y": 592.95,
+      "size": 6.96,
+      "font": "Helvetica-Bold"
+    },
+    {
+      "text": "Banco:",
+      "x": 91.86,
+      "y": 513.96,
+      "size": 8.04,
+      "font": "Helvetica-Bold"
+    }
+  ],
+  "checkboxes": [
+    {
+      "x": 129.93,
+      "y": 501.39,
+      "side": 5.19
+    },
+    {
+      "x": 171.8,
+      "y": 501.39,
+      "side": 5.19
+    },
+    {
+      "x": 231.1,
+      "y": 501.39,
+      "side": 5.19
+    },
+    {
+      "x": 133.7,
+      "y": 478.25,
+      "side": 5.19
+    },
+    {
+      "x": 177.8,
+      "y": 478.25,
+      "side": 5.19
+    },
+    {
+      "x": 86.01,
+      "y": 580.56,
+      "side": 4.49
+    },
+    {
+      "x": 380.53,
+      "y": 524.79,
+      "side": 4.49
+    },
+    {
+      "x": 423.27,
+      "y": 524.79,
+      "side": 4.49
+    },
+    {
+      "x": 262.63,
+      "y": 524.79,
+      "side": 4.49
+    },
+    {
+      "x": 314.63,
+      "y": 524.79,
+      "side": 4.49
+    },
+    {
+      "x": 484.76,
+      "y": 524.79,
+      "side": 4.49
+    },
+    {
+      "x": 58.19,
+      "y": 141.48,
+      "side": 6.43
+    },
+    {
+      "x": 248.39,
+      "y": 141.48,
+      "side": 6.43
+    },
+    {
+      "x": 411.91,
+      "y": 141.48,
+      "side": 6.43
+    },
+    {
+      "x": 131.14,
+      "y": 526.08,
+      "side": 5.16
+    },
+    {
+      "x": 162.79,
+      "y": 526.08,
+      "side": 5.16
+    },
+    {
+      "x": 86.01,
+      "y": 589.72,
+      "side": 4.49
+    }
+  ]
+}

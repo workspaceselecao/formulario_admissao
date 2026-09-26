@@ -1,12 +1,13 @@
 # Painel Administrativo — Manual e Documentação Técnica
 
-> **Documentos Nativos (novo):** a seção **▣ Documentos Nativos** implementa o
-> gerador de PDF descrito em `IMPLEMENTAÇÃO DE GERADOR NATIVO D.md` — o documento
-> passa a ser uma definição (página + elementos em pt) e o PDF vira resultado da
-> aplicação. Manual completo: **[`Docs/documentos-nativos.md`](documentos-nativos.md)**.
+> **Documentos Embarcados (novo):** a seção **▣ Documentos Embarcados** gera o PDF
+> pela própria aplicação a partir do template declarativo (`template.json` + assets PNG
+> extraídos do documento oficial) + os campos do schema — **nenhum PDF externo é
+> carregado nem enviado**. Engine: `/embedded-docs.js`; prova de conceito e template do
+> F-075: `ficha-cadastral-embutido/`.
 
 > **Reestruturação v3 (entidades):** a navegação segue o modelo de entidades —
-> **Visão Geral · Formulários · Templates · Documentos Nativos · Editor Visual ·
+> **Visão Geral · Formulários · Templates · Documentos Embarcados · Editor Visual ·
 > Cidades & Regionais · Configurações · Validação · Histórico · Segurança** — com as ferramentas
 > técnicas (Assistência, Dados & Backups, Regras, Sistema) no sub-menu
 > **“Mais ferramentas”**. Novidades: detalhe do formulário com abas,
@@ -194,41 +195,41 @@ e opcionais** — overlays v1/v2 são migrados por normalização na carga (nenh
 chaves novas; a importação aceita arquivos v1/v2 (campos ausentes = sem alteração)
 e apresenta o diff por grupo antes de aplicar.
 
-## Documentos Nativos (gerador de PDF)
+## Documentos Embarcados (geração 100% embarcada)
 
-Seção **▣ Documentos Nativos**, com as subseções **Templates Nativos · Comparação ·
-Importar PDF · Versões · Logs · Assets & Fontes** (§35 do documento de implementação).
+Seção **▣ Documentos Embarcados**, com as abas **Templates Embarcados · Comparação · Logs**.
 
-* **＋ Documento a partir do schema** cria a definição a partir do schema de campos
-  real (`ficha_cadastral_campos.json`, `declaracao_plano_saude_campos.json`) usando a
-  **dimensão medida** do template oficial — a geometria dos campos é convertida para o
-  sistema do gerador (`x` da esquerda, `y` do **topo**, pt) **preservando a posição do
-  PDF atual** (mesma baseline e mesmo `x`, verificado pela auditoria).
-* **Preview = o PDF de verdade**, gerado pela engine (`native-docs.js`) e renderizado
-  com pdf.js. Edição por arraste (com snap) e por **valores numéricos de precisão
-  decimal**; zoom 50–200% (visual, não muda a escala real); camadas, agrupar,
-  duplicar, excluir, adicionar elementos (texto, campo, linha, retângulo, elipse,
-  tabela, imagem, assinatura, checkbox).
-* **Calibração:** tudo que o schema não descreve (textos fixos, linhas, caixas, logo,
-  assinatura) entra como **REQUER CALIBRAÇÃO** — via *Importar PDF (referência)* ou
-  reconstrução manual — e nada é inventado.
+O PDF é gerado pela própria aplicação a partir do **template declarativo**
+(`template.json` + `assets/*.png`, extraídos do documento oficial pelo
+`extract_template.py` da POC) e os dados do candidato entram nas **coordenadas dos
+campos do schema** (`*_campos.json`) — a mesma fonte do Editor Visual. Nenhum PDF
+externo é carregado nem enviado: o próprio código desenha tudo (pdf-lib).
+
+* **Preview = o PDF de verdade**, gerado agora pela engine (`embedded-docs.js`) com
+  dados de teste e renderizado com pdf.js. O que aparece na tela é a saída final.
+* **Localizador de campos:** busca por chave, rótulo ou coordenada; o campo selecionado
+  mostra a coordenada e a pendência de overlay, com atalho **✥ Ajustar no Editor
+  Visual** — que edita a MESMA chave de overlay usada pela geração embarcada.
+* **Perfil de texto:** o engine usa o MESMO perfil da aplicação pública (Helvetica 9 pt,
+  `x + 0,5`, baseline `y + min(altura × 0,78; 9 × 1,12)`, offset −9 pt acima de y = 120,
+  truncamento na largura − 2 pt) — conferido pela auditoria contra as constantes do
+  `ficha_cadastral.html`.
 * **Comparação** mede a diferença nas **áreas impressas** (o fundo branco não entra na
-  conta), o deslocamento estimado (dx/dy em pt, com desempate pelo menor deslocamento
-  — páginas idênticas devolvem `0,0`) e usa a tolerância de `Configurações → Documentos`,
-  com sobreposição por transparência.
-* **Congelar versão e publicar** grava status, motivo, autor, versão (patch) e hash
-  **SHA-256**, com a definição completa restaurável na aba **Versões**; a aba **Logs**
-  mostra a trilha do documento.
-* **Exportar/Importar definição** (`document-definition-<id>.json`) — a importação
-  valida, mostra as alterações e só aplica após confirmação.
-* **Modo híbrido:** cada documento declara `external` (padrão, template atual) ou
-  `native`. O modo **efetivo** só é `native` com status **PUBLICADO** e definição sem
-  erro crítico; fora disso a aplicação pública continua no template externo (§49).
-  O gate de publicação só **bloqueia** documento declarado `native` **e** `PUBLICADO`.
-* Configurações novas: `documentos.modo_padrao`, `documentos.tolerancia_visual_pt`,
-  `documentos.exigir_confirmacao_importados` (todas com consumidor no código).
-* Enquanto a migração não termina, **o caminho de produção continua sendo o Editor
-  Visual + Dados → Exportar arquivos do repositório**.
+  conta) e o deslocamento estimado (dx/dy em pt, com desempate pelo menor deslocamento
+  — páginas idênticas devolvem `0,0`) contra o template oficial, usando a tolerância de
+  `Configurações → Documentos`, com sobreposição por transparência.
+* **Determinismo:** a mesma entrada produz os mesmos bytes (datas de metadado
+  congeladas) — verificado pela auditoria.
+* **Versionamento:** o template embarcado é versionado no **repositório (git)** —
+  sem overlay de definição, sem versões no painel, sem calibração manual. A aba Logs
+  mostra a trilha da sessão; o histórico definitivo é a trilha de commits.
+* **Exportar template:** em **Dados & Backups → Exportar arquivos do repositório**,
+  o botão `⬇ template do documento embarcado` baixa o `template.json` efetivo para
+  versionar.
+* Configuração: `documentos.tolerancia_visual_pt` (tolerância da comparação).
+* Novos documentos: rode `ficha-cadastral-embutido/extract_template.py` sobre o PDF
+  oficial (o script generaliza para qualquer um dos 4 documentos) e adicione a entrada
+  em `DN_FONTES` (`admin/panel.js`).
 
 ## Auditoria contra os dados reais
 
@@ -239,10 +240,10 @@ alguma verificação não bate com os dados reais (falsos positivos). Ele també
 confere que **nenhuma configuração é controle fantasma** (toda chave de
 `CONFIG_DEFS` é lida em algum fluxo).
 
-Cobre, entre outras: perfil de fidelidade do gerador nativo espelhando as constantes
-reais do `ficha_cadastral.html`; bootstrap do F-075/F-089 a partir dos schemas reais
-com a **mesma baseline e o mesmo `x`** em todos os campos; PDF nativo com as dimensões
-exatas do template e determinístico; gate de publicação sem erro/aviso com overlay vazio; Saúde
+Cobre, entre outras: perfil do gerador embarcado espelhando as constantes
+reais do `ficha_cadastral.html`; template embarcado do F-075 com as camadas do
+formulário oficial; **mesma baseline** do app público em todos os campos; PDF embarcado com as dimensões
+exatas do documento e determinístico; gate de publicação sem erro/aviso com overlay vazio; Saúde
 rápida (sem rede) e completa (com `HEAD` real nos arquivos); toda cidade com
 ficha mapeada e UF válida; métricas por formulário; inventário de PDFs existente;
 schemas reais aprovados no gate, com as dimensões reais dos PDFs; Command Palette

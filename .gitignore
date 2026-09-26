@@ -3,8 +3,8 @@ scripts/verify-no-leaked-keys.mjs
 scripts/pre-commit-check.mjs
 scripts/generate-verifiers.mjs
 
-# Keys file (used during verifier generation)
-keys.txt
+# Chaves/códigos reais (geração de verificadores e suíte de testes)
+keys*.txt
 
 # Node
 node_modules/
@@ -20,6 +20,10 @@ Thumbs.db
 
 # Vercel
 .vercel/
+
+# POC ficha-cadastral-embutido: template.json e assets/*.png são FONTE (versionados,
+# o painel os busca via HTTP no deploy estático); apenas o output.pdf é artefato.
+ficha-cadastral-embutido/output.pdf
 
 # Painel administrativo (modo API — dados locais do test-server)
 data/
