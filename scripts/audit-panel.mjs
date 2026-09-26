@@ -391,6 +391,41 @@ if (ED && pdfLib) {
   const dnFantasmas = [...dnChamadas].filter(n => !dnDefinicoes.has(n));
   check("seção Documentos Embarcados: toda função dn*() chamada no painel está definida",
     dnFantasmas.length === 0, dnFantasmas.length ? "sem definição: " + dnFantasmas.join(", ") : dnChamadas.size + " funções OK");
+
+  // 13.8 — nenhum campo de texto do schema desenha por cima do rótulo do template
+  // (bug real: "SOLTEIRO" impresso sobre "Estado Civil" — o x do valor coincidia com o início do rótulo)
+  const metricasRotulo = {};
+  for (const nome of ["Helvetica", "HelveticaBold"]) {
+    const docT = await pdfLib.PDFDocument.create();
+    metricasRotulo[nome] = await docT.embedFont(pdfLib.StandardFonts[nome]);
+  }
+  const larguraRotulo = (t) => {
+    try { return metricasRotulo[(t.font || "Helvetica").replace("-", "")].widthOfTextAtSize(t.text, t.size); }
+    catch (e) { return t.text.length * t.size * 0.55; }
+  };
+  const rotulosTemplate = template.texts
+    .map((t) => ({ texto: t.text, x0: t.x, x1: t.x + larguraRotulo(t), y0: t.y, y1: t.y + t.size * 0.72 }))
+    .filter((r) => /[^_\s/]/.test(r.texto)); // réguas (____/____) são linhas de escrita, não rótulos
+  const camposTextoSchema = [];
+  (function coletarTexto(no, prefix) {
+    for (const [k, v] of Object.entries(no || {})) {
+      if (!v || typeof v !== "object") continue;
+      if (v.tipo === "texto" && v.coordenadas) camposTextoSchema.push({ path: prefix + k, c: v.coordenadas });
+      if (v.campos) coletarTexto(v.campos, prefix + k + ".");
+    }
+  })(schema.campos, "");
+  const colisoesRotulo = [];
+  for (const f of camposTextoSchema) {
+    const x = Number(f.c.x) || 0, y = Number(f.c.y) || 0;
+    const h = Number(f.c.altura ?? f.c.height) || 12, w = Number(f.c.largura ?? f.c.width) || 200;
+    const baseline = y + Math.min(h * 0.78, 9 * 1.12) - (y > 120 ? 9 : 0);
+    const vX0 = x + 0.5, vX1 = x + 0.5 + w, vY0 = baseline - 2.2, vY1 = baseline + 6.6;
+    for (const r of rotulosTemplate) {
+      if (vX0 < r.x1 - 1 && vX1 > r.x0 + 1 && vY0 < r.y1 && vY1 > r.y0) colisoesRotulo.push(f.path + " × " + JSON.stringify(r.texto));
+    }
+  }
+  check("schema: nenhum campo de texto desenha sobre o rótulo do template",
+    colisoesRotulo.length === 0, colisoesRotulo.length ? colisoesRotulo.slice(0, 4).join(" | ") : camposTextoSchema.length + " campos OK");
 }
 
 // ── Relatório ─────────────────────────────────────────────────────────

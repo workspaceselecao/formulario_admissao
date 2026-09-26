@@ -27,9 +27,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 20,
+            "x": 138,
             "y": 667,
-            "largura": 479,
+            "largura": 361,
             "altura": 13
           },
           "obrigatorio": false,
@@ -40,9 +40,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 20,
+            "x": 55,
             "y": 648,
-            "largura": 230,
+            "largura": 195,
             "altura": 12
           },
           "obrigatorio": false,
@@ -53,9 +53,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 263,
+            "x": 293,
             "y": 648,
-            "largura": 205,
+            "largura": 175,
             "altura": 12
           },
           "obrigatorio": false,
@@ -66,9 +66,9 @@
           "tipo": "email",
           "pagina": 1,
           "coordenadas": {
-            "x": 20,
+            "x": 48,
             "y": 629,
-            "largura": 447,
+            "largura": 419,
             "altura": 11
           },
           "obrigatorio": false
@@ -78,9 +78,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 19,
+            "x": 66,
             "y": 608,
-            "largura": 378,
+            "largura": 331,
             "altura": 12
           },
           "obrigatorio": false,
@@ -145,9 +145,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 15,
+            "x": 58,
             "y": 570,
-            "largura": 265,
+            "largura": 222,
             "altura": 12
           },
           "obrigatorio": false
@@ -157,9 +157,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 290,
+            "x": 302,
             "y": 570,
-            "largura": 42,
+            "largura": 30,
             "altura": 11
           },
           "obrigatorio": false
@@ -169,9 +169,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 340,
+            "x": 393,
             "y": 570,
-            "largura": 235,
+            "largura": 182,
             "altura": 12
           },
           "obrigatorio": false
@@ -181,9 +181,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 18,
+            "x": 41,
             "y": 553,
-            "largura": 109,
+            "largura": 86,
             "altura": 12
           },
           "obrigatorio": false,
@@ -194,9 +194,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 134,
+            "x": 161,
             "y": 553,
-            "largura": 198,
+            "largura": 171,
             "altura": 12
           },
           "obrigatorio": false
@@ -206,9 +206,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 339,
+            "x": 370,
             "y": 553,
-            "largura": 234,
+            "largura": 203,
             "altura": 12
           },
           "obrigatorio": false
@@ -825,7 +825,7 @@
           "pagina": 1,
           "coordenadas": {
             "x": 95,
-            "y": 26,
+            "y": 39,
             "largura": 199,
             "altura": 10
           },
@@ -838,7 +838,7 @@
           "pagina": 1,
           "coordenadas": {
             "x": 95,
-            "y": 26,
+            "y": 39,
             "largura": 199,
             "altura": 10
           },

@@ -82,10 +82,24 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
             w, h = r["x1"] - r["x0"], r["bottom"] - r["top"]
             if w > page_w * 0.95 and h > page_h * 0.9:
                 continue  # fundo de pagina inteiro, ignorar
+            if h > 3:
+                # Retangulo "alto" demais para ser uma divisoria real (que tem
+                # ~0.5-1.5pt de espessura). Isso e sempre metade de um par
+                # preto+branco quase idêntico que o Canva usa para "apagar"
+                # um trecho da grade da imagem de fundo (ex.: nas linhas de
+                # checkbox). O par so faz sentido junto: preto por baixo,
+                # branco por cima cobrindo 100%. Extraidos separadamente e
+                # desenhados com qualquer imprecisao de arredondamento, sobra
+                # uma fresta preta na borda -> aparenta linha quebrada/torta.
+                # A imagem de fundo (assets/imgN.png) ja tem a linha certa,
+                # continua, sem o corte -- entao o par inteiro (preto E o
+                # branco correspondente) e descartado, e a linha da propria
+                # imagem aparece por conta, identica ao original.
+                continue
             entry = {"x": round(r["x0"], 2), "y": round(page_h - r["bottom"], 2),
                       "width": round(w, 2), "height": round(h, 2)}
             if r.get("non_stroking_color") == (1.0, 1.0, 1.0):
-                template["whiteBoxes"].append(entry)
+                pass  # par preto+branco descartado acima (ver comentario)
             else:
                 template["blackBars"].append(entry)
 

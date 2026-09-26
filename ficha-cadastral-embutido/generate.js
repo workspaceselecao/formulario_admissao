@@ -37,16 +37,16 @@ async function generateFichaCadastral(data = {}) {
     });
   }
 
-  // 3) Pequenas caixas brancas (mesmo truque visual do original, cobre
-  //    trechos da grade para dar acabamento limpo às áreas de checkbox)
-  for (const box of template.whiteBoxes) {
-    page.drawRectangle({
-      x: box.x, y: box.y, width: box.width, height: box.height,
-      color: rgb(1, 1, 1),
-    });
-  }
+  // (Não existe mais uma etapa de "caixas brancas de acabamento" aqui.
+  // Elas formavam, no PDF original, um par preto+branco quase idêntico
+  // usado só para apagar um trecho da grade da imagem de fundo. Extraídos
+  // como dois elementos separados e redesenhados, qualquer imprecisão de
+  // arredondamento entre os dois deixava uma fresta preta visível — o
+  // efeito de "linha torta/quebrada" relatado. A imagem de fundo já traz
+  // essas linhas corretas e contínuas, então o par inteiro foi descartado
+  // na extração: ver extract_template.py, filtro `if h > 3: continue`.)
 
-  // 4) Texto estático do layout (rótulos, títulos, cabeçalho) — desenhado
+  // 3) Texto estático do layout (rótulos, títulos, cabeçalho) — desenhado
   //    palavra por palavra na posição exata extraída do PDF original
   for (const t of template.texts) {
     page.drawText(t.text, {
@@ -55,7 +55,7 @@ async function generateFichaCadastral(data = {}) {
     });
   }
 
-  // 5) Checkboxes: quadrados vetoriais no lugar do glyph "❑" (evita
+  // 4) Checkboxes: quadrados vetoriais no lugar do glyph "❑" (evita
   //    depender de fonte customizada só por causa de um símbolo)
   for (const cb of template.checkboxes) {
     page.drawRectangle({
@@ -64,16 +64,26 @@ async function generateFichaCadastral(data = {}) {
     });
   }
 
-  // 6) Dados dinâmicos do candidato (exemplo de uso — mesmas coordenadas
+  // 5) Dados dinâmicos do candidato (exemplo de uso — mesmas coordenadas
   //    que hoje já vivem no módulo "Coordenadas" do admin)
+  // As posições abaixo usam a MESMA linha de base real dos rótulos vizinhos
+  // (a mesma fonte de coordenada corrigida no fix da linha de base), então
+  // continuam corretas mesmo se o layout for reextraído no futuro.
   if (data.nomeCompleto) {
-    page.drawText(data.nomeCompleto, { x: 22, y: template.page.height - 152, size: 8, font: helv });
+    // Nome vai na faixa em branco entre o rótulo "Nome Completo:" (baseline
+    // y=696.03) e a divisória que inicia a linha "Nome Social:" (y=685.30
+    // topo-baixo 156.95) — baseline própria, ~3pt acima dessa divisória.
+    page.drawText(data.nomeCompleto, { x: 19.57, y: 685.30, size: 7.5, font: helv });
   }
   if (data.telefone) {
-    page.drawText(data.telefone, { x: 90, y: template.page.height - 184, size: 8, font: helv });
+    // Mesma linha de base do rótulo "Telefone:" (y=650.65), começando
+    // logo após o texto do rótulo (x1≈50.58).
+    page.drawText(data.telefone, { x: 58, y: 650.65, size: 7.5, font: helv });
   }
   if (data.email) {
-    page.drawText(data.email, { x: 90, y: template.page.height - 205, size: 8, font: helv });
+    // Mesma linha de base do rótulo "E-mail:" (y=629.68), logo após o
+    // texto do rótulo (x1≈42.83).
+    page.drawText(data.email, { x: 50, y: 629.68, size: 7.5, font: helv });
   }
 
   return pdfDoc.save();
