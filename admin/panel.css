@@ -633,11 +633,4 @@ table.data td.chk input[type="checkbox"] { cursor: pointer; }
 .cmp-grid.sobreposto > div:nth-child(2) .cmp-canvas { display: block; margin: 0 auto; }
 @media (max-width: 900px) { .cmp-grid { grid-template-columns: 1fr; } }
 
-/* Preencher (Documentos Nativos): só os campos do modelo, sem geometria */
-.dp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; align-content: start; }
-.dp-grupo { grid-column: 1 / -1; border-top: 2px solid var(--border); padding-top: 14px; margin-top: 4px; }
-.dp-grupo:first-child { border-top: none; padding-top: 0; margin-top: 0; }
-.dp-grupo > h3 { margin: 0 0 10px; font-size: 13px; color: var(--accent); }
-.dp-opcoes { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.dp-opcoes label { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; cursor: pointer; }
-.dp-grid .campo-largo { grid-column: 1 / -1; }
+

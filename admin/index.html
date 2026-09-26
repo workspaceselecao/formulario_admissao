@@ -137,28 +137,12 @@
           <span class="badge warn">REQUER CALIBRAÇÃO</span>.
         </p>
         <div class="tabs" role="tablist" aria-label="Áreas de documentos nativos">
-          <button type="button" role="tab" data-dntab="preencher" aria-selected="false">✎ Preencher</button>
           <button type="button" role="tab" data-dntab="templates" aria-selected="true" class="active">Templates Nativos</button>
           <button type="button" role="tab" data-dntab="comparacao" aria-selected="false">Comparação</button>
           <button type="button" role="tab" data-dntab="referencia" aria-selected="false">Importar PDF</button>
           <button type="button" role="tab" data-dntab="versoes" aria-selected="false">Versões</button>
           <button type="button" role="tab" data-dntab="logs" aria-selected="false">Logs</button>
           <button type="button" role="tab" data-dntab="recursos" aria-selected="false">Assets &amp; Fontes</button>
-        </div>
-
-        <!-- ── Preencher: SÓ os campos do modelo, sem geometria ── -->
-        <div class="panel tab-pane" id="dnPane-preencher">
-          <p class="section-desc">
-            Informe apenas os dados — a posição, o tamanho e o traço do formulário já estão
-            resolvidos na definição. O que você escreve aqui é o que sai no PDF.
-          </p>
-          <div class="toolbar">
-            <select id="dpDoc" style="min-width:260px" aria-label="Documento"></select>
-            <button type="button" class="btn" id="btnDpGerar">▶ Gerar PDF preenchido</button>
-            <button type="button" class="btn secondary" id="btnDpLimpar">↺ Limpar campos</button>
-            <span class="section-desc" id="dpResumo" style="margin-left:auto"></span>
-          </div>
-          <div id="dpForm" class="dp-grid"></div>
         </div>
 
         <!-- ── Templates Nativos: lista, editor visual e propriedades ── -->
@@ -755,7 +739,6 @@
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <script src="/native-docs.js"></script>
-  <script src="/admin/preencher.js"></script>
   <script src="/admin/persistence.js"></script>
   <script src="/admin/panel.js"></script>
 </body>

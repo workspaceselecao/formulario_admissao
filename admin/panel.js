@@ -949,10 +949,7 @@
     if (name === "formularios") { renderFormularios(); renderFormDetail(); }
     if (name === "validacao") renderValidacao();
     if (name === "configuracoes") renderConfiguracoes();
-    if (name === "documentos") {
-      renderDocumentos();
-      dpCarregarSchemaLabels($("dnDoc") && $("dnDoc").value).then(function () { dpRender(); }).catch(function () { });
-    }
+    if (name === "documentos") renderDocumentos();
     if (name === "coordenadas") {
       // Auto-recuperação: se o template não carregou no init (ex.: CDN lenta
       // na abertura), tenta de novo ao entrar na seção — antes falava só no init.
@@ -5347,197 +5344,6 @@
     renderDocumentos();
   }
 
-  // ══════════════════════════════════════════════════════
-  // PREENCHER — só os campos do modelo (usa AdminPreencher)
-  //
-  // O editor acima é uma ferramenta de LAYOUT. Para preencher o formulário ele
-  // é dispendioso: achar o elemento, entender binding e coordenadas para digitar
-  // um nome. Aqui o usuário vê apenas os campos que o modelo tem, com o rótulo
-  // do schema, e gera o PDF. Os valores NÃO mudam a definição: vão como DADOS
-  // para o mesmo engine (`renderizarPdf(def, dados, …)`).
-  // ══════════════════════════════════════════════════════
-
-  /** Rótulos do schema (chave → label) para os campos da definição. */
-  async function dpCarregarSchemaLabels(docId) {
-    const fonte = dnFontePor(docId);
-    if (!fonte || !fonte.schemaArquivo) return {};
-    if (state.dpSchemaLabels && state.dpSchemaLabels[fonte.schemaArquivo]) return state.dpSchemaLabels[fonte.schemaArquivo];
-    state.dpSchemaLabels = state.dpSchemaLabels || {};
-    const mapa = {};
-    try {
-      const r = await fetch(urlRepositorio(fonte.schemaArquivo), { cache: "no-store" });
-      if (r.ok) {
-        const schema = await r.json();
-        const visitar = function (no, cam) {
-          if (!no || typeof no !== "object") return;
-          if (no.coordenadas && no.label) mapa[cam] = String(no.label);
-          for (const k of Object.keys(no)) {
-            if (typeof no[k] === "object" && k !== "coordenadas") visitar(no[k], cam ? cam + "." + k : k);
-          }
-        };
-        visitar(schema.campos || {}, "");
-      }
-    } catch (e) { /* labels ficam no fallback do módulo */ }
-    state.dpSchemaLabels[fonte.schemaArquivo] = mapa;
-    return mapa;
-  }
-
-  /** Título da seção para a tela (chave → texto). */
-  function dpTituloSecao(nome) {
-    const TITULOS = {
-      dados_pessoais: "Dados Pessoais",
-      endereco: "Endereço",
-      deficiencia: "Deficiência",
-      conta_bancaria: "Dados Bancários",
-      dependentes: "Dependentes",
-      vale_transporte: "Vale Transporte (quantidade e valor unitário)",
-      vale_alimentacao_refeicao: "Vale Alimentação / Refeição",
-      assinatura: "Assinatura",
-      marcacao: "Marcações do formulário",
-      "(geral)": "Campos do modelo"
-    };
-    return TITULOS[nome] || nome.replace(/_/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); });
-  }
-
-  /** Estado do preencher (valores vivos da tela, por documento). */
-  function dpEstado() {
-    if (!state.dpValores) state.dpValores = {};
-    return state.dpValores;
-  }
-
-  /** Renderiza o formulário do documento selecionado: só campos, sem geometria. */
-  function dpRender() {
-    const P = global.AdminPreencher;
-    const box = $("dpForm");
-    const sel = $("dpDoc");
-    if (!box || !P || !sel) return;
-    const ids = Object.keys(dnRegistros());
-    sel.innerHTML = ids.map(function (id) {
-      const d = (dnRegistros()[id] || {}).definicao || {};
-      return '<option value="' + esc(id) + '">' + esc(d.documentName || id) + "</option>";
-    }).join("") || '<option value="">(nenhum documento nativo)</option>';
-    if (!ids.length) {
-      box.innerHTML = '<div class="notice info">Nenhum documento nativo no repositório.</div>';
-      $("dpResumo").textContent = "";
-      return;
-    }
-    if (!sel.value || ids.indexOf(sel.value) === -1) sel.value = ids[0];
-    const def = dnRegistro(sel.value) && dnRegistro(sel.value).definicao;
-    const catalogo = P.catalogoDaDefinicao(def, (state.dpSchemaLabels || {})[(dnFontePor(sel.value) || {}).schemaArquivo]);
-    const valores = dpEstado()[sel.value] = dpEstado()[sel.value] || { textos: {}, marcas: {} };
-
-    box.innerHTML = catalogo.secoes.map(function (s) {
-      const campos = s.campos.map(function (c) {
-        const v = valores.textos[c.id] != null ? valores.textos[c.id] : "";
-        const type = /data|dtnasc/i.test(c.rotulo) ? "date" : (/email/i.test(c.rotulo) ? "email" : (/(quantidade|n[uú]mero)/i.test(c.rotulo) ? "number" : "text"));
-        return '<div' + (c.largo ? ' class="campo-largo"' : "") + '><label for="dp_' + esc(c.id) + '">' + esc(c.rotulo) + "</label>" +
-          '<input type="' + type + '" id="dp_' + esc(c.id) + '" data-dp-texto="' + esc(c.id) + '" value="' + esc(v) + '" autocomplete="off"></div>';
-      }).join("");
-      const grupos = s.grupos.map(function (g) {
-        const escolhida = valores.marcas[g.rotulo];
-        const ops = g.opcoes.map(function (o) {
-          return '<label><input type="radio" name="dpGrupo_' + esc(g.rotulo) + '" data-dp-marca="' + esc(g.rotulo) + '" value="' + esc(o.id) + '"' + (escolhida === o.id ? " checked" : "") + "> " + esc(o.rotulo) + "</label>";
-        }).join("");
-        return '<div class="campo-largo"><label>' + esc(g.rotulo) + '</label><div class="dp-opcoes">' + ops + "</div></div>";
-      }).join("");
-      return '<div class="dp-grupo"><h3>' + esc(dpTituloSecao(s.nome)) + "</h3>" + campos + grupos + "</div>";
-    }).join("") || '<div class="notice info">Este modelo não tem campos preenchíveis.</div>';
-
-    dpLigarEventos();
-    dpAtualizarResumo();
-  }
-
-  /** Uma ligação de eventos por renderização (a área é recriada a cada mudança). */
-  function dpLigarEventos() {
-    const box = $("dpForm");
-    if (!box) return;
-    box.querySelectorAll("[data-dp-texto]").forEach(function (inp) {
-      inp.addEventListener("input", function () {
-        const doc = $("dpDoc").value;
-        dpEstado()[doc] = dpEstado()[doc] || { textos: {}, marcas: {} };
-        dpEstado()[doc].textos[this.getAttribute("data-dp-texto")] = this.value;
-        dpAtualizarResumo();
-      });
-    });
-    box.querySelectorAll("[data-dp-marca]").forEach(function (rad) {
-      rad.addEventListener("change", function () {
-        const doc = $("dpDoc").value;
-        dpEstado()[doc] = dpEstado()[doc] || { textos: {}, marcas: {} };
-        dpEstado()[doc].marcas[this.getAttribute("data-dp-marca")] = this.value;
-        dpAtualizarResumo();
-      });
-    });
-  }
-
-  /** Contagem preenchidos/total para a barra da ferramenta. */
-  function dpAtualizarResumo() {
-    const P = global.AdminPreencher;
-    const def = dnRegistro($("dpDoc").value) && dnRegistro($("dpDoc").value).definicao;
-    const box = $("dpResumo");
-    if (!P || !def || !box) return;
-    const catalogo = P.catalogoDaDefinicao(def, (state.dpSchemaLabels || {})[(dnFontePor($("dpDoc").value) || {}).schemaArquivo]);
-    const val = dpEstado()[$("dpDoc").value] || { textos: {}, marcas: {} };
-    const r = P.resumoPreenchimento(catalogo, function (id) { return val.textos[id]; }, val.marcas);
-    box.textContent = r.preenchidos + " de " + r.campos + " campo(s) preenchido(s)";
-  }
-
-  /** Monta o mapa de dados do engine a partir do que está na tela. */
-  function dpDadosDaTela() {
-    const P = global.AdminPreencher;
-    const def = dnRegistro($("dpDoc").value) && dnRegistro($("dpDoc").value).definicao;
-    if (!P || !def) return {};
-    const catalogo = P.catalogoDaDefinicao(def, (state.dpSchemaLabels || {})[(dnFontePor($("dpDoc").value) || {}).schemaArquivo]);
-    const val = dpEstado()[$("dpDoc").value] || { textos: {}, marcas: {} };
-    return P.valoresDaTela(catalogo, function (id) { return val.textos[id]; }, val.marcas);
-  }
-
-  /** Gera o PDF com os valores da tela (mesmo engine do editor). */
-  async function dpGerarPdf() {
-    const N = dnNativo();
-    const docId = $("dpDoc").value;
-    const def = dnRegistro(docId) && dnRegistro(docId).definicao;
-    if (!N || !def) { toast("Nenhum documento nativo selecionado.", false); return; }
-    if (!global.PDFLib) { toast("pdf-lib não carregou (CDN).", false); return; }
-    try {
-      const assets = await dnCarregarImagens(def);
-      const dados = dpDadosDaTela();
-      const gerado = await N.renderizarPdf(def, dados, global.PDFLib, assets, { forcar: true });
-      const faltando = gerado.ignorados.filter(function (i) { return /valor\/binding vazio/.test(i.motivo); }).length;
-      dnAbrirBytes(gerado.bytes, (def.documentId || "documento") + "-preenchido.pdf");
-      await logEvento({ acao: "preencher_gerado", entidade: def.documentName, alteracao: "PDF preenchido gerado: " + Object.keys(dados).filter(function (k) { return dados[k] === true || (dados[k] && dados[k].length); }).length + " valor(es) informado(s)" });
-      toast("PDF gerado — " + gerado.paginas + " página(s). " +
-        (faltando ? faltando + " campo(s) ficaram em branco (não preenchidos)." : "Todos os campos preenchidos."));
-    } catch (e) {
-      toast("Falha ao gerar o PDF: " + e.message, false);
-    }
-  }
-
-  /** Limpa os valores da tela deste documento. */
-  async function dpLimpar() {
-    const docId = $("dpDoc").value;
-    const ok = await confirmModal("Limpar campos",
-      "<p>Apaga os valores informados nesta tela (o formulário e o documento não são alterados).</p>", "Limpar");
-    if (!ok) return;
-    delete dpEstado()[docId];
-    dpRender();
-    toast("Campos limpos.");
-  }
-
-  let dpHandlersOk = false;
-  function dpInstalarHandlers() {
-    if (dpHandlersOk) return;
-    dpHandlersOk = true;
-    const sel = $("dpDoc");
-    if (sel) sel.addEventListener("change", async function () {
-      await dpCarregarSchemaLabels(this.value);
-      dpRender();
-    });
-    const gerar = $("btnDpGerar");
-    if (gerar) gerar.addEventListener("click", dpGerarPdf);
-    const limpar = $("btnDpLimpar");
-    if (limpar) limpar.addEventListener("click", dpLimpar);
-  }
-
   function renderDocumentos() {
     const N = dnNativo();
     const sel = $("dnDoc");
@@ -5906,9 +5712,6 @@
     // Documentos nativos (gerador) — handlers uma única vez
     dnInstalarHandlers();
     renderDocumentos();
-
-    // Preencher (só os campos do modelo) — handlers uma única vez
-    dpInstalarHandlers();
 
     // Editor (v3) — snap/atalhos/palette/submenu
     instalarSubmenu();
