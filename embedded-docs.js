@@ -518,6 +518,17 @@
           if (!str) { ignorados.push({ id: f.path, motivo: "texto vazio após truncar" }); continue; }
           var alvo = folhasPdf[idxPagina];
           if (!alvo) { ignorados.push({ id: f.path, motivo: "página " + (idxPagina + 1) + " não desenhada" }); continue; }
+          // Opção de radio/checkbox marcada (valor true): desenha um X centralizado
+          // na coordenada da opção (a caixinha ❑ já vem do template).
+          if (valor === true) {
+            var wOp = num(coordenada.largura != null ? coordenada.largura : coordenada.width, 9.75);
+            var hOp = num(coordenada.altura != null ? coordenada.altura : coordenada.height, 8.85);
+            var sizeX = Math.min(wOp, hOp) * 0.92;
+            var cxOp = x + wOp / 2, cyOp = yBase + hOp / 2;
+            alvo.drawText("X", { x: cxOp - sizeX * 0.30, y: cyOp - sizeX * 0.36, size: sizeX, font: helvBold, color: PDFLib.rgb(0, 0, 0) });
+            desenhados++;
+            continue;
+          }
           alvo.drawText(str, {
             x: x + PERFIL_APP.offsetX,
             y: baselinePdf(coordenada, PERFIL_APP.tamanho),
