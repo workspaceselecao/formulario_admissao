@@ -23,11 +23,15 @@ import fitz
 from PIL import Image
 
 FONT_MAP = {
-    "Arial-BoldMT": "Helvetica-Bold",
-    "ArialMT": "Helvetica",
+    "Arial-BoldMT": "Arial-Bold",
+    "ArialMT": "Arial",
+    "ArialNarrow-Bold": "Arial-Narrow-Bold",
+    "ArialNarrow": "Arial-Narrow",
     "HelveticaLTPro-Roman": "Helvetica",
-    "Arial,Bold": "Helvetica-Bold",
-    "Arial": "Helvetica",
+    "Arial,Bold": "Arial-Bold",
+    "Arial": "Arial",
+    "TimesNewRoman": "Times-Roman",
+    "Wingdings": "Symbol",
 }
 
 def map_font(fontname: str) -> str:
@@ -36,6 +40,30 @@ def map_font(fontname: str) -> str:
         if k in base:
             return v
     return "Helvetica"
+
+# Glifos que o PDF usa para desenhar uma caixa de marcação como texto.
+GLIFOS_MARCACAO = ("❑", "☐", "□", "▫")
+
+
+def _escuro(cor):
+    """True se a cor de contorno e preta (ou quase)."""
+    if not cor or not isinstance(cor, (tuple, list)) or len(cor) < 3:
+        return False
+    return all(c <= 0.2 for c in cor[:3])
+
+def ja_tem_checkbox_perto(checkboxes, x, y, tol=3.0):
+    """True se ja existe um quadrado DESENHADO (retangulo) nessa posicao.
+
+    Alguns PDFs desenham a caixa E deixam o glifo; outros so usam o glifo.
+    A comparacao e feita entre o glifo (origem x + linha de base y) e a caixa
+    ja extraida, com uma tolerancia de 3 pt.
+    """
+    for cb in checkboxes:
+        dentro_x = cb["x"] - tol <= x <= cb["x"] + cb["width"] + tol
+        dentro_y = cb["y"] - tol <= y <= cb["y"] + cb["height"] + tol
+        if dentro_x and dentro_y:
+            return True
+    return False
 
 def extract(pdf_path: str, out_dir: str, page_index: int = 0):
     assets_dir = os.path.join(out_dir, "assets")
@@ -73,6 +101,13 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
     with pdfplumber.open(pdf_path) as pdf:
         p = pdf.pages[page_index]
 
+        # IMPORTANTE: o pdf-plumber mede a partir da MEDIA BOX, e nao da Crop
+        # Box. A F-075_37 tem MediaBox [0, 7.83, ...] e CropBox [0, 0, ...]:
+        # usar a altura da pagina (842,25) como origem derruba todas as
+        # divisórias 7,83 pt para fora do lugar. `p.bbox[3]` ja e a base certa
+        # (o topo do recorte, no mesmo sistema do pdf-lib).
+        ref_h = p.bbox[3]
+
         seen = set()
         for r in p.rects:
             key = (round(r["x0"], 1), round(r["x1"], 1), round(r["top"], 1), round(r["bottom"], 1))
@@ -82,7 +117,7 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
             w, h = r["x1"] - r["x0"], r["bottom"] - r["top"]
             if w > page_w * 0.95 and h > page_h * 0.9:
                 continue  # fundo de pagina inteiro, ignorar
-            entry = {"x": round(r["x0"], 2), "y": round(page_h - r["bottom"], 2),
+            entry = {"x": round(r["x0"], 2), "y": round(ref_h - r["bottom"], 2),
                      "width": round(w, 2), "height": round(h, 2)}
             linha = w <= 3 or h <= 3      # divisoria: fina em pelo menos um eixo
             if linha:
@@ -96,10 +131,16 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
                         entry["width"] = max(round(w, 2), 0.48)
                 template["blackBars"].append(entry)
             elif r.get("non_stroking_color") == (1.0, 1.0, 1.0) and r.get("stroking_color") is not None:
-                # Caixa de campo / quadrado de marcacao: fundo branco COM
-                # borda -> e o que desenha as linhas verticais e horizontais
-                # internas das tabelas. Vai para whiteBoxes com `borda`.
-                entry["borda"] = round(r.get("linewidth") or 0.5, 2)
+                # Caixa de campo / quadrado de marcacao: fundo branco. Vai para
+                # whiteBoxes e COBRE o que estiver embaixo (e o que faz a grade
+                # sumir nos pontos certainos do original).
+                # A borda so existe quando o PDF realmente CONTORNA a caixa
+                # (contorno escuro com espessura > 0). Na F-075_37 o contorno
+                # e branco com espessura 0 e o par preto que vem depois e
+                # desenhado com alfa 0 ( invisivel): desenhar borda preta ali
+                # seria inventar traco que o original nao tem.
+                if _escuro(r.get("stroking_color")) and (r.get("linewidth") or 0) > 0:
+                    entry["borda"] = round(r["linewidth"], 2)
                 if w < 15 and h < 15:
                     template["checkboxes"].append(entry)   # quadradinho de marcação
                 else:
@@ -124,15 +165,33 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
                         and abs(c['top'] - w['top']) < 0.6]
             baseline_y = matching[0]['matrix'][5] if matching else (page_h - w['bottom'])
 
-            if "FreeSerif" in w["fontname"] or w["text"] in ("❑", "☐", "□"):
+            if w["text"] in GLIFOS_MARCACAO:
                 # O glifo "❑" e a MESMA marcação que o Canva ja desenhou como
                 # retangulo (branco + borda) — e esse retangulo, extraido com a
                 # geometria exata, ja foi para `checkboxes` acima. Aqui o glifo
                 # e so descartado, para nao desenhar dois quadradinhos.
+                #
+                #MAS: na revisao F-075_37 o PDF NAO desenha o retangulo — a
+                # marcacao existe so como glifo de texto. Descartar o glifo
+                # apagaria as 17 caixas da ficha. Nesse caso o glifo vira um
+                # quadrado vetorial com a geometria REAL medida no raster do
+                # proprio PDF (lado = 0,70 x corpo, topo apoiado na linha de
+                # base), e nao em texto.
+                if not ja_tem_checkbox_perto(template["checkboxes"], w["x0"], baseline_y):
+                    lado = round(w["size"] * 0.70, 2)
+                    template["checkboxes"].append({
+                        "x": round(w["x0"] + 0.30, 2),
+                        "y": round(baseline_y - lado, 2),
+                        "width": lado, "height": lado,
+                        "borda": 0.5,
+                    })
                 continue
+            elif "FreeSerif" in w["fontname"]:
+                continue   # FreeSerif so foi usado para os glifos de marcação
             else:
                 template["texts"].append({
                     "text": w["text"], "x": round(w["x0"], 2), "y": round(baseline_y, 2),
+                    "fim": round(w["x1"], 2),
                     "size": round(w["size"], 2), "font": map_font(w["fontname"])
                 })
 

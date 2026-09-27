@@ -195,7 +195,11 @@ async function generateFichaCadastral(data = {}) {
 
   // 5) Dados dinâmicos do candidato
   if (data.nomeCompleto) {
-    page.drawText(data.nomeCompleto, { x: 19.57, y: 685.30, size: 7.5, font: arial });
+    // Caixa do campo "Nome Completo" fica em y=694.48-706.78 (whiteBox);
+    // 685.30 caia em cima da linha "Nome Social" logo abaixo, sobrepondo o
+    // rotulo (bug). Usa a mesma folga da caixa do telefone (~1.5pt acima do
+    // fundo da caixa).
+    page.drawText(data.nomeCompleto, { x: 19.57, y: 696.0, size: 7.5, font: arial });
   }
   if (data.telefone) {
     page.drawText(data.telefone, { x: 58, y: 650.65, size: 7.5, font: arial });
