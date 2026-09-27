@@ -14,78 +14,73 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 19.4,
-            "y": 696.78,
-            "largura": 472.7,
+            "x": 398.57,
+            "y": 695.44,
+            "largura": 168,
             "altura": 12.3
           },
           "obrigatorio": true,
-          "observacao": "Preencher conforme Certidão de Nascimento ou Casamento",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Preencher conforme Certidão de Nascimento ou Casamento"
         },
         "craxá": {
           "label": "Nome Social (Crachá)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 19.4,
-            "y": 673.98,
-            "largura": 472.7,
+            "x": 138.27,
+            "y": 670.83,
+            "largura": 420,
             "altura": 12.3
           },
           "obrigatorio": false,
-          "observacao": "Nome para inclusão no crachá",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Nome para inclusão no crachá"
         },
         "fone": {
           "label": "Telefone",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 19.4,
-            "y": 651.48,
-            "largura": 229.35,
+            "x": 55.03,
+            "y": 650.06,
+            "largura": 202,
             "altura": 12.3
           },
           "obrigatorio": false,
-          "mascara": "(99) 9999-9999",
-          "_fonte_caixa": "PDF_com_caixa"
+          "mascara": "(99) 9999-9999"
         },
         "celular": {
           "label": "Celular (WhatsApp)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 262.8,
-            "y": 651.68,
-            "largura": 229.35,
+            "x": 292.67,
+            "y": 650.06,
+            "largura": 278,
             "altura": 12.3
           },
           "obrigatorio": false,
-          "mascara": "(99) 99999-9999",
-          "_fonte_caixa": "PDF_com_caixa"
+          "mascara": "(99) 99999-9999"
         },
         "email": {
           "label": "E-mail",
           "tipo": "email",
           "pagina": 1,
           "coordenadas": {
-            "x": 19.4,
-            "y": 628.78,
-            "largura": 295.75,
+            "x": 47.29,
+            "y": 629.09,
+            "largura": 520,
             "altura": 12.3
           },
-          "obrigatorio": false,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": false
         },
         "estadocivil": {
           "label": "Estado Civil",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 19.4,
-            "y": 605.98,
-            "largura": 295.75,
+            "x": 66.38,
+            "y": 611.12,
+            "largura": 500,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -96,8 +91,7 @@
             "VIÚVO(A)",
             "UNIÃO ESTÁVEL",
             "SEPARADO(A)"
-          ],
-          "_fonte_caixa": "PDF_com_caixa"
+          ]
         },
         "primeiro_emprego": {
           "label": "Primeiro Emprego",
@@ -107,19 +101,19 @@
             "sim": {
               "label": "Sim",
               "coordenadas": {
-                "x": 94.8,
-                "y": 592.28,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 85.84,
+                "y": 589.92,
+                "largura": 4.87,
+                "altura": 4.87
               }
             },
             "nao": {
               "label": "Não",
               "coordenadas": {
-                "x": 94.8,
-                "y": 581.23,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 85.88,
+                "y": 579.76,
+                "largura": 4.87,
+                "altura": 4.87
               }
             }
           }
@@ -129,9 +123,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 200,
-            "y": 566.0,
-            "largura": 370,
+            "x": 162.79,
+            "y": 580.4,
+            "largura": 400,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -151,79 +145,73 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 20.5,
-            "y": 560.33,
-            "largura": 295.75,
+            "x": 58.19,
+            "y": 572.03,
+            "largura": 226,
             "altura": 12.3
           },
-          "obrigatorio": false,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": false
         },
         "numero": {
           "label": "Número",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 330.25,
-            "y": 560.33,
-            "largura": 43.35,
+            "x": 301.84,
+            "y": 572.03,
+            "largura": 34,
             "altura": 12.3
           },
-          "obrigatorio": false,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": false
         },
         "complemento": {
           "label": "Complemento",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 385.35,
-            "y": 560.68,
-            "largura": 185.5,
+            "x": 392.79,
+            "y": 572.03,
+            "largura": 178,
             "altura": 12.3
           },
-          "obrigatorio": false,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": false
         },
         "cep": {
           "label": "CEP",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 20.05,
-            "y": 537.78,
-            "largura": 104.75,
+            "x": 40.67,
+            "y": 553.15,
+            "largura": 88,
             "altura": 12.3
           },
           "obrigatorio": false,
-          "mascara": "99999-999",
-          "_fonte_caixa": "PDF_com_caixa"
+          "mascara": "99999-999"
         },
         "bairro": {
           "label": "Bairro",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 136.05,
-            "y": 537.68,
-            "largura": 194.85,
+            "x": 161.32,
+            "y": 553.15,
+            "largura": 172,
             "altura": 12.3
           },
-          "obrigatorio": false,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": false
         },
         "cidadeuf": {
           "label": "Cidade/UF",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 340.35,
-            "y": 537.83,
-            "largura": 232.75,
+            "x": 369.51,
+            "y": 553.15,
+            "largura": 200,
             "altura": 12.3
           },
-          "obrigatorio": false,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": false
         }
       }
     },
@@ -238,19 +226,19 @@
             "sim": {
               "label": "Sim",
               "coordenadas": {
-                "x": 104.55,
-                "y": 520.41,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 85.84,
+                "y": 589.92,
+                "largura": 4.87,
+                "altura": 4.87
               }
             },
             "nao": {
               "label": "Não",
               "coordenadas": {
-                "x": 133.05,
-                "y": 520.26,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 162.58,
+                "y": 526.28,
+                "largura": 5.6,
+                "altura": 5.6
               }
             }
           }
@@ -267,52 +255,47 @@
             "fisica": {
               "label": "Física",
               "coordenadas": {
-                "x": 262.2,
-                "y": 514.48,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 262.44,
+                "y": 524.98,
+                "largura": 4.87,
+                "altura": 4.87
+              }
             },
             "auditiva": {
               "label": "Auditiva",
               "coordenadas": {
-                "x": 319.5,
-                "y": 514.43,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 314.44,
+                "y": 524.98,
+                "largura": 4.87,
+                "altura": 4.87
+              }
             },
             "visual": {
               "label": "Visual",
               "coordenadas": {
-                "x": 393.8,
-                "y": 514.38,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 380.34,
+                "y": 524.98,
+                "largura": 4.87,
+                "altura": 4.87
+              }
             },
             "intelectual": {
               "label": "Intelectual",
               "coordenadas": {
-                "x": 442.7,
-                "y": 514.33,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 423.18,
+                "y": 524.98,
+                "largura": 4.87,
+                "altura": 4.87
+              }
             },
             "multipla": {
               "label": "Múltipla",
               "coordenadas": {
-                "x": 514.15,
-                "y": 514.28,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 484.68,
+                "y": 524.98,
+                "largura": 4.87,
+                "altura": 4.87
+              }
             }
           }
         }
@@ -329,49 +312,47 @@
             "conta_corrente": {
               "label": "Conta Corrente Bradesco",
               "coordenadas": {
-                "x": 128.8,
-                "y": 493.32,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 129.86,
+                "y": 501.62,
+                "largura": 5.63,
+                "altura": 5.63
               }
             },
             "bradesco": {
               "label": "Conta Salário Bradesco",
               "coordenadas": {
-                "x": 171.9,
-                "y": 493.22,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 171.62,
+                "y": 501.62,
+                "largura": 5.63,
+                "altura": 5.63
               }
             },
             "poupanca_bradesco": {
               "label": "Conta Poupança Bradesco",
               "coordenadas": {
-                "x": 232.35,
-                "y": 493.13,
-                "largura": 9.75,
-                "altura": 8.85
+                "x": 230.92,
+                "y": 501.62,
+                "largura": 5.63,
+                "altura": 5.63
               }
             },
             "santander_corrente": {
               "label": "Conta Corrente Santander",
               "coordenadas": {
-                "x": 130.1,
-                "y": 474.57,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 133.52,
+                "y": 478.48,
+                "largura": 5.63,
+                "altura": 5.63
+              }
             },
             "santander_salario": {
               "label": "Conta Salário Santander",
               "coordenadas": {
-                "x": 174.55,
-                "y": 473.92,
-                "largura": 9.75,
-                "altura": 8.85
-              },
-              "_fonte_caixa": "PDF_com_caixa"
+                "x": 177.64,
+                "y": 478.48,
+                "largura": 5.63,
+                "altura": 5.63
+              }
             }
           }
         },
@@ -380,9 +361,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 298.35,
-            "y": 493.23,
-            "largura": 109.6,
+            "x": 326.3,
+            "y": 513.56,
+            "largura": 86,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -393,17 +374,16 @@
               "conta_corrente",
               "poupanca_bradesco"
             ]
-          },
-          "_fonte_caixa": "PDF_com_caixa"
+          }
         },
         "bradesco_conta_digito": {
           "label": "Conta/Dígito (Bradesco)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 418.2,
-            "y": 493.23,
-            "largura": 137.55,
+            "x": 472.68,
+            "y": 513.43,
+            "largura": 100,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -414,17 +394,16 @@
               "conta_corrente",
               "poupanca_bradesco"
             ]
-          },
-          "_fonte_caixa": "PDF_com_caixa"
+          }
         },
         "santander_agencia": {
           "label": "Agência (Santander)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 298.35,
-            "y": 493.23,
-            "largura": 109.6,
+            "x": 326.3,
+            "y": 513.56,
+            "largura": 86,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -435,17 +414,16 @@
               "santander_salario"
             ]
           },
-          "observacao": "Mesmas coordenadas da agência Bradesco até medição específica no PDF F-075_37",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Mesmas coordenadas da agência Bradesco até medição específica no PDF F-075_37"
         },
         "santander_conta_digito": {
           "label": "Conta/Dígito (Santander)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 418.2,
-            "y": 493.23,
-            "largura": 137.55,
+            "x": 472.68,
+            "y": 513.43,
+            "largura": 100,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -456,23 +434,21 @@
               "santander_salario"
             ]
           },
-          "observacao": "Mesmas coordenadas da conta Bradesco até medição específica no PDF F-075_37",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Mesmas coordenadas da conta Bradesco até medição específica no PDF F-075_37"
         },
         "cpf_titular": {
           "label": "CPF do titular",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 298.5,
-            "y": 469.15,
-            "largura": 184.45,
+            "x": 355.31,
+            "y": 485.54,
+            "largura": 215,
             "altura": 12.3
           },
           "obrigatorio": false,
           "mascara": "999.999.999-99",
-          "observacao": "Preenchido para qualquer tipo de conta (Bradesco ou Santander)",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Preenchido para qualquer tipo de conta (Bradesco ou Santander)"
         }
       }
     },
@@ -488,41 +464,38 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 20.65,
-                "y": 422.2,
-                "largura": 279.1,
+                "x": 45.5,
+                "y": 435.39,
+                "largura": 255,
                 "altura": 12.3
               },
-              "obrigatorio": false,
-              "_fonte_caixa": "PDF_com_caixa"
+              "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 309.45,
-                "y": 422.4,
-                "largura": 110.25,
+                "x": 380.0,
+                "y": 435.39,
+                "largura": 48,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "99/99/9999",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99/99/9999"
             },
             "cpf": {
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 431.6,
-                "y": 422.4,
-                "largura": 132.4,
+                "x": 506.5,
+                "y": 435.39,
+                "largura": 68,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "999.999.999-99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "999.999.999-99"
             }
           }
         },
@@ -534,41 +507,38 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 20.65,
-                "y": 401.1,
-                "largura": 279.1,
+                "x": 45.5,
+                "y": 405.38,
+                "largura": 255,
                 "altura": 12.3
               },
-              "obrigatorio": false,
-              "_fonte_caixa": "PDF_com_caixa"
+              "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 309.45,
-                "y": 401.3,
-                "largura": 110.25,
+                "x": 380.0,
+                "y": 405.38,
+                "largura": 48,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "99/99/9999",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99/99/9999"
             },
             "cpf": {
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 431.6,
-                "y": 401.3,
-                "largura": 132.4,
+                "x": 506.5,
+                "y": 405.38,
+                "largura": 68,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "999.999.999-99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "999.999.999-99"
             }
           }
         },
@@ -580,41 +550,38 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 20.65,
-                "y": 379.65,
-                "largura": 279.1,
+                "x": 45.5,
+                "y": 377.75,
+                "largura": 255,
                 "altura": 12.3
               },
-              "obrigatorio": false,
-              "_fonte_caixa": "PDF_com_caixa"
+              "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 309.45,
-                "y": 379.85,
-                "largura": 110.25,
+                "x": 380.0,
+                "y": 377.75,
+                "largura": 48,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "99/99/9999",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99/99/9999"
             },
             "cpf": {
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 431.6,
-                "y": 379.85,
-                "largura": 132.4,
+                "x": 506.5,
+                "y": 377.75,
+                "largura": 68,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "999.999.999-99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "999.999.999-99"
             }
           }
         },
@@ -626,41 +593,38 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 20.65,
-                "y": 358.55,
-                "largura": 279.1,
+                "x": 45.5,
+                "y": 351.82,
+                "largura": 255,
                 "altura": 12.3
               },
-              "obrigatorio": false,
-              "_fonte_caixa": "PDF_com_caixa"
+              "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 309.45,
-                "y": 358.75,
-                "largura": 110.25,
+                "x": 380.0,
+                "y": 351.82,
+                "largura": 48,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "99/99/9999",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99/99/9999"
             },
             "cpf": {
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 431.6,
-                "y": 358.75,
-                "largura": 132.4,
+                "x": 506.5,
+                "y": 351.82,
+                "largura": 68,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "999.999.999-99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "999.999.999-99"
             }
           }
         },
@@ -672,41 +636,38 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 20.65,
-                "y": 336.8,
-                "largura": 279.1,
+                "x": 45.5,
+                "y": 328.29,
+                "largura": 255,
                 "altura": 12.3
               },
-              "obrigatorio": false,
-              "_fonte_caixa": "PDF_com_caixa"
+              "obrigatorio": false
             },
             "dtnasc": {
               "label": "Data de Nascimento",
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 309.45,
-                "y": 337.0,
-                "largura": 110.25,
+                "x": 380.0,
+                "y": 328.29,
+                "largura": 48,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "99/99/9999",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99/99/9999"
             },
             "cpf": {
               "label": "CPF do Dependente",
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 431.6,
-                "y": 337.0,
-                "largura": 132.4,
+                "x": 506.5,
+                "y": 328.29,
+                "largura": 68,
                 "altura": 12.3
               },
               "obrigatorio": false,
-              "mascara": "999.999.999-99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "999.999.999-99"
             }
           }
         }
@@ -721,23 +682,21 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 267.3,
-              "y": 275.67,
-              "largura": 58.55,
+              "x": 321.81,
+              "y": 251.82,
+              "largura": 44,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           },
           "valor_unitario": {
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 454.65,
-              "y": 276.2,
-              "largura": 58.55,
+              "x": 515.23,
+              "y": 251.82,
+              "largura": 56,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           }
         },
         "metro_trem": {
@@ -746,23 +705,21 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 267.5,
-              "y": 254.82,
-              "largura": 58.55,
+              "x": 321.81,
+              "y": 230.33,
+              "largura": 44,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           },
           "valor_unitario": {
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 454.85,
-              "y": 255.37,
-              "largura": 58.55,
+              "x": 515.23,
+              "y": 230.33,
+              "largura": 56,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           }
         },
         "intermunicipal": {
@@ -771,23 +728,21 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 267.6,
-              "y": 235.95,
-              "largura": 58.55,
+              "x": 321.81,
+              "y": 208.93,
+              "largura": 44,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           },
           "valor_unitario": {
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 454.95,
-              "y": 236.5,
-              "largura": 58.55,
+              "x": 515.23,
+              "y": 208.93,
+              "largura": 56,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           }
         },
         "integracao": {
@@ -796,23 +751,21 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 267.35,
-              "y": 215.9,
-              "largura": 58.55,
+              "x": 321.81,
+              "y": 187.57,
+              "largura": 44,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           },
           "valor_unitario": {
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 454.7,
-              "y": 216.45,
-              "largura": 58.55,
+              "x": 515.23,
+              "y": 187.57,
+              "largura": 56,
               "altura": 12.3
-            },
-            "_fonte_caixa": "PDF_com_caixa"
+            }
           }
         }
       }
@@ -825,32 +778,29 @@
         "alimentacao": {
           "label": "100% Vale Alimentação",
           "coordenadas": {
-            "x": 57.75,
-            "y": 170.35,
-            "largura": 9.75,
-            "altura": 8.85
-          },
-          "_fonte_caixa": "PDF_com_caixa"
+            "x": 57.94,
+            "y": 141.78,
+            "largura": 6.97,
+            "altura": 6.97
+          }
         },
         "refeicao": {
           "label": "100% Vale Refeição",
           "coordenadas": {
-            "x": 248.7,
-            "y": 170.12,
-            "largura": 9.75,
-            "altura": 8.85
-          },
-          "_fonte_caixa": "PDF_com_caixa"
+            "x": 248.14,
+            "y": 141.78,
+            "largura": 6.97,
+            "altura": 6.97
+          }
         },
         "flex": {
           "label": "Flexibilizado (50% VR e 50% VA)",
           "coordenadas": {
-            "x": 412.2,
-            "y": 170.02,
-            "largura": 9.75,
-            "altura": 8.85
-          },
-          "_fonte_caixa": "PDF_com_caixa"
+            "x": 411.66,
+            "y": 141.78,
+            "largura": 6.97,
+            "altura": 6.97
+          }
         }
       }
     },
@@ -862,41 +812,38 @@
           "tipo": "imagem",
           "pagina": 1,
           "coordenadas": {
-            "x": 61.0,
-            "y": 65.81,
-            "largura": 230.85,
-            "altura": 44.25
+            "x": 57.66,
+            "y": 46.81,
+            "largura": 236,
+            "altura": 20
           },
-          "obrigatorio": true,
-          "_fonte_caixa": "PDF_com_caixa"
+          "obrigatorio": true
         },
         "nome_legivel": {
           "label": "Assinatura digitada (nome legível no PDF)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 61.3,
-            "y": 42.67,
-            "largura": 230.85,
+            "x": 58.16,
+            "y": 34.87,
+            "largura": 232,
             "altura": 12.75
           },
           "obrigatorio": true,
-          "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
         },
         "nome_legivel_sem_rubrica": {
           "label": "Assinatura digitada (sem rubrica manual)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 61.3,
-            "y": 42.67,
-            "largura": 230.85,
+            "x": 58.16,
+            "y": 34.87,
+            "largura": 232,
             "altura": 12.75
           },
           "obrigatorio": false,
-          "observacao": "Usado somente quando o candidato marca 'Não assinar'",
-          "_fonte_caixa": "PDF_com_caixa"
+          "observacao": "Usado somente quando o candidato marca 'Não assinar'"
         },
         "data": {
           "label": "Data",
@@ -906,33 +853,30 @@
           "segmentos": {
             "dia": {
               "coordenadas": {
-                "x": 438.45,
-                "y": 66.66,
-                "largura": 24.9,
+                "x": 431.69,
+                "y": 34.87,
+                "largura": 16,
                 "altura": 12.75
               },
-              "mascara": "99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99"
             },
             "mes": {
               "coordenadas": {
-                "x": 479.05,
-                "y": 66.66,
-                "largura": 25.6,
+                "x": 471.59,
+                "y": 34.87,
+                "largura": 16,
                 "altura": 12.75
               },
-              "mascara": "99",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "99"
             },
             "ano": {
               "coordenadas": {
-                "x": 520.35,
-                "y": 66.66,
-                "largura": 26.25,
+                "x": 517.63,
+                "y": 34.87,
+                "largura": 30,
                 "altura": 12.75
               },
-              "mascara": "9999",
-              "_fonte_caixa": "PDF_com_caixa"
+              "mascara": "9999"
             }
           }
         },
@@ -942,13 +886,13 @@
           "pagina": 1,
           "coordenadas": {
             "x": 21.0,
-            "y": -3.18,
+            "y": 12.0,
             "largura": 554.75,
             "altura": 12.75
           },
           "obrigatorio": false,
           "observacao": "x/y/largura são margens do rodapé; y é recalculado na geração do PDF com base na altura da página (carimbo automático).",
-          "_fonte_caixa": "PDF_com_caixa"
+          "rodape": true
         }
       }
     }

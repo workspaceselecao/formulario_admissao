@@ -159,7 +159,9 @@
     modo: null, origem: null,
     // v3: forms_meta, templates_versoes e configuracoes são novos e opcionais
     // (normalizados em carregarTudo) — overlays v1/v2 continuam válidos.
-    overlay: { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {} },
+    // textos = edição de CONTEÚDO do template embarcado (por documentId);
+    // rotulos = nome/label dos campos de dado (por docKey).
+    overlay: { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, textos: {}, rotulos: {} },
     docData: {},        // por docKey: {json, flat:[], pageSizes:[], pdfjsDoc, page, sel, dirty}
     docBase: {},        // por docKey: JSON original do repositório (sem overlay) — fonte para reconstrução e validação
     cityMap: {}, cityArr: [], citySource: null,
@@ -555,12 +557,39 @@
       const patch = overlayMap[f.key];
       if (patch) aplicarPatchCoordenada(f.coords, patch);
     }
+    // Editor Visual — rótulo do campo: o NOME que o ADM dá ao campo. Vai para
+    // o `label` do schema (é o rótulo que o app e o formulário exibem).
+    aplicarRotulos(json, docKey);
     // §10 — Field Builder: reconstrói o JSON EFETIVO aplicando criações,
     // renomeações e exclusões do overlay campos_custom (aditivo; o JSON
     // original do repositório permanece em state.docBase[docKey]).
     if (state.overlay.campos_custom && state.overlay.campos_custom[docKey]) {
       aplicarCamposCustomEmJson(json, state.overlay.campos_custom[docKey]);
     }
+  }
+
+  /**
+   * Rótulos do Editor Visual: { "<path do campo>": "Novo nome" }. Aplica no
+   * objeto `label` do schema (fora de `coordenadas` — coordenadas seguem
+   * restritas a x/y/largura/altura, invariante auditada por
+   * scripts/audit-panel.mjs). Caminho ausente = patch órfão, ignorado.
+   */
+  function aplicarRotulos(json, docKey) {
+    const mapa = (state.overlay.rotulos || {})[docKey];
+    if (!mapa || !json || !json.campos) return;
+    const aplicar = function (no, caminho) {
+      if (!no || typeof no !== "object" || Array.isArray(no)) return;
+      if (no.coordenadas && typeof no.coordenadas === "object") {
+        const novo = mapa[caminho];
+        if (typeof novo === "string" && novo.trim()) no.label = novo.trim();
+        return;
+      }
+      for (const k of Object.keys(no)) {
+        const v = no[k];
+        if (v && typeof v === "object") aplicar(v, caminho ? caminho + "." + k : k);
+      }
+    };
+    aplicar(json.campos, "");
   }
 
   function docDataFlat(docKey, json) {
@@ -610,6 +639,10 @@
       if (!state.overlay.templates_versoes) state.overlay.templates_versoes = {};
       if (!state.overlay.configuracoes) state.overlay.configuracoes = {};
       if (!state.overlay.campos_custom) state.overlay.campos_custom = {};
+      // Edição de conteúdo (template embarcado) e rótulos dos campos: chaves
+      // novas e opcionais — overlay antigo carrega sem elas.
+      if (!state.overlay.textos) state.overlay.textos = {};
+      if (!state.overlay.rotulos) state.overlay.rotulos = {};
     }
 
 
@@ -713,7 +746,9 @@
       pdfs_meta: state.overlay.pdfs_meta || {},
       forms_meta: state.overlay.forms_meta || {},
       templates_versoes: state.overlay.templates_versoes || {},
-      configuracoes: state.overlay.configuracoes || {}
+      configuracoes: state.overlay.configuracoes || {},
+      textos: state.overlay.textos || {},
+      rotulos: state.overlay.rotulos || {}
     };
   }
 
@@ -746,7 +781,27 @@
     for (const key of Object.keys(o.templates_versoes || {})) add("templates_versoes", key, key, resumoValor(o.templates_versoes[key]));
     for (const key of Object.keys(o.configuracoes || {})) add("configuracoes", key, key, resumoValor(o.configuracoes[key]));
     for (const key of Object.keys(o.campos_custom || {})) add("campos_custom", key, "Campos — " + key, resumoValorCamposCustom(o.campos_custom[key]));
+    for (const docId of Object.keys(o.textos || {})) {
+      const n = Object.keys(o.textos[docId] || {}).length;
+      if (n) add("textos", docId, "Conteúdo do documento — " + docId, resumoValorTextos(o.textos[docId]));
+    }
+    for (const key of Object.keys(o.rotulos || {})) {
+      const n = Object.keys(o.rotulos[key] || {}).length;
+      if (n) add("rotulos", key, "Rótulos — " + ((DOCS[key] && DOCS[key].label) || key), n + " campo(s) renomeado(s)");
+    }
     return pend;
+  }
+
+  /** Resumo legível das edições de conteúdo (lista de pendências). */
+  function resumoValorTextos(lote) {
+    const partes = [];
+    for (const id of Object.keys(lote || {})) {
+      const p = lote[id] || {};
+      if (p.visivel === false) partes.push("− " + id);
+      else if (p.text != null) partes.push(id + " = " + JSON.stringify(p.text));
+      else partes.push("± " + id);
+    }
+    return partes.length ? partes.slice(0, 4).join(", ") + (partes.length > 4 ? "…" : "") : "(vazio)";
   }
 
   /** Resumo legível de um lote de campos customizados (lista de pendências). */
@@ -801,10 +856,20 @@
         forms_meta: manterMap("forms_meta"),
         templates_versoes: manterMap("templates_versoes"),
         configuracoes: manterMap("configuracoes"),
-        campos_custom: manterMap("campos_custom")
+        campos_custom: manterMap("campos_custom"),
+        // `textos` e `rotulos` são aninhados (documento → campo): o descarte
+        // remove o documento inteiro, não um campo solto.
+        textos: manterAninhado("textos"),
+        rotulos: manterAninhado("rotulos")
       },
       descartados: pend.length
     };
+
+    function manterAninhado(g) {
+      const out = {}, marc = grupos[g] || new Set();
+      for (const k of Object.keys(o[g] || {})) if (!marc.has(k)) out[k] = o[g][k];
+      return out;
+    }
   }
 
   /** §8 — status do template: número da versão (overlay) e se há rollback disponível. */
@@ -1840,6 +1905,21 @@
     sel.innerHTML = st.pageSizes.map(function (_, i) {
       return '<option value="' + (i + 1) + '"' + ((i + 1) === st.page ? " selected" : "") + ">Página " + (i + 1) + " de " + st.pageSizes.length + "</option>";
     }).join("");
+    // Template embarcado do documento (camada de conteúdo): é ele que dá nome
+    // aos campos do documento. Sem ele, o editor mostra só os campos de dado.
+    const fonte = dnFontePorDocKey(docKey);
+    if (fonte) {
+      try {
+        await dnCarregarTemplate(fonte);
+      } catch (e) {
+        toast("Template embarcado indisponível (" + e.message + ") — os campos do documento não serão listados.", false);
+      }
+    }
+    edAtualizarCampos(docKey);
+    if (fonte) {
+      const nomePdf = $("edNomePdf");
+      if (nomePdf) nomePdf.textContent = d.pdfFile || d.label;
+    }
     atualizarListaCampos(docKey);
     await renderEditorPage(docKey);
   }
@@ -1882,12 +1962,17 @@
     }
     canvas.width = viewport.width; canvas.height = viewport.height;
 
-    // caixas dos campos da página
-    const fields = st.flat.filter(function (f) { return (f.pagina || 1) === st.page && f.coords && typeof f.coords.x === "number"; });
-    for (const f of fields) {
+    // Caixas dos campos da página. A lista é a UNIFICADA (dados + texto fixo +
+    // marcação): o ADM vê e arrasta tudo que o PDF é feito.
+    const campos = (st.campos && st.campos.length ? st.campos : st.flat).filter(function (f) {
+      return (f.pagina || 1) === st.page && f.coords && typeof f.coords.x === "number";
+    });
+    for (const f of campos) {
       const noMulti = state.edSelMulti.some(function (x) { return x.key === f.key; });
+      const kind = f.kind || "dado";
       const box = document.createElement("div");
-      box.className = "field-box" + (st.sel === f || noMulti ? " selected" : "") + (campoTemPendencia(docKey, f) ? " pending" : "");
+      box.className = "field-box kind-" + kind + (st.sel === f || noMulti ? " selected" : "") +
+        (campoTemPendencia(docKey, f) ? " pending" : "") + (f.visivel === false ? " kind-oculto" : "");
       const size = st.pageSizes[st.page - 1];
       const x = f.coords.x / size.w * viewport.width;
       const yTop = (size.h - (f.coords.y + (f.coords.altura || 10))) / size.h * viewport.height;
@@ -1896,14 +1981,14 @@
       box.style.left = x + "px"; box.style.top = yTop + "px";
       box.style.width = w + "px"; box.style.height = h + "px";
       box.textContent = f.label;
-      box.title = f.label + "  (x:" + f.coords.x + ", y:" + f.coords.y + ")";
+      box.title = f.label + "  (x:" + f.coords.x + ", y:" + f.coords.y + ")" + (kind === "dado" ? "" : "  · " + f.secao);
       box.dataset.secao = f.secao; box.dataset.key = f.key;
       attachDrag(box, f, docKey);
       attachResize(box, f, docKey); // §11 — redimensionar
       box.addEventListener("click", function (ev) { ev.stopPropagation(); selectField(docKey, f); });
       stack.appendChild(box);
     }
-    if (!fields.length) {
+    if (!campos.length) {
       const hint = document.createElement("div");
       hint.className = "notice info";
       hint.style.cssText = "position:absolute;top:10px;left:10px;right:10px";
@@ -1911,6 +1996,8 @@
       stack.appendChild(hint);
     }
     atualizarListaCampos(docKey); // pendências podem ter mudado
+    edRenderFormulario(docKey);
+    edRenderEngine(docKey);
   }
 
   /** §11 — snap-to-grid (1/5/10 pts). */
@@ -2135,6 +2222,7 @@
   function fillEditorForm(f, docKey, numbersOnly) {
     $("edFieldTitle").textContent = f.label;
     $("edFieldInfo").textContent = DOCS[docKey].label + " · " + (f.secao || "—") + " · " + f.key;
+    edPreencherFormulario(f, docKey);
     $("edX").value = f.coords.x; $("edY").value = f.coords.y;
     $("edL").value = f.coords.largura != null ? f.coords.largura : "";
     $("edA").value = f.coords.altura != null ? f.coords.altura : "";
@@ -2155,11 +2243,15 @@
       $("edT").title = "Somente leitura: o tamanho da fonte é definido no código de geração.";
       $("edPg").disabled = true; // mover campo de página alteraria a lógica de geração
       $("edPg").title = "Somente leitura: a página é definida pelo schema e pela lógica de geração.";
+      // Altura não é informação do template: para campo do documento ela é
+      // derivada do corpo (e muda com ele), então não é digitável.
+      $("edA").disabled = !!(f.kind && f.kind !== "dado");
     }
   }
 
   /** Tarefa 4 — o campo tem alteração pendente em relação ao overlay/original? */
   function campoTemPendencia(docKey, f) {
+    if (f && f.kind && f.kind !== "dado") return edTemPendencia(f);
     for (const p of PROPS_COORD) {
       if (f.origCoords[p] !== f.coords[p] && !(f.origCoords[p] == null && f.coords[p] == null)) return true;
     }
@@ -2225,6 +2317,18 @@
   /** Restauração de UM campo por objeto (usada pelo atalho R e pela seleção múltipla). */
   async function restaurarCampoObj(docKey, f) {
     if (!f || !campoTemPendencia(docKey, f)) return false;
+    // Campo do DOCUMENTO (texto fixo / marcação): volta ao valor salvo no
+    // overlay de conteúdo ou ao original do template do repositório.
+    if (f.kind && f.kind !== "dado") {
+      const ok = await edRestaurarConteudo(docKey, f);
+      if (ok) {
+        await logEvento({
+          acao: "restauracao_campo", entidade: DOCS[docKey].label + " → " + f.label,
+          alteracao: "conteúdo restaurado ao valor salvo/original"
+        });
+      }
+      return ok;
+    }
     const patch = state.overlay[DOCS[docKey].overlayKey][f.key] || {};
     const antes = Object.assign({}, f.coords);
     for (const p of PROPS_COORD) {
@@ -2328,6 +2432,465 @@
     } catch (e) {
       toast("Falha ao salvar: " + e.message, false);
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EDITOR VISUAL — CAMPOS DO DOCUMENTO (template embarcado)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // O template embarcado descreve o documento inteiro: cada trecho de texto fixo
+  // e cada caixinha de marcação vira um CAMPO com nome e seção ("Código/Revisão",
+  // "Data da publicação", "Vigência", "Bradesco — Poupança"…). O ADM reescreve
+  // esses textos numa versão futura sem reextrair o PDF: enquanto o texto não
+  // muda, o trecho continua desenhado glifo a glifo e o PDF sai byte a byte
+  // igual ao documento oficial; ao mudar, o texto é medido com a fonte real e
+  // re-quebrado dentro de `maxWidth`.
+
+  /** Documento embarcado que atende a um docKey do schema (1:1 por enquanto). */
+  function dnFontePorDocKey(docKey) {
+    return DN_FONTES.filter(function (f) { return f.docKey === docKey; })[0] || null;
+  }
+
+  /**
+   * Trechos e caixinhas do documento, já com as edições de CONTEÚDO do overlay
+   * aplicadas sobre o template do repositório. `base` é o template intocado:
+   * as duas cópias juntas dão a comparação "original → editado" que a lista e
+   * o indicador de pendência usam.
+   */
+  function edTemplatePronto(docKey) {
+    const fonte = dnFontePorDocKey(docKey);
+    if (!fonte) return null;
+    const pacote = dnTemplateCache[fonte.documentId];
+    if (!pacote) return null; // template ainda não carregou (CDN/rede)
+    return { fonte: fonte, base: pacote.template, template: templateEfetivo(fonte.documentId, pacote.template) };
+  }
+
+  /** Largura estimada do trecho, para a caixa de seleção/arraste no canvas. */
+  function edLarguraTexto(txt, size, ancorado) {
+    if (ancorado && txt && txt.chars && txt.chars.length) {
+      const xs = txt.chars.filter(function (c) { return c.c && c.c.trim(); }).map(function (c) { return c.x; });
+      if (xs.length) return Math.max(6, xs[xs.length - 1] - xs[0] + (size || 9));
+    }
+    // ~0,52 em é a largura média de caractere do Arial em texto corrido.
+    return Math.max(8, String((txt && txt.text) || "").length * (size || 9) * 0.52);
+  }
+
+  /** Desce ~0,22 em abaixo da baseline: a caixa desenhada tem que cobrir o glifo. */
+  function edDescida(size) { return (size || 9) * 0.22; }
+
+  /**
+   * Lista UNIFICADA de campos do documento (texto fixo + marcação + dado),
+   * na mesma forma que o editor já usa (key/label/coords), para que arraste,
+   * seleção múltipla, teclado e restauração funcionem igual para os três tipos.
+   * Campos de dado entram por referência (o objeto de st.flat) — as edições de
+   * coordenada deles continuam indo para o mesmo overlay de sempre.
+   */
+  function edConstruirCampos(docKey) {
+    const st = state.docData[docKey];
+    if (!st) return [];
+    const itens = [];
+    const pron = edTemplatePronto(docKey);
+    if (pron) {
+      const basePorId = {};
+      (pron.base.texts || []).forEach(function (t, i) { basePorId[t.id || ("t" + i)] = t; });
+      (pron.base.checkboxes || []).forEach(function (c, i) { basePorId[c.id || ("c" + i)] = c; });
+      (pron.template.texts || []).forEach(function (t, i) {
+        const id = t.id || ("t" + i);
+        const orig = basePorId[id] || t;
+        const size = Number(t.size) || 9;
+        const x = Number(t.x) || 0;
+        const y = (Number(t.y) || 0) - edDescida(size);
+        const larg = edLarguraTexto(t, size, false);
+        const alt = size * 1.3;
+        itens.push({
+          kind: "texto", key: id, docId: pron.fonte.documentId,
+          label: t.nome || t.text || id, nome: t.nome || id, papel: t.papel || "texto",
+          secao: t.secao || "Campos", pagina: t.pagina || 1,
+          opcaoDe: t.opcaoDe || null, rotuloDe: t.rotuloDe || null,
+          size: size, font: t.font || "Helvetica",
+          valor: t.text == null ? "" : String(t.text),
+          origValor: orig.text == null ? "" : String(orig.text),
+          visivel: t.visivel !== false, origVisivel: orig.visivel !== false,
+          coords: { x: x, y: y, largura: larg, altura: alt },
+          origCoords: { x: x, y: y, largura: larg, altura: alt },
+          observacao: t.maxWidth ? "Largura de quebra: " + t.maxWidth + " pt" : ""
+        });
+      });
+      (pron.template.checkboxes || []).forEach(function (c, i) {
+        const id = c.id || ("c" + i);
+        const orig = basePorId[id] || c;
+        const s = Number(c.size) || 9.96;
+        const x = Number(c.x) || 0;
+        const y = (Number(c.base != null ? c.base : c.y) || 0) - edDescida(s);
+        const op = itens.filter(function (t) { return t.opcaoDe === id; })[0] || null;
+        itens.push({
+          kind: "caixa", key: id, docId: pron.fonte.documentId,
+          label: c.nome || c.rotulo || id, nome: c.nome || c.rotulo || id, papel: "caixa",
+          secao: c.secao || "Campos", pagina: c.pagina || 1, opcaoDe: null,
+          opcaoTexto: op ? op.key : null,
+          size: s, font: null, valor: "", origValor: "",
+          visivel: c.visivel !== false, origVisivel: orig.visivel !== false,
+          coords: { x: x, y: y, largura: s, altura: s },
+          origCoords: { x: x, y: y, largura: s, altura: s },
+          observacao: op ? "Marca a opção \"" + op.label + "\"" : "Caixinha de marcação"
+        });
+      });
+    }
+    // Campos de dado: o MESMO objeto de st.flat (identidade preservada para
+    // seleção/arraste/restauração), só marcado como `dado`.
+    for (const f of (st.flat || [])) { f.kind = "dado"; itens.push(f); }
+    st.campos = itens;
+    return itens;
+  }
+
+  /** Recarrega a lista unificada (após carregar o template ou trocar o doc). */
+  function edAtualizarCampos(docKey) {
+    const st = state.docData[docKey];
+    if (!st) return [];
+    const itens = edConstruirCampos(docKey);
+    if (st.sel && itens.indexOf(st.sel) === -1) {
+      // a seleção apontava para um objeto da lista anterior: reancora pela chave
+      st.sel = itens.filter(function (x) { return x.key === st.sel.key; })[0] || null;
+    }
+    state.edSelMulti = (state.edSelMulti || []).map(function (x) {
+      return itens.filter(function (y) { return y.key === x.key; })[0] || x;
+    }).filter(Boolean);
+    return itens;
+  }
+
+  /** O campo do documento tem alteração pendente? */
+  function edTemPendencia(f) {
+    if (!f) return false;
+    if (!f.kind || f.kind === "dado") {
+      for (const p of PROPS_COORD) {
+        if (f.origCoords[p] !== f.coords[p] && !(f.origCoords[p] == null && f.coords[p] == null)) return true;
+      }
+      return false;
+    }
+    if (f.valor !== f.origValor) return true;
+    if (f.visivel !== f.origVisivel) return true;
+    if (f.origSize != null && f.size !== f.origSize) return true;
+    if (f.coords.x !== f.origCoords.x) return true;
+    if (f.coords.y + edDescida(f.size) !== f.origCoords.y + edDescida(f.origSize != null ? f.origSize : f.size)) return true;
+    if (f.coords.largura !== f.origCoords.largura) return true;
+    return false;
+  }
+
+  /** Patch de conteúdo de um campo do documento (o que vai para textos.json). */
+  function edPatchConteudo(f) {
+    if (!f || !f.kind || f.kind === "dado") return null;
+    const patch = {};
+    if (f.valor !== f.origValor) patch.text = f.valor;
+    if (f.visivel !== f.origVisivel) patch.visivel = f.visivel;
+    if (f.origSize != null && f.size !== f.origSize) patch.size = f.size;
+    const ar = function (n) { return Math.round(n * 100) / 100; };
+    const x = ar(f.coords.x);
+    const y = ar(f.coords.y + edDescida(f.size));
+    if (x !== f.origCoords.x) patch.x = x;
+    if (y !== f.origCoords.y + edDescida(f.origSize != null ? f.origSize : f.size)) patch.y = y;
+    if (f.coords.largura !== f.origCoords.largura) patch.maxWidth = ar(f.coords.largura);
+    return Object.keys(patch).length ? patch : null;
+  }
+
+  /** Diferenças de conteúdo do documento (pendências do editor). */
+  function edDiffConteudo(docKey) {
+    const st = state.docData[docKey];
+    const out = [];
+    for (const f of (st.campos || [])) {
+      if (!f.kind || f.kind === "dado") continue;
+      const patch = edPatchConteudo(f);
+      if (patch) out.push({ key: f.key, label: f.label, patch: patch, campo: f });
+    }
+    return out;
+  }
+
+  /**
+   * Salva as edições de CONTEÚDO no overlay `textos` (por documentId) e
+   * persiste. A coordenada de um trecho do template também é conteúdo: ela vai
+   * no mesmo patch, porque o engine a lê do mesmo lugar.
+   */
+  async function edSalvarConteudo(docKey) {
+    const diffs = edDiffConteudo(docKey);
+    if (!diffs.length) { toast("Nenhuma alteração de conteúdo a salvar."); return; }
+    let html = "<p>Edições de conteúdo que serão salvas no overlay administrativo:</p><pre>";
+    for (const d of diffs) {
+      html += esc(d.key) + " — " + esc(d.label) + "\n";
+      for (const p of Object.keys(d.patch)) html += "  " + p + ": " + esc(JSON.stringify(d.patch[p])) + "\n";
+    }
+    html += "</pre><p class='muted'>O botão “Exportar textos.json” baixa o arquivo para versionar no repositório.</p>";
+    const ok = await confirmModal("Salvar alterações de conteúdo", html, "Salvar");
+    if (!ok) return;
+    const st = state.docData[docKey];
+    const fonte = dnFontePorDocKey(docKey);
+    const mapa = overlayTextos(fonte.documentId);
+    for (const d of diffs) {
+      mapa[d.key] = Object.assign({}, mapa[d.key], d.patch);
+      // o valor salvo passa a ser a nova origem (pendência zera, restaurável)
+      const f = d.campo;
+      f.origValor = f.valor; f.origVisivel = f.visivel; f.origSize = f.size;
+      f.origCoords.x = f.coords.x;
+      f.origCoords.y = f.coords.y;
+      f.origCoords.largura = f.coords.largura;
+    }
+    try {
+      const r = await global.AdminPersistence.salvarOverlay(state.overlay);
+      await logEvento({
+        acao: "alteracao_conteudo", entidade: fonte.nome,
+        alteracao: diffs.map(function (d) { return d.key + ": " + Object.keys(d.patch).join(","); }).join("; "),
+        reverso: { overlayKey: "textos", itens: diffs.map(function (d) { return { chave: d.key, anterior: d.patch }; }) }
+      });
+      st.dirty = false;
+      edAtualizarCampos(docKey);
+      updatePendingList(docKey);
+      edRenderFormulario(docKey);
+      renderDashboard();
+      await edRenderEngine(docKey);
+      toast(r.persistido
+        ? "Conteúdo gravado no servidor (com backup) — use “Exportar textos.json” para versionar."
+        : "Conteúdo salvo na sessão — exporte o textos.json (Editor Visual) para efetivar.");
+    } catch (e) {
+      toast("Falha ao salvar conteúdo: " + e.message, false);
+    }
+  }
+
+  /** Restaura UM campo do documento ao valor salvo (ou ao original do repo). */
+  async function edRestaurarConteudo(docKey, f) {
+    if (!f || !f.kind || f.kind === "dado" || !edTemPendencia(f)) return false;
+    const fonte = dnFontePorDocKey(docKey);
+    const salvo = ((state.overlay.textos || {})[fonte.documentId] || {})[f.key] || {};
+    f.valor = ("text" in salvo) ? String(salvo.text) : f.origValor;
+    f.visivel = ("visivel" in salvo) ? salvo.visivel !== false : f.origVisivel;
+    f.size = ("size" in salvo) ? Number(salvo.size) : (f.origSize != null ? f.origSize : f.size);
+    f.coords.x = ("x" in salvo) ? Number(salvo.x) : f.origCoords.x;
+    f.coords.largura = ("maxWidth" in salvo) ? Number(salvo.maxWidth) : f.origCoords.largura;
+    f.coords.altura = f.size * 1.3;
+    f.coords.y = ("y" in salvo) ? Number(salvo.y) - edDescida(f.size) : f.origCoords.y;
+    edSelecionar(docKey, f);
+    await edRenderEngine(docKey);
+    return true;
+  }
+
+  /** Aplica o valor digitado no campo do documento. */
+  function edDefinirValor(f, valor) {
+    if (!f || !f.kind || f.kind === "dado") return;
+    f.valor = valor;
+    f.coords.largura = edLarguraTexto({ text: valor }, f.size, false);
+    f.coords.altura = f.size * 1.3;
+    edMarcarSujo(f);
+  }
+
+  function edDefinirVisivel(f, visivel) {
+    if (!f || !f.kind || f.kind === "dado") return;
+    f.visivel = !!visivel;
+    edMarcarSujo(f);
+  }
+
+  /** Corpo do texto: preserva a baseline (a caixa sobe/desce junto). */
+  function edDefinirSize(f, size) {
+    if (!f || !f.kind || f.kind === "dado") return;
+    const novo = Number(size);
+    if (!(novo > 0)) return;
+    const base = f.coords.y + edDescida(f.size);
+    f.size = novo;
+    f.coords.y = base - edDescida(novo);
+    f.coords.altura = novo * 1.3;
+    f.coords.largura = edLarguraTexto({ text: f.valor }, novo, false);
+    edMarcarSujo(f);
+  }
+
+  /** Marca o documento como editado e agenda o redesenho do PDF gerado. */
+  function edMarcarSujo(f) {
+    const docKey = $("edDoc") ? $("edDoc").value : null;
+    const st = docKey && state.docData[docKey];
+    if (!st) return;
+    st.dirty = true;
+    const box = document.querySelector('.field-box[data-key="' + String(f.key).replace(/"/g, '\\"') + '"]');
+    if (box) updateBoxFromField(box, f, st);
+    $("edSave").disabled = false; $("edCancel").disabled = false;
+    $("edRestore").disabled = !edTemPendencia(f);
+    updatePendingList(docKey);
+    edAgendarEngine();
+  }
+
+  /**
+   * Lista "Campos do documento": TODOS os campos que compõem o arquivo,
+   * agrupados por seção, na ordem de leitura do PDF. É o formulário que o ADM
+   * pediu — nome, valor, seção e estado (editado/oculto) de cada campo.
+   */
+  function edRenderFormulario(docKey) {
+    const st = state.docData[docKey];
+    const box = $("edFormulario");
+    const resumo = $("edConteudoResumo");
+    if (!box || !st) return;
+    const itens = st.campos || [];
+    const q = (($("edBuscaConteudo") || {}).value || "").toLowerCase().trim();
+    const norm = function (s) { return String(s == null ? "" : s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); };
+    const tq = norm(q);
+    const filtrados = tq ? itens.filter(function (f) {
+      return norm(f.label).indexOf(tq) !== -1 || norm(f.nome).indexOf(tq) !== -1 ||
+        norm(f.secao).indexOf(tq) !== -1 || norm(f.valor).indexOf(tq) !== -1 || norm(f.key).indexOf(tq) !== -1;
+    }) : itens;
+    const nPendencia = itens.filter(edTemPendencia).length;
+    if (resumo) resumo.textContent = (tq ? filtrados.length + " de " : "") + itens.length + " campo(s) do documento" +
+      (nPendencia ? " · " + nPendencia + " editado(s)" : "") +
+      " · " + itens.filter(function (f) { return f.kind === "texto"; }).length + " texto(s) fixo(s), " +
+      itens.filter(function (f) { return f.kind === "caixa"; }).length + " marcação(ões), " +
+      itens.filter(function (f) { return !f.kind || f.kind === "dado"; }).length + " campo(s) de dado";
+    if (!filtrados.length) {
+      box.innerHTML = '<div class="field-item" aria-disabled="true">Nenhum campo' + (tq ? " para esta busca" : "") + ".</div>";
+      return;
+    }
+    const sel = st.sel;
+    let html = "", secaoAtual = null;
+    for (const f of filtrados) {
+      if (f.secao !== secaoAtual) {
+        secaoAtual = f.secao;
+        html += '<div class="field-group">' + esc(secaoAtual) + "</div>";
+      }
+      const cls = "field-item" + (sel === f ? " selected" : "") + (edTemPendencia(f) ? " pending" : "");
+      const selos = [];
+      if (f.kind === "texto") {
+        selos.push('<span class="selo ' + (f.papel === "valor" ? "valor" : f.papel === "opcao" ? "opcao" : f.papel === "titulo" ? "titulo" : "") + '">' + esc(f.papel) + "</span>");
+      } else if (f.kind === "caixa") selos.push('<span class="selo caixa">marcação</span>');
+      else selos.push('<span class="selo">' + esc(f.tipo || "dado") + "</span>");
+      if (f.visivel === false) selos.push('<span class="selo oculto">oculto</span>');
+      html += '<button type="button" role="option" class="' + cls + '" data-ed-campo="' + esc(f.key) + '">' +
+        '<span class="fi-label">' + esc(f.label) + "</span>" +
+        (f.valor ? '<span class="fi-valor">' + esc(f.valor.length > 60 ? f.valor.slice(0, 60) + "…" : f.valor) + "</span>" : "") +
+        '<span class="fi-selos">' + selos.join("") + '<span class="selo">' + esc(f.key) + "</span></span></button>";
+    }
+    box.innerHTML = html;
+    box.querySelectorAll("button[data-ed-campo]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        const f = (st.campos || []).filter(function (x) { return x.key === b.getAttribute("data-ed-campo"); })[0];
+        if (f) edSelecionar(docKey, f);
+      });
+    });
+  }
+
+  /** Seleciona um campo (de dado ou do documento) e mostra o inspetor certo. */
+  function edSelecionar(docKey, f) {
+    const st = state.docData[docKey];
+    if (!st) return;
+    if ((f.pagina || 1) !== st.page) {
+      st.page = f.pagina || 1;
+      if ($("edPage")) $("edPage").value = String(st.page);
+      renderEditorPage(docKey).then(function () { edSelecionar(docKey, f); });
+      return;
+    }
+    st.sel = f;
+    document.querySelectorAll(".field-box").forEach(function (b) {
+      const noMulti = state.edSelMulti.some(function (x) { return x.key === b.dataset.key; });
+      b.classList.toggle("selected", b.dataset.key === f.key || noMulti);
+    });
+    fillEditorForm(f, docKey, false);
+    atualizarListaCampos(docKey);
+    edRenderFormulario(docKey);
+  }
+
+  /**
+   * Inspetor de um campo do DOCUMENTO: texto, corpo, visibilidade, posição e
+   * largura de quebra. `maxWidth` sai da caixa "Largura" (é o espaço em que o
+   * texto reescrito é re-quebrado pela fonte real).
+   */
+  function edPreencherFormulario(f, docKey) {
+    const bloco = $("edBlocoConteudo");
+    if (!bloco) return;
+    const deDoc = !!(f && f.kind && f.kind !== "dado");
+    bloco.hidden = !deDoc;
+    const acoes = $("edAcoesConteudo");
+    if (acoes) acoes.hidden = !deDoc;
+    if (!deDoc) return;
+    $("edValor").value = f.valor;
+    $("edVisivel").checked = f.visivel !== false;
+    $("edSize").value = f.size;
+    $("edNomeCampo").value = f.nome || f.label;
+    if ($("edLLabel")) $("edLLabel").textContent = f.kind === "caixa" ? "Tamanho" : "Largura / quebra (pt)";
+    $("edValorNota").textContent = f.kind === "caixa"
+      ? "Caixinha de marcação — o texto da opção é o campo ao lado" + (f.opcaoTexto ? " (" + f.opcaoTexto + ")." : ".")
+      : (f.origValor === f.valor
+        ? "Como no documento oficial (desenhado glifo a glifo — saída idêntica)."
+        : "Editado: o texto passa a ser medido com a fonte real e re-quebrado em " + Math.round(f.coords.largura) + " pt.");
+    void docKey;
+  }
+
+  /** Exporta o textos.json (edição de conteúdo) do documento exibido. */
+  function edExportarTextos() {
+    const docKey = $("edDoc") ? $("edDoc").value : null;
+    const fonte = docKey ? dnFontePorDocKey(docKey) : null;
+    if (!fonte) { toast("Este documento não tem template embarcado — nada de conteúdo para exportar.", false); return; }
+    const payload = textosEfetivosParaRepositorio(fonte.documentId);
+    const n = Object.keys(payload.textos).length;
+    if (!n) { toast("Nenhuma edição de conteúdo salva — o texto atual é o do documento oficial."); return; }
+    global.AdminPersistence.baixarJSON(payload, "textos.json");
+    logEvento({ acao: "exportacao", entidade: fonte.templateDir + "/textos.json", alteracao: n + " edição(ões) de conteúdo para versionar no repositório" });
+    toast("textos.json gerado (" + n + " campo(s)) — substitua em " + fonte.templateDir + "/ e comite.");
+  }
+
+  // ── PDF GERADO (engine) ao lado do oficial ────────────────────────────────
+  let edEngineToken = 0;
+  let edEngineTimer = null;
+  function edAgendarEngine() {
+    if (!$("edVerEngine") || !$("edVerEngine").checked) return;
+    clearTimeout(edEngineTimer);
+    edEngineTimer = setTimeout(function () { edRenderEngine().catch(function () { }); }, 350);
+  }
+
+  /**
+   * Desenha no segundo canvas o PDF que o sistema REALMENTE imprime: o
+   * template do repositório com as edições de conteúdo, mais os dados de teste,
+   * gerado agora pela engine. É o contraponto ao raster do PDF oficial: o que
+   * sai daqui é o PDF do candidato.
+   */
+  async function edRenderEngine(docKey) {
+    const N = dnNativo();
+    docKey = docKey || ($("edDoc") ? $("edDoc").value : null);
+    const canvas = $("edCanvasEngine");
+    const nota = $("edEngineNota");
+    const wrap = $("edEngineWrap");
+    if (!N || !canvas) return;
+    if (wrap) wrap.hidden = !($("edVerEngine") && $("edVerEngine").checked);
+    if (!$("edVerEngine") || !$("edVerEngine").checked) return;
+    const fonte = dnFontePorDocKey(docKey);
+    if (!fonte) { if (nota) nota.textContent = "— documento sem template embarcado"; return; }
+    if (!global.PDFLib || !global.pdfjsLib) { if (nota) nota.textContent = "pdf-lib/pdf.js indisponíveis (CDN)"; return; }
+    const token = ++edEngineToken;
+    let pacote, gerado;
+    try {
+      pacote = await dnCarregarTemplate(fonte);
+      const schemaCampos = (state.docData[fonte.docKey] || {}).json && state.docData[fonte.docKey].json.campos;
+      const tpl = templateEfetivo(fonte.documentId, pacote.template);
+      gerado = await N.gerarPdf(tpl, schemaCampos, dnDadosDeTeste(schemaCampos), global.PDFLib,
+        { imagens: pacote.imagens, fontes: pacote.fontes }, { autor: dnAutor(), textos: (state.overlay.textos || {})[fonte.documentId] || {} });
+    } catch (e) {
+      if (nota) nota.textContent = "falha: " + e.message;
+      return;
+    }
+    if (token !== edEngineToken) return;
+    if (nota) {
+      const r = gerado.relatorio || {};
+      const partes = [gerado.desenhados + " campo(s) de teste"];
+      if (r.textosEditados && r.textosEditados.length) partes.push(r.textosEditados.length + " texto(s) reescrito(s)");
+      if (r.ocultos && r.ocultos.length) partes.push(r.ocultos.length + " oculto(s)");
+      if (r.fontesFallback && r.fontesFallback.length) partes.push("fonte no fallback");
+      nota.textContent = partes.join(" · ");
+    }
+    const st = state.docData[docKey];
+    const escala = st && st.renderScale ? st.renderScale : 1;
+    try {
+      const pdf = await global.pdfjsLib.getDocument({ data: gerado.bytes.slice(0) }).promise;
+      const pg = await pdf.getPage((st && st.page) || 1);
+      const vp = pg.getViewport({ scale: escala });
+      canvas.width = vp.width; canvas.height = vp.height;
+      canvas.style.width = vp.width + "px"; canvas.style.height = vp.height + "px";
+      const camada = $("edBoxesEngine");
+      if (camada) {
+        camada.style.position = "absolute";
+        camada.style.left = "0px"; camada.style.top = "0px";
+        camada.style.width = vp.width + "px"; camada.style.height = vp.height + "px";
+        camada.innerHTML = "";
+      }
+      await pg.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+    } catch (e) { /* canvas é best-effort */ }
   }
 
   // ══════════════════════════════════════════════════════
@@ -3005,6 +3568,7 @@
     const json = JSON.parse(JSON.stringify(state.docBase[docKey]));
     const lote = (state.overlay.campos_custom || {})[docKey];
     if (lote) aplicarCamposCustomEmJson(json, lote);
+    aplicarRotulos(json, docKey);
     return json;
   }
 
@@ -3028,7 +3592,42 @@
       const p = patches[f.key];
       if (p) aplicarPatchCoordenada(f.coords, p); // só x/y/largura/altura
     }
+    aplicarRotulos(json, docKey); // `label` do campo (fora de coordenadas)
     return json;
+  }
+
+  /**
+   * EDIÇÃO DE CONTEÚDO — o objeto que o Editor Visual grava por campo do
+   * template embarcado: { "t15": { text: "F-075(PR-011)/39" }, "c02": { visivel: false } }.
+   * É o mesmo formato aceito por EmbeddedDocs.aplicarTextosEditados e é o que
+   * o botão "Exportar textos.json" baixa para o repositório.
+   */
+  function overlayTextos(docId) {
+    if (!state.overlay.textos) state.overlay.textos = {};
+    if (!state.overlay.textos[docId]) state.overlay.textos[docId] = {};
+    return state.overlay.textos[docId];
+  }
+
+  /** Cópia do template com as edições de conteúdo aplicadas (nunca muta a base). */
+  function templateEfetivo(docId, template) {
+    const N = dnNativo();
+    if (!template) return null;
+    const eds = (state.overlay.textos || {})[docId] || {};
+    if (!N || !N.aplicarTextosEditados) return template;
+    return N.aplicarTextosEditados(template, eds);
+  }
+
+  /** Arquivo textos.json pronto para o repositório (overlay de conteúdo). */
+  function textosEfetivosParaRepositorio(docId) {
+    const eds = (state.overlay.textos || {})[docId] || {};
+    return {
+      documento: docId,
+      versao: 1,
+      sobre: "Edições de conteúdo aplicadas pelo painel ADM (texto, visibilidade, corpo, posição). " +
+             "Trechos com `text` diferente do original saem do desenho ancorado e são medidos com a fonte real; " +
+             "sem edição o PDF gerado é idêntico ao documento oficial.",
+      textos: JSON.parse(JSON.stringify(eds))
+    };
   }
 
   /**
@@ -3514,7 +4113,13 @@
     const nCustom = Object.keys(state.overlay.campos_custom || {}).reduce(function (n, k) { return n + Object.keys(state.overlay.campos_custom[k] || {}).length; }, 0);
     const nCidades = Object.keys(state.overlay.cidades || {}).length;
     const nNovas = (state.overlay.cidades_novas || []).length;
-    return { nPatch: nPatch, nCustom: nCustom, nCidades: nCidades, nNovas: nNovas, nenhuma: !(nPatch || nCustom || nCidades || nNovas) };
+    const nTextos = Object.keys(state.overlay.textos || {}).reduce(function (n, k) { return n + Object.keys(state.overlay.textos[k] || {}).length; }, 0);
+    const nRotulos = Object.keys(state.overlay.rotulos || {}).reduce(function (n, k) { return n + Object.keys(state.overlay.rotulos[k] || {}).length; }, 0);
+    return {
+      nPatch: nPatch, nCustom: nCustom, nCidades: nCidades, nNovas: nNovas,
+      nTextos: nTextos, nRotulos: nRotulos,
+      nenhuma: !(nPatch || nCustom || nCidades || nNovas || nTextos || nRotulos)
+    };
   }
 
   function renderExportacaoRepositorio() {
@@ -3524,7 +4129,8 @@
     box.innerHTML = r.nenhuma
       ? '<div class="notice info">Sem alterações no overlay: os arquivos gerados ficam <strong>idênticos</strong> aos do repositório (útil para conferir, não para alterar).</div>'
       : '<div class="notice warn">Pendente de levar ao repositório: <strong>' + r.nPatch + "</strong> coordenada(s) ajustada(s) · <strong>" + r.nCustom +
-        "</strong> operação(ões) de campo · <strong>" + r.nCidades + "</strong> cidade(s) alterada(s) + <strong>" + r.nNovas + "</strong> nova(s). " +
+        "</strong> operação(ões) de campo · <strong>" + r.nCidades + "</strong> cidade(s) alterada(s) + <strong>" + r.nNovas + "</strong> nova(s) · <strong>" +
+        r.nTextos + "</strong> campo(s) de conteúdo · <strong>" + r.nRotulos + "</strong> rótulo(s) de campo. " +
         "Baixe os arquivos abaixo, substitua na raiz do repositório e comite.</div>";
   }
 
@@ -3596,6 +4202,16 @@
     return { novos: novos, alterados: alterados, identicos: identicos, total: chaves.length };
   }
 
+  /** Diff de um overlay ANINHADO (documento → campo → patch), reaproveitando
+   *  a comparação por chave: devolve o mesmo formato de diffOverlayMaps. */
+  function diffAninhado(atual, novo) {
+    const out = {};
+    for (const doc of Object.keys(novo || {})) {
+      out[doc] = diffOverlayMaps((atual || {})[doc] || {}, (novo || {})[doc] || {});
+    }
+    return out;
+  }
+
   function diffImportacao(o) {
     const atual = state.overlay;
     return {
@@ -3607,6 +4223,8 @@
       templates_versoes: diffOverlayMaps(atual.templates_versoes || {}, o.templates_versoes || {}),
       configuracoes: diffOverlayMaps(atual.configuracoes || {}, o.configuracoes || {}),
       campos_custom: diffOverlayMaps(atual.campos_custom || {}, o.campos_custom || {}),
+      textos: diffAninhado(atual.textos || {}, o.textos || {}),
+      rotulos: diffAninhado(atual.rotulos || {}, o.rotulos || {}),
       cidades_novas: (function () {
         const existentes = {};
         for (const n of (atual.cidades_novas || [])) existentes[normalizarChaveCidade(n.cidade)] = n;
@@ -3632,11 +4250,17 @@
       }
       const o = json.overlay;
       const d = diffImportacao(o);
-      const nTotalNovos = d.campos_ficha.novos.length + d.campos_declaracao.novos.length + d.cidades.novos.length + d.pdfs_meta.novos.length + d.cidades_novas.novos.length + d.forms_meta.novos.length + d.templates_versoes.novos.length + d.configuracoes.novos.length + d.campos_custom.novos.length;
-      const nTotalAlt = d.campos_ficha.alterados.length + d.campos_declaracao.alterados.length + d.cidades.alterados.length + d.pdfs_meta.alterados.length + d.forms_meta.alterados.length + d.templates_versoes.alterados.length + d.configuracoes.alterados.length + d.campos_custom.alterados.length;
+      // `textos`/`rotulos` são aninhados (documento → campo): soma os totais por documento.
+      const somaAninhado = function (m, prop) {
+        let n = 0;
+        for (const doc of Object.keys(m || {})) n += (m[doc] && m[doc][prop]) || 0;
+        return n;
+      };
+      const nTotalNovos = d.campos_ficha.novos.length + d.campos_declaracao.novos.length + d.cidades.novos.length + d.pdfs_meta.novos.length + d.cidades_novas.novos.length + d.forms_meta.novos.length + d.templates_versoes.novos.length + d.configuracoes.novos.length + d.campos_custom.novos.length + somaAninhado(d.textos, "novos") + somaAninhado(d.rotulos, "novos");
+      const nTotalAlt = d.campos_ficha.alterados.length + d.campos_declaracao.alterados.length + d.cidades.alterados.length + d.pdfs_meta.alterados.length + d.forms_meta.alterados.length + d.templates_versoes.alterados.length + d.configuracoes.alterados.length + d.campos_custom.alterados.length + somaAninhado(d.textos, "alterados") + somaAninhado(d.rotulos, "alterados");
       // Itens idênticos não alteram nada, mas precisam aparecer na conta: sem
       // isso, “Configurações (1) · 1 idêntico” parecia 1 mudança pendente.
-      const nTotalIdenticos = d.campos_ficha.identicos + d.campos_declaracao.identicos + d.cidades.identicos + d.pdfs_meta.identicos + d.forms_meta.identicos + d.templates_versoes.identicos + d.configuracoes.identicos + d.campos_custom.identicos;
+      const nTotalIdenticos = d.campos_ficha.identicos + d.campos_declaracao.identicos + d.cidades.identicos + d.pdfs_meta.identicos + d.forms_meta.identicos + d.templates_versoes.identicos + d.configuracoes.identicos + d.campos_custom.identicos + somaAninhado(d.textos, "identicos") + somaAninhado(d.rotulos, "identicos");
       const nMudancas = nTotalNovos + nTotalAlt;
 
       // ── Tarefa 5 — diff campo a campo com checkboxes (marcados por padrão) ──
@@ -3657,6 +4281,29 @@
         if (dd.identicos) html += "<details style='margin:6px 0'><summary style='font-size:11.5px;color:var(--text-light);cursor:pointer'>" + dd.identicos + " idêntico(s) (recolhidos — não alteram nada)</summary></details>";
         return html;
       }
+      /** Bloco de um overlay ANINHADO (documento → campo): a chave marcada no
+       *  checkbox é "grupo|documento|campo". */
+      function blocoAninhado(key, titulo) {
+        const porDoc = d[key] || {};
+        const docs = Object.keys(porDoc).filter(function (doc) { return porDoc[doc] && porDoc[doc].total; });
+        if (!docs.length) return "";
+        let h = "<h4 style='margin:10px 0 4px;font-size:12.5px'>" + titulo + "</h4>";
+        for (const doc of docs) {
+          const dd = porDoc[doc];
+          h += "<div class='muted' style='font-size:11px;margin:6px 0 2px'>" + esc(doc) + " — " + dd.total + " campo(s) no arquivo · " +
+            (dd.novos.length + dd.alterados.length) + " mudança(s)</div>";
+          const item = function (campo, de, para, novo) {
+            h += "<div class='diff-line'><label style='display:flex;gap:8px;align-items:flex-start;cursor:pointer'>" +
+              "<input type='checkbox' data-imp='" + key + "|" + esc(doc) + "|" + esc(campo) + "' checked> <span>" +
+              "<span class='path'>" + esc(campo) + "</span> " +
+              (novo ? "<span class='new'>novo</span> — " : "<span class='old'>" + esc(resumoValor(de)) + "</span> → <span class='new'>") +
+              esc(resumoValor(para)) + "</span></label></div>";
+          };
+          for (const n of dd.novos) item(n.k, null, n.v, true);
+          for (const a of dd.alterados) item(a.k, a.de, a.para, false);
+        }
+        return h;
+      }
       let html = nMudancas
         ? "<div class='notice warn'><strong>Diff da importação:</strong> " + nTotalNovos + " novo(s) · " + nTotalAlt + " alterado(s)" +
           (nTotalIdenticos ? " · " + nTotalIdenticos + " idêntico(s)" : "") + ". Desmarque o que NÃO deve ser aplicado.</div>"
@@ -3665,6 +4312,8 @@
           " Isso é o esperado ao exportar e reimportar a <em>mesma sessão</em> sem alterar nada. Para ver mudanças, altere algo depois de exportar " +
           "ou importe este arquivo em outro ambiente — outra aba/navegador, outra máquina ou o painel em modo API.</div>";
       html += blocoMap("campos_ficha") + blocoMap("campos_declaracao") + blocoMap("cidades") + blocoMap("pdfs_meta") + blocoMap("forms_meta") + blocoMap("templates_versoes") + blocoMap("configuracoes") + blocoMap("campos_custom");
+      html += blocoAninhado("textos", "Edição de conteúdo dos documentos embarcados");
+      html += blocoAninhado("rotulos", "Rótulos dos campos de dado");
       if (d.cidades_novas.novos.length || d.cidades_novas.duplicados.length) {
         html += "<h4 style='margin:10px 0 4px;font-size:12.5px'>Cidades novas (" + d.cidades_novas.novos.length + " novas · " + d.cidades_novas.duplicados.length + " já existentes)</h4>";
         for (const n of d.cidades_novas.novos) {
@@ -3687,14 +4336,23 @@
         if (!ok) return;
 
         // aplica apenas o que continuar marcado, mesclando no overlay atual
-        const destinos = { campos_ficha: {}, campos_declaracao: {}, cidades: {}, pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, campos_custom: {} };
+        const destinos = { campos_ficha: {}, campos_declaracao: {}, cidades: {}, pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, campos_custom: {}, textos: {}, rotulos: {} };
         const novasSelecionadas = new Set();
         for (const m of marcados) {
-          const pipe = m.indexOf("|");
-          const grupo = m.slice(0, pipe), chave = m.slice(pipe + 1);
-          if (grupo === "cidades_novas") { novasSelecionadas.add(chave); continue; }
-          const n = (o[grupo] || {})[chave];
-          if (n) destinos[grupo][chave] = n;
+          const partes = m.split("|");
+          const grupo = partes[0];
+          if (grupo === "cidades_novas") { novasSelecionadas.add(partes.slice(1).join("|")); continue; }
+          if (grupo === "textos" || grupo === "rotulos") {
+            // grupo|documento|campo — overlay aninhado
+            const doc = partes[1], campo = partes.slice(2).join("|");
+            const n = (((o[grupo] || {})[doc]) || {})[campo];
+            if (n === undefined) continue;
+            destinos[grupo][doc] = destinos[grupo][doc] || {};
+            destinos[grupo][doc][campo] = n;
+            continue;
+          }
+          const n = (o[grupo] || {})[partes.slice(1).join("|")];
+          if (n) destinos[grupo][partes.slice(1).join("|")] = n;
         }
         state.overlay = {
           campos_ficha: Object.assign({}, state.overlay.campos_ficha, destinos.campos_ficha),
@@ -3705,7 +4363,9 @@
           forms_meta: Object.assign({}, state.overlay.forms_meta, destinos.forms_meta),
           templates_versoes: Object.assign({}, state.overlay.templates_versoes, destinos.templates_versoes),
           configuracoes: Object.assign({}, state.overlay.configuracoes, destinos.configuracoes),
-          campos_custom: Object.assign({}, state.overlay.campos_custom, destinos.campos_custom)
+          campos_custom: Object.assign({}, state.overlay.campos_custom, destinos.campos_custom),
+          textos: Object.assign({}, state.overlay.textos || {}, destinos.textos),
+          rotulos: Object.assign({}, state.overlay.rotulos || {}, destinos.rotulos)
         };
         for (const key of Object.keys(DOCS)) applyOverlayToDoc(key, state.docData[key].json);
         applyCidadesOverlay(); rebuildCityMap();

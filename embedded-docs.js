@@ -32,8 +32,16 @@
  *
  * API: EmbeddedDocs.validarTemplate · EmbeddedDocs.gerarPdf
  *      EmbeddedDocs.quebrarTexto · EmbeddedDocs.fontesDoTemplate
- *      EmbeddedDocs.PAGINA_MAX · EmbeddedDocs.PERFIL_APP
- *      EmbeddedDocs.FONTES_PADRAO
+ *      EmbeddedDocs.trechosComId · EmbeddedDocs.aplicarTextosEditados
+ *      EmbeddedDocs.textoAncorado · EmbeddedDocs.PAGINA_MAX
+ *      EmbeddedDocs.PERFIL_APP · EmbeddedDocs.FONTES_PADRAO
+ *      EmbeddedDocs.PROPS_TEXTO
+ *
+ * EDIÇÃO DE CONTEÚDO (`opcoes.textos`): o ADM reescreve trechos estáticos
+ * ("F-075(PR-011)/38", "Data da publicação", rótulos de BANCO…) sem reextrair
+ * o PDF. O trecho só deixa o caminho ancorado glifo a glifo quando o texto
+ * novo é DIFERENTE do ancorado — até lá a saída é byte a byte o documento
+ * oficial. `visivel: false` remove o trecho (ou a caixinha) do formulário.
  * (window.EmbeddedDocs no navegador; require em Node.)
  */
 (function (root, factory) {
@@ -70,6 +78,7 @@
   var PERFIL_APP = {
     fonte: "Helvetica",
     tamanho: 9,
+    tamanhoEvidencia: 5.5,   // rodapé de evidência (mesmo corpo do app público)
     offsetX: 0.5,
     alturaFracao: 0.78,
     alturaTeto: 1.12,
@@ -81,6 +90,8 @@
   var TEMPLATE_MAX_BYTES = 8 * 1024 * 1024;
   /** Limites estruturais por camada (evita JSON malicioso/quebrado travar a aba). */
   var LIMITES = { imagens: 64, blackBars: 400, whiteBoxes: 400, texts: 1200, checkboxes: 200, paginas: 8 };
+  /** Propriedades de um trecho estático que o ADM pode editar (overlay → texto.json). */
+  var PROPS_TEXTO = ["text", "visivel", "x", "y", "size", "font", "maxWidth", "lineHeight", "alinhamento", "cor"];
 
   function ehNumero(v) { return typeof v === "number" && isFinite(v); }
   function num(v, padrao) { var n = Number(v); return isFinite(n) ? n : (padrao || 0); }
@@ -137,6 +148,19 @@
     if (imagensSemArquivo) erros.push(imagensSemArquivo + " imagem(ns) com `file` inválido (esperado nome de asset, ex.: assets/img0.png).");
     if (!contagens.texts) avisos.push("Template sem textos estáticos — confirme que é o template completo (layout vazio imprime só os dados).");
     if (!contagens.checkboxes && !contagens.blackBars) avisos.push("Template sem caixas de marcação nem barras — típico de extração parcial.");
+    // Trechos estáticos nomeados (edição de conteúdo pelo ADM): `id` único e
+    // obrigatório quando há rótulo/seção, senão duas edições colidiriam no
+    // mesmo trecho. Trecho com `maxWidth` e sem `lineHeight` quebra a linha
+    // colada no bloco de cima — aviso, não erro (ainda gera).
+    var idsVistos = {}, idsRepetidos = 0, wrapsSemLinha = 0, textos = template.texts || [];
+    for (var ti2 = 0; ti2 < textos.length; ti2++) {
+      var t2 = textos[ti2] || {};
+      var id2 = t2.id != null ? String(t2.id) : null;
+      if (id2) { if (idsVistos[id2]) idsRepetidos++; else idsVistos[id2] = true; }
+      if (num(t2.maxWidth) > 0 && !(num(t2.lineHeight) > 0)) wrapsSemLinha++;
+    }
+    if (idsRepetidos) erros.push("texts com `id` repetido: " + idsRepetidos + " ocorrência(s) — o `id` identifica o trecho na edição de conteúdo e precisa ser único.");
+    if (wrapsSemLinha) avisos.push(wrapsSemLinha + " trecho(s) com `maxWidth` sem `lineHeight` — a quebra assume 1,2× o tamanho e pode encostar na linha de cima.");
     var fontesDeclaradas = fontesDoTemplate(template);
     if (template.fontes) {
       for (var fnt0 in fontesDeclaradas) {
@@ -188,6 +212,7 @@
         path: caminho,
         label: no.label || "",
         tipo: no.tipo || no.type || null,
+        rodape: no.rodape === true,
         coordenadas: no.coordenadas,
         pagina: num(no.pagina != null ? no.pagina : no.page, 1)
       });
@@ -264,6 +289,98 @@
   }
 
   /**
+   * O trecho está ANCORADO quando `chars` reconstrói exatamente `text` — a
+   * forma extraída do PDF oficial, que reproduz o kerning glifo a glifo.
+   * Assim que o ADM edita o texto (ou o repositório passa a ter um trecho novo),
+   * a ancoragem deixa de valer e o trecho passa a ser desenhado como RUN
+   * (proporcional, com quebra em `maxWidth`) a partir de (x, y). É o que
+   * permite trocar "F-075(PR-011)/38" por "F-075(PR-011)/39" sem reextrair.
+   */
+  function textoAncorado(tx) {
+    if (!tx || !Array.isArray(tx.chars) || !tx.chars.length) return false;
+    var montado = "";
+    for (var i = 0; i < tx.chars.length; i++) {
+      var c = tx.chars[i];
+      if (!c || !c.c) return false;
+      montado += c.c;
+    }
+    return montado === String(tx.text == null ? "" : tx.text);
+  }
+
+  /** `id` estável do trecho; sem `id` no template, cai no índice ("t07"). */
+  function idDoTexto(tx, indice) {
+    return (tx && tx.id) ? String(tx.id) : "t" + indice;
+  }
+
+  /** Todas as páginas do template, com o índice global de cada trecho. */
+  function trechosComId(template) {
+    var paginas = paginasDoTemplate(template);
+    var saida = [];
+    for (var p = 0; p < paginas.length; p++) {
+      var textos = (paginas[p] && paginas[p].texts) || [];
+      for (var t = 0; t < textos.length; t++) {
+        var tx = textos[t];
+        saida.push({ id: idDoTexto(tx, t), pagina: p + 1, indice: t, texto: tx || {} });
+      }
+    }
+    return saida;
+  }
+
+  /**
+   * Aplica as edições do ADM sobre uma CÓPIA do template (overlay de conteúdo
+   * — exportado como `textos.json`). Só as propriedades de PROPS_TEXTO entram;
+   * `chars` e a âncora original são preservados para que a saída continue
+   * byte a byte igual ao documento oficial enquanto o texto não muda.
+   * Id desconhecido é ignorado de propósito (um `textos.json` de uma versão
+   * anterior do formulário não pode quebrar a geração de uma versão nova).
+   */
+  function aplicarTextosEditados(template, edicoes) {
+    var copia = JSON.parse(JSON.stringify(template || {}));
+    var eds = edicoes || {};
+    if (!copia || typeof copia !== "object") return copia;
+    var porId = {};
+    var chaves = Object.keys(eds);
+    for (var ci = 0; ci < chaves.length; ci++) {
+      var patch = eds[chaves[ci]];
+      if (patch && typeof patch === "object") porId[String(chaves[ci])] = patch;
+    }
+    if (!Object.keys(porId).length) return copia;
+    var aplicados = [], ignorados = [];
+    for (var p = 0; p < paginasDoTemplate(copia).length; p++) {
+      var pagina = paginasDoTemplate(copia)[p];
+      var textos = (pagina && pagina.texts) || [];
+      for (var t = 0; t < textos.length; t++) {
+        var tx = textos[t];
+        if (!tx) continue;
+        var patch = porId[idDoTexto(tx, t)];
+        if (!patch) continue;
+        for (var q = 0; q < PROPS_TEXTO.length; q++) {
+          var prop = PROPS_TEXTO[q];
+          if (!(prop in patch)) continue;
+          if (prop === "text") {
+            if (String(patch.text) === String(tx.text == null ? "" : tx.text)) continue;
+            tx.text = String(patch.text);
+            // Texto novo não tem ancoragem: some com `chars` para o desenho
+            // cair no caminho proporcional (nada é inventado sobre posição).
+            delete tx.chars;
+          } else if (prop === "visivel") {
+            tx.visivel = patch.visivel !== false;
+          } else {
+            tx[prop] = patch[prop];
+          }
+        }
+        aplicados.push(idDoTexto(tx, t));
+      }
+    }
+    for (var k = 0; k < chaves.length; k++) {
+      if (aplicados.indexOf(String(chaves[k])) === -1) ignorados.push(String(chaves[k]));
+    }
+    copia._edicoesAplicadas = aplicados;
+    copia._edicoesIgnoradas = ignorados;
+    return copia;
+  }
+
+  /**
    * Gera o PDF: template + assets + dados. `dados` é um mapa FLAT
    * ("dados_pessoais.campos.nome" → valor) — as folhas do schema, a mesma
    * chave que o Editor Visual e o overlay usam. Campos sem valor ficam em
@@ -276,8 +393,18 @@
     var dadosMapa = dados || {};
     var imagens = (assets && assets.imagens) || {};
     var bytesFontes = (assets && assets.fontes) || {};
+    var relatorioIgnoradas = [];
     if (!PDFLib || !PDFLib.PDFDocument) return Promise.reject(new Error("pdf-lib não disponível (CDN/bundle)."));
     if (!template || typeof template !== "object") return Promise.reject(new Error("Template ausente — carregue o template.json do documento."));
+
+    // Edições de conteúdo do ADM (overlay → `textos.json`): aplicadas ANTES da
+    // validação, para que o que é validado e desenhado seja o template
+    // efetivo. Sem `opcoes.textos` o caminho é idêntico ao anterior (mesmos
+    // bytes — é isso que a auditoria de fidelidade mede).
+    if (ops.textos && typeof ops.textos === "object") {
+      template = aplicarTextosEditados(template, ops.textos);
+      relatorioIgnoradas = (template._edicoesIgnoradas || []).slice();
+    }
 
     var v = validarTemplate(template, schemaCampos);
     if (!v.ok) return Promise.reject(new Error("Template inválido: " + v.erros[0]));
@@ -298,7 +425,7 @@
       };
       var pageW = num(template.page.width), pageH = num(template.page.height);
       var pngCache = {};
-      var relatorio = { imagensFaltando: [], textos: 0, checkboxes: 0, barras: 0, fontesFallback: [] };
+      var relatorio = { imagensFaltando: [], textos: 0, checkboxes: 0, barras: 0, fontesFallback: [], textosEditados: [], ocultos: [], edicoesIgnoradas: relatorioIgnoradas };
       var folhasPdf = [];      // página pdf-lib por índice (o PDF real)
       var paginas = paginasDoTemplate(template);
 
@@ -437,11 +564,15 @@
           var textos = camadas.texts || [];
           for (var t = 0; t < textos.length; t++) {
             var tx = textos[t];
-            if (!tx || (!tx.text && !tx.chars && !tx.palavras)) continue;
+            if (!tx) continue;
+            var idTx = idDoTexto(tx, t);
+            if (tx.visivel === false) { relatorio.ocultos.push(idTx); continue; } // campo removido pelo ADM
+            if (!tx.text && !tx.chars && !tx.palavras) continue;
+            if (tx.chars && tx.chars.length && !textoAncorado(tx)) relatorio.textosEditados.push(idTx);
             var fnt = resolverFonte(tx.font);
             var tam = num(tx.size, 9);
             var larg = num(tx.maxWidth, 0);
-            if (tx.chars && tx.chars.length) {
+            if (tx.chars && tx.chars.length && textoAncorado(tx)) {
               // Texto ancorado CARACTERE A CARACTERE: cada glifo recebe a
               // origem x EXATA do PDF oficial (extração via rawdict). Reproduz
               // o kerning irregular do Canva, que nem o Tc uniforme alcança.
@@ -459,21 +590,31 @@
               }
             } else if (larg > 0) {
               // Trecho com quebra de linha: as linhas descem de `y` a cada
-              // `lineHeight` (mesma convenção do gerador Node da POC).
+              // `lineHeight` (mesma convenção do gerador Node da POC). É o
+              // caminho usado quando o ADM REESCREVE um trecho estático: o
+              // texto novo é medido com a fonte real e re-quebrado no espaço
+              // declarado (maxWidth), em vez de estourar a linha.
               var passo = num(tx.lineHeight, tam * 1.2);
               var linhas = quebrarTexto(fnt, String(tx.text), tam, larg);
               for (var q = 0; q < linhas.length; q++) {
-                folha.drawText(linhas[q], { x: num(tx.x), y: num(tx.y) - q * passo, size: tam, font: fnt, color: cor });
+                var yLinha = num(tx.y) - q * passo;
+                var xLinha = num(tx.x);
+                if (tx.alinhamento && larg > 0) { // direita/centro dentro da caixa
+                  var sobra = larg - fnt.widthOfTextAtSize(linhas[q], tam);
+                  if (tx.alinhamento === "direita" || tx.alinhamento === "right") xLinha += sobra;
+                  else if (tx.alinhamento === "centro" || tx.alinhamento === "center") xLinha += sobra / 2;
+                }
+                folha.drawText(linhas[q], { x: xLinha, y: yLinha, size: tam, font: fnt, color: corHex(tx.cor, PDFLib) || cor });
               }
             } else {
-              folha.drawText(String(tx.text), { x: num(tx.x), y: num(tx.y), size: tam, font: fnt, color: cor });
+              folha.drawText(String(tx.text), { x: num(tx.x), y: num(tx.y), size: tam, font: fnt, color: corHex(tx.cor, PDFLib) || cor });
             }
           }
           relatorio.textos += textos.length;
           var cbs = camadas.checkboxes || [];
           for (var c = 0; c < cbs.length; c++) {
             var cb = cbs[c];
-            if (!cb) continue;
+            if (!cb || cb.visivel === false) continue;
             // Formato novo: glifo U+2751 (quadrado com sombra, Wingdings no
             // original) na origem exata (x, base) e size extraídos do PDF
             // oficial. Fonte do glifo declarada em template.fonteCheckbox
@@ -486,11 +627,14 @@
               }
             }
             // Fallback/geometria legada: retângulo branco com borda (formato
-            // `width`/`height`; `side` é o formato antigo de quadrado).
-            var w = num(cb.width, num(cb.side, 5));
-            var h = num(cb.height, num(cb.side, 5));
+            // `width`/`height`; `side` é o formato antigo de quadrado). Sem
+            // TTF, um trecho com `base` cai no retângulo NA POSIÇÃO DA LINHA
+            // (a caixa é derivada do `size`), não no rodapé da página.
+            var w = num(cb.width, num(cb.side, ehNumero(cb.base) ? num(cb.size, 9.96) : 5));
+            var h = num(cb.height, num(cb.side, ehNumero(cb.base) ? num(cb.size, 9.96) : 5));
             if (w <= 0 || h <= 0) continue;
-            folha.drawRectangle({ x: num(cb.x), y: num(cb.y), width: w, height: h, color: branco, borderColor: cor, borderWidth: num(cb.borda, 0.5) });
+            var yCx = num(cb.y, ehNumero(cb.base) ? num(cb.base) - h * 0.78 : 0);
+            folha.drawRectangle({ x: num(cb.x), y: yCx, width: w, height: h, color: branco, borderColor: cor, borderWidth: num(cb.borda, 0.5) });
           }
           relatorio.checkboxes += cbs.length;
         });
@@ -518,6 +662,27 @@
           if (!str) { ignorados.push({ id: f.path, motivo: "texto vazio após truncar" }); continue; }
           var alvo = folhasPdf[idxPagina];
           if (!alvo) { ignorados.push({ id: f.path, motivo: "página " + (idxPagina + 1) + " não desenhada" }); continue; }
+          // Campo de RODAPÉ (`assinatura.evidencia`, marcado com `rodape: true`):
+          // a coordenada y é a margem INFERIOR da página, não a base do texto.
+          // Mesmo desenho do app público (quebrarTextoEvidencia +
+          // desenharEvidenciaAssinatura): 5,5 pt, começando em y + 4, uma linha
+          // a cada 5,5 × 1,18. O `y < 0` cobre schemas antigos com margem
+          // negativa (o gate de publicação recusa coordenada negativa).
+          if (f.rodape || yBase < 0) {
+            var linhasEv = quebrarTexto(helv, String(valor), PERFIL_APP.tamanhoEvidencia,
+                                       Math.max(120, w - 2));
+            for (var e = 0; e < linhasEv.length; e++) {
+              alvo.drawText(linhasEv[e], {
+                x: x + PERFIL_APP.offsetX,
+                y: yBase + 4 + e * (PERFIL_APP.tamanhoEvidencia * 1.18),
+                size: PERFIL_APP.tamanhoEvidencia,
+                font: helv,
+                color: PDFLib.rgb(0, 0, 0)
+              });
+            }
+            desenhados++;
+            continue;
+          }
           // Opção de radio/checkbox marcada (valor true): desenha um X centralizado
           // na coordenada da opção (a caixinha ❑ já vem do template).
           if (valor === true) {
@@ -574,6 +739,7 @@
     PAGINA_MAX: LIMITES.paginas,
     TEMPLATE_MAX_BYTES: TEMPLATE_MAX_BYTES,
     FONTES_PADRAO: FONTES_PADRAO,
+    PROPS_TEXTO: PROPS_TEXTO,
     validarTemplate: validarTemplate,
     folhasComCoordenadas: folhasComCoordenadas,
     baselinePdf: baselinePdf,
@@ -581,6 +747,9 @@
     quebrarTexto: quebrarTexto,
     fontesDoTemplate: fontesDoTemplate,
     valorDaFolha: valorDaFolha,
+    textoAncorado: textoAncorado,
+    trechosComId: trechosComId,
+    aplicarTextosEditados: aplicarTextosEditados,
     gerarPdf: gerarPdf
   };
 });

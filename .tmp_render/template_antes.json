@@ -235,14 +235,7 @@
           "c": "o",
           "x": 46.38
         }
-      ],
-      "id": "t00",
-      "secao": "Vale refeição / alimentação",
-      "papel": "texto",
-      "nome": "Aviso — Atenção",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": ": A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes (filhos e/ou",
@@ -783,14 +776,7 @@
           "c": "u",
           "x": 560.02
         }
-      ],
-      "id": "t01",
-      "secao": "Vale refeição / alimentação",
-      "papel": "texto",
-      "nome": ": A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes (filhos e/ou",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "cônjuge) no plano de saúde. É imprescindível a apresentação do CPF de todos os dependentes. Para que o pagamento do salário família seja realizado",
@@ -1383,14 +1369,7 @@
           "c": "o",
           "x": 560.01
         }
-      ],
-      "id": "t02",
-      "secao": "Vale refeição / alimentação",
-      "papel": "texto",
-      "nome": "cônjuge) no plano de saúde. É imprescindível a apresentação do CPF de todos os dependentes. Para que o pagamento do salário família seja realizado",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "é fundamental a apresentação da certidão de nascimento dos filhos menores de 14 anos. Para as crianças com menos de 7 anos de idade, também é",
@@ -1963,14 +1942,7 @@
           "c": "é",
           "x": 560.02
         }
-      ],
-      "id": "t03",
-      "secao": "Vale refeição / alimentação",
-      "papel": "texto",
-      "nome": "é fundamental a apresentação da certidão de nascimento dos filhos menores de 14 anos. Para as crianças com menos de 7 anos de idade, também é",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "necessário a carteira de vacinação. Estrangeiros: entregar a documentação específica (conforme Check List).",
@@ -2407,17 +2379,10 @@
           "c": ".",
           "x": 408.92
         }
-      ],
-      "id": "t04",
-      "secao": "Aviso — Atenção",
-      "papel": "texto",
-      "nome": "necessário a carteira de vacinação. Estrangeiros: entregar a documentação específica (conforme Check List).",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
-      "text": "Bradesco:",
+      "text": "Bradesco:  Corrente  Conta Salário  Poupança",
       "x": 91.03,
       "y": 501.69,
       "size": 8.04,
@@ -2458,23 +2423,15 @@
         {
           "c": ":",
           "x": 125.01
-        }
-      ],
-      "id": "t05",
-      "papel": "rotulo",
-      "nome": "Bradesco",
-      "secao": "Conta bancária",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
-    },
-    {
-      "text": "Corrente",
-      "x": 137.81,
-      "y": 501.69,
-      "size": 8.04,
-      "font": "Arial",
-      "chars": [
+        },
+        {
+          "c": " ",
+          "x": 127.24
+        },
+        {
+          "c": " ",
+          "x": 135.58
+        },
         {
           "c": "C",
           "x": 137.81
@@ -2506,25 +2463,15 @@
         {
           "c": "e",
           "x": 164.63
-        }
-      ],
-      "id": "t06",
-      "papel": "opcao",
-      "opcaoDe": "c00",
-      "grupo": "Bradesco",
-      "nome": "Bradesco — Corrente",
-      "secao": "Conta bancária",
-      "maxWidth": 445.69,
-      "lineHeight": 9.65,
-      "visivel": true
-    },
-    {
-      "text": "Conta Salário",
-      "x": 179.68,
-      "y": 501.69,
-      "size": 8.04,
-      "font": "Arial",
-      "chars": [
+        },
+        {
+          "c": " ",
+          "x": 169.1
+        },
+        {
+          "c": " ",
+          "x": 177.44
+        },
         {
           "c": "C",
           "x": 179.68
@@ -2576,25 +2523,15 @@
         {
           "c": "o",
           "x": 223.93
-        }
-      ],
-      "id": "t07",
-      "papel": "opcao",
-      "opcaoDe": "c01",
-      "grupo": "Bradesco",
-      "nome": "Bradesco — Conta Salário",
-      "secao": "Conta bancária",
-      "maxWidth": 403.82,
-      "lineHeight": 9.65,
-      "visivel": true
-    },
-    {
-      "text": "Poupança",
-      "x": 238.98,
-      "y": 501.69,
-      "size": 8.04,
-      "font": "Arial",
-      "chars": [
+        },
+        {
+          "c": " ",
+          "x": 228.4
+        },
+        {
+          "c": " ",
+          "x": 236.74
+        },
         {
           "c": "P",
           "x": 238.98
@@ -2627,19 +2564,23 @@
           "c": "a",
           "x": 270.72
         }
-      ],
-      "id": "t08",
-      "papel": "opcao",
-      "opcaoDe": "c02",
-      "grupo": "Bradesco",
-      "nome": "Bradesco — Poupança",
-      "secao": "Conta bancária",
-      "maxWidth": 344.52,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
-      "text": "Santander:",
+      "text": " ",
+      "x": 275.2,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Arial-Bold",
+      "chars": [
+        {
+          "c": " ",
+          "x": 275.2
+        }
+      ]
+    },
+    {
+      "text": "Santander:  Corrente   Conta Salário",
       "x": 91.66,
       "y": 478.55,
       "size": 8.04,
@@ -2684,23 +2625,15 @@
         {
           "c": ":",
           "x": 128.77
-        }
-      ],
-      "id": "t09",
-      "papel": "rotulo",
-      "nome": "Santander",
-      "secao": "Conta bancária",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
-    },
-    {
-      "text": "Corrente",
-      "x": 141.58,
-      "y": 478.55,
-      "size": 8.04,
-      "font": "Helvetica",
-      "chars": [
+        },
+        {
+          "c": " ",
+          "x": 131.0
+        },
+        {
+          "c": " ",
+          "x": 139.34
+        },
         {
           "c": "C",
           "x": 141.58
@@ -2732,25 +2665,19 @@
         {
           "c": "e",
           "x": 168.39
-        }
-      ],
-      "id": "t10",
-      "papel": "opcao",
-      "opcaoDe": "c03",
-      "grupo": "Santander",
-      "nome": "Santander — Corrente",
-      "secao": "Conta bancária",
-      "maxWidth": 441.92,
-      "lineHeight": 9.65,
-      "visivel": true
-    },
-    {
-      "text": "Conta Salário",
-      "x": 185.69,
-      "y": 478.55,
-      "size": 8.04,
-      "font": "Helvetica",
-      "chars": [
+        },
+        {
+          "c": " ",
+          "x": 172.87
+        },
+        {
+          "c": " ",
+          "x": 175.1
+        },
+        {
+          "c": " ",
+          "x": 183.45
+        },
         {
           "c": "C",
           "x": 185.69
@@ -2803,16 +2730,7 @@
           "c": "o",
           "x": 229.93
         }
-      ],
-      "id": "t11",
-      "papel": "opcao",
-      "opcaoDe": "c04",
-      "grupo": "Santander",
-      "nome": "Santander — Conta Salário",
-      "secao": "Conta bancária",
-      "maxWidth": 397.81,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "Ficha Cadastral de Admissão – Operacional e Administrativo ",
@@ -3057,14 +2975,7 @@
           "c": " ",
           "x": 417.38
         }
-      ],
-      "id": "t12",
-      "secao": "Cabeçalho",
-      "papel": "titulo",
-      "nome": "Título do formulário",
-      "maxWidth": 456.68,
-      "lineHeight": 12.05,
-      "visivel": true
+      ]
     },
     {
       "text": "Data da publicação:",
@@ -3149,14 +3060,7 @@
           "c": ":",
           "x": 363.69
         }
-      ],
-      "id": "t13",
-      "papel": "rotulo",
-      "nome": "Data da publicação",
-      "secao": "Cabeçalho",
-      "maxWidth": 293.12,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "Vigência:",
@@ -3201,14 +3105,7 @@
           "c": ":",
           "x": 343.57
         }
-      ],
-      "id": "t14",
-      "papel": "rotulo",
-      "nome": "Vigência",
-      "secao": "Cabeçalho",
-      "maxWidth": 273.01,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "F-075(PR-011)/38 ",
@@ -3285,15 +3182,7 @@
           "c": " ",
           "x": 284.19
         }
-      ],
-      "id": "t15",
-      "papel": "valor",
-      "rotuloDe": "t16",
-      "nome": "Código/Revisão",
-      "secao": "Cabeçalho",
-      "maxWidth": 380.19,
-      "lineHeight": 12.05,
-      "visivel": true
+      ]
     },
     {
       "text": "Código/Revisão:",
@@ -3362,14 +3251,7 @@
           "c": ":",
           "x": 194.86
         }
-      ],
-      "id": "t16",
-      "papel": "rotulo",
-      "nome": "Código/Revisão",
-      "secao": "Cabeçalho",
-      "maxWidth": 456.68,
-      "lineHeight": 10.8,
-      "visivel": true
+      ]
     },
     {
       "text": "Importante:",
@@ -3422,14 +3304,7 @@
           "c": ":",
           "x": 58.2
         }
-      ],
-      "id": "t17",
-      "papel": "rotulo",
-      "nome": "Aviso — Importante",
-      "secao": "Aviso — Importante",
-      "maxWidth": 470.0,
-      "lineHeight": 9.6,
-      "visivel": true
+      ]
     },
     {
       "text": " As informações devem ser corretamente preenchidas para cadastro admissão devido ao cumprimento do decreto 8373/2014 Programa eSocial. ",
@@ -3978,15 +3853,7 @@
           "c": " ",
           "x": 574.24
         }
-      ],
-      "id": "t18",
-      "papel": "valor",
-      "rotuloDe": "t17",
-      "nome": "Aviso — Importante",
-      "secao": "Aviso — Importante",
-      "maxWidth": 470.0,
-      "lineHeight": 9.6,
-      "visivel": true
+      ]
     },
     {
       "text": "29/05/2026",
@@ -4035,15 +3902,7 @@
           "c": "6",
           "x": 415.84
         }
-      ],
-      "id": "t19",
-      "papel": "valor",
-      "rotuloDe": "t13",
-      "nome": "Data da publicação",
-      "secao": "Cabeçalho",
-      "maxWidth": 216.58,
-      "lineHeight": 13.2,
-      "visivel": true
+      ]
     },
     {
       "text": "2 anos",
@@ -4076,15 +3935,7 @@
           "c": "s",
           "x": 406.03
         }
-      ],
-      "id": "t20",
-      "papel": "valor",
-      "rotuloDe": "t14",
-      "nome": "Vigência",
-      "secao": "Cabeçalho",
-      "maxWidth": 205.05,
-      "lineHeight": 13.2,
-      "visivel": true
+      ]
     },
     {
       "text": "DEPENDENTES ",
@@ -4141,14 +3992,7 @@
           "c": " ",
           "x": 331.94
         }
-      ],
-      "id": "t21",
-      "secao": "Dependentes",
-      "papel": "titulo",
-      "nome": "DEPENDENTES",
-      "maxWidth": 326.55,
-      "lineHeight": 11.95,
-      "visivel": true
+      ]
     },
     {
       "text": "DADOS PESSOAIS ",
@@ -4217,14 +4061,7 @@
           "c": " ",
           "x": 339.65
         }
-      ],
-      "id": "t22",
-      "secao": "Aviso — Importante",
-      "papel": "titulo",
-      "nome": "DADOS PESSOAIS",
-      "maxWidth": 333.88,
-      "lineHeight": 11.95,
-      "visivel": true
+      ]
     },
     {
       "text": "VALE REFEIÇÃO/ALIMENTAÇÃO ",
@@ -4337,14 +4174,7 @@
           "c": " ",
           "x": 373.09
         }
-      ],
-      "id": "t23",
-      "secao": "Vale refeição / alimentação",
-      "papel": "titulo",
-      "nome": "VALE REFEIÇÃO/ALIMENTAÇÃO",
-      "maxWidth": 368.21,
-      "lineHeight": 11.95,
-      "visivel": true
+      ]
     },
     {
       "text": "BENEFÍCIOS - VALE TRANSPORTE ",
@@ -4469,14 +4299,7 @@
           "c": " ",
           "x": 378.4
         }
-      ],
-      "id": "t24",
-      "secao": "Dependentes",
-      "papel": "titulo",
-      "nome": "BENEFÍCIOS - VALE TRANSPORTE",
-      "maxWidth": 373.49,
-      "lineHeight": 11.95,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome: ",
@@ -4509,14 +4332,7 @@
           "c": " ",
           "x": 41.37
         }
-      ],
-      "id": "t25",
-      "papel": "rotulo",
-      "nome": "Nome",
-      "secao": "Dependentes",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome: ",
@@ -4549,14 +4365,7 @@
           "c": " ",
           "x": 41.37
         }
-      ],
-      "id": "t26",
-      "papel": "rotulo",
-      "nome": "Nome",
-      "secao": "Dependentes",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome: ",
@@ -4589,14 +4398,7 @@
           "c": " ",
           "x": 41.37
         }
-      ],
-      "id": "t27",
-      "papel": "rotulo",
-      "nome": "Nome",
-      "secao": "Dependentes",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome: ",
@@ -4629,14 +4431,7 @@
           "c": " ",
           "x": 41.37
         }
-      ],
-      "id": "t28",
-      "papel": "rotulo",
-      "nome": "Nome",
-      "secao": "Dependentes",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome: ",
@@ -4669,14 +4464,7 @@
           "c": " ",
           "x": 41.37
         }
-      ],
-      "id": "t29",
-      "papel": "rotulo",
-      "nome": "Nome",
-      "secao": "Dependentes",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "VALE TRANSPORTE ",
@@ -4749,14 +4537,7 @@
           "c": " ",
           "x": 141.8
         }
-      ],
-      "id": "t30",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "VALE TRANSPORTE",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "ÔNIBUS ",
@@ -4793,14 +4574,7 @@
           "c": " ",
           "x": 121.11
         }
-      ],
-      "id": "t31",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "ÔNIBUS",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "METRÔ/TREM ",
@@ -4853,14 +4627,7 @@
           "c": " ",
           "x": 130.95
         }
-      ],
-      "id": "t32",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "METRÔ/TREM",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "INTERMUNICIPAL ",
@@ -4929,14 +4696,7 @@
           "c": " ",
           "x": 137.35
         }
-      ],
-      "id": "t33",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "INTERMUNICIPAL",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "INTEGRAÇÃO ",
@@ -4989,14 +4749,7 @@
           "c": " ",
           "x": 130.95
         }
-      ],
-      "id": "t34",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "INTEGRAÇÃO",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome Social: (Inclusão no crachá) ",
@@ -5141,14 +4894,7 @@
           "c": " ",
           "x": 133.83
         }
-      ],
-      "id": "t35",
-      "secao": "Dados pessoais",
-      "papel": "texto",
-      "nome": "Nome Social: (Inclusão no crachá)",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Telefone: ",
@@ -5197,14 +4943,7 @@
           "c": " ",
           "x": 50.6
         }
-      ],
-      "id": "t36",
-      "papel": "rotulo",
-      "nome": "Telefone",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "E-mail: ",
@@ -5245,14 +4984,7 @@
           "c": " ",
           "x": 42.85
         }
-      ],
-      "id": "t37",
-      "papel": "rotulo",
-      "nome": "E-mail",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Estado Civil: ",
@@ -5317,14 +5049,7 @@
           "c": " ",
           "x": 61.95
         }
-      ],
-      "id": "t38",
-      "papel": "rotulo",
-      "nome": "Estado Civil",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": " NÃO – Informar ",
@@ -5397,15 +5122,7 @@
           "c": " ",
           "x": 142.79
         }
-      ],
-      "id": "t39",
-      "papel": "opcao",
-      "opcaoDe": "c05",
-      "secao": "Dados pessoais",
-      "nome": "NÃO – Informar",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "PIS: ",
@@ -5434,14 +5151,7 @@
           "c": " ",
           "x": 158.35
         }
-      ],
-      "id": "t40",
-      "papel": "rotulo",
-      "nome": "PIS",
-      "secao": "Dados pessoais",
-      "maxWidth": 438.76,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Endereço: ",
@@ -5490,14 +5200,7 @@
           "c": " ",
           "x": 53.75
         }
-      ],
-      "id": "t41",
-      "papel": "rotulo",
-      "nome": "Endereço",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "CEP: ",
@@ -5526,14 +5229,7 @@
           "c": " ",
           "x": 36.24
         }
-      ],
-      "id": "t42",
-      "papel": "rotulo",
-      "nome": "CEP",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Bairro: ",
@@ -5574,14 +5270,7 @@
           "c": " ",
           "x": 156.89
         }
-      ],
-      "id": "t43",
-      "papel": "rotulo",
-      "nome": "Bairro",
-      "secao": "Dados pessoais",
-      "maxWidth": 449.51,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Possui Deficiência?",
@@ -5666,14 +5355,7 @@
           "c": "?",
           "x": 81.38
         }
-      ],
-      "id": "t44",
-      "secao": "Dados pessoais",
-      "papel": "texto",
-      "nome": "Possui Deficiência?",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Celular: ",
@@ -5718,14 +5400,7 @@
           "c": " ",
           "x": 288.23
         }
-      ],
-      "id": "t45",
-      "papel": "rotulo",
-      "nome": "Celular",
-      "secao": "Dados pessoais",
-      "maxWidth": 321.27,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nº ",
@@ -5746,14 +5421,7 @@
           "c": " ",
           "x": 297.4
         }
-      ],
-      "id": "t46",
-      "secao": "Dados pessoais",
-      "papel": "texto",
-      "nome": "Nº",
-      "maxWidth": 293.66,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "QUANTIDADE ",
@@ -5806,14 +5474,7 @@
           "c": " ",
           "x": 317.38
         }
-      ],
-      "id": "t47",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "QUANTIDADE",
-      "maxWidth": 312.75,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Data de nascimento: ",
@@ -5902,14 +5563,7 @@
           "c": " ",
           "x": 375.36
         }
-      ],
-      "id": "t48",
-      "papel": "rotulo",
-      "nome": "Data de nascimento",
-      "secao": "Dependentes",
-      "maxWidth": 276.13,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Data de nascimento: ",
@@ -5998,14 +5652,7 @@
           "c": " ",
           "x": 375.89
         }
-      ],
-      "id": "t49",
-      "papel": "rotulo",
-      "nome": "Data de nascimento",
-      "secao": "Dependentes",
-      "maxWidth": 276.13,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Data de nascimento: ",
@@ -6094,14 +5741,7 @@
           "c": " ",
           "x": 375.89
         }
-      ],
-      "id": "t50",
-      "papel": "rotulo",
-      "nome": "Data de nascimento",
-      "secao": "Dependentes",
-      "maxWidth": 276.13,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Data de nascimento: ",
@@ -6190,14 +5830,7 @@
           "c": " ",
           "x": 375.89
         }
-      ],
-      "id": "t51",
-      "papel": "rotulo",
-      "nome": "Data de nascimento",
-      "secao": "Dependentes",
-      "maxWidth": 276.13,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Data de nascimento: ",
@@ -6286,14 +5919,7 @@
           "c": " ",
           "x": 375.89
         }
-      ],
-      "id": "t52",
-      "papel": "rotulo",
-      "nome": "Data de nascimento",
-      "secao": "Dependentes",
-      "maxWidth": 276.13,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Nome Completo: (Preencher da mesma forma que consta no documento Certidão de Nascimento ou Casamento) ",
@@ -6710,14 +6336,7 @@
           "c": " ",
           "x": 394.13
         }
-      ],
-      "id": "t53",
-      "secao": "Dados pessoais",
-      "papel": "texto",
-      "nome": "Nome Completo: (Preencher da mesma forma que consta no documento Certidão de Nascimento ou Casamento)",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Complemento: ",
@@ -6778,14 +6397,7 @@
           "c": " ",
           "x": 388.36
         }
-      ],
-      "id": "t54",
-      "papel": "rotulo",
-      "nome": "Complemento",
-      "secao": "Dados pessoais",
-      "maxWidth": 244.06,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Cidade: ",
@@ -6826,14 +6438,7 @@
           "c": " ",
           "x": 365.08
         }
-      ],
-      "id": "t55",
-      "papel": "rotulo",
-      "nome": "Cidade",
-      "secao": "Dados pessoais",
-      "maxWidth": 244.06,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "TIPO DEFICIÊNCIA ",
@@ -6910,14 +6515,33 @@
           "c": " ",
           "x": 447.36
         }
-      ],
-      "id": "t56",
-      "secao": "Dados pessoais",
-      "papel": "texto",
-      "nome": "TIPO DEFICIÊNCIA",
-      "maxWidth": 199.05,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
+    },
+    {
+      "text": " ",
+      "x": 386.38,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Arial",
+      "chars": [
+        {
+          "c": " ",
+          "x": 386.38
+        }
+      ]
+    },
+    {
+      "text": " ",
+      "x": 428.19,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Arial",
+      "chars": [
+        {
+          "c": " ",
+          "x": 428.19
+        }
+      ]
     },
     {
       "text": "CPF (do dependente): ",
@@ -7010,14 +6634,7 @@
           "c": " ",
           "x": 502.35
         }
-      ],
-      "id": "t57",
-      "papel": "rotulo",
-      "nome": "CPF (do dependente)",
-      "secao": "Dependentes",
-      "maxWidth": 153.79,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "CPF (do dependente): ",
@@ -7110,14 +6727,7 @@
           "c": " ",
           "x": 502.35
         }
-      ],
-      "id": "t58",
-      "papel": "rotulo",
-      "nome": "CPF (do dependente)",
-      "secao": "Dependentes",
-      "maxWidth": 153.79,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "CPF (do dependente): ",
@@ -7210,14 +6820,7 @@
           "c": " ",
           "x": 502.35
         }
-      ],
-      "id": "t59",
-      "papel": "rotulo",
-      "nome": "CPF (do dependente)",
-      "secao": "Dependentes",
-      "maxWidth": 153.79,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "CPF (do dependente): ",
@@ -7310,14 +6913,7 @@
           "c": " ",
           "x": 502.35
         }
-      ],
-      "id": "t60",
-      "papel": "rotulo",
-      "nome": "CPF (do dependente)",
-      "secao": "Dependentes",
-      "maxWidth": 153.79,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "CPF (do dependente): ",
@@ -7410,14 +7006,7 @@
           "c": " ",
           "x": 502.35
         }
-      ],
-      "id": "t61",
-      "papel": "rotulo",
-      "nome": "CPF (do dependente)",
-      "secao": "Dependentes",
-      "maxWidth": 153.79,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "VALOR UNITÁRIO ",
@@ -7486,14 +7075,7 @@
           "c": " ",
           "x": 510.79
         }
-      ],
-      "id": "t62",
-      "secao": "Benefícios — Vale transporte",
-      "papel": "texto",
-      "nome": "VALOR UNITÁRIO",
-      "maxWidth": 132.87,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": " FÍSICA",
@@ -7530,15 +7112,7 @@
           "c": "A",
           "x": 288.17
         }
-      ],
-      "id": "t63",
-      "papel": "opcao",
-      "opcaoDe": "c08",
-      "secao": "Dados pessoais",
-      "nome": "FÍSICA",
-      "maxWidth": 315.03,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": " AUDITIVA",
@@ -7583,15 +7157,7 @@
           "c": "A",
           "x": 350.06
         }
-      ],
-      "id": "t64",
-      "papel": "opcao",
-      "opcaoDe": "c09",
-      "secao": "Dados pessoais",
-      "nome": "AUDITIVA",
-      "maxWidth": 262.91,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "VISUAL",
@@ -7624,15 +7190,7 @@
           "c": "L",
           "x": 409.26
         }
-      ],
-      "id": "t65",
-      "papel": "opcao",
-      "opcaoDe": "c06",
-      "secao": "Dados pessoais",
-      "nome": "VISUAL",
-      "maxWidth": 195.2,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "INTELECTUAL",
@@ -7685,15 +7243,7 @@
           "c": "L",
           "x": 474.5
         }
-      ],
-      "id": "t66",
-      "papel": "opcao",
-      "opcaoDe": "c07",
-      "secao": "Dados pessoais",
-      "nome": "INTELECTUAL",
-      "maxWidth": 152.47,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": " MÚLTIPLA ",
@@ -7742,15 +7292,7 @@
           "c": " ",
           "x": 526.92
         }
-      ],
-      "id": "t67",
-      "papel": "opcao",
-      "opcaoDe": "c10",
-      "secao": "Dados pessoais",
-      "nome": "MÚLTIPLA",
-      "maxWidth": 92.9,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "DADOS",
@@ -7779,14 +7321,7 @@
           "c": "S",
           "x": 46.07
         }
-      ],
-      "id": "t68",
-      "secao": "Conta bancária",
-      "papel": "titulo",
-      "nome": "Conta bancária",
-      "maxWidth": 470.0,
-      "lineHeight": 10.8,
-      "visivel": true
+      ]
     },
     {
       "text": "CONTA",
@@ -7815,14 +7350,7 @@
           "c": "A",
           "x": 45.07
         }
-      ],
-      "id": "t69",
-      "secao": "Conta bancária",
-      "papel": "titulo",
-      "nome": "Conta bancária",
-      "maxWidth": 470.0,
-      "lineHeight": 10.8,
-      "visivel": true
+      ]
     },
     {
       "text": "BANCÁRIA ",
@@ -7867,14 +7395,7 @@
           "c": " ",
           "x": 67.59
         }
-      ],
-      "id": "t70",
-      "secao": "Conta bancária",
-      "papel": "titulo",
-      "nome": "Conta bancária",
-      "maxWidth": 470.0,
-      "lineHeight": 10.8,
-      "visivel": true
+      ]
     },
     {
       "text": "NOME COMPLETO DO CANDIDATO",
@@ -7987,14 +7508,7 @@
           "c": "O",
           "x": 225.91
         }
-      ],
-      "id": "t71",
-      "secao": "Assinatura",
-      "papel": "texto",
-      "nome": "Assinatura — nome completo",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "DATA ",
@@ -8023,14 +7537,7 @@
           "c": " ",
           "x": 502.21
         }
-      ],
-      "id": "t72",
-      "secao": "Assinatura",
-      "papel": "texto",
-      "nome": "Assinatura — data",
-      "maxWidth": 102.74,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "100% Vale Alimentação",
@@ -8123,15 +7630,7 @@
           "c": "o",
           "x": 159.9
         }
-      ],
-      "id": "t73",
-      "papel": "opcao",
-      "opcaoDe": "c11",
-      "secao": "Vale refeição / alimentação",
-      "nome": "100% Vale Alimentação",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "Agência:",
@@ -8172,14 +7671,7 @@
           "c": ":",
           "x": 321.12
         }
-      ],
-      "id": "t74",
-      "papel": "rotulo",
-      "nome": "Agência",
-      "secao": "Conta bancária",
-      "maxWidth": 293.66,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "100% Vale Refeição ",
@@ -8264,15 +7756,7 @@
           "c": " ",
           "x": 340.82
         }
-      ],
-      "id": "t75",
-      "papel": "opcao",
-      "opcaoDe": "c12",
-      "secao": "Vale refeição / alimentação",
-      "nome": "100% Vale Refeição",
-      "maxWidth": 317.79,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "Conta/Dígito: ",
@@ -8337,14 +7821,7 @@
           "c": " ",
           "x": 467.95
         }
-      ],
-      "id": "t76",
-      "papel": "rotulo",
-      "nome": "Conta/Dígito",
-      "secao": "Conta bancária",
-      "maxWidth": 166.03,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "Flexibilizado (50% VR e 50% VA) ",
@@ -8481,15 +7958,7 @@
           "c": " ",
           "x": 550.87
         }
-      ],
-      "id": "t77",
-      "papel": "opcao",
-      "opcaoDe": "c13",
-      "secao": "Vale refeição / alimentação",
-      "nome": "Flexibilizado (50% VR e 50% VA)",
-      "maxWidth": 156.43,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "_______________________________________",
@@ -8654,14 +8123,7 @@
           "c": "_",
           "x": 290.05
         }
-      ],
-      "id": "t78",
-      "secao": "Assinatura",
-      "papel": "texto",
-      "nome": "_______________________________________",
-      "maxWidth": 470.0,
-      "lineHeight": 13.25,
-      "visivel": true
+      ]
     },
     {
       "text": "______/_______/_____",
@@ -8750,22 +8212,36 @@
           "c": "_",
           "x": 540.74
         }
-      ],
-      "id": "t79",
-      "secao": "Assinatura",
-      "papel": "texto",
-      "nome": "______/_______/_____",
-      "maxWidth": 153.31,
-      "lineHeight": 13.25,
-      "visivel": true
+      ]
     },
     {
-      "text": "SIM",
-      "x": 139.03,
+      "text": " ",
+      "x": 517.13,
+      "y": 33.35,
+      "size": 4.82,
+      "font": "Arial",
+      "chars": [
+        {
+          "c": " ",
+          "x": 517.13
+        }
+      ]
+    },
+    {
+      "text": "  SIM     NÃO ",
+      "x": 128.43,
       "y": 526.38,
       "size": 8.0,
       "font": "Arial",
       "chars": [
+        {
+          "c": " ",
+          "x": 128.43
+        },
+        {
+          "c": " ",
+          "x": 136.78
+        },
         {
           "c": "S",
           "x": 139.03
@@ -8777,24 +8253,27 @@
         {
           "c": "M",
           "x": 146.64
-        }
-      ],
-      "id": "t80",
-      "papel": "opcao",
-      "opcaoDe": "c14",
-      "secao": "Dados pessoais",
-      "nome": "SIM",
-      "maxWidth": 444.47,
-      "lineHeight": 9.6,
-      "visivel": true
-    },
-    {
-      "text": "NÃO",
-      "x": 170.67,
-      "y": 526.38,
-      "size": 8.0,
-      "font": "Arial",
-      "chars": [
+        },
+        {
+          "c": " ",
+          "x": 153.33
+        },
+        {
+          "c": " ",
+          "x": 155.58
+        },
+        {
+          "c": " ",
+          "x": 157.83
+        },
+        {
+          "c": " ",
+          "x": 160.08
+        },
+        {
+          "c": " ",
+          "x": 168.43
+        },
         {
           "c": "N",
           "x": 170.67
@@ -8806,16 +8285,12 @@
         {
           "c": "O",
           "x": 181.84
+        },
+        {
+          "c": " ",
+          "x": 188.1
         }
-      ],
-      "id": "t81",
-      "papel": "opcao",
-      "opcaoDe": "c15",
-      "secao": "Dados pessoais",
-      "nome": "NÃO",
-      "maxWidth": 412.83,
-      "lineHeight": 9.6,
-      "visivel": true
+      ]
     },
     {
       "text": "SIM",
@@ -8836,16 +8311,7 @@
           "c": "M",
           "x": 100.87
         }
-      ],
-      "id": "t82",
-      "papel": "opcao",
-      "opcaoDe": "c16",
-      "grupo": "Primeiro emprego",
-      "nome": "Primeiro emprego — SIM",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Número do CPF",
@@ -8906,14 +8372,7 @@
           "c": "F",
           "x": 342.9
         }
-      ],
-      "id": "t83",
-      "secao": "Conta bancária",
-      "papel": "texto",
-      "nome": "Número do CPF",
-      "maxWidth": 296.45,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": ": ",
@@ -8930,14 +8389,7 @@
           "c": " ",
           "x": 350.06
         }
-      ],
-      "id": "t84",
-      "secao": "Conta bancária",
-      "papel": "pontuacao",
-      "nome": ":",
-      "maxWidth": 235.68,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     },
     {
       "text": "Primeiro emprego: ",
@@ -9018,14 +8470,7 @@
           "c": " ",
           "x": 80.43
         }
-      ],
-      "id": "t85",
-      "papel": "rotulo",
-      "nome": "Primeiro emprego",
-      "secao": "Dados pessoais",
-      "maxWidth": 470.0,
-      "lineHeight": 8.35,
-      "visivel": true
+      ]
     },
     {
       "text": "Banco:",
@@ -9058,186 +8503,94 @@
           "c": ":",
           "x": 116.44
         }
-      ],
-      "id": "t86",
-      "papel": "rotulo",
-      "nome": "Banco",
-      "secao": "Conta bancária",
-      "maxWidth": 470.0,
-      "lineHeight": 9.65,
-      "visivel": true
+      ]
     }
   ],
   "checkboxes": [
     {
       "x": 129.48,
       "base": 501.69,
-      "size": 8.04,
-      "id": "c00",
-      "rotulo": "Corrente",
-      "nome": "Corrente",
-      "secao": "Conta bancária",
-      "visivel": true
+      "size": 8.04
     },
     {
       "x": 171.34,
       "base": 501.69,
-      "size": 8.04,
-      "id": "c01",
-      "rotulo": "Conta Salário",
-      "nome": "Conta Salário",
-      "secao": "Conta bancária",
-      "visivel": true
+      "size": 8.04
     },
     {
       "x": 230.64,
       "base": 501.69,
-      "size": 8.04,
-      "id": "c02",
-      "rotulo": "Poupança",
-      "nome": "Poupança",
-      "secao": "Conta bancária",
-      "visivel": true
+      "size": 8.04
     },
     {
       "x": 133.24,
       "base": 478.55,
-      "size": 8.04,
-      "id": "c03",
-      "rotulo": "Corrente",
-      "nome": "Corrente",
-      "secao": "Conta bancária",
-      "visivel": true
+      "size": 8.04
     },
     {
       "x": 177.35,
       "base": 478.55,
-      "size": 8.04,
-      "id": "c04",
-      "rotulo": "Conta Salário",
-      "nome": "Conta Salário",
-      "secao": "Conta bancária",
-      "visivel": true
+      "size": 8.04
     },
     {
       "x": 85.62,
       "base": 580.82,
-      "size": 6.96,
-      "id": "c05",
-      "rotulo": "NÃO – Informar",
-      "nome": "NÃO – Informar",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     },
     {
       "x": 380.13,
       "base": 525.05,
-      "size": 6.96,
-      "id": "c06",
-      "rotulo": "VISUAL",
-      "nome": "VISUAL",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     },
     {
       "x": 422.87,
       "base": 525.05,
-      "size": 6.96,
-      "id": "c07",
-      "rotulo": "INTELECTUAL",
-      "nome": "INTELECTUAL",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     },
     {
       "x": 262.23,
       "base": 525.05,
-      "size": 6.96,
-      "id": "c08",
-      "rotulo": "FÍSICA",
-      "nome": "FÍSICA",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     },
     {
       "x": 314.23,
       "base": 525.05,
-      "size": 6.96,
-      "id": "c09",
-      "rotulo": "AUDITIVA",
-      "nome": "AUDITIVA",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     },
     {
       "x": 484.36,
       "base": 525.05,
-      "size": 6.96,
-      "id": "c10",
-      "rotulo": "MÚLTIPLA",
-      "nome": "MÚLTIPLA",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     },
     {
       "x": 57.62,
       "base": 141.86,
-      "size": 9.96,
-      "id": "c11",
-      "rotulo": "100% Vale Alimentação",
-      "nome": "100% Vale Alimentação",
-      "secao": "Vale refeição / alimentação",
-      "visivel": true
+      "size": 9.96
     },
     {
       "x": 247.82,
       "base": 141.86,
-      "size": 9.96,
-      "id": "c12",
-      "rotulo": "100% Vale Refeição",
-      "nome": "100% Vale Refeição",
-      "secao": "Vale refeição / alimentação",
-      "visivel": true
+      "size": 9.96
     },
     {
       "x": 411.34,
       "base": 141.86,
-      "size": 9.96,
-      "id": "c13",
-      "rotulo": "Flexibilizado (50% VR e 50% VA)",
-      "nome": "Flexibilizado (50% VR e 50% VA)",
-      "secao": "Vale refeição / alimentação",
-      "visivel": true
+      "size": 9.96
     },
     {
       "x": 130.68,
       "base": 526.38,
-      "size": 8.0,
-      "id": "c14",
-      "rotulo": "SIM",
-      "nome": "SIM",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 8.0
     },
     {
       "x": 162.33,
       "base": 526.38,
-      "size": 8.0,
-      "id": "c15",
-      "rotulo": "NÃO",
-      "nome": "NÃO",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 8.0
     },
     {
       "x": 85.62,
       "base": 589.98,
-      "size": 6.96,
-      "id": "c16",
-      "rotulo": "SIM",
-      "nome": "SIM",
-      "secao": "Dados pessoais",
-      "visivel": true
+      "size": 6.96
     }
   ]
 }

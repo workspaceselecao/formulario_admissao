@@ -226,50 +226,96 @@
 
       <!-- ══════════ COORDENADAS ══════════ -->
       <section id="sec-coordenadas" class="admin-section">
-        <h2>Editor de Coordenadas</h2>
+        <h2>Editor Visual</h2>
         <p class="section-desc">
-          Selecione o template, visualize a página e arraste os campos. O sistema de coordenadas
-          é o mesmo do pdf-lib: origem no canto <strong>inferior esquerdo</strong>, Y cresce para cima, unidade em pontos (pt).
+          O documento é montado <strong>100% embarcado</strong>: um <code>template.json</code> descreve os textos fixos,
+          as imagens, as réguas e as caixinhas de marcação, e o schema de campos diz onde entram os DADOS do candidato.
+          Aqui os dois lados são editáveis: arraste os campos sobre a página e use a aba
+          <strong>Campos do documento</strong> para listar e reescrever <em>todos</em> os campos que compõem o arquivo —
+          inclusive os textos fixos (Código/Revisão, Data da publicação, Vigência, rótulos e opções de BANCO).
+          Coordenadas em pontos (pt), origem no canto <strong>inferior esquerdo</strong>, Y cresce para cima — o mesmo
+          sistema do pdf-lib.
         </p>
         <div class="toolbar">
           <select id="edDoc" style="min-width:280px">
             <option value="ficha_cadastral">Ficha Cadastral (F-075) — ficha_cadastral_campos.json</option>
             <option value="declaracao_plano_saude">Declaração Plano de Saúde — declaracao_plano_saude_campos.json</option>
           </select>
-          <select id="edPage" style="min-width:120px"></select>
+          <select id="edPage" style="min-width:120px" aria-label="Página"></select>
           <label class="chk-inline" for="edSnap"><input type="checkbox" id="edSnap" checked> Snap to grid</label>
           <select id="edSnapGrid" style="min-width:110px" aria-label="Grade de encaixe">
             <option value="1">1 pt</option>
             <option value="5" selected>5 pts</option>
             <option value="10">10 pts</option>
           </select>
-          <button type="button" class="btn secondary" id="edTestPreview">Visualizar PDF de teste</button>
+          <label class="chk-inline" for="edVerEngine"><input type="checkbox" id="edVerEngine" checked> Ver o PDF gerado</label>
+          <button type="button" class="btn secondary" id="edTestPreview">Ver PDF oficial</button>
+          <button type="button" class="btn secondary" id="edGerarTeste">Gerar PDF (engine)</button>
           <button type="button" class="btn secondary" id="edGoCampos">Ver tabela de campos</button>
         </div>
         <div class="legend-selos">
           <span class="badge muted">Atalhos</span> setas = mover (1 pt) · Shift+setas = 5 pts · Alt+setas = ajuste fino (0,5 pt) · Ctrl/Cmd+clique = seleção múltipla · L = alinhar · Shift+L = distribuir · R = restaurar
+          <span class="badge muted">Lateral</span> laranja = campo de dado (schema) · azul = texto fixo do template · verde = caixinha de marcação
         </div>
         <div class="editor-layout">
-          <div class="pdf-viewport">
-            <div class="pdf-page-stack" id="edPageStack">
-              <canvas id="edCanvas"></canvas>
+          <div class="ed-dual">
+            <div class="pdf-viewport">
+              <div class="pdf-page-stack" id="edPageStack">
+                <canvas id="edCanvas"></canvas>
+                <div id="edBoxes" class="field-layer"></div>
+              </div>
+              <div class="ed-titulo">Oficial — <code id="edNomePdf">F-075</code></div>
+            </div>
+            <div class="pdf-viewport" id="edEngineWrap">
+              <div class="pdf-page-stack" id="edInnerEngine">
+                <canvas id="edCanvasEngine"></canvas>
+                <div id="edBoxesEngine" class="field-layer"></div>
+              </div>
+              <div class="ed-titulo">Gerado — <code>embedded-docs.js</code> <span id="edEngineNota" class="muted"></span></div>
             </div>
           </div>
           <div class="panel editor-form">
-            <!-- Tarefa 4: busca de campos + lista lateral (clicar seleciona no canvas) -->
-            <div class="field-search">
-              <label for="edBuscaCampo">Localizar campo</label>
-              <input type="search" id="edBuscaCampo" placeholder="Buscar por label, seção ou chave…" autocomplete="off">
-              <div class="field-list-count" id="edListaContagem"></div>
-              <div class="field-list" id="edListaCampos" role="listbox" aria-label="Campos do documento"></div>
+            <div class="tabs" id="edTabs" role="tablist">
+              <button class="tab active" type="button" role="tab" data-edtab="campos" aria-selected="true">Campos de dado</button>
+              <button class="tab" type="button" role="tab" data-edtab="conteudo" aria-selected="false">Campos do documento</button>
+            </div>
+            <div class="tab-pane active" data-edpane="campos">
+              <!-- Tarefa 4: busca de campos + lista lateral (clicar seleciona no canvas) -->
+              <div class="field-search">
+                <label for="edBuscaCampo">Localizar campo de dado</label>
+                <input type="search" id="edBuscaCampo" placeholder="Buscar por label, seção ou chave…" autocomplete="off">
+                <div class="field-list-count" id="edListaContagem"></div>
+                <div class="field-list" id="edListaCampos" role="listbox" aria-label="Campos de dado"></div>
+              </div>
+            </div>
+            <div class="tab-pane" data-edpane="conteudo">
+              <div class="field-search">
+                <label for="edBuscaConteudo">Campos que compõem o documento</label>
+                <input type="search" id="edBuscaConteudo" placeholder="Buscar em tudo: nome, valor, seção…" autocomplete="off">
+                <div class="field-list-count" id="edConteudoResumo"></div>
+                <div class="field-list" id="edFormulario" role="listbox" aria-label="Campos do documento"></div>
+              </div>
             </div>
             <hr class="editor-sep">
             <h3 id="edFieldTitle">Campo</h3>
-            <div id="edFieldInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo no PDF.</div>
+            <div id="edFieldInfo" class="section-desc" style="margin-bottom:10px">Selecione um campo no PDF ou na lista.</div>
+            <div id="edBlocoConteudo" hidden>
+              <div class="form-grid" style="margin-bottom:8px">
+                <div style="grid-column:1/-1"><label for="edValor">Texto do campo</label>
+                  <textarea id="edValor" rows="2" spellcheck="false" placeholder="Texto exibido no documento"></textarea>
+                  <div class="muted" id="edValorNota" style="font-size:10.5px;margin-top:4px"></div>
+                </div>
+                <div><label for="edSize">Corpo (pt)</label><input type="number" id="edSize" step="0.25" min="1" max="40"></div>
+                <div><label class="chk-inline" for="edVisivel"><input type="checkbox" id="edVisivel"> Visível</label></div>
+                <div style="grid-column:1/-1"><label for="edNomeCampo">Nome do campo (aparece na lista e no app)</label>
+                  <input type="text" id="edNomeCampo" placeholder="ex.: Banco — Bradesco — Corrente">
+                </div>
+              </div>
+            </div>
             <div class="form-grid">
               <div><label for="edX">X (pt)</label><input type="number" id="edX" step="0.5" disabled></div>
               <div><label for="edY">Y (pt)</label><input type="number" id="edY" step="0.5" disabled></div>
-              <div><label for="edL">Largura</label><input type="number" id="edL" step="0.5" disabled></div>
+              <div><label for="edL" id="edLLabel">Largura</label><input type="number" id="edL" step="0.5" disabled></div>
               <div><label for="edA">Altura</label><input type="number" id="edA" step="0.5" disabled></div>
               <div><label for="edPg">Página</label><input type="number" id="edPg" min="1" step="1" disabled></div>
               <div><label for="edT">Tamanho da fonte</label><input type="number" id="edT" step="0.5" disabled></div>
@@ -283,6 +329,9 @@
               <button type="button" class="btn" id="edSave" disabled>Salvar alterações</button>
               <button type="button" class="btn secondary" id="edCancel" disabled>Cancelar</button>
               <button type="button" class="btn secondary" id="edRestore" disabled title="Reverte apenas este campo ao valor salvo no overlay (ou ao original), preservando as demais edições pendentes">↩ Restaurar este campo</button>
+            </div>
+            <div class="editor-actions" id="edAcoesConteudo" hidden style="margin-top:8px">
+              <button type="button" class="btn secondary" id="edExportarTextos" title="Baixa o textos.json com as edições de conteúdo (texto/visibilidade/corpo) para versionar no repositório">Exportar textos.json</button>
             </div>
             <div id="edPending" style="margin-top:12px"></div>
             <!-- §11 — seleção múltipla: alinhar/distribuir/restaurar -->

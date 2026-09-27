@@ -319,10 +319,10 @@ if (ED && pdfLib) {
   const v = ED.validarTemplate(template, schema.campos);
   check("template embarcado do F-075 não tem erro crítico", v.ok === true, v.erros.slice(0, 4).join(" | "));
   check("template embarcado declara o mobiliário do formulário oficial (textos, imagens, marcações)",
-    // texts: os blocos de texto longo (cabeçalho, "Importante:", "Nome Completo:",
-    // "Atenção: ...") são trechos únicos com `maxWidth`, não um fragmento por
-    // palavra como na extração crua — 132 trechos continuam cobrindo o layout.
-    v.resumo && v.resumo.camadas.texts >= 120 && v.resumo.camadas.images >= 3 && v.resumo.camadas.checkboxes === 17,
+    // F-075_37: o texto estatico vem ANCORADO caractere a caractere (85 trechos
+    // de linha, cada glifo com a origem x do PDF oficial), as 9 imagens sao as
+    // grades/logo do modelo e as 17 marcacoes ❑ sao os quadradinhos impressos.
+    v.resumo && v.resumo.camadas.texts >= 80 && v.resumo.camadas.images >= 9 && v.resumo.camadas.checkboxes === 17,
     JSON.stringify(v.resumo && v.resumo.camadas));
   check("template embarcado usa a página exata do documento oficial",
     Math.abs(v.resumo.pagina.width - 595.5) < 0.01 && Math.abs(v.resumo.pagina.height - 842.25) < 0.01,
@@ -342,21 +342,29 @@ if (ED && pdfLib) {
     ttfsFaltando.length ? "faltando: " + ttfsFaltando.join(", ") : nomesFontes.join(", ") + " OK");
   // 13.2c — trechos com quebra automática: `maxWidth` cabe na página e tem
   // `lineHeight` (sem ele a engine assume 1,2× o tamanho e o bloco encosta).
+  // No F-075_37 o texto é ancorado por glifo, então não há quebra: nesse caso
+  // a exigência é que TODO trecho esteja ancorado (nada depende de wrap).
   const wraps = (template.texts || []).filter((t) => t.maxWidth);
   const wrapsRuins = wraps.filter((t) => !(t.lineHeight > 0) || t.x + t.maxWidth > template.page.width || t.maxWidth <= 0);
-  check("trechos com `maxWidth` têm `lineHeight` e cabem na largura da página", wraps.length >= 3 && wrapsRuins.length === 0,
-    wrapsRuins.length ? JSON.stringify(wrapsRuins.slice(0, 2)) : wraps.length + " trecho(s) com quebra");
-  // 13.2d — as linhas VERTICAIS/horizontais das tabelas: as caixas de campo
-  // (fundo branco + borda) precisam estar no template, senão a coluna some.
+  const ancorados = (template.texts || []).filter((t) => Array.isArray(t.chars) && t.chars.length).length;
+  check("trechos com `maxWidth` têm `lineHeight` e cabem na largura da página",
+    wrapsRuins.length === 0 && (wraps.length > 0 || ancorados === (template.texts || []).length),
+    wrapsRuins.length ? JSON.stringify(wrapsRuins.slice(0, 2))
+      : wraps.length + " trecho(s) com quebra | " + ancorados + " trecho(s) ancorados");
+  // 13.2d — a grade do F-075_37 é feita de réguas pretas (divisórias reais) +
+  // caixas brancas de ACABAMENTO (opacas, sem borda: o par preto que as
+  // acompanha no PDF oficial é desenhado com alfa 0 e não aparece). Inventar
+  // borda preta nessas caixas seria acrescentar traço que o modelo não tem.
   const caixas = template.whiteBoxes || [];
-  const caixasSemBorda = caixas.filter((b) => !(b.borda > 0));
+  const caixasComBorda = caixas.filter((b) => b.borda > 0);
   const checks = template.checkboxes || [];
-  const checksSemGeom = checks.filter((c) => !(c.width > 0 && c.height > 0));
-  check("template embarcado traz as caixas de campo com borda (linhas da tabela)",
-    caixas.length >= 40 && caixasSemBorda.length === 0,
-    `${caixas.length} caixa(s), sem borda: ${caixasSemBorda.length}`);
-  check("marcações da tabela têm geometria real (width/height) e borda",
-    checks.length === 17 && checksSemGeom.length === 0 && checks.every((c) => c.borda > 0),
+  const checksSemGeom = checks.filter((c) =>
+    !(c.width > 0 && c.height > 0) && !(c.base != null && c.size > 0));
+  check("template embarcado traz a grade do formulário (réguas + caixas de acabamento)",
+    caixas.length >= 8 && caixasComBorda.length === 0 && (template.blackBars || []).length >= 11,
+    `${(template.blackBars || []).length} régua(s), ${caixas.length} caixa(s), com borda: ${caixasComBorda.length}`);
+  check("marcações da tabela têm geometria real (glifo ancorado ou width/height)",
+    checks.length === 17 && checksSemGeom.length === 0,
     `${checks.length} marcação(ões), sem geometria: ${checksSemGeom.length}`);
 
   // 13.3 — fidelidade: baseline calculada pelo engine = fórmula do app público
@@ -434,6 +442,13 @@ if (ED && pdfLib) {
     metricasRotulo[nome] = await docT.embedFont(pdfLib.StandardFonts[nome]);
   }
   const larguraRotulo = (t) => {
+    // Trecho ancorado (chars): o rotulo e desenhado glifo a glifo nas
+    // coordenadas do PDF oficial — a largura vem do ultimo glifo, nao das
+    // metricas de uma fonte diferente (Arial x Helvetica).
+    if (Array.isArray(t.chars) && t.chars.length) {
+      const ultimo = t.chars[t.chars.length - 1];
+      return (ultimo.x - t.x) + t.size * 0.6;
+    }
     try { return metricasRotulo[(t.font || "Helvetica").replace("-", "")].widthOfTextAtSize(t.text, t.size); }
     catch (e) { return t.text.length * t.size * 0.55; }
   };

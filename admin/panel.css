@@ -212,6 +212,16 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   gap: 18px; align-items: start;
 }
 @media (max-width: 1020px) { .editor-layout { grid-template-columns: 1fr; } }
+/* PDF oficial e PDF gerado lado a lado: o ADM compara o modelo com a saída */
+.ed-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; min-width: 0; }
+@media (max-width: 1400px) { .ed-dual { grid-template-columns: 1fr; } }
+.ed-dual .pdf-viewport { max-height: 78vh; }
+.ed-dual .pdf-page-stack { width: 100%; }
+.ed-titulo {
+  font-size: 10.5px; color: #cfd6dd; margin-top: 8px;
+  text-align: center; letter-spacing: .02em;
+}
+.ed-titulo code { color: #fff; }
 .pdf-viewport {
   background: #525659; border-radius: var(--radius);
   padding: 18px; overflow: auto; position: relative;
@@ -263,6 +273,34 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 .field-item.pending .fi-label::after { content: " •"; color: var(--warn); font-weight: 700; }
 .field-item .fi-label { font-weight: 500; color: var(--text); }
 .field-item .fi-meta { color: var(--text-light); font-size: 10px; display: block; }
+
+/* ── Editor Visual: campos do documento (texto fixo, opção, caixinha, dado) ── */
+.field-list.tall { max-height: 46vh; }
+.field-item .fi-valor {
+  color: var(--text-light); font-size: 11px; display: block;
+  overflow-wrap: anywhere; font-family: var(--mono, ui-monospace, monospace);
+}
+.field-item .fi-selos { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+.selo {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em;
+  border: 1px solid var(--border); border-radius: 999px; padding: 0 6px;
+  color: var(--text-light); background: var(--card);
+}
+.selo.valor { color: var(--accent-dark); border-color: var(--accent); }
+.selo.opcao { color: #0b6b5b; border-color: #0b6b5b; }
+.selo.caixa { color: #1d4ed8; border-color: #1d4ed8; }
+.selo.titulo { color: #7c3aed; border-color: #7c3aed; }
+.selo.oculto { color: var(--danger, #b91c1c); border-color: var(--danger, #b91c1c); }
+.field-group {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-light); background: var(--bg, #f6f7f9);
+  padding: 5px 10px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 1;
+}
+/* Caixas sobre o PDF: dado = laranja, texto fixo = azul, marcação = verde */
+.field-box.kind-texto { border-color: #2563eb; background: rgba(37, 99, 235, 0.10); color: #2563eb; }
+.field-box.kind-caixa { border-color: #059669; background: rgba(5, 150, 105, 0.12); color: #059669; }
+.field-box.kind-oculto { opacity: .45; border-style: dotted; }
 
 /* ── Mensagens / toasts ── */
 .notice { border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.5; margin-bottom: 14px; overflow-wrap: anywhere; }
