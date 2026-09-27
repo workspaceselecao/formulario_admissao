@@ -293,7 +293,7 @@
                 <label for="edBuscaConteudo">Campos que compõem o documento</label>
                 <input type="search" id="edBuscaConteudo" placeholder="Buscar em tudo: nome, valor, seção…" autocomplete="off">
                 <div class="field-list-count" id="edConteudoResumo"></div>
-                <div class="field-list" id="edFormulario" role="listbox" aria-label="Campos do documento"></div>
+                <div class="field-list tall" id="edFormulario" role="listbox" aria-label="Campos do documento"></div>
               </div>
             </div>
             <hr class="editor-sep">
@@ -305,7 +305,7 @@
                   <textarea id="edValor" rows="2" spellcheck="false" placeholder="Texto exibido no documento"></textarea>
                   <div class="muted" id="edValorNota" style="font-size:10.5px;margin-top:4px"></div>
                 </div>
-                <div><label for="edSize">Corpo (pt)</label><input type="number" id="edSize" step="0.25" min="1" max="40"></div>
+                <div><label for="edSize" id="edLSize">Corpo (pt)</label><input type="number" id="edSize" step="0.25" min="1" max="40"></div>
                 <div><label class="chk-inline" for="edVisivel"><input type="checkbox" id="edVisivel"> Visível</label></div>
                 <div style="grid-column:1/-1"><label for="edNomeCampo">Nome do campo (aparece na lista e no app)</label>
                   <input type="text" id="edNomeCampo" placeholder="ex.: Banco — Bradesco — Corrente">

@@ -2079,6 +2079,7 @@
         if (st.sel === f) fillEditorForm(f, docKey, true);
         st.dirty = true;
         $("edSave").disabled = false; $("edCancel").disabled = false;
+        edAgendarEngine();
       }
       function onUp() {
         handle.removeEventListener("pointermove", onMove);
@@ -2178,6 +2179,7 @@
       $("edSave").disabled = false; $("edCancel").disabled = false;
       fillEditorForm(alvo, docKey, true);
       renderEditorPage(docKey);
+      updatePendingList(docKey);
     });
   }
 
@@ -2217,6 +2219,7 @@
     });
     fillEditorForm(f, docKey, false);
     atualizarListaCampos(docKey); // marca item selecionado na lista (T4)
+    edRenderFormulario(docKey);   // idem na lista unificada de campos do documento
   }
 
   function fillEditorForm(f, docKey, numbersOnly) {
@@ -2347,23 +2350,31 @@
     const st = state.docData[docKey];
     const f = st.sel;
     if (!f || !campoTemPendencia(docKey, f)) return;
+    // restaurarCampoObj já registra o evento no histórico (inclusive para
+    // campos do documento) — aqui só o reflexo na interface.
     await restaurarCampoObj(docKey, f);
     fillEditorForm(f, docKey, true);
     atualizarListaCampos(docKey);
-    await logEvento({
-      acao: "restauracao_campo", entidade: DOCS[docKey].label + " → " + f.label,
-      alteracao: PROPS_COORD.filter(function (p) { return antes[p] !== f.coords[p]; })
-        .map(function (p) { return p + ": " + antes[p] + "→" + f.coords[p]; }).join("; ") || "sem diferença efetiva"
-    });
+    edRenderFormulario(docKey);
     toast("Campo \"" + f.label + "\" restaurado — as demais edições pendentes foram preservadas.");
   }
 
   function updatePendingList(docKey) {
     const st = state.docData[docKey];
-    const diffs = diffDoc(docKey);
+    const nCoord = diffDoc(docKey).length;
+    const nConteudo = edDiffConteudo(docKey).length;
+    const total = nCoord + nConteudo;
     const el = $("edPending");
-    if (!diffs.length) { el.innerHTML = ""; return; }
-    el.innerHTML = '<div class="notice warn">' + diffs.length + " alteração(ões) pendente(s) nesta configuração.</div>";
+    // Toda mutação do editor passa por aqui (arraste, resize, atalhos,
+    // campos numéricos, conteúdo): o PDF gerado é reagendado para que
+    // nenhum caminho de edição fique sem contraponto visual.
+    edAgendarEngine();
+    if (!total) { el.innerHTML = ""; return; }
+    const partes = [];
+    if (nCoord) partes.push(nCoord + " de coordenada");
+    if (nConteudo) partes.push(nConteudo + " de conteúdo");
+    el.innerHTML = '<div class="notice warn">' + partes.join(" + ") +
+      " pendente(s) nesta configuração.</div>";
   }
 
   function diffDoc(docKey) {
@@ -2380,10 +2391,25 @@
     return out;
   }
 
+  /**
+   * Botão "Salvar alterações": despacha as duas naturezas de edição do editor
+   * — coordenada (overlay do schema, como sempre) e conteúdo (overlay `textos`
+   * por documentId). Cada uma só abre confirmação quando tem algo a gravar.
+   */
   async function saveDocEdits(docKey) {
+    const temCoord = diffDoc(docKey).length > 0;
+    const temConteudo = edDiffConteudo(docKey).length > 0;
+    if (!temCoord) return temConteudo ? edSalvarConteudo(docKey) : toast("Nenhuma alteração a salvar.");
+    const salvouCoord = await saveCoordsEdits(docKey);
+    if (salvouCoord && temConteudo) await edSalvarConteudo(docKey);
+    if (!salvouCoord && temConteudo) edRenderFormulario(docKey);
+  }
+
+  /** Grava só as coordenadas dos campos de dado (overlay do schema). */
+  async function saveCoordsEdits(docKey) {
     const st = state.docData[docKey];
     const diffs = diffDoc(docKey);
-    if (!diffs.length) { toast("Nenhuma alteração a salvar."); return; }
+    if (!diffs.length) return true;
     const porCampo = {};
     for (const d of diffs) {
       porCampo[d.key] = porCampo[d.key] || { label: d.label, patch: {} };
@@ -2398,7 +2424,7 @@
     }
     html += "</pre>";
     const ok = await confirmModal("Salvar alterações de coordenadas", html, "Salvar");
-    if (!ok) return;
+    if (!ok) return false;
     const map = state.overlay[DOCS[docKey].overlayKey];
     // reverso (Tarefa 6): valor anterior de cada propriedade tocada, para undo
     const itens = [];
@@ -2426,11 +2452,14 @@
       st.dirty = false;
       updatePendingList(docKey);
       atualizarListaCampos(docKey);
+      edRenderFormulario(docKey);
       $("edRestore").disabled = true;
       toast(r.persistido ? "Gravado no servidor (com backup)." : "Overlay salvo na sessão — exporte o JSON (Dados) para efetivar.");
       renderDashboard();
+      return true;
     } catch (e) {
       toast("Falha ao salvar: " + e.message, false);
+      return false;
     }
   }
 
@@ -2506,7 +2535,10 @@
           label: t.nome || t.text || id, nome: t.nome || id, papel: t.papel || "texto",
           secao: t.secao || "Campos", pagina: t.pagina || 1,
           opcaoDe: t.opcaoDe || null, rotuloDe: t.rotuloDe || null,
-          size: size, font: t.font || "Helvetica",
+          size: size, font: t.font || "Helvetica", origSize: size,
+          // maxWidth declarado no template é fixo: o texto reescrito quebra
+          // dentro dele. Sem maxWidth, a caixa acompanha o comprimento do texto.
+          larguraFixa: t.maxWidth != null,
           valor: t.text == null ? "" : String(t.text),
           origValor: orig.text == null ? "" : String(orig.text),
           visivel: t.visivel !== false, origVisivel: orig.visivel !== false,
@@ -2527,7 +2559,7 @@
           label: c.nome || c.rotulo || id, nome: c.nome || c.rotulo || id, papel: "caixa",
           secao: c.secao || "Campos", pagina: c.pagina || 1, opcaoDe: null,
           opcaoTexto: op ? op.key : null,
-          size: s, font: null, valor: "", origValor: "",
+          size: s, font: null, origSize: s, valor: "", origValor: "",
           visivel: c.visivel !== false, origVisivel: orig.visivel !== false,
           coords: { x: x, y: y, largura: s, altura: s },
           origCoords: { x: x, y: y, largura: s, altura: s },
@@ -2538,6 +2570,17 @@
     // Campos de dado: o MESMO objeto de st.flat (identidade preservada para
     // seleção/arraste/restauração), só marcado como `dado`.
     for (const f of (st.flat || [])) { f.kind = "dado"; itens.push(f); }
+    // Ordem de leitura do PDF: página, de cima para baixo, da esquerda para a
+    // direita. É o que faz o agrupamento por seção sair na ordem em que o
+    // documento é lido (cabeçalho, dados, bancos, rodapé). O sort é estável
+    // (V8 ≥ 11), então trechos de mesma posição mantêm a ordem do template.
+    itens.sort(function (a, b) {
+      const pa = a.pagina || 1, pb = b.pagina || 1;
+      if (pa !== pb) return pa - pb;
+      if (a.coords.y !== b.coords.y) return b.coords.y - a.coords.y; // Y cresce para cima
+      if (a.coords.x !== b.coords.x) return a.coords.x - b.coords.x;
+      return 0;
+    });
     st.campos = itens;
     return itens;
   }
@@ -2587,7 +2630,7 @@
     const y = ar(f.coords.y + edDescida(f.size));
     if (x !== f.origCoords.x) patch.x = x;
     if (y !== f.origCoords.y + edDescida(f.origSize != null ? f.origSize : f.size)) patch.y = y;
-    if (f.coords.largura !== f.origCoords.largura) patch.maxWidth = ar(f.coords.largura);
+    if (f.coords.largura !== f.origCoords.largura && f.kind !== "caixa") patch.maxWidth = ar(f.coords.largura);
     return Object.keys(patch).length ? patch : null;
   }
 
@@ -2661,8 +2704,8 @@
     f.visivel = ("visivel" in salvo) ? salvo.visivel !== false : f.origVisivel;
     f.size = ("size" in salvo) ? Number(salvo.size) : (f.origSize != null ? f.origSize : f.size);
     f.coords.x = ("x" in salvo) ? Number(salvo.x) : f.origCoords.x;
+    f.coords.altura = f.kind === "caixa" ? f.size : f.size * 1.3;
     f.coords.largura = ("maxWidth" in salvo) ? Number(salvo.maxWidth) : f.origCoords.largura;
-    f.coords.altura = f.size * 1.3;
     f.coords.y = ("y" in salvo) ? Number(salvo.y) - edDescida(f.size) : f.origCoords.y;
     edSelecionar(docKey, f);
     await edRenderEngine(docKey);
@@ -2673,7 +2716,7 @@
   function edDefinirValor(f, valor) {
     if (!f || !f.kind || f.kind === "dado") return;
     f.valor = valor;
-    f.coords.largura = edLarguraTexto({ text: valor }, f.size, false);
+    if (!f.larguraFixa) f.coords.largura = edLarguraTexto({ text: valor }, f.size, false);
     f.coords.altura = f.size * 1.3;
     edMarcarSujo(f);
   }
@@ -2684,16 +2727,23 @@
     edMarcarSujo(f);
   }
 
-  /** Corpo do texto: preserva a baseline (a caixa sobe/desce junto). */
+  /** Corpo do texto: preserva a baseline (a caixa sobe/desce junto).
+   *  Na caixinha de marcação o "corpo" é o lado do quadrado. */
   function edDefinirSize(f, size) {
     if (!f || !f.kind || f.kind === "dado") return;
     const novo = Number(size);
     if (!(novo > 0)) return;
+    if (f.kind === "caixa") {
+      f.size = novo;
+      f.coords.largura = novo; f.coords.altura = novo;
+      edMarcarSujo(f);
+      return;
+    }
     const base = f.coords.y + edDescida(f.size);
     f.size = novo;
     f.coords.y = base - edDescida(novo);
     f.coords.altura = novo * 1.3;
-    f.coords.largura = edLarguraTexto({ text: f.valor }, novo, false);
+    if (!f.larguraFixa) f.coords.largura = edLarguraTexto({ text: f.valor }, novo, false);
     edMarcarSujo(f);
   }
 
@@ -2704,7 +2754,11 @@
     if (!st) return;
     st.dirty = true;
     const box = document.querySelector('.field-box[data-key="' + String(f.key).replace(/"/g, '\\"') + '"]');
-    if (box) updateBoxFromField(box, f, st);
+    if (box) {
+      updateBoxFromField(box, f, st);
+      box.classList.toggle("kind-oculto", f.visivel === false);
+      box.classList.toggle("pending", !!edTemPendencia(f));
+    }
     $("edSave").disabled = false; $("edCancel").disabled = false;
     $("edRestore").disabled = !edTemPendencia(f);
     updatePendingList(docKey);
@@ -2740,6 +2794,7 @@
       return;
     }
     const sel = st.sel;
+    const scroll = box.scrollTop;
     let html = "", secaoAtual = null;
     for (const f of filtrados) {
       if (f.secao !== secaoAtual) {
@@ -2759,6 +2814,7 @@
         '<span class="fi-selos">' + selos.join("") + '<span class="selo">' + esc(f.key) + "</span></span></button>";
     }
     box.innerHTML = html;
+    box.scrollTop = scroll; // a lista é redesenhada a cada tecla digitada
     box.querySelectorAll("button[data-ed-campo]").forEach(function (b) {
       b.addEventListener("click", function () {
         const f = (st.campos || []).filter(function (x) { return x.key === b.getAttribute("data-ed-campo"); })[0];
@@ -2799,13 +2855,29 @@
     bloco.hidden = !deDoc;
     const acoes = $("edAcoesConteudo");
     if (acoes) acoes.hidden = !deDoc;
-    if (!deDoc) return;
+    if (!deDoc) {
+      // devolve os controles de conteúdo ao estado neutro: senão um campo de
+      // dado selecionado depois de uma caixinha herdaria "Lado (pt)" e inputs
+      // desabilitados do campo anterior.
+      ["edValor", "edVisivel", "edSize", "edNomeCampo", "edL"].forEach(function (id) { $(id).disabled = false; });
+      if ($("edLLabel")) $("edLLabel").textContent = "Largura";
+      if ($("edLSize")) $("edLSize").textContent = "Corpo (pt)";
+      return;
+    }
     $("edValor").value = f.valor;
     $("edVisivel").checked = f.visivel !== false;
     $("edSize").value = f.size;
     $("edNomeCampo").value = f.nome || f.label;
-    if ($("edLLabel")) $("edLLabel").textContent = f.kind === "caixa" ? "Tamanho" : "Largura / quebra (pt)";
-    $("edValorNota").textContent = f.kind === "caixa"
+    const eCaixa = f.kind === "caixa";
+    if ($("edLLabel")) $("edLLabel").textContent = eCaixa ? "Lado (pt)" : "Largura / quebra (pt)";
+    if ($("edLSize")) $("edLSize").textContent = eCaixa ? "Lado (pt)" : "Corpo (pt)";
+    // Na caixinha, largura e lado são o mesmo número (editado em "Corpo").
+    $("edL").disabled = eCaixa;
+    $("edValor").disabled = eCaixa;
+    $("edValor").placeholder = eCaixa
+      ? "A caixinha não tem texto — o rótulo é o campo ao lado"
+      : "Texto exibido no documento";
+    $("edValorNota").textContent = eCaixa
       ? "Caixinha de marcação — o texto da opção é o campo ao lado" + (f.opcaoTexto ? " (" + f.opcaoTexto + ")." : ".")
       : (f.origValor === f.valor
         ? "Como no documento oficial (desenhado glifo a glifo — saída idêntica)."
@@ -5256,6 +5328,62 @@
       renderEditorPage(edDoc.value);
     });
     $("edBuscaCampo").addEventListener("input", function () { atualizarListaCampos(edDoc.value); });
+    $("edBuscaConteudo").addEventListener("input", function () { edRenderFormulario(edDoc.value); });
+    // ── Campos do documento: conteúdo (texto, visibilidade, corpo, nome) ──
+    // Os controles só existem enquanto um campo do DOCUMENTO está selecionado;
+    // a guarda abaixo mantém o comportamento antigo quando o selecionado é um
+    // campo de dado do schema.
+    const campoDocSel = function () {
+      const st = state.docData[edDoc.value];
+      const f = st && st.sel;
+      return f && f.kind && f.kind !== "dado" ? f : null;
+    };
+    $("edValor").addEventListener("input", function () {
+      const f = campoDocSel(); if (!f) return;
+      edDefinirValor(f, this.value);
+      edRenderFormulario(edDoc.value);
+    });
+    $("edSize").addEventListener("change", function () {
+      const f = campoDocSel(); if (!f) return;
+      edDefinirSize(f, this.value);
+      edRenderFormulario(edDoc.value);
+    });
+    $("edVisivel").addEventListener("change", function () {
+      const f = campoDocSel(); if (!f) return;
+      edDefinirVisivel(f, this.checked);
+      edRenderFormulario(edDoc.value);
+    });
+    $("edNomeCampo").addEventListener("change", function () {
+      const f = campoDocSel(); if (!f) return;
+      const novo = this.value.trim();
+      if (!novo) { this.value = f.nome || f.label; return; }
+      f.nome = novo; f.label = novo;
+      edMarcarSujo(f);
+      edRenderFormulario(edDoc.value);
+      $("edFieldTitle").textContent = novo;
+      $("edFieldInfo").textContent = DOCS[edDoc.value].label + " · " + (f.secao || "—") + " · " + f.key;
+    });
+    $("edExportarTextos").addEventListener("click", function () { edExportarTextos(); });
+    $("edVerEngine").addEventListener("change", function () {
+      const wrap = $("edEngineWrap");
+      if (wrap) wrap.hidden = !this.checked;
+      if (this.checked) edRenderEngine(edDoc.value);
+    });
+    // Abas "Campos de dado" | "Campos do documento"
+    $("edTabs").querySelectorAll("button[data-edtab]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        const alvo = b.getAttribute("data-edtab");
+        $("edTabs").querySelectorAll("button[data-edtab]").forEach(function (x) {
+          const on = x === b;
+          x.classList.toggle("active", on);
+          x.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        document.querySelectorAll("[data-edpane]").forEach(function (p) {
+          p.classList.toggle("active", p.getAttribute("data-edpane") === alvo);
+        });
+        if (alvo === "conteudo") edRenderFormulario(edDoc.value);
+      });
+    });
     $("edRestore").addEventListener("click", function () { restaurarCampo(edDoc.value); });
     $("edX").addEventListener("input", function () { const f = state.docData[edDoc.value].sel; if (!f) return; f.coords.x = round1(parseFloat(this.value) || 0); syncBox(f, edDoc.value); });
     $("edY").addEventListener("input", function () { const f = state.docData[edDoc.value].sel; if (!f) return; f.coords.y = round1(parseFloat(this.value) || 0); syncBox(f, edDoc.value); });
@@ -5270,10 +5398,18 @@
         const patch = state.overlay[DOCS[edDoc.value].overlayKey][f2.key];
         if (patch) { for (const p of ["x", "y", "largura", "altura"]) { if (p in patch) f2.coords[p] = patch[p]; } }
       }
-      st.dirty = false; updatePendingList(edDoc.value); atualizarListaCampos(edDoc.value);
+      st.dirty = false;
+      // conteúdo: reconstrói os campos do documento a partir do template +
+      // overlay de textos salvo, descartando texto/visibilidade/corpo pendentes.
+      edAtualizarCampos(edDoc.value);
+      st.sel = null;
+      updatePendingList(edDoc.value); atualizarListaCampos(edDoc.value);
+      edRenderFormulario(edDoc.value);
+      $("edBlocoConteudo").hidden = true; $("edAcoesConteudo").hidden = true;
       $("edRestore").disabled = true;
       renderEditorPage(edDoc.value);
       $("edSave").disabled = true; $("edCancel").disabled = true;
+      await edRenderEngine(edDoc.value);
       toast("Alterações não salvas foram descartadas.");
     });
     $("edTestPreview").addEventListener("click", function () { previewTeste(edDoc.value); });

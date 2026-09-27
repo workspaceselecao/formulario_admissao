@@ -482,6 +482,12 @@ async function testarPainelV2(assert) {
   assert("importação CSV/JSON de cidades (Tarefa 2.5)", adminR2.body.includes('id="cidImportFile"'), "missing");
   assert("lista de campos do editor (Tarefa 4)", adminR2.body.includes('id="edListaCampos"') && adminR2.body.includes('id="edBuscaCampo"'), "missing");
   assert("botão restaurar campo individual (Tarefa 4)", adminR2.body.includes('id="edRestore"'), "missing");
+  // Editor Visual — campos do documento (texto fixo, marcação e rótulos)
+  assert("lista unificada de campos do documento", adminR2.body.includes('id="edFormulario"') && adminR2.body.includes('id="edBuscaConteudo"') && adminR2.body.includes('id="edConteudoResumo"'), "missing");
+  assert("inspetor de conteúdo (texto, corpo, visibilidade, nome)", adminR2.body.includes('id="edValor"') && adminR2.body.includes('id="edSize"') && adminR2.body.includes('id="edVisivel"') && adminR2.body.includes('id="edNomeCampo"'), "missing");
+  assert("preview duplo: oficial + PDF gerado pela engine", adminR2.body.includes('id="edCanvasEngine"') && adminR2.body.includes('id="edVerEngine"'), "missing");
+  assert("exportação do textos.json", adminR2.body.includes('id="edExportarTextos"'), "missing");
+  assert("abas Campos de dado | Campos do documento", adminR2.body.includes('id="edTabs"') && adminR2.body.includes('data-edtab="conteudo"'), "missing");
   assert("filtros de histórico (Tarefa 6)", adminR2.body.includes('id="histBusca"') && adminR2.body.includes('id="histAcao"') && adminR2.body.includes('id="histUsuario"'), "missing");
   const cssR = await fetch(`http://127.0.0.1:${PORT}/admin/panel.css`);
   assert("selos editable/readonly no CSS (Tarefa 7)", cssR.body.includes(".badge.editable") && cssR.body.includes(".badge.readonly"), "missing");
@@ -489,6 +495,10 @@ async function testarPainelV2(assert) {
   const panelCode = readFile(join(ROOT, "admin", "panel.js"), "utf8");
   assert("panel.js sem localStorage", !LS_USE_RE.test(panelCode), "localStorage usage found!");
   assert("formModal documentada com JSDoc (Tarefa 1)", panelCode.includes("@returns {Promise<Object|null>}"), "missing");
+  for (const fn of ["edConstruirCampos", "edRenderFormulario", "edSelecionar", "edSalvarConteudo",
+                    "edRestaurarConteudo", "edExportarTextos", "edRenderEngine", "templateEfetivo"]) {
+    assert("Editor Visual: " + fn + " definido em panel.js", panelCode.includes("function " + fn), "missing");
+  }
 
   // ── 14.b — comportamentais (node:vm com stubs) ──
   const stubs = criarStubsDom();
