@@ -3,2442 +3,6 @@
     "width": 595.5,
     "height": 842.25
   },
-  "images": [
-    {
-      "file": "assets/img0.png",
-      "x": 23.6,
-      "y": 788.08,
-      "width": 91.3,
-      "height": 21.95
-    },
-    {
-      "file": "assets/img1.png",
-      "x": 524.18,
-      "y": 771.97,
-      "width": 55.73,
-      "height": 54.03
-    },
-    {
-      "file": "assets/img2.png",
-      "x": 444.4,
-      "y": 780.2,
-      "width": 72.5,
-      "height": 36.83
-    }
-  ],
-  "blackBars": [
-    {
-      "x": 14.04,
-      "y": 761.04,
-      "width": 560.88,
-      "height": 1.44
-    },
-    {
-      "x": 14.04,
-      "y": 741.46,
-      "width": 560.88,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 715.42,
-      "width": 560.88,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 692.74,
-      "width": 560.88,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 670.06,
-      "width": 242.33,
-      "height": 0.48
-    },
-    {
-      "x": 256.37,
-      "y": 670.06,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 256.85,
-      "y": 670.06,
-      "width": 318.07,
-      "height": 0.48
-    },
-    {
-      "x": 256.37,
-      "y": 647.86,
-      "width": 0.48,
-      "height": 22.2
-    },
-    {
-      "x": 14.04,
-      "y": 647.38,
-      "width": 242.33,
-      "height": 0.48
-    },
-    {
-      "x": 256.37,
-      "y": 647.38,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 256.85,
-      "y": 647.38,
-      "width": 318.07,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 624.58,
-      "width": 560.88,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 601.9,
-      "width": 560.88,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 579.19,
-      "width": 308.83,
-      "height": 0.48
-    },
-    {
-      "x": 322.87,
-      "y": 579.19,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 323.35,
-      "y": 579.19,
-      "width": 54.36,
-      "height": 0.48
-    },
-    {
-      "x": 377.71,
-      "y": 579.19,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 378.19,
-      "y": 579.19,
-      "width": 196.73,
-      "height": 0.48
-    },
-    {
-      "x": 322.87,
-      "y": 556.99,
-      "width": 0.48,
-      "height": 22.2
-    },
-    {
-      "x": 377.71,
-      "y": 556.99,
-      "width": 0.48,
-      "height": 22.2
-    },
-    {
-      "x": 14.04,
-      "y": 556.51,
-      "width": 114.26,
-      "height": 0.48
-    },
-    {
-      "x": 128.3,
-      "y": 556.51,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 128.78,
-      "y": 556.51,
-      "width": 194.09,
-      "height": 0.48
-    },
-    {
-      "x": 322.87,
-      "y": 556.51,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 323.35,
-      "y": 556.51,
-      "width": 10.32,
-      "height": 0.48
-    },
-    {
-      "x": 333.67,
-      "y": 556.51,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 334.15,
-      "y": 556.51,
-      "width": 43.56,
-      "height": 0.48
-    },
-    {
-      "x": 377.71,
-      "y": 556.51,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 378.19,
-      "y": 556.51,
-      "width": 196.73,
-      "height": 0.48
-    },
-    {
-      "x": 128.3,
-      "y": 534.31,
-      "width": 0.48,
-      "height": 22.2
-    },
-    {
-      "x": 333.67,
-      "y": 534.31,
-      "width": 0.48,
-      "height": 22.2
-    },
-    {
-      "x": 14.04,
-      "y": 533.83,
-      "width": 114.26,
-      "height": 0.48
-    },
-    {
-      "x": 128.3,
-      "y": 533.83,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 128.78,
-      "y": 533.83,
-      "width": 127.58,
-      "height": 0.48
-    },
-    {
-      "x": 256.37,
-      "y": 533.83,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 256.85,
-      "y": 533.83,
-      "width": 76.82,
-      "height": 0.48
-    },
-    {
-      "x": 333.67,
-      "y": 533.83,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 334.15,
-      "y": 533.83,
-      "width": 240.77,
-      "height": 0.48
-    },
-    {
-      "x": 256.37,
-      "y": 512.59,
-      "width": 0.48,
-      "height": 21.24
-    },
-    {
-      "x": 14.04,
-      "y": 512.11,
-      "width": 69.98,
-      "height": 0.48
-    },
-    {
-      "x": 84.02,
-      "y": 512.11,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 84.5,
-      "y": 512.11,
-      "width": 171.86,
-      "height": 0.48
-    },
-    {
-      "x": 256.37,
-      "y": 512.11,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 256.85,
-      "y": 512.11,
-      "width": 35.04,
-      "height": 0.48
-    },
-    {
-      "x": 291.89,
-      "y": 512.11,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 292.37,
-      "y": 512.11,
-      "width": 119.18,
-      "height": 0.48
-    },
-    {
-      "x": 411.55,
-      "y": 512.11,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 412.03,
-      "y": 512.11,
-      "width": 162.89,
-      "height": 0.48
-    },
-    {
-      "x": 84.02,
-      "y": 489.55,
-      "width": 0.48,
-      "height": 22.56
-    },
-    {
-      "x": 291.89,
-      "y": 489.55,
-      "width": 0.48,
-      "height": 22.56
-    },
-    {
-      "x": 411.55,
-      "y": 489.55,
-      "width": 0.48,
-      "height": 22.56
-    },
-    {
-      "x": 84.02,
-      "y": 489.07,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 84.5,
-      "y": 489.07,
-      "width": 207.38,
-      "height": 0.48
-    },
-    {
-      "x": 291.89,
-      "y": 489.07,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 292.37,
-      "y": 489.07,
-      "width": 119.18,
-      "height": 0.48
-    },
-    {
-      "x": 411.55,
-      "y": 489.07,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 412.03,
-      "y": 489.07,
-      "width": 162.89,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 465.91,
-      "width": 69.98,
-      "height": 0.48
-    },
-    {
-      "x": 84.02,
-      "y": 466.39,
-      "width": 0.48,
-      "height": 22.68
-    },
-    {
-      "x": 84.02,
-      "y": 465.91,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 84.5,
-      "y": 465.91,
-      "width": 207.38,
-      "height": 0.48
-    },
-    {
-      "x": 291.89,
-      "y": 466.39,
-      "width": 0.48,
-      "height": 22.68
-    },
-    {
-      "x": 291.89,
-      "y": 465.91,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 292.37,
-      "y": 465.91,
-      "width": 282.55,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 440.11,
-      "width": 288.17,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 440.11,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 302.69,
-      "y": 440.11,
-      "width": 122.18,
-      "height": 0.48
-    },
-    {
-      "x": 424.87,
-      "y": 440.11,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 425.35,
-      "y": 440.11,
-      "width": 151.01,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 419.35,
-      "width": 0.48,
-      "height": 20.76
-    },
-    {
-      "x": 424.87,
-      "y": 419.35,
-      "width": 0.48,
-      "height": 20.76
-    },
-    {
-      "x": 14.04,
-      "y": 418.87,
-      "width": 288.17,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 418.87,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 302.69,
-      "y": 418.87,
-      "width": 122.18,
-      "height": 0.48
-    },
-    {
-      "x": 424.87,
-      "y": 418.87,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 425.35,
-      "y": 418.87,
-      "width": 151.01,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 397.97,
-      "width": 0.48,
-      "height": 20.9
-    },
-    {
-      "x": 424.87,
-      "y": 397.97,
-      "width": 0.48,
-      "height": 20.9
-    },
-    {
-      "x": 14.04,
-      "y": 397.49,
-      "width": 288.17,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 397.49,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 302.69,
-      "y": 397.49,
-      "width": 122.18,
-      "height": 0.48
-    },
-    {
-      "x": 424.87,
-      "y": 397.49,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 425.35,
-      "y": 397.49,
-      "width": 151.01,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 376.73,
-      "width": 0.48,
-      "height": 20.76
-    },
-    {
-      "x": 424.87,
-      "y": 376.73,
-      "width": 0.48,
-      "height": 20.76
-    },
-    {
-      "x": 14.04,
-      "y": 376.25,
-      "width": 288.17,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 376.25,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 302.69,
-      "y": 376.25,
-      "width": 122.18,
-      "height": 0.48
-    },
-    {
-      "x": 424.87,
-      "y": 376.25,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 425.35,
-      "y": 376.25,
-      "width": 151.01,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 355.37,
-      "width": 0.48,
-      "height": 20.88
-    },
-    {
-      "x": 424.87,
-      "y": 355.37,
-      "width": 0.48,
-      "height": 20.88
-    },
-    {
-      "x": 14.04,
-      "y": 354.89,
-      "width": 288.17,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 354.89,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 302.69,
-      "y": 354.89,
-      "width": 122.18,
-      "height": 0.48
-    },
-    {
-      "x": 424.87,
-      "y": 354.89,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 425.35,
-      "y": 354.89,
-      "width": 151.01,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 334.13,
-      "width": 0.48,
-      "height": 20.76
-    },
-    {
-      "x": 424.87,
-      "y": 334.13,
-      "width": 0.48,
-      "height": 20.76
-    },
-    {
-      "x": 14.04,
-      "y": 333.65,
-      "width": 288.17,
-      "height": 0.48
-    },
-    {
-      "x": 302.21,
-      "y": 333.65,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 302.69,
-      "y": 333.65,
-      "width": 122.18,
-      "height": 0.48
-    },
-    {
-      "x": 424.87,
-      "y": 333.65,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 425.35,
-      "y": 333.65,
-      "width": 150.17,
-      "height": 0.48
-    },
-    {
-      "x": 575.52,
-      "y": 333.65,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 576,
-      "y": 333.65,
-      "width": 0.24,
-      "height": 0.48
-    },
-    {
-      "x": 576.24,
-      "y": 333.65,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 307.61,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 307.61,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 307.61,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 307.61,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 307.61,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 288.53,
-      "width": 0.48,
-      "height": 19.08
-    },
-    {
-      "x": 387.91,
-      "y": 288.53,
-      "width": 0.48,
-      "height": 19.08
-    },
-    {
-      "x": 14.04,
-      "y": 288.05,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 288.05,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 288.05,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 288.05,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 288.05,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 268.85,
-      "width": 0.48,
-      "height": 19.2
-    },
-    {
-      "x": 387.91,
-      "y": 268.85,
-      "width": 0.48,
-      "height": 19.2
-    },
-    {
-      "x": 14.04,
-      "y": 268.37,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 268.37,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 268.37,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 268.37,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 268.37,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 249.17,
-      "width": 0.48,
-      "height": 19.2
-    },
-    {
-      "x": 387.91,
-      "y": 249.17,
-      "width": 0.48,
-      "height": 19.2
-    },
-    {
-      "x": 14.04,
-      "y": 248.69,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 248.69,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 248.69,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 248.69,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 248.69,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 229.49,
-      "width": 0.48,
-      "height": 19.2
-    },
-    {
-      "x": 387.91,
-      "y": 229.49,
-      "width": 0.48,
-      "height": 19.2
-    },
-    {
-      "x": 14.04,
-      "y": 229.01,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 229.01,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 229.01,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 229.01,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 229.01,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 209.78,
-      "width": 0.48,
-      "height": 19.22
-    },
-    {
-      "x": 387.91,
-      "y": 209.78,
-      "width": 0.48,
-      "height": 19.22
-    },
-    {
-      "x": 14.04,
-      "y": 209.3,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 209.3,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 209.3,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 209.3,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 209.3,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 14.04,
-      "y": 183.26,
-      "width": 186.89,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 183.26,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 183.26,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 183.26,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 183.26,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 13.32,
-      "y": 163.34,
-      "width": 187.61,
-      "height": 0.48
-    },
-    {
-      "x": 200.93,
-      "y": 163.82,
-      "width": 0.48,
-      "height": 19.44
-    },
-    {
-      "x": 200.93,
-      "y": 163.34,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 201.41,
-      "y": 163.34,
-      "width": 186.5,
-      "height": 0.48
-    },
-    {
-      "x": 387.91,
-      "y": 163.82,
-      "width": 0.48,
-      "height": 19.44
-    },
-    {
-      "x": 387.91,
-      "y": 163.34,
-      "width": 0.48,
-      "height": 0.48
-    },
-    {
-      "x": 388.39,
-      "y": 163.34,
-      "width": 187.13,
-      "height": 0.48
-    },
-    {
-      "x": 21.24,
-      "y": 151.82,
-      "width": 42.74,
-      "height": 1.08
-    },
-    {
-      "x": 125.42,
-      "y": 827.52,
-      "width": 297.41,
-      "height": 0.48,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 125.42,
-      "y": 802.2,
-      "width": 297.41,
-      "height": 0.48,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 125.42,
-      "y": 774.12,
-      "width": 297.41,
-      "height": 0.48,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 125.18,
-      "y": 802.44,
-      "width": 0.48,
-      "height": 24.84,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 423.07,
-      "y": 802.44,
-      "width": 0.48,
-      "height": 24.84,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 125.18,
-      "y": 774.36,
-      "width": 0.48,
-      "height": 27.6,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 289.61,
-      "y": 774.36,
-      "width": 0.48,
-      "height": 27.6,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    },
-    {
-      "x": 423.07,
-      "y": 774.36,
-      "width": 0.48,
-      "height": 27.6,
-      "cor": "#003366",
-      "tracejado": [
-        0.48,
-        0.48
-      ]
-    }
-  ],
-  "whiteBoxes": [
-    {
-      "x": 135.05,
-      "y": 535.38,
-      "width": 196.85,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.05,
-      "y": 535.48,
-      "width": 106.75,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 339.35,
-      "y": 535.53,
-      "width": 234.75,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.5,
-      "y": 558.03,
-      "width": 297.75,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 329.25,
-      "y": 558.03,
-      "width": 45.35,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 384.35,
-      "y": 558.38,
-      "width": 187.5,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 18.4,
-      "y": 603.68,
-      "width": 297.75,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 18.4,
-      "y": 626.48,
-      "width": 297.75,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 18.4,
-      "y": 649.18,
-      "width": 231.35,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 261.8,
-      "y": 649.38,
-      "width": 231.35,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 18.4,
-      "y": 671.68,
-      "width": 474.7,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 18.4,
-      "y": 694.48,
-      "width": 474.7,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 297.35,
-      "y": 490.93,
-      "width": 111.6,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 417.2,
-      "y": 490.93,
-      "width": 139.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 297.5,
-      "y": 466.85,
-      "width": 186.45,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.65,
-      "y": 419.9,
-      "width": 281.1,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 308.45,
-      "y": 420.1,
-      "width": 112.25,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 430.6,
-      "y": 420.1,
-      "width": 134.4,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.65,
-      "y": 398.8,
-      "width": 281.1,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 308.45,
-      "y": 399.0,
-      "width": 112.25,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 430.6,
-      "y": 399.0,
-      "width": 134.4,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.65,
-      "y": 377.35,
-      "width": 281.1,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 308.45,
-      "y": 377.55,
-      "width": 112.25,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 430.6,
-      "y": 377.55,
-      "width": 134.4,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.65,
-      "y": 356.25,
-      "width": 281.1,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 308.45,
-      "y": 356.45,
-      "width": 112.25,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 430.6,
-      "y": 356.45,
-      "width": 134.4,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 19.65,
-      "y": 334.5,
-      "width": 281.1,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 308.45,
-      "y": 334.7,
-      "width": 112.25,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 430.6,
-      "y": 334.7,
-      "width": 134.4,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 266.3,
-      "y": 273.37,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 453.65,
-      "y": 273.9,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 266.5,
-      "y": 252.52,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 453.85,
-      "y": 253.07,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 266.6,
-      "y": 233.65,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 453.95,
-      "y": 234.2,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 266.35,
-      "y": 213.6,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 453.7,
-      "y": 214.15,
-      "width": 60.55,
-      "height": 12.3,
-      "borda": 0.5
-    },
-    {
-      "x": 60.0,
-      "y": 72.5,
-      "width": 232.85,
-      "height": 44.25,
-      "borda": 0.5
-    },
-    {
-      "x": 60.3,
-      "y": 49.36,
-      "width": 232.85,
-      "height": 12.75,
-      "borda": 0.5
-    },
-    {
-      "x": 20.0,
-      "y": 3.51,
-      "width": 556.75,
-      "height": 12.75,
-      "borda": 0.5
-    },
-    {
-      "x": 432.75,
-      "y": 73.51,
-      "width": 31.7,
-      "height": 12.75,
-      "borda": 0.5
-    },
-    {
-      "x": 474.1,
-      "y": 73.4,
-      "width": 31.7,
-      "height": 12.75,
-      "borda": 0.5
-    },
-    {
-      "x": 516.1,
-      "y": 73.21,
-      "width": 31.7,
-      "height": 12.75,
-      "borda": 0.5
-    }
-  ],
-  "texts": [
-    {
-      "text": "Ficha Cadastral de Admissão – Operacional e Administrativo",
-      "x": 135,
-      "y": 811,
-      "size": 11,
-      "font": "Arial-Narrow"
-    },
-    {
-      "text": "Código/Revisão: F-075 (PR-011) / 38",
-      "x": 135,
-      "y": 785,
-      "size": 9,
-      "font": "Arial-Narrow"
-    },
-    {
-      "text": "Data da publicação: 29/05/2026",
-      "x": 300,
-      "y": 790,
-      "size": 8,
-      "font": "Arial-Narrow"
-    },
-    {
-      "text": "Vigência: 2 anos",
-      "x": 300,
-      "y": 778,
-      "size": 8,
-      "font": "Arial-Narrow"
-    },
-    {
-      "text": "Importante: As informações devem ser corretamente preenchidas para cadastro admissão devido o cumprimento do decreto 8373/2014 Programa eSocial.",
-      "x": 18,
-      "y": 751.5,
-      "size": 9,
-      "font": "Arial-Narrow",
-      "maxWidth": 542,
-      "lineHeight": 10.5
-    },
-    {
-      "text": "DADOS",
-      "x": 249.53,
-      "y": 725.02,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "PESSOAIS",
-      "x": 288.39,
-      "y": 725.02,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nome Completo: (Preencher da mesma forma que consta no documento Certidão de Nascimento ou Casamento)",
-      "x": 19.56,
-      "y": 707.86,
-      "size": 8,
-      "font": "Arial",
-      "maxWidth": 520,
-      "lineHeight": 9.6
-    },
-    {
-      "text": "Nome",
-      "x": 19.56,
-      "y": 685.18,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Social:",
-      "x": 44.03,
-      "y": 685.18,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(Inclusão",
-      "x": 72.57,
-      "y": 685.18,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "no",
-      "x": 109.87,
-      "y": 685.18,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "crachá)",
-      "x": 121.87,
-      "y": 685.18,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Telefone:",
-      "x": 19.56,
-      "y": 662.5,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Celular:",
-      "x": 262.13,
-      "y": 662.5,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "E-mail:",
-      "x": 19.56,
-      "y": 639.82,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Estado",
-      "x": 19.56,
-      "y": 617.14,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Civil:",
-      "x": 48.6,
-      "y": 617.14,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Primeiro",
-      "x": 19.56,
-      "y": 592.9,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "emprego:",
-      "x": 54.34,
-      "y": 592.9,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "SIM",
-      "x": 106.94,
-      "y": 592.9,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "NÃO",
-      "x": 106.94,
-      "y": 581.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "–",
-      "x": 126.5,
-      "y": 581.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Informar",
-      "x": 133.1,
-      "y": 581.86,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "PIS:",
-      "x": 165.14,
-      "y": 581.86,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Endereço:",
-      "x": 19.56,
-      "y": 571.63,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nº",
-      "x": 328.51,
-      "y": 571.63,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Complemento:",
-      "x": 383.47,
-      "y": 571.63,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CEP:",
-      "x": 19.56,
-      "y": 548.95,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Bairro:",
-      "x": 133.94,
-      "y": 548.95,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Cidade:",
-      "x": 339.31,
-      "y": 548.95,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Possui",
-      "x": 19.56,
-      "y": 520.99,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Deficiência?",
-      "x": 48.12,
-      "y": 520.99,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "SIM",
-      "x": 116.9,
-      "y": 520.99,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "NÃO",
-      "x": 144.98,
-      "y": 520.99,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "TIPO",
-      "x": 384.31,
-      "y": 525.19,
-      "size": 6.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "DEFICIÊNCIA",
-      "x": 402.54,
-      "y": 525.19,
-      "size": 6.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "FÍSICA",
-      "x": 273.29,
-      "y": 514.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "AUDITIVA",
-      "x": 331.51,
-      "y": 514.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "VISUAL",
-      "x": 404.83,
-      "y": 514.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "INTELECTUAL",
-      "x": 454.3,
-      "y": 514.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "MÚLTIPLA",
-      "x": 525.46,
-      "y": 514.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "DADOS",
-      "x": 19.56,
-      "y": 496.39,
-      "size": 9,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CONTA",
-      "x": 19.56,
-      "y": 486.07,
-      "size": 9,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "BANCÁRIA",
-      "x": 19.56,
-      "y": 475.75,
-      "size": 9,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Banco:",
-      "x": 89.78,
-      "y": 504.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Bradesco",
-      "x": 89.78,
-      "y": 493.75,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Corrente",
-      "x": 138.86,
-      "y": 493.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Conta",
-      "x": 182.66,
-      "y": 493.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Salário",
-      "x": 206.17,
-      "y": 493.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Poupança",
-      "x": 243.53,
-      "y": 493.75,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Agência:",
-      "x": 297.53,
-      "y": 504.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Conta/Dígito:",
-      "x": 417.31,
-      "y": 504.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Santander",
-      "x": 89.78,
-      "y": 474.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Corrente",
-      "x": 141.5,
-      "y": 474.67,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Conta",
-      "x": 185.45,
-      "y": 474.67,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Salário",
-      "x": 208.84,
-      "y": 474.67,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "Número",
-      "x": 297.53,
-      "y": 479.71,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "do",
-      "x": 330.03,
-      "y": 479.71,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CPF",
-      "x": 342.02,
-      "y": 479.71,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": ":",
-      "x": 358.15,
-      "y": 479.71,
-      "size": 9.96,
-      "font": "Helvetica"
-    },
-    {
-      "text": "DEPENDENTES",
-      "x": 253.01,
-      "y": 449.71,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nome:",
-      "x": 19.56,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Data",
-      "x": 310,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "de",
-      "x": 327.4,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "nascimento:",
-      "x": 339.01,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CPF",
-      "x": 430.51,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(do",
-      "x": 448.86,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "dependente):",
-      "x": 463.49,
-      "y": 432.67,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nome:",
-      "x": 19.56,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Data",
-      "x": 310,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "de",
-      "x": 327.4,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "nascimento:",
-      "x": 339.01,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CPF",
-      "x": 430.51,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(do",
-      "x": 448.86,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "dependente):",
-      "x": 463.49,
-      "y": 411.31,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nome:",
-      "x": 19.56,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Data",
-      "x": 310,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "de",
-      "x": 327.4,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "nascimento:",
-      "x": 339.01,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CPF",
-      "x": 430.51,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(do",
-      "x": 448.86,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "dependente):",
-      "x": 463.49,
-      "y": 390.05,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nome:",
-      "x": 19.56,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Data",
-      "x": 310,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "de",
-      "x": 327.4,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "nascimento:",
-      "x": 339.01,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CPF",
-      "x": 430.51,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(do",
-      "x": 448.9,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "dependente):",
-      "x": 463.53,
-      "y": 368.69,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Nome:",
-      "x": 19.56,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Data",
-      "x": 310,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "de",
-      "x": 327.4,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "nascimento:",
-      "x": 339.01,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "CPF",
-      "x": 430.51,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(do",
-      "x": 448.86,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "dependente):",
-      "x": 463.49,
-      "y": 347.45,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "BENEFÍCIOS",
-      "x": 210.65,
-      "y": 317.21,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "-",
-      "x": 274.49,
-      "y": 317.21,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "VALE",
-      "x": 280.61,
-      "y": 317.21,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "TRANSPORTE",
-      "x": 310.01,
-      "y": 317.21,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "VALE",
-      "x": 68.3,
-      "y": 295.13,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "TRANSPORTE",
-      "x": 91.82,
-      "y": 295.13,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "QUANTIDADE",
-      "x": 268.13,
-      "y": 295.13,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "VALOR",
-      "x": 447.46,
-      "y": 295.13,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "UNITÁRIO",
-      "x": 477.8,
-      "y": 295.13,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "ÔNIBUS",
-      "x": 92.18,
-      "y": 275.57,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "METRÔ/TREM",
-      "x": 80.78,
-      "y": 255.89,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "INTERMUNICIPAL",
-      "x": 73.46,
-      "y": 236.21,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "INTEGRAÇÃO",
-      "x": 80.78,
-      "y": 216.38,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "VALE",
-      "x": 215.93,
-      "y": 192.86,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "REFEIÇÃO/ALIMENTAÇÃO",
-      "x": 245.31,
-      "y": 192.86,
-      "size": 9.96,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "100%",
-      "x": 75.62,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Vale",
-      "x": 98.18,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Alimentação",
-      "x": 117.02,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "100%",
-      "x": 266.33,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Vale",
-      "x": 289,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Refeição",
-      "x": 307.7,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Flexibilizado",
-      "x": 428.23,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "(50%",
-      "x": 478.37,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "VR",
-      "x": 499.24,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "e",
-      "x": 512.67,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "50%",
-      "x": 519.26,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "VA)",
-      "x": 537.49,
-      "y": 170.06,
-      "size": 8.04,
-      "font": "Helvetica-Bold"
-    },
-    {
-      "text": "Atenção: A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes (filhos e/ou cônjuge) no plano de saúde. É imprescindível a apresentação do CPF de todos os dependentes. Para que o pagamento do salário família seja realizado é fundamental a apresentação da certidão de nascimento dos filhos menores de 14 anos. Para as crianças com menos de 7 anos de idade, também é necessário a carteira de vacinação. Estrangeiros: entregar a documentação específica (conforme Check List).",
-      "x": 21.24,
-      "y": 153.98,
-      "size": 8,
-      "font": "Arial",
-      "maxWidth": 545,
-      "lineHeight": 9.66
-    },
-    {
-      "text": "_______________________________________",
-      "x": 56.64,
-      "y": 73.58,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "______/_______/_____",
-      "x": 430.03,
-      "y": 73.58,
-      "size": 11.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "NOME",
-      "x": 109.34,
-      "y": 63.74,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "COMPLETO",
-      "x": 135.49,
-      "y": 63.74,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "DO",
-      "x": 182.54,
-      "y": 63.74,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "CANDIDATO",
-      "x": 196.81,
-      "y": 63.74,
-      "size": 8.04,
-      "font": "Helvetica"
-    },
-    {
-      "text": "DATA",
-      "x": 479.98,
-      "y": 63.74,
-      "size": 8.04,
-      "font": "Helvetica"
-    }
-  ],
-  "checkboxes": [
-    {
-      "x": 104.55,
-      "y": 520.41,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 133.05,
-      "y": 520.26,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 94.8,
-      "y": 592.28,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 94.8,
-      "y": 581.23,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 262.2,
-      "y": 514.38,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 319.5,
-      "y": 514.33,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 393.8,
-      "y": 514.28,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 442.7,
-      "y": 514.48,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 514.15,
-      "y": 514.43,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 232.35,
-      "y": 493.13,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 171.9,
-      "y": 493.22,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 128.8,
-      "y": 493.32,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 174.55,
-      "y": 474.57,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 130.1,
-      "y": 473.92,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 57.75,
-      "y": 170.02,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 248.7,
-      "y": 170.35,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    },
-    {
-      "x": 412.2,
-      "y": 170.12,
-      "width": 9.75,
-      "height": 8.85,
-      "borda": 0.5
-    }
-  ],
   "fontes": {
     "Arial": {
       "arquivo": "assets/arial.ttf",
@@ -2457,36 +21,931 @@
       "fallback": "Helvetica-Bold"
     }
   },
-  "azulBars": [
+  "images": [
     {
-      "x": 125.18,
-      "y": 802.44,
-      "width": 0.0,
-      "height": 24.84
+      "file": "assets/img0.png",
+      "x": 23.61,
+      "y": 779.88,
+      "width": 91.34,
+      "height": 21.96
     },
     {
-      "x": 423.07,
-      "y": 802.44,
-      "width": 0.0,
-      "height": 24.84
+      "file": "assets/img1.png",
+      "x": 119.99,
+      "y": 760.81,
+      "width": 308.37,
+      "height": 63.77
     },
     {
-      "x": 125.18,
-      "y": 774.36,
-      "width": 0.0,
-      "height": 27.6
+      "file": "assets/img2.png",
+      "x": 9.04,
+      "y": 632.37,
+      "width": 570.97,
+      "height": 30.01
     },
     {
-      "x": 289.61,
-      "y": 774.36,
-      "width": 0.0,
-      "height": 27.6
+      "file": "assets/img3.png",
+      "x": 9.04,
+      "y": 174.58,
+      "width": 570.21,
+      "height": 117.04
     },
     {
-      "x": 423.07,
-      "y": 774.36,
-      "width": 0.0,
-      "height": 27.6
+      "file": "assets/img4.png",
+      "x": 8.32,
+      "y": 133.38,
+      "width": 570.97,
+      "height": 24.01
+    },
+    {
+      "file": "assets/img5.png",
+      "x": 9.04,
+      "y": 461.99,
+      "width": 570.97,
+      "height": 141.8
+    },
+    {
+      "file": "assets/img6.png",
+      "x": 9.04,
+      "y": 308.15,
+      "width": 570.97,
+      "height": 139.55
+    },
+    {
+      "file": "assets/img7.png",
+      "x": 444.61,
+      "y": 775.08,
+      "width": 72.53,
+      "height": 36.84
+    },
+    {
+      "file": "assets/img8.png",
+      "x": 524.6,
+      "y": 775.03,
+      "width": 42.57,
+      "height": 40.37
+    }
+  ],
+  "blackBars": [
+    {
+      "x": 19.57,
+      "y": 130.87,
+      "width": 31.73,
+      "height": 0.67
+    },
+    {
+      "x": 14.05,
+      "y": 709.98,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 14.05,
+      "y": 684.82,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 14.05,
+      "y": 625.71,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 16.85,
+      "y": 738.82,
+      "width": 41.36,
+      "height": 0.67
+    },
+    {
+      "x": 13.56,
+      "y": 731.07,
+      "width": 561.09,
+      "height": 0.48
+    },
+    {
+      "x": 13.94,
+      "y": 749.79,
+      "width": 560.12,
+      "height": 1.5
+    },
+    {
+      "x": 13.56,
+      "y": 731.11,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 14.04,
+      "y": 710.04,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 14.04,
+      "y": 684.89,
+      "width": 560.88,
+      "height": 0.48
+    },
+    {
+      "x": 14.04,
+      "y": 625.8,
+      "width": 560.88,
+      "height": 0.48
+    }
+  ],
+  "whiteBoxes": [
+    {
+      "x": 395.11,
+      "y": 147.5,
+      "width": 29.47,
+      "height": 11.38,
+      "borda": 0.5
+    },
+    {
+      "x": 45.93,
+      "y": 147.2,
+      "width": 29.47,
+      "height": 11.38,
+      "borda": 0.5
+    },
+    {
+      "x": 234.25,
+      "y": 147.2,
+      "width": 29.47,
+      "height": 11.38,
+      "borda": 0.5
+    },
+    {
+      "x": 87.43,
+      "y": 482.18,
+      "width": 189.32,
+      "height": 15.81,
+      "borda": 0.5
+    },
+    {
+      "x": 89.39,
+      "y": 506.58,
+      "width": 189.32,
+      "height": 15.81,
+      "borda": 0.5
+    },
+    {
+      "x": 61.44,
+      "y": 532.1,
+      "width": 152.27,
+      "height": 15.81,
+      "borda": 0.5
+    },
+    {
+      "x": 16.85,
+      "y": 588.76,
+      "width": 152.27,
+      "height": 15.81,
+      "borda": 0.5
+    },
+    {
+      "x": 260.36,
+      "y": 530.74,
+      "width": 274.47,
+      "height": 11.38,
+      "borda": 0.5
+    }
+  ],
+  "checkboxes": [
+    {
+      "x": 129.78,
+      "y": 496.06,
+      "width": 5.63,
+      "height": 5.63,
+      "borda": 0.5
+    },
+    {
+      "x": 171.64,
+      "y": 496.06,
+      "width": 5.63,
+      "height": 5.63,
+      "borda": 0.5
+    },
+    {
+      "x": 230.94,
+      "y": 496.06,
+      "width": 5.63,
+      "height": 5.63,
+      "borda": 0.5
+    },
+    {
+      "x": 133.54,
+      "y": 472.92,
+      "width": 5.63,
+      "height": 5.63,
+      "borda": 0.5
+    },
+    {
+      "x": 177.65,
+      "y": 472.92,
+      "width": 5.63,
+      "height": 5.63,
+      "borda": 0.5
+    },
+    {
+      "x": 85.92,
+      "y": 575.95,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    },
+    {
+      "x": 380.43,
+      "y": 520.18,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    },
+    {
+      "x": 423.17,
+      "y": 520.18,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    },
+    {
+      "x": 262.53,
+      "y": 520.18,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    },
+    {
+      "x": 314.53,
+      "y": 520.18,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    },
+    {
+      "x": 484.66,
+      "y": 520.18,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    },
+    {
+      "x": 57.92,
+      "y": 134.89,
+      "width": 6.97,
+      "height": 6.97,
+      "borda": 0.5
+    },
+    {
+      "x": 248.12,
+      "y": 134.89,
+      "width": 6.97,
+      "height": 6.97,
+      "borda": 0.5
+    },
+    {
+      "x": 411.64,
+      "y": 134.89,
+      "width": 6.97,
+      "height": 6.97,
+      "borda": 0.5
+    },
+    {
+      "x": 130.98,
+      "y": 520.78,
+      "width": 5.6,
+      "height": 5.6,
+      "borda": 0.5
+    },
+    {
+      "x": 162.63,
+      "y": 520.78,
+      "width": 5.6,
+      "height": 5.6,
+      "borda": 0.5
+    },
+    {
+      "x": 85.92,
+      "y": 585.11,
+      "width": 4.87,
+      "height": 4.87,
+      "borda": 0.5
+    }
+  ],
+  "texts": [
+    {
+      "text": "Atenção",
+      "x": 19.57,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Arial-Bold",
+      "espacamentoEntreGlifos": 0.14
+    },
+    {
+      "text": ": A ausência da certidão de casamento, de nascimento e do número do cartão SUS implicará na não inclusão dos dependentes (filhos e/ou",
+      "x": 51.3,
+      "y": 124.38,
+      "size": 8.04,
+      "font": "Arial",
+      "espacamentoEntreGlifos": 0.14
+    },
+    {
+      "text": "cônjuge) no plano de saúde. É imprescindível a apresentação do CPF de todos os dependentes. Para que o pagamento do salário família seja realizado",
+      "x": 19.57,
+      "y": 115.0,
+      "size": 8.04,
+      "font": "Arial",
+      "espacamentoEntreGlifos": 0.01
+    },
+    {
+      "text": "é fundamental a apresentação da certidão de nascimento dos filhos menores de 14 anos. Para as crianças com menos de 7 anos de idade, também é",
+      "x": 19.57,
+      "y": 105.61,
+      "size": 8.04,
+      "font": "Arial",
+      "espacamentoEntreGlifos": 0.055
+    },
+    {
+      "text": "necessário a carteira de vacinação. Estrangeiros: entregar a documentação específica (conforme Check List).",
+      "x": 19.57,
+      "y": 96.23,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Bradesco:",
+      "x": 91.03,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Corrente",
+      "x": 137.81,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Conta Salário",
+      "x": 179.68,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Poupança",
+      "x": 238.98,
+      "y": 501.69,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Santander:",
+      "x": 91.66,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Corrente",
+      "x": 141.58,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Conta Salário",
+      "x": 185.69,
+      "y": 478.55,
+      "size": 8.04,
+      "font": "Helvetica"
+    },
+    {
+      "text": "Ficha Cadastral de Admissão – Operacional e Administrativo",
+      "x": 126.82,
+      "y": 804.77,
+      "size": 10.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Data da publicação:",
+      "x": 290.38,
+      "y": 783.91,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Vigência:",
+      "x": 310.49,
+      "y": 773.19,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "F-075(PR-011)/38",
+      "x": 203.31,
+      "y": 777.82,
+      "size": 10.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Código/Revisão:",
+      "x": 126.82,
+      "y": 776.52,
+      "size": 9.0,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Importante:",
+      "x": 16.85,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "As informações devem ser corretamente preenchidas para cadastro admissão devido ao cumprimento do decreto 8373/2014 Programa eSocial.",
+      "x": 63.1,
+      "y": 732.32,
+      "size": 8.0,
+      "font": "Arial"
+    },
+    {
+      "text": "29/05/2026",
+      "x": 366.92,
+      "y": 783.22,
+      "size": 11.0,
+      "font": "Arial"
+    },
+    {
+      "text": "2 anos",
+      "x": 378.45,
+      "y": 770.89,
+      "size": 11.0,
+      "font": "Arial"
+    },
+    {
+      "text": "DEPENDENTES",
+      "x": 256.95,
+      "y": 449.66,
+      "size": 9.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "DADOS PESSOAIS",
+      "x": 249.62,
+      "y": 709.23,
+      "size": 9.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "VALE REFEIÇÃO/ALIMENTAÇÃO",
+      "x": 215.29,
+      "y": 162.82,
+      "size": 9.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "BENEFÍCIOS - VALE TRANSPORTE",
+      "x": 210.01,
+      "y": 297.66,
+      "size": 9.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome:",
+      "x": 19.57,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "VALE TRANSPORTE",
+      "x": 73.01,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "ÔNIBUS",
+      "x": 93.9,
+      "y": 252.41,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "METRÔ/TREM",
+      "x": 83.94,
+      "y": 230.92,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "INTERMUNICIPAL",
+      "x": 77.57,
+      "y": 209.52,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "INTEGRAÇÃO",
+      "x": 83.94,
+      "y": 188.16,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome Social: (Inclusão no crachá)",
+      "x": 19.57,
+      "y": 671.42,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Telefone:",
+      "x": 19.57,
+      "y": 650.65,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "E-mail:",
+      "x": 19.57,
+      "y": 629.68,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Estado Civil:",
+      "x": 19.57,
+      "y": 611.71,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "NÃO – Informar",
+      "x": 93.82,
+      "y": 580.99,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "Celular:",
+      "x": 262.23,
+      "y": 650.65,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "PIS:",
+      "x": 144.74,
+      "y": 580.99,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Endereço:",
+      "x": 19.57,
+      "y": 572.62,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nº",
+      "x": 289.84,
+      "y": 572.62,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CEP:",
+      "x": 19.57,
+      "y": 553.74,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Bairro:",
+      "x": 133.99,
+      "y": 553.74,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Possui Deficiência?",
+      "x": 19.57,
+      "y": 534.02,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Data de nascimento:",
+      "x": 307.37,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Data de nascimento:",
+      "x": 307.37,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Data de nascimento:",
+      "x": 307.37,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Data de nascimento:",
+      "x": 307.37,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Data de nascimento:",
+      "x": 307.37,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "QUANTIDADE",
+      "x": 270.75,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Nome Completo: (Preencher da mesma forma que consta no documento Certidão de Nascimento ou Casamento)",
+      "x": 19.57,
+      "y": 696.03,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Complemento:",
+      "x": 339.44,
+      "y": 572.62,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Cidade:",
+      "x": 339.44,
+      "y": 553.74,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "TIPO DEFICIÊNCIA",
+      "x": 384.45,
+      "y": 533.1,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CPF (do dependente):",
+      "x": 429.71,
+      "y": 435.98,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CPF (do dependente):",
+      "x": 429.71,
+      "y": 405.97,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CPF (do dependente):",
+      "x": 429.71,
+      "y": 378.34,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CPF (do dependente):",
+      "x": 429.71,
+      "y": 352.41,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CPF (do dependente):",
+      "x": 429.71,
+      "y": 328.88,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "VALOR UNITÁRIO",
+      "x": 450.63,
+      "y": 273.66,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "FÍSICA",
+      "x": 270.41,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "AUDITIVA",
+      "x": 322.54,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "VISUAL",
+      "x": 388.3,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "INTELECTUAL",
+      "x": 431.03,
+      "y": 525.05,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "MÚLTIPLA",
+      "x": 492.59,
+      "y": 525.03,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "DADOS",
+      "x": 19.57,
+      "y": 501.99,
+      "size": 9.0,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "CONTA",
+      "x": 19.57,
+      "y": 492.24,
+      "size": 9.0,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "BANCÁRIA",
+      "x": 19.57,
+      "y": 482.49,
+      "size": 9.0,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "NOME COMPLETO DO CANDIDATO",
+      "x": 96.78,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "DATA",
+      "x": 480.76,
+      "y": 34.85,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "100% Vale Alimentação",
+      "x": 75.41,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Agência:",
+      "x": 289.84,
+      "y": 514.15,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "100% Vale Refeição",
+      "x": 265.71,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Conta/Dígito:",
+      "x": 417.47,
+      "y": 514.02,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Flexibilizado (50% VR e 50% VA)",
+      "x": 427.07,
+      "y": 142.79,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "_______________________________________",
+      "x": 56.66,
+      "y": 44.81,
+      "size": 11.04,
+      "font": "Arial"
+    },
+    {
+      "text": "______/_______/_____",
+      "x": 430.19,
+      "y": 44.81,
+      "size": 11.04,
+      "font": "Arial"
+    },
+    {
+      "text": "SIM",
+      "x": 139.03,
+      "y": 526.38,
+      "size": 8.0,
+      "font": "Arial"
+    },
+    {
+      "text": "NÃO",
+      "x": 170.67,
+      "y": 526.38,
+      "size": 8.0,
+      "font": "Arial"
+    },
+    {
+      "text": "SIM",
+      "x": 94.26,
+      "y": 589.98,
+      "size": 6.96,
+      "font": "Arial"
+    },
+    {
+      "text": "Número do CPF",
+      "x": 287.05,
+      "y": 486.13,
+      "size": 8.04,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": ":",
+      "x": 347.82,
+      "y": 486.13,
+      "size": 8.04,
+      "font": "Arial"
+    },
+    {
+      "text": "Primeiro emprego:",
+      "x": 18.26,
+      "y": 592.95,
+      "size": 6.96,
+      "font": "Arial-Bold"
+    },
+    {
+      "text": "Banco:",
+      "x": 91.86,
+      "y": 513.96,
+      "size": 8.04,
+      "font": "Arial-Bold"
     }
   ]
 }

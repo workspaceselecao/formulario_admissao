@@ -6,7 +6,8 @@
 
 const fs = require("fs");
 const path = require("path");
-const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const { PDFDocument, StandardFonts, rgb, PDFHexString } = require("pdf-lib");
+const operators = require("pdf-lib/cjs/api/operators");
 const fontkit = require("@pdf-lib/fontkit");
 
 // ---------------------------------------------------------------------------
@@ -156,10 +157,31 @@ async function generateFichaCadastral(data = {}) {
 
   // 3) Texto estático do layout (rótulos, títulos, cabeçalho)
   //    Entradas com "maxWidth" disparam word-wrap automático.
+  //    Entradas com "espacamentoEntreGlifos" (pt extras por glifo, ex.: 0.13)
+  //    são desenhadas via operadores brutos com o operador Tc do PDF — o Canva
+  //    gerou o texto dessas linhas com letter-spacing que o TTF puro não
+  //    reproduz, e sem o Tc elas terminam antes do fim da linha do original.
   for (const t of template.texts) {
     const font = fontMap[t.font] || helv;
     const size = t.size;
     const lineHeight = t.lineHeight || (size * 1.2);
+
+    if (t.espacamentoEntreGlifos) {
+      const O = operators;
+      const fontKey = page.node.newFontDictionary(font.name, font.ref);
+      page.pushOperators(
+        O.pushGraphicsState(),
+        O.beginText(),
+        O.setFillingRgbColor(0, 0, 0),
+        O.setFontAndSize(fontKey, size),
+        O.setCharacterSpacing(t.espacamentoEntreGlifos),
+        O.rotateAndSkewTextRadiansAndTranslate(0, 0, 0, t.x, t.y),
+        O.showText(font.encodeText(t.text)),
+        O.endText(),
+        O.popGraphicsState(),
+      );
+      continue;
+    }
 
     if (t.maxWidth) {
       // Texto com quebra de linha automática

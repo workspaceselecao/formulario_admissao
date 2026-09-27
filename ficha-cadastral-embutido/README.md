@@ -80,14 +80,29 @@ praticamente pixel a pixel com o original.
 
 ## Fidelidade medida (diff de pixels contra o PDF oficial)
 
+Referência: **F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf** (150 dpi,
+tolerância 200/255):
+
 | Estado | página inteira |
 |---|---|
-| commit anterior (sem as caixas de campo) | 94,6% |
-| com `whiteBoxes` + `checkboxes` + moldura tracejada | **96,5%** |
+| template da v38 (antes do alinhamento ao 37) | 15,2% |
+| reextração do 37 (template + assets) | 2,95% |
+| + letter-spacing (`espacamentoEntreGlifos`) nas 4 linhas do bloco "Atenção" | **2,53%** |
 
-O resto da diferença é a tolerância de 0,33 pt entre a altura de página do
-PDF oficial (841,92 pt) e a do template (842,25 pt) mais antialiasing: as
-medidas acima já compensam 1 px (0,24 pt) de deslocamento vertical.
+O resíduo é antialiasing de fonte (o original usa subsets do Canva com
+contornos ligeiramente diferentes dos TTF do Windows) e tolerância de 0,33 pt
+na altura da página.
+
+## Letter-spacing do bloco "Atenção" (`espacamentoEntreGlifos`)
+
+O Canva gerou as 4 linhas do aviso "Atenção: …" (y 710–748 do topo) com um
+letter-spacing que o TTF puro não reproduz: sem compensação, cada linha
+terminava de 1,5 pt a 17 pt antes do original (a linha 1 era a pior).
+Desenhar essas linhas com o operador **Tc** (`setCharacterSpacing` do pdf-lib,
+via `page.pushOperators`) com o valor calibrado por linha (0,14 / 0,01 / 0,055
+pt) fecha a largura e reduziu a divergência do bloco de 9,5% para ~3% dos
+pixels. Entradas comummente de texto não são afetadas; só as que declaram
+`"espacamentoEntreGlifos": <pt>` no `template.texts`.
 
 ## Bug corrigido: texto "flutuando" alto demais dentro das linhas
 
