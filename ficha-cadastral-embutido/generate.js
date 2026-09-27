@@ -98,6 +98,17 @@ async function generateFichaCadastral(data = {}) {
   const arial           = (await fonteDoTemplate("Arial"))             || helv;
   const arialBold       = (await fonteDoTemplate("Arial-Bold"))        || helvBold;
 
+  // ---- Fonte das checkboxes ----
+  // O original usa o glifo Unicode U+2751 (quadrado branco com sombra) gravado
+  // como texto Wingdings. A Wingdings do Windows não cobre U+2751; o Segoe UI
+  // Symbol tem o glifo idêntico. Se o TTF não estiver disponível, cai no
+  // quadrado vetorial desenhado (sem sombra).
+  const simboloTtf = path.join(__dirname, "assets", "seguisym.ttf");
+  const fonteCheckbox = fs.existsSync(simboloTtf)
+    ? await pdfDoc.embedFont(fs.readFileSync(simboloTtf))
+    : null;
+  const GLIFO_CHECKBOX = "\u2751";
+
   // Mapa de nomes de fonte (template.json → objeto de fonte embedado)
   const fontMap = {
     "Helvetica":        helv,
@@ -182,6 +193,26 @@ async function generateFichaCadastral(data = {}) {
     const size = t.size;
     const lineHeight = t.lineHeight || (size * 1.2);
 
+    if (t.chars) {
+      // Texto ancorado caractere a caractere: cada glifo recebe a origem x
+      // EXATA do original (rawdict do PDF de referência). Reproduz o kerning
+      // irregular do Canva, que nem letter-spacing uniforme (Tc) alcança.
+      for (const c of t.chars) {
+        page.drawText(c.c, { x: c.x, y: t.y, size, font, color: rgb(0, 0, 0) });
+      }
+      continue;
+    }
+
+    if (t.palavras) {
+      // Texto ancorado palavra a palavra: cada palavra recebe a coordenada x
+      // EXATA do original (extraída do PDF de referência). Reproduz o kerning
+      // irregular do Canva, que letter-spacing uniforme (Tc) não alcança.
+      for (const p of t.palavras) {
+        page.drawText(p.t, { x: p.x, y: t.y, size, font, color: rgb(0, 0, 0) });
+      }
+      continue;
+    }
+
     if (t.espacamentoEntreGlifos) {
       const O = operators;
       const fontKey = page.node.newFontDictionary(font.name, font.ref);
@@ -219,16 +250,42 @@ async function generateFichaCadastral(data = {}) {
     }
   }
 
-  // 4) Checkboxes: quadrados reais do documento (branco + borda 0,5 pt)
+  // 4) Checkboxes: o original as grava como TEXTO (glifo U+2751 Wingdings,
+  //    quadrado branco com sombra). Cada glifo usa a ORIGEM exata (x, baseline)
+  //    e o size extraidos do PDF de referencia — sem heuristica de posicao.
   for (const cb of template.checkboxes) {
-    page.drawRectangle({
-      x: cb.x, y: cb.y,
-      width: cb.width != null ? cb.width : cb.side,
-      height: cb.height != null ? cb.height : cb.side,
-      color: rgb(1, 1, 1),
-      borderColor: rgb(0, 0, 0),
-      borderWidth: cb.borda || 0.5,
-    });
+    if (fonteCheckbox && cb.base != null) {
+      page.drawText(GLIFO_CHECKBOX, {
+        x: cb.x,
+        y: cb.base,
+        size: cb.size,
+        font: fonteCheckbox,
+        color: rgb(0, 0, 0),
+      });
+    } else if (fonteCheckbox) {
+      // Fallback legado (checkboxes geometricas): quadrado visual dentro do bbox
+      const w = cb.width != null ? cb.width : cb.side;
+      const h = cb.height != null ? cb.height : cb.side;
+      const size = cb.size || (w / 0.703);
+      page.drawText(GLIFO_CHECKBOX, {
+        x: cb.x - 0.55,
+        y: cb.y + h - size * 0.035 - (9.96 - size) * 1.4,
+        size,
+        font: fonteCheckbox,
+        color: rgb(0, 0, 0),
+      });
+    } else {
+      const w = cb.width != null ? cb.width : cb.side;
+      const h = cb.height != null ? cb.height : cb.side;
+      page.drawRectangle({
+        x: cb.x, y: cb.y,
+        width: w,
+        height: h,
+        color: rgb(1, 1, 1),
+        borderColor: rgb(0, 0, 0),
+        borderWidth: cb.borda || 0.5,
+      });
+    }
   }
 
   // 5) Dados dinâmicos do candidato

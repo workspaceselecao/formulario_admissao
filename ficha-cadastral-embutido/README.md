@@ -88,10 +88,36 @@ tolerância 200/255):
 | template da v37 | 15,2% |
 | reextração do 38 (template + assets) | 2,30% |
 | + letter-spacing (`espacamentoEntreGlifos`) nas linhas do bloco "Atenção" | 2,12% |
-| + carimbo "Uso Interno" recortado do render oficial | **1,68%** |
+| + carimbo "Uso Interno" recortado do render oficial | 1,68% |
+| + ancoragem caractere a caractere (`chars` no template) | 1,20% |
+| + correção da altura da página na extração (841,92, não 842,25) | 0,47% |
+| + moldura vetorial da tabelinha do cabeçalho + carimbo recalibrado | **0,48%** |
 
 O resíduo é antialiasing de fonte (o original usa subsets do Canva com
 contornos ligeiramente mais grossos que os TTF do Windows).
+
+## Ancoragem caractere a caractere (`chars`)
+
+O Canva grava o texto com kerning irregular (cada palavra e às vezes cada
+glifo recebe posição própria). Nem letter-spacing uniforme (Tc) reproduz
+isso: as linhas longas acumulavam deriva interna de até ~2 pt no meio da
+linha. Entradas de `template.texts` com `"chars"` (lista de `{c, x}` extraída
+do rawdict do PDF de referência) são desenhadas **caractere a caractere**,
+cada uma na origem x exata do original. O `extract_template.py` já grava as
+entradas nesse formato por padrão; as chaves legadas (`palavras`,
+`espacamentoEntreGlifos`, `maxWidth`) continuam suportadas pelo `generate.js`.
+
+ATENÇÃO: a conversão baseline-pdf → y-do-template deve usar a **altura real
+da página** (`page.rect.height` = 841,92), e não um valor fixo (842,25 era o
+erro que deslocava todos os textos em ~0,33 pt).
+
+## Checkboxes por origem exata
+
+Cada glifo `❑` do original é gravado no template com `x`, `base` (baseline
+PDF) e `size` extraídos do rawdict — sem heurística de posicionamento. A
+Wingdings do Windows não cobre U+2751, então usamos Segoe UI Symbol
+(`assets/seguisym.ttf`), cujo glifo é idêntico. Sem a fonte, cai no quadrado
+vetorial.
 
 ## Letter-spacing (`espacamentoEntreGlifos`)
 
