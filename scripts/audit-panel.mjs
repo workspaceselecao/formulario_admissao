@@ -346,6 +346,18 @@ if (ED && pdfLib) {
   const wrapsRuins = wraps.filter((t) => !(t.lineHeight > 0) || t.x + t.maxWidth > template.page.width || t.maxWidth <= 0);
   check("trechos com `maxWidth` têm `lineHeight` e cabem na largura da página", wraps.length >= 3 && wrapsRuins.length === 0,
     wrapsRuins.length ? JSON.stringify(wrapsRuins.slice(0, 2)) : wraps.length + " trecho(s) com quebra");
+  // 13.2d — as linhas VERTICAIS/horizontais das tabelas: as caixas de campo
+  // (fundo branco + borda) precisam estar no template, senão a coluna some.
+  const caixas = template.whiteBoxes || [];
+  const caixasSemBorda = caixas.filter((b) => !(b.borda > 0));
+  const checks = template.checkboxes || [];
+  const checksSemGeom = checks.filter((c) => !(c.width > 0 && c.height > 0));
+  check("template embarcado traz as caixas de campo com borda (linhas da tabela)",
+    caixas.length >= 40 && caixasSemBorda.length === 0,
+    `${caixas.length} caixa(s), sem borda: ${caixasSemBorda.length}`);
+  check("marcações da tabela têm geometria real (width/height) e borda",
+    checks.length === 17 && checksSemGeom.length === 0 && checks.every((c) => c.borda > 0),
+    `${checks.length} marcação(ões), sem geometria: ${checksSemGeom.length}`);
 
   // 13.3 — fidelidade: baseline calculada pelo engine = fórmula do app público
   const folhas = ED.folhasComCoordenadas(schema.campos);

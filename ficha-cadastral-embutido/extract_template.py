@@ -82,26 +82,34 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
             w, h = r["x1"] - r["x0"], r["bottom"] - r["top"]
             if w > page_w * 0.95 and h > page_h * 0.9:
                 continue  # fundo de pagina inteiro, ignorar
-            if h > 3:
-                # Retangulo "alto" demais para ser uma divisoria real (que tem
-                # ~0.5-1.5pt de espessura). Isso e sempre metade de um par
-                # preto+branco quase idêntico que o Canva usa para "apagar"
-                # um trecho da grade da imagem de fundo (ex.: nas linhas de
-                # checkbox). O par so faz sentido junto: preto por baixo,
-                # branco por cima cobrindo 100%. Extraidos separadamente e
-                # desenhados com qualquer imprecisao de arredondamento, sobra
-                # uma fresta preta na borda -> aparenta linha quebrada/torta.
-                # A imagem de fundo (assets/imgN.png) ja tem a linha certa,
-                # continua, sem o corte -- entao o par inteiro (preto E o
-                # branco correspondente) e descartado, e a linha da propria
-                # imagem aparece por conta, identica ao original.
-                continue
             entry = {"x": round(r["x0"], 2), "y": round(page_h - r["bottom"], 2),
-                      "width": round(w, 2), "height": round(h, 2)}
-            if r.get("non_stroking_color") == (1.0, 1.0, 1.0):
-                pass  # par preto+branco descartado acima (ver comentario)
-            else:
+                     "width": round(w, 2), "height": round(h, 2)}
+            linha = w <= 3 or h <= 3      # divisoria: fina em pelo menos um eixo
+            if linha:
+                # Divisoria real (horizontal ~0.5pt ou VERTICAL ~0.5pt de
+                # largura). As verticais sao tan importantes quanto as
+                # horizontais: sem elas a tabela perde as colunas.
+                if r.get("stroking_color") is not None and r.get("non_stroking_color") is None:
+                    rgb = tuple(round(c, 2) for c in r["stroking_color"])
+                    if rgb != (0.0, 0.0, 0.0):
+                        entry["cor"] = "#%02X%02X%02X" % tuple(int(round(c * 255)) for c in rgb)
+                        entry["width"] = max(round(w, 2), 0.48)
                 template["blackBars"].append(entry)
+            elif r.get("non_stroking_color") == (1.0, 1.0, 1.0) and r.get("stroking_color") is not None:
+                # Caixa de campo / quadrado de marcacao: fundo branco COM
+                # borda -> e o que desenha as linhas verticais e horizontais
+                # internas das tabelas. Vai para whiteBoxes com `borda`.
+                entry["borda"] = round(r.get("linewidth") or 0.5, 2)
+                if w < 15 and h < 15:
+                    template["checkboxes"].append(entry)   # quadradinho de marcação
+                else:
+                    template["whiteBoxes"].append(entry)
+            # Qualquer outro retangulo "alto e largo" e o par preto+branco de
+            # acabamento que o Canva usa para apagar um trecho da grade. O par
+            # inteiro (preto E o branco correspondente) e descartado: extraidos
+            # separadamente e desenhados com qualquer imprecisao de
+            # arredondamento sobra uma fresta preta na borda (aparenta linha
+            # quebrada/torta). A imagem de fundo ja traz a linha certa.
 
         chars = p.chars
         for w in p.extract_words(extra_attrs=["fontname", "size"]):
@@ -117,14 +125,11 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
             baseline_y = matching[0]['matrix'][5] if matching else (page_h - w['bottom'])
 
             if "FreeSerif" in w["fontname"] or w["text"] in ("❑", "☐", "□"):
-                side = round((w["x1"] - w["x0"]) * 0.85, 2)
-                cap = w['size'] * 0.72
-                box_bottom = baseline_y - (cap - side) / 2
-                template["checkboxes"].append({
-                    "x": round(w["x0"] + ((w["x1"] - w["x0"]) - side) / 2, 2),
-                    "y": round(box_bottom, 2),
-                    "side": side
-                })
+                # O glifo "❑" e a MESMA marcação que o Canva ja desenhou como
+                # retangulo (branco + borda) — e esse retangulo, extraido com a
+                # geometria exata, ja foi para `checkboxes` acima. Aqui o glifo
+                # e so descartado, para nao desenhar dois quadradinhos.
+                continue
             else:
                 template["texts"].append({
                     "text": w["text"], "x": round(w["x0"], 2), "y": round(baseline_y, 2),

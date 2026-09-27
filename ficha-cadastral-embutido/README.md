@@ -49,12 +49,23 @@ praticamente pixel a pixel com o original.
    tortas — a palavra "da" da primeira linha do "Atenção" vinha em `x = 330` no
    meio da linha); o texto agora é re-quebrado pela fonte real, o que conserta a
    posição e o corpo do texto de uma vez.
-3. **Checkboxes (`❑`)**: no original é um glifo de uma fonte
-   (`FreeSerif`) especificamente incluída só para esse símbolo. Troquei por
-   um quadrado vetorial desenhado (`drawRectangle` sem preenchimento) na
-   mesma posição/tamanho — visualmente equivalente e evita ter que embutir
-   mais uma fonte só por causa de um caractere.
-4. **Molduras/grades das tabelas**: ao exportar do Canva, os títulos e
+3. **Camadas de linha/caixa** (o que faz a tabela ter "linhas verticais e
+   horizontais" como no original):
+   - `blackBars` — divisórias. `width`/`height` são **comprimento e
+     espessura** (a espessura é o menor dos dois: 297 × 0,48 = linha de
+     0,48 pt). `cor` opcional (a "tabelinha" do cabeçalho é azul `#003366`) e
+     `tracejado: [0.48, 0.48]` desenha linha pontilhada (`drawLine` +
+     `dashArray`).
+   - `whiteBoxes` — caixas de campo: fundo branco + `borda` (0,5 pt). São as
+     linhas verticais/horizontais internas das tabelas; sem elas as colunas
+     somem.
+   - `checkboxes` — os quadradinhos de marcação, com a **geometria real**
+     (`width`/`height` + `borda`) do retângulo que o Canva desenhou.
+4. **Checkboxes (`❑`)**: o glifo `❑` do original é a MESMA marcação que o
+   Canva já desenhou como retângulo — extraímos o retângulo (geometria exata,
+   inclusive o preenchimento branco que apaga a grade atrás) e descartamos o
+   glifo, para não desenhar dois quadradinhos.
+5. **Molduras/grades das tabelas**: ao exportar do Canva, os títulos e
    textos viraram texto real (vetorial), mas as bordas/linhas de várias
    tabelas foram "achatadas" em imagens raster (eu confirmei isso abrindo
    cada uma). Em vez de tentar redesenhar cada linha manualmente (arriscado
@@ -63,9 +74,20 @@ praticamente pixel a pixel com o original.
    arquivo externo enviado por candidato/admin). É a mesma lógica de manter
    um logo como asset — só que agora existe *dentro* do projeto, versionado,
    e não depende de recriar um PDF pronto inteiro a cada ajuste de layout.
-5. As poucas linhas divisórias que o Canva exportou como vetor real (ex.:
+6. As poucas linhas divisórias que o Canva exportou como vetor real (ex.:
    as linhas simples da seção "Dados Pessoais") foram mantidas como
    retângulos pretos finos desenhados via código — 100% vetorial.
+
+## Fidelidade medida (diff de pixels contra o PDF oficial)
+
+| Estado | página inteira |
+|---|---|
+| commit anterior (sem as caixas de campo) | 94,6% |
+| com `whiteBoxes` + `checkboxes` + moldura tracejada | **96,5%** |
+
+O resto da diferença é a tolerância de 0,33 pt entre a altura de página do
+PDF oficial (841,92 pt) e a do template (842,25 pt) mais antialiasing: as
+medidas acima já compensam 1 px (0,24 pt) de deslocamento vertical.
 
 ## Bug corrigido: texto "flutuando" alto demais dentro das linhas
 

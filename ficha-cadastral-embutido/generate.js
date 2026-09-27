@@ -30,6 +30,30 @@ function wrapText(text, font, size, maxWidth) {
   return lines;
 }
 
+// ---------------------------------------------------------------------------
+// Helper: "#RRGGBB" → cor pdf-lib (usado pelas divisórias coloridas do cabeçalho)
+// ---------------------------------------------------------------------------
+function hexToRgb(hex) {
+  const h = String(hex).replace("#", "");
+  return rgb(
+    parseInt(h.slice(0, 2), 16) / 255,
+    parseInt(h.slice(2, 4), 16) / 255,
+    parseInt(h.slice(4, 6), 16) / 255,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Helper: espessura (pt) de uma divisória — `width`/`height` carregam o
+// comprimento e a espessura; a espessura é o menor dos dois (0,48 pt na
+// prática). Sem os dois, 0,48.
+// ---------------------------------------------------------------------------
+function espessuraDaDivisoria(bar) {
+  const w = Number(bar.width) || 0;
+  const h = Number(bar.height) || 0;
+  if (w > 0 && h > 0) return Math.min(w, h);
+  return w || h || 0.48;
+}
+
 async function generateFichaCadastral(data = {}) {
   const template = JSON.parse(fs.readFileSync(path.join(__dirname, "template.json"), "utf-8"));
 
@@ -94,12 +118,40 @@ async function generateFichaCadastral(data = {}) {
     page.drawImage(embedded, { x: img.x, y: img.y, width: img.width, height: img.height });
   }
 
-  // 2) Divisórias vetoriais (linhas finas pretas reais do documento original)
+  // 2) Divisórias vetoriais (linhas finas pretas reais do documento original;
+  //    `cor` para as réguas coloridas e `tracejado` para as linhas pontilhadas)
   for (const bar of template.blackBars) {
+    const color = bar.cor ? hexToRgb(bar.cor) : rgb(0, 0, 0);
+    if (bar.tracejado) {
+      // `width`/`height` são o COMPRIMENTO e a ESPESSURA da divisória: a
+      // espessura é sempre o menor dos dois (297 x 0,48 = linha de 0,48 pt).
+      page.drawLine({
+        start: { x: bar.x, y: bar.y },
+        end: { x: bar.x + bar.width, y: bar.y + bar.height },
+        thickness: espessuraDaDivisoria(bar),
+        color,
+        dashArray: bar.tracejado,
+      });
+      continue;
+    }
     page.drawRectangle({
       x: bar.x, y: bar.y, width: bar.width, height: bar.height,
-      color: rgb(0, 0, 0),
+      color,
     });
+  }
+
+  // 2b) Caixas de campo (as linhas verticais/horizontais das tabelas): fundo
+  //     branco + borda preta, exatamente como o Canva as desenhou no original.
+  for (const bx of template.whiteBoxes || []) {
+    const opts = {
+      x: bx.x, y: bx.y, width: bx.width, height: bx.height,
+      color: rgb(1, 1, 1),
+    };
+    if (bx.borda) {
+      opts.borderColor = rgb(0, 0, 0);
+      opts.borderWidth = bx.borda;
+    }
+    page.drawRectangle(opts);
   }
 
   // 3) Texto estático do layout (rótulos, títulos, cabeçalho)
@@ -129,11 +181,15 @@ async function generateFichaCadastral(data = {}) {
     }
   }
 
-  // 4) Checkboxes: quadrados vetoriais no lugar do glyph "❑"
+  // 4) Checkboxes: quadrados reais do documento (branco + borda 0,5 pt)
   for (const cb of template.checkboxes) {
     page.drawRectangle({
-      x: cb.x, y: cb.y, width: cb.side, height: cb.side,
-      borderColor: rgb(0, 0, 0), borderWidth: 0.75,
+      x: cb.x, y: cb.y,
+      width: cb.width != null ? cb.width : cb.side,
+      height: cb.height != null ? cb.height : cb.side,
+      color: rgb(1, 1, 1),
+      borderColor: rgb(0, 0, 0),
+      borderWidth: cb.borda || 0.5,
     });
   }
 

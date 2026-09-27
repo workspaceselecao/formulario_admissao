@@ -86,6 +86,18 @@
   function num(v, padrao) { var n = Number(v); return isFinite(n) ? n : (padrao || 0); }
   function arred(n) { return Math.round(num(n) * 100) / 100; }
 
+  /** "#RRGGBB" (ou "rgb(r,g,b)") → cor do pdf-lib. */
+  function corHex(valor, PDFLib) {
+    if (!PDFLib || !PDFLib.rgb) return null;
+    var s = String(valor || "").trim();
+    if (/^#/.test(s) && s.length === 7) {
+      return PDFLib.rgb(parseInt(s.slice(1, 3), 16) / 255, parseInt(s.slice(3, 5), 16) / 255, parseInt(s.slice(5, 7), 16) / 255);
+    }
+    var m = s.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (m) return PDFLib.rgb(Number(m[1]) / 255, Number(m[2]) / 255, Number(m[3]) / 255);
+    return null;
+  }
+
   /**
    * Validação estrutural do template + contagem dos campos do schema.
    * Nunca lança: retorna { ok, erros[], avisos[], resumo }.
@@ -371,16 +383,42 @@
           var barras = camadas.blackBars || [];
           for (var b = 0; b < barras.length; b++) {
             var bar = barras[b];
-            if (!bar || num(bar.width) <= 0 || num(bar.height) <= 0) continue;
-            folha.drawRectangle({ x: num(bar.x), y: num(bar.y), width: num(bar.width), height: num(bar.height), color: cor });
+            if (!bar) continue;
+            var wBar = num(bar.width), hBar = num(bar.height);
+            if (wBar < 0 || hBar < 0) continue;
+            // `cor` opcional: réguas coloridas do cabeçalho (o resto é preto).
+            var corBar = corHex(bar.cor, PDFLib) || cor;
+            if (bar.tracejado) {
+              // Linha pontilhada (dashArray) — a moldura tracejada da
+              // "tabelinha" do cabeçalho. wBar/hBarzeradas ainda desenham
+              // (comprimento válido), diferente do drawRectangle.
+              if (!wBar && !hBar) continue;
+              // `width`/`height` = comprimento e espessura; a espessura é o
+              // menor dos dois (divisória real: ~0,48 pt).
+              var espessura = (wBar > 0 && hBar > 0) ? Math.min(wBar, hBar) : (wBar || hBar);
+              folha.drawLine({
+                start: { x: num(bar.x), y: num(bar.y) },
+                end: { x: num(bar.x) + wBar, y: num(bar.y) + hBar },
+                thickness: espessura || 0.48,
+                color: corBar,
+                dashArray: bar.tracejado
+              });
+              continue;
+            }
+            if (wBar <= 0 || hBar <= 0) continue;
+            folha.drawRectangle({ x: num(bar.x), y: num(bar.y), width: wBar, height: hBar, color: corBar });
           }
           relatorio.barras += barras.length;
+          // Caixas de campo = as linhas verticais/horizontais das tabelas:
+          // fundo branco + borda preta (`borda`), como no documento oficial.
           var brancas = camadas.whiteBoxes || [];
           var branco = PDFLib.rgb(1, 1, 1);
           for (var w = 0; w < brancas.length; w++) {
             var bx = brancas[w];
             if (!bx || num(bx.width) <= 0 || num(bx.height) <= 0) continue;
-            folha.drawRectangle({ x: num(bx.x), y: num(bx.y), width: num(bx.width), height: num(bx.height), color: branco });
+            var optsCaixa = { x: num(bx.x), y: num(bx.y), width: num(bx.width), height: num(bx.height), color: branco };
+            if (num(bx.borda) > 0) { optsCaixa.borderColor = cor; optsCaixa.borderWidth = num(bx.borda); }
+            folha.drawRectangle(optsCaixa);
           }
           var textos = camadas.texts || [];
           for (var t = 0; t < textos.length; t++) {
@@ -406,9 +444,12 @@
           for (var c = 0; c < cbs.length; c++) {
             var cb = cbs[c];
             if (!cb) continue;
-            var lado = num(cb.side, 5);
-            if (lado <= 0) continue;
-            folha.drawRectangle({ x: num(cb.x), y: num(cb.y), width: lado, height: lado, borderColor: cor, borderWidth: 0.75 });
+            // Geometria real do original (`width`/`height`); `side` é o
+            // formato antigo (quadrado perfeito).
+            var w = num(cb.width, num(cb.side, 5));
+            var h = num(cb.height, num(cb.side, 5));
+            if (w <= 0 || h <= 0) continue;
+            folha.drawRectangle({ x: num(cb.x), y: num(cb.y), width: w, height: h, color: branco, borderColor: cor, borderWidth: num(cb.borda, 0.5) });
           }
           relatorio.checkboxes += cbs.length;
         });

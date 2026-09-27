@@ -63,6 +63,8 @@ Se adicionar um **campo novo** no formulário web, tem de existir **entrada corr
 
 > **Fonte e quebra de linha no template.** `template.texts[].font` aceita uma fonte padrão do PDF **ou** um nome declarado em `template.fontes` (`{ "arquivo": "assets/X.ttf", "fallback": "Helvetica" }`). O TTF só é embutido se os bytes chegarem em `assets.fontes` **e** o fontkit estiver carregado (CDN `@pdf-lib/fontkit` no painel; sem ele a engine usa `fallback` e reporta em `relatorio.fontesFallback`). Trechos com `maxWidth` são re-quebrados pela fonte real com `lineHeight` (padrão `tamanho × 1,2`), descendo linha a linha a partir de `y`.
 
+> **Linhas, caixas e a "tabelinha" do cabeçalho.** `blackBars` = divisórias, com `width`/`height` carregando **comprimento e espessura** (espessura = o menor dos dois), `cor` opcional (a moldura do cabeçalho é azul `#003366`) e `tracejado: [0.48, 0.48]` para linha pontilhada. `whiteBoxes` = caixas de campo (fundo branco + `borda`) — são elas que desenham as linhas verticais/horizontais internas das tabelas; sem elas as colunas somem. `checkboxes` = quadradinhos de marcação com a geometria real (`width`/`height` + `borda`). A auditoria (`scripts/audit-panel.mjs`) acusa a ausência de qualquer um desses grupos.
+
 ---
 
 ## 4. Ficha cadastral — onde atualizar o quê
