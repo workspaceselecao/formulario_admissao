@@ -8263,5 +8263,8 @@
         }
       ]
     }
-  ]
+  ],
+  "fonteCheckbox": {
+    "arquivo": "assets/seguisym.ttf"
+  }
 }

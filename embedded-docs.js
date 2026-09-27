@@ -330,6 +330,20 @@
           });
         });
       }, Promise.resolve());
+      // Fonte do glifo das checkboxes (template.fonteCheckbox = { arquivo }):
+      // Wingdings do Windows não cobre U+2751; o Segoe UI Symbol tem o glifo
+      // idêntico. Sem o TTF, as checkboxes caem no retângulo vetorial.
+      var GLIFO_CHECKBOX = "\u2751";
+      var fonteCheckboxEmb = null;
+      var declCb = template.fonteCheckbox || null;
+      var arqCb = declCb && declCb.arquivo;
+      var brutoCb = arqCb ? bytesFontes[arqCb] : null;
+      correntes = correntes.then(function () {
+        if (!brutoCb) return null;
+        if (!fonteKit || !pdfDoc.registerFontkit) return null;
+        pdfDoc.registerFontkit(fonteKit);
+        return pdfDoc.embedFont(brutoCb).then(function (emb) { fonteCheckboxEmb = emb; return null; }).catch(function () { return null; });
+      });
       return correntes.then(function () {
         // ── 1) Camadas de fundo por página (imagens → barras → caixas brancas → textos → marcações)
         return PDFLib.all ? Promise.all(paginas.map(function (p, idx) {
@@ -423,11 +437,27 @@
           var textos = camadas.texts || [];
           for (var t = 0; t < textos.length; t++) {
             var tx = textos[t];
-            if (!tx || !tx.text) continue;
+            if (!tx || (!tx.text && !tx.chars && !tx.palavras)) continue;
             var fnt = resolverFonte(tx.font);
             var tam = num(tx.size, 9);
             var larg = num(tx.maxWidth, 0);
-            if (larg > 0) {
+            if (tx.chars && tx.chars.length) {
+              // Texto ancorado CARACTERE A CARACTERE: cada glifo recebe a
+              // origem x EXATA do PDF oficial (extração via rawdict). Reproduz
+              // o kerning irregular do Canva, que nem o Tc uniforme alcança.
+              for (var k = 0; k < tx.chars.length; k++) {
+                var ch = tx.chars[k];
+                if (!ch || !ch.c) continue;
+                folha.drawText(ch.c, { x: num(ch.x), y: num(tx.y), size: tam, font: fnt, color: cor });
+              }
+            } else if (tx.palavras && tx.palavras.length) {
+              // Formato intermediário: ancoragem palavra a palavra.
+              for (var pw = 0; pw < tx.palavras.length; pw++) {
+                var pl = tx.palavras[pw];
+                if (!pl || !pl.t) continue;
+                folha.drawText(pl.t, { x: num(pl.x), y: num(tx.y), size: tam, font: fnt, color: cor });
+              }
+            } else if (larg > 0) {
               // Trecho com quebra de linha: as linhas descem de `y` a cada
               // `lineHeight` (mesma convenção do gerador Node da POC).
               var passo = num(tx.lineHeight, tam * 1.2);
@@ -444,8 +474,19 @@
           for (var c = 0; c < cbs.length; c++) {
             var cb = cbs[c];
             if (!cb) continue;
-            // Geometria real do original (`width`/`height`); `side` é o
-            // formato antigo (quadrado perfeito).
+            // Formato novo: glifo U+2751 (quadrado com sombra, Wingdings no
+            // original) na origem exata (x, base) e size extraídos do PDF
+            // oficial. Fonte do glifo declarada em template.fonteCheckbox
+            // (arquivo TTF, ex.: Segoe UI Symbol); sem o TTF, cai no retângulo.
+            if (ehNumero(cb.base)) {
+              var fntCb = fonteCheckboxEmb;
+              if (fntCb) {
+                folha.drawText(GLIFO_CHECKBOX, { x: num(cb.x), y: num(cb.base), size: num(cb.size, 9.96), font: fntCb, color: cor });
+                continue;
+              }
+            }
+            // Fallback/geometria legada: retângulo branco com borda (formato
+            // `width`/`height`; `side` é o formato antigo de quadrado).
             var w = num(cb.width, num(cb.side, 5));
             var h = num(cb.height, num(cb.side, 5));
             if (w <= 0 || h <= 0) continue;

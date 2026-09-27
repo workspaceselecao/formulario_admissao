@@ -4086,10 +4086,16 @@
     }
     const fontes = {};
     const faltandoFontes = [];
+    const arquivosFontes = [];
     for (const nome of Object.keys(template.fontes || {})) {
       const decl = template.fontes[nome] || {};
       const arq = decl.arquivo || (typeof decl === "string" ? decl : null);
       if (!arq) continue;
+      arquivosFontes.push(arq);
+    }
+    // Fonte do glifo das checkboxes (U+2751), declarada à parte no template.
+    if (template.fonteCheckbox && template.fonteCheckbox.arquivo) arquivosFontes.push(template.fonteCheckbox.arquivo);
+    for (const arq of arquivosFontes) {
       try {
         const r = await fetch(dnUrlTemplate(fonte, arq), { cache: "no-store" });
         if (r.ok) fontes[arq] = new Uint8Array(await r.arrayBuffer());
