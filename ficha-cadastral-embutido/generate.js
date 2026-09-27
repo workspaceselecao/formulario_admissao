@@ -6,7 +6,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { PDFDocument, StandardFonts, rgb, PDFHexString } = require("pdf-lib");
+const { PDFDocument, StandardFonts, rgb, PDFHexString, degrees } = require("pdf-lib");
 const operators = require("pdf-lib/cjs/api/operators");
 const fontkit = require("@pdf-lib/fontkit");
 
@@ -116,7 +116,23 @@ async function generateFichaCadastral(data = {}) {
       imageCache[img.file] = await pdfDoc.embedPng(bytes);
     }
     const embedded = imageCache[img.file];
-    page.drawImage(embedded, { x: img.x, y: img.y, width: img.width, height: img.height });
+    if (img.rotacao) {
+      // Imagem com rotação (ex.: carimbo "Uso Interno" do Canva, gravado a
+      // -30° no PDF). drawImage gira em torno do canto (x,y); desloca x/y para
+      // que o CENTRO da imagem girada coincida com o centro do bbox original.
+      const teta = (img.rotacao * Math.PI) / 180;
+      const dx = img.width / 2, dy = img.height / 2;
+      const cx = img.x + dx, cy = img.y + dy;
+      page.drawImage(embedded, {
+        x: cx - (dx * Math.cos(teta) - dy * Math.sin(teta)),
+        y: cy - (dx * Math.sin(teta) + dy * Math.cos(teta)),
+        width: img.width,
+        height: img.height,
+        rotate: degrees(img.rotacao),
+      });
+    } else {
+      page.drawImage(embedded, { x: img.x, y: img.y, width: img.width, height: img.height });
+    }
   }
 
   // 2) Divisórias vetoriais (linhas finas pretas reais do documento original;
@@ -233,13 +249,10 @@ async function generateFichaCadastral(data = {}) {
   return pdfDoc.save();
 }
 
-// Execução direta: gera um PDF de exemplo em output.pdf
+// Execução direta: gera output.pdf de comparação de layout (sem dados do
+// candidato — o PDF oficial F-075 vem em branco).
 if (require.main === module) {
-  generateFichaCadastral({
-    nomeCompleto: "MARIA DA SILVA SANTOS",
-    telefone: "(71) 99999-0000",
-    email: "maria.santos@exemplo.com",
-  }).then((bytes) => {
+  generateFichaCadastral({}).then((bytes) => {
     fs.writeFileSync(path.join(__dirname, "output.pdf"), bytes);
     console.log("Gerado: output.pdf");
   });
