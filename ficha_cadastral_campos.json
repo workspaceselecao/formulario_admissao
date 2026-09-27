@@ -14,9 +14,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 398.57,
-            "y": 695.44,
-            "largura": 168,
+            "x": 18.4,
+            "y": 694.48,
+            "largura": 474.7,
             "altura": 12.3
           },
           "obrigatorio": true,
@@ -27,9 +27,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 138.27,
-            "y": 670.83,
-            "largura": 420,
+            "x": 18.4,
+            "y": 671.68,
+            "largura": 474.7,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -40,9 +40,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 55.03,
-            "y": 650.06,
-            "largura": 202,
+            "x": 18.4,
+            "y": 649.18,
+            "largura": 231.35,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -53,9 +53,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 292.67,
-            "y": 650.06,
-            "largura": 278,
+            "x": 261.8,
+            "y": 649.38,
+            "largura": 231.35,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -66,9 +66,9 @@
           "tipo": "email",
           "pagina": 1,
           "coordenadas": {
-            "x": 47.29,
-            "y": 629.09,
-            "largura": 520,
+            "x": 18.4,
+            "y": 626.48,
+            "largura": 297.75,
             "altura": 12.3
           },
           "obrigatorio": false
@@ -78,9 +78,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 66.38,
-            "y": 611.12,
-            "largura": 500,
+            "x": 18.4,
+            "y": 603.68,
+            "largura": 297.75,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -101,19 +101,19 @@
             "sim": {
               "label": "Sim",
               "coordenadas": {
-                "x": 85.84,
-                "y": 589.92,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 94.8,
+                "y": 592.28,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "nao": {
               "label": "Não",
               "coordenadas": {
-                "x": 85.88,
-                "y": 579.76,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 94.8,
+                "y": 581.23,
+                "largura": 9.75,
+                "altura": 8.85
               }
             }
           }
@@ -122,12 +122,12 @@
           "label": "PIS (informar se não for primeiro emprego)",
           "tipo": "texto",
           "pagina": 1,
-          "coordenadas": {
-            "x": 162.79,
-            "y": 580.4,
-            "largura": 400,
-            "altura": 12.3
-          },
+      "coordenadas": {
+        "x": 184.5,
+        "y": 580.93,
+        "largura": 130.65,
+        "altura": 12.3
+      },
           "obrigatorio": false,
           "mascara": "999.99999.99-9",
           "dependencia": {
@@ -145,9 +145,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 58.19,
-            "y": 572.03,
-            "largura": 226,
+            "x": 19.5,
+            "y": 558.03,
+            "largura": 297.75,
             "altura": 12.3
           },
           "obrigatorio": false
@@ -157,9 +157,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 301.84,
-            "y": 572.03,
-            "largura": 34,
+            "x": 329.25,
+            "y": 558.03,
+            "largura": 45.35,
             "altura": 12.3
           },
           "obrigatorio": false
@@ -169,9 +169,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 392.79,
-            "y": 572.03,
-            "largura": 178,
+            "x": 384.35,
+            "y": 558.38,
+            "largura": 187.5,
             "altura": 12.3
           },
           "obrigatorio": false
@@ -181,9 +181,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 40.67,
-            "y": 553.15,
-            "largura": 88,
+            "x": 19.05,
+            "y": 535.48,
+            "largura": 106.75,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -194,9 +194,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 161.32,
-            "y": 553.15,
-            "largura": 172,
+            "x": 135.05,
+            "y": 535.38,
+            "largura": 196.85,
             "altura": 12.3
           },
           "obrigatorio": false
@@ -206,9 +206,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 369.51,
-            "y": 553.15,
-            "largura": 200,
+            "x": 339.35,
+            "y": 535.53,
+            "largura": 234.75,
             "altura": 12.3
           },
           "obrigatorio": false
@@ -226,19 +226,19 @@
             "sim": {
               "label": "Sim",
               "coordenadas": {
-                "x": 85.84,
-                "y": 589.92,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 104.55,
+                "y": 520.41,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "nao": {
               "label": "Não",
               "coordenadas": {
-                "x": 162.58,
-                "y": 526.28,
-                "largura": 5.6,
-                "altura": 5.6
+                "x": 133.05,
+                "y": 520.26,
+                "largura": 9.75,
+                "altura": 8.85
               }
             }
           }
@@ -255,46 +255,46 @@
             "fisica": {
               "label": "Física",
               "coordenadas": {
-                "x": 262.44,
-                "y": 524.98,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 262.2,
+                "y": 514.38,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "auditiva": {
               "label": "Auditiva",
               "coordenadas": {
-                "x": 314.44,
-                "y": 524.98,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 319.5,
+                "y": 514.33,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "visual": {
               "label": "Visual",
               "coordenadas": {
-                "x": 380.34,
-                "y": 524.98,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 393.8,
+                "y": 514.28,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "intelectual": {
               "label": "Intelectual",
               "coordenadas": {
-                "x": 423.18,
-                "y": 524.98,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 442.7,
+                "y": 514.48,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "multipla": {
               "label": "Múltipla",
               "coordenadas": {
-                "x": 484.68,
-                "y": 524.98,
-                "largura": 4.87,
-                "altura": 4.87
+                "x": 514.15,
+                "y": 514.43,
+                "largura": 9.75,
+                "altura": 8.85
               }
             }
           }
@@ -312,46 +312,46 @@
             "conta_corrente": {
               "label": "Conta Corrente Bradesco",
               "coordenadas": {
-                "x": 129.86,
-                "y": 501.62,
-                "largura": 5.63,
-                "altura": 5.63
+                "x": 128.8,
+                "y": 493.32,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "bradesco": {
               "label": "Conta Salário Bradesco",
               "coordenadas": {
-                "x": 171.62,
-                "y": 501.62,
-                "largura": 5.63,
-                "altura": 5.63
+                "x": 171.9,
+                "y": 493.22,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "poupanca_bradesco": {
               "label": "Conta Poupança Bradesco",
               "coordenadas": {
-                "x": 230.92,
-                "y": 501.62,
-                "largura": 5.63,
-                "altura": 5.63
+                "x": 232.35,
+                "y": 493.13,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "santander_corrente": {
               "label": "Conta Corrente Santander",
               "coordenadas": {
-                "x": 133.52,
-                "y": 478.48,
-                "largura": 5.63,
-                "altura": 5.63
+                "x": 130.1,
+                "y": 473.92,
+                "largura": 9.75,
+                "altura": 8.85
               }
             },
             "santander_salario": {
               "label": "Conta Salário Santander",
               "coordenadas": {
-                "x": 177.64,
-                "y": 478.48,
-                "largura": 5.63,
-                "altura": 5.63
+                "x": 174.55,
+                "y": 474.57,
+                "largura": 9.75,
+                "altura": 8.85
               }
             }
           }
@@ -361,9 +361,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 326.3,
-            "y": 513.56,
-            "largura": 86,
+            "x": 297.35,
+            "y": 490.93,
+            "largura": 111.6,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -381,9 +381,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 472.68,
-            "y": 513.43,
-            "largura": 100,
+            "x": 417.2,
+            "y": 490.93,
+            "largura": 139.55,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -401,9 +401,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 326.3,
-            "y": 513.56,
-            "largura": 86,
+            "x": 297.35,
+            "y": 490.93,
+            "largura": 111.6,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -414,16 +414,16 @@
               "santander_salario"
             ]
           },
-          "observacao": "Mesmas coordenadas da agência Bradesco até medição específica no PDF F-075_37"
+          "observacao": "Mesma caixa da agência Bradesco: o PDF traz uma única caixa de Agência/Conta para os dois bancos"
         },
         "santander_conta_digito": {
           "label": "Conta/Dígito (Santander)",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 472.68,
-            "y": 513.43,
-            "largura": 100,
+            "x": 417.2,
+            "y": 490.93,
+            "largura": 139.55,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -434,16 +434,16 @@
               "santander_salario"
             ]
           },
-          "observacao": "Mesmas coordenadas da conta Bradesco até medição específica no PDF F-075_37"
+          "observacao": "Mesma caixa da conta Bradesco: o PDF traz uma única caixa de Agência/Conta para os dois bancos"
         },
         "cpf_titular": {
           "label": "CPF do titular",
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 355.31,
-            "y": 485.54,
-            "largura": 215,
+            "x": 297.5,
+            "y": 466.85,
+            "largura": 186.45,
             "altura": 12.3
           },
           "obrigatorio": false,
@@ -778,28 +778,28 @@
         "alimentacao": {
           "label": "100% Vale Alimentação",
           "coordenadas": {
-            "x": 57.94,
-            "y": 141.78,
-            "largura": 6.97,
-            "altura": 6.97
+            "x": 57.75,
+            "y": 170.02,
+            "largura": 9.75,
+            "altura": 8.85
           }
         },
         "refeicao": {
           "label": "100% Vale Refeição",
           "coordenadas": {
-            "x": 248.14,
-            "y": 141.78,
-            "largura": 6.97,
-            "altura": 6.97
+            "x": 248.7,
+            "y": 170.35,
+            "largura": 9.75,
+            "altura": 8.85
           }
         },
         "flex": {
           "label": "Flexibilizado (50% VR e 50% VA)",
           "coordenadas": {
-            "x": 411.66,
-            "y": 141.78,
-            "largura": 6.97,
-            "altura": 6.97
+            "x": 412.2,
+            "y": 170.12,
+            "largura": 9.75,
+            "altura": 8.85
           }
         }
       }
@@ -812,10 +812,10 @@
           "tipo": "imagem",
           "pagina": 1,
           "coordenadas": {
-            "x": 57.66,
-            "y": 46.81,
-            "largura": 236,
-            "altura": 20
+            "x": 60.0,
+            "y": 72.5,
+            "largura": 232.85,
+            "altura": 44.25
           },
           "obrigatorio": true
         },
@@ -824,9 +824,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 58.16,
-            "y": 34.87,
-            "largura": 232,
+            "x": 60.3,
+            "y": 49.36,
+            "largura": 232.85,
             "altura": 12.75
           },
           "obrigatorio": true,
@@ -837,9 +837,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 58.16,
-            "y": 34.87,
-            "largura": 232,
+            "x": 60.3,
+            "y": 49.36,
+            "largura": 232.85,
             "altura": 12.75
           },
           "obrigatorio": false,
@@ -885,9 +885,9 @@
           "tipo": "texto",
           "pagina": 1,
           "coordenadas": {
-            "x": 21.0,
-            "y": 12.0,
-            "largura": 554.75,
+            "x": 20.0,
+            "y": 3.51,
+            "largura": 556.75,
             "altura": 12.75
           },
           "obrigatorio": false,

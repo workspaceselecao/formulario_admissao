@@ -302,16 +302,13 @@ if (ED && pdfLib) {
   // 13.1 — o perfil de texto do engine espelha o código da aplicação
   const htmlFicha = readFileSync(join(ROOT, "ficha_cadastral.html"), "utf8");
   const fonteHtml = parseFloat((htmlFicha.match(/const PDF_FONT_TEXTO = ([\d.]+)/) || [])[1]);
-  const offsetHtml = parseFloat((htmlFicha.match(/const OFFSET_Y_TEXTO_UMA_LINHA_PT = ([\d.]+)/) || [])[1]);
-  const limiteHtml = parseFloat((htmlFicha.match(/const LIMITE_Y_SEM_OFFSET_TEXTO_PT = ([\d.]+)/) || [])[1]);
-  const baselineHtml = (htmlFicha.match(/Math\.min\(h \* ([\d.]+), tamanhoFonte \* ([\d.]+)\)/) || []).slice(1).map(Number);
+  const tintaHtml = parseFloat((htmlFicha.match(/const ALTURA_TINTA_TEXTO = ([\d.]+)/) || [])[1]);
+  const fracaoHtml = parseFloat((htmlFicha.match(/Math\.min\(\(h - tamanhoFonte \* ALTURA_TINTA_TEXTO\) \/ 2, h \* ([\d.]+)\)/) || [])[1]);
   check("perfil do engine espelha as constantes reais do ficha_cadastral.html",
     ED.PERFIL_APP.tamanho === fonteHtml &&
-    ED.PERFIL_APP.offsetYUmaLinha === offsetHtml &&
-    ED.PERFIL_APP.limiteYSemOffset === limiteHtml &&
-    ED.PERFIL_APP.alturaFracao === baselineHtml[0] &&
-    ED.PERFIL_APP.alturaTeto === baselineHtml[1],
-    JSON.stringify({ engine: ED.PERFIL_APP, html: { fonteHtml, offsetHtml, limiteHtml, baselineHtml } }));
+    ED.PERFIL_APP.alturaTinta === tintaHtml &&
+    ED.PERFIL_APP.alturaFracao === fracaoHtml,
+    JSON.stringify({ engine: ED.PERFIL_APP, html: { fonteHtml, tintaHtml, fracaoHtml } }));
 
   // 13.2 — template do F-075: estrutura completa e válida (camadas do formulário)
   const schema = JSON.parse(readFileSync(join(ROOT, "ficha_cadastral_campos.json"), "utf8"));
@@ -319,13 +316,13 @@ if (ED && pdfLib) {
   const v = ED.validarTemplate(template, schema.campos);
   check("template embarcado do F-075 não tem erro crítico", v.ok === true, v.erros.slice(0, 4).join(" | "));
   check("template embarcado declara o mobiliário do formulário oficial (textos, imagens, marcações)",
-    // F-075_37: o texto estatico vem ANCORADO caractere a caractere (85 trechos
-    // de linha, cada glifo com a origem x do PDF oficial), as 9 imagens sao as
-    // grades/logo do modelo e as 17 marcacoes ❑ sao os quadradinhos impressos.
-    v.resumo && v.resumo.camadas.texts >= 80 && v.resumo.camadas.images >= 9 && v.resumo.camadas.checkboxes === 17,
+    // F-075_38: o texto estatico vem ANCORADO caractere a caractere (89 trechos
+    // de linha, cada glifo com a origem x do PDF oficial), as 3 imagens sao os
+    // logos/carimbo do modelo e as 17 marcacoes ❑ sao os quadradinhos impressos.
+    v.resumo && v.resumo.camadas.texts >= 85 && v.resumo.camadas.images >= 3 && v.resumo.camadas.checkboxes === 17,
     JSON.stringify(v.resumo && v.resumo.camadas));
   check("template embarcado usa a página exata do documento oficial",
-    Math.abs(v.resumo.pagina.width - 595.5) < 0.01 && Math.abs(v.resumo.pagina.height - 842.25) < 0.01,
+    Math.abs(v.resumo.pagina.width - 595.32) < 0.01 && Math.abs(v.resumo.pagina.height - 841.92) < 0.01,
     JSON.stringify(v.resumo.pagina));
   // 13.2b — fontes declaradas: todo texto usa fonte padrão OU fonte declarada, e
   // todo TTF declarado existe no reposório (fonte versionada, não artefato).
@@ -342,7 +339,7 @@ if (ED && pdfLib) {
     ttfsFaltando.length ? "faltando: " + ttfsFaltando.join(", ") : nomesFontes.join(", ") + " OK");
   // 13.2c — trechos com quebra automática: `maxWidth` cabe na página e tem
   // `lineHeight` (sem ele a engine assume 1,2× o tamanho e o bloco encosta).
-  // No F-075_37 o texto é ancorado por glifo, então não há quebra: nesse caso
+  // No F-075_38 o texto é ancorado por glifo, então não há quebra: nesse caso
   // a exigência é que TODO trecho esteja ancorado (nada depende de wrap).
   const wraps = (template.texts || []).filter((t) => t.maxWidth);
   const wrapsRuins = wraps.filter((t) => !(t.lineHeight > 0) || t.x + t.maxWidth > template.page.width || t.maxWidth <= 0);
@@ -351,18 +348,21 @@ if (ED && pdfLib) {
     wrapsRuins.length === 0 && (wraps.length > 0 || ancorados === (template.texts || []).length),
     wrapsRuins.length ? JSON.stringify(wrapsRuins.slice(0, 2))
       : wraps.length + " trecho(s) com quebra | " + ancorados + " trecho(s) ancorados");
-  // 13.2d — a grade do F-075_37 é feita de réguas pretas (divisórias reais) +
-  // caixas brancas de ACABAMENTO (opacas, sem borda: o par preto que as
-  // acompanha no PDF oficial é desenhado com alfa 0 e não aparece). Inventar
-  // borda preta nessas caixas seria acrescentar traço que o modelo não tem.
+  // 13.2d — a grade do F-075_38 é feita de réguas pretas vetoriais (161 no
+  // total: as divisórias das tabelas mais as molduras dos avisos). Esta versão
+  // do Canva não usa caixas brancas de ACABAMENTO — elas existem no v37. A
+  // regra abaixo continua valendo: caixa branca de acabamento é opaca e sem
+  // borda (o par preto que a acompanha no PDF oficial é desenhado com alfa 0
+  // e não aparece); inventar borda preta seria acrescentar traço que o modelo
+  // não tem.
   const caixas = template.whiteBoxes || [];
   const caixasComBorda = caixas.filter((b) => b.borda > 0);
   const checks = template.checkboxes || [];
   const checksSemGeom = checks.filter((c) =>
     !(c.width > 0 && c.height > 0) && !(c.base != null && c.size > 0));
-  check("template embarcado traz a grade do formulário (réguas + caixas de acabamento)",
-    caixas.length >= 8 && caixasComBorda.length === 0 && (template.blackBars || []).length >= 11,
-    `${(template.blackBars || []).length} régua(s), ${caixas.length} caixa(s), com borda: ${caixasComBorda.length}`);
+  check("template embarcado traz a grade do formulário (réguas vetoriais, sem borda inventada)",
+    caixasComBorda.length === 0 && (template.blackBars || []).length >= 150,
+    `${(template.blackBars || []).length} régua(s), ${caixas.length} caixa(s) branca(s), com borda: ${caixasComBorda.length}`);
   check("marcações da tabela têm geometria real (glifo ancorado ou width/height)",
     checks.length === 17 && checksSemGeom.length === 0,
     `${checks.length} marcação(ões), sem geometria: ${checksSemGeom.length}`);
@@ -373,8 +373,9 @@ if (ED && pdfLib) {
   const divergentes = [];
   for (const f of folhas) {
     const c = f.coordenadas;
-    const esperadoY = c.y + Math.min((c.altura || 0) * ED.PERFIL_APP.alturaFracao, ED.PERFIL_APP.tamanho * ED.PERFIL_APP.alturaTeto) -
-      (c.y > ED.PERFIL_APP.limiteYSemOffset ? ED.PERFIL_APP.offsetYUmaLinha : 0);
+    const esperadoY = Math.max(c.y + 0.5,
+      c.y + Math.min(((c.altura || 0) - ED.PERFIL_APP.tamanho * ED.PERFIL_APP.alturaTinta) / 2,
+        (c.altura || 0) * ED.PERFIL_APP.alturaFracao));
     if (Math.abs(esperadoY - ED.baselinePdf(c, ED.PERFIL_APP.tamanho)) > 0.001) divergentes.push(f.path);
   }
   check("baseline do engine é idêntica à fórmula do PDF atual (campo a campo)",
@@ -393,9 +394,12 @@ if (ED && pdfLib) {
   const buf1 = Buffer.from(g1.bytes);
   check("PDF embarcado gerado é um PDF de verdade", buf1.slice(0, 5).toString() === "%PDF-", buf1.slice(0, 5).toString());
   const carregado = await pdfLib.PDFDocument.load(g1.bytes);
+  const paginaTemplate = template.page || {};
   check("PDF embarcado tem as dimensões EXATAS do documento oficial",
-    Math.abs(carregado.getPage(0).getWidth() - 595.5) < 0.01 && Math.abs(carregado.getPage(0).getHeight() - 842.25) < 0.01,
-    carregado.getPage(0).getWidth() + "x" + carregado.getPage(0).getHeight());
+    Math.abs(carregado.getPage(0).getWidth() - paginaTemplate.width) < 0.01 &&
+    Math.abs(carregado.getPage(0).getHeight() - paginaTemplate.height) < 0.01,
+    carregado.getPage(0).getWidth() + "x" + carregado.getPage(0).getHeight() +
+    " (template " + paginaTemplate.width + "x" + paginaTemplate.height + ")");
   check("PDF embarcado é determinístico (mesma entrada ⇒ mesmos bytes)",
     Buffer.compare(Buffer.from(g2.bytes), buf1) === 0, "bytes diferentes");
   check("geração não inventa dado: sem dados, nenhum campo é desenhado",
@@ -467,7 +471,7 @@ if (ED && pdfLib) {
   for (const f of camposTextoSchema) {
     const x = Number(f.c.x) || 0, y = Number(f.c.y) || 0;
     const h = Number(f.c.altura ?? f.c.height) || 12, w = Number(f.c.largura ?? f.c.width) || 200;
-    const baseline = y + Math.min(h * 0.78, 9 * 1.12) - (y > 120 ? 9 : 0);
+    const baseline = Math.max(y + 0.5, y + Math.min((h - 9 * 0.72) / 2, h * 0.78));
     const vX0 = x + 0.5, vX1 = x + 0.5 + w, vY0 = baseline - 2.2, vY1 = baseline + 6.6;
     for (const r of rotulosTemplate) {
       if (vX0 < r.x1 - 1 && vX1 > r.x0 + 1 && vY0 < r.y1 && vY1 > r.y0) colisoesRotulo.push(f.path + " × " + JSON.stringify(r.texto));

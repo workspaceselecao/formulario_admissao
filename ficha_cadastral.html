@@ -1464,7 +1464,7 @@
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
 <script>
-const TEMPLATE_PATH = "./F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf";
+const TEMPLATE_PATH = "./F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf";
 const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
 const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
@@ -1562,9 +1562,9 @@ function sanitizarSegmentoNomeArquivo(s) {
     .trim();
 }
 
-/** Ajuste fino no corpo do formulário (y alto). Zona de assinatura (y ≤ 120) não usa offset. */
-const OFFSET_Y_TEXTO_UMA_LINHA_PT = 9;
-const LIMITE_Y_SEM_OFFSET_TEXTO_PT = 120;
+/** Ajuste fino no corpo do formulário: a caixa alta do valor (0,72 do corpo) é
+ *  centralizada na altura do campo, para o texto caber na caixa impressa. */
+const ALTURA_TINTA_TEXTO = 0.72;
 let assinaturaCanvasCtx = null;
 let assinaturaCanvasTemTraço = false;
 let assinaturaDesenhando = false;
@@ -3163,7 +3163,8 @@ function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
 function baselineYNoCampo(box, tamanhoFonte) {
   const yBottom = Number(box.y) || 0;
   const h = Number(box.altura ?? box.height) || 12;
-  return yBottom + Math.min(h * 0.78, tamanhoFonte * 1.12);
+  const dentro = Math.min((h - tamanhoFonte * ALTURA_TINTA_TEXTO) / 2, h * 0.78);
+  return Math.max(yBottom + 0.5, yBottom + dentro);
 }
 
 function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
@@ -3173,10 +3174,7 @@ function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
   const size = options.size ?? PDF_FONT_TEXTO;
   const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
   if (!str) return false;
-  const yBottom = Number(c.y) || 0;
-  const offsetLinha =
-    yBottom > LIMITE_Y_SEM_OFFSET_TEXTO_PT ? OFFSET_Y_TEXTO_UMA_LINHA_PT : 0;
-  const y = baselineYNoCampo(c, size) - offsetLinha + (options.offsetY ?? 0);
+  const y = baselineYNoCampo(c, size) + (options.offsetY ?? 0);
   const x = Number(c.x) || 0;
   page.drawText(str, {
     x: x + (options.offsetX ?? 0.5),

@@ -1,7 +1,13 @@
 """
-Script de extração: le o PDF oficial (F-075_37) e gera automaticamente o
+Script de extração: le o PDF oficial (F-075_38) e gera automaticamente o
 template.json + os assets PNG usados pelo generate.js (pdf-lib) e pelo engine
 embarcado (embedded-docs.js), SEM precisar mapear coordenadas manualmente.
+
+O template.json do repositório foi extraído de
+"F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf" (o documento canônico).
+As COORDENADAS dos campos de dado, essas, saem de uma outra fonte: as 65 caixas
+de preenchimento de "..._com caixa.pdf", que é o mesmo v38 com os retângulos
+marcados por cima — ver .tmp_render/remapear_v38.py.
 
 Uso:
     pip install pdfplumber pymupdf pillow
@@ -37,6 +43,16 @@ FONTES = {
     "ArialNarrow": ("Arial-Narrow", "assets/ARIALN.ttf"),
     "HelveticaLTPro-Roman": ("Helvetica", None),
     "FreeSerif": ("Helvetica", None),
+}
+
+# Fallback de cada familia, usado quando o TTF nao pode ser embutido (o engine
+# cai no padrao do pdf-lib sem quebrar). A versao "Narrow" cai no Arial largo
+# equivalente: ~22% mais largo, por isso o aviso de fidelidade.
+FALLBACK_FONTE = {
+    "Arial": "Helvetica",
+    "Arial-Bold": "Helvetica-Bold",
+    "Arial-Narrow": "Helvetica",
+    "Arial-Narrow-Bold": "Helvetica-Bold",
 }
 
 GLIFO_CHECKBOX = "❑"
@@ -345,12 +361,20 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
     page_fitz = doc[page_index]
     page_h, page_w = page_fitz.rect.height, page_fitz.rect.width
 
+    # As fontes declaradas sao DERIVADAS do mapa FONTES: toda familia que tem
+    # TTF no repositorio e declarada, nao so as duas primeiras. No F-075 v38
+    # nueve trechos usam Arial-Narrow(-Bold) — sem esta linha eles caiam no
+    # fallback largo e estouravam a caixa.
+    familias = {}
+    for _pdf, (nome, arquivo) in FONTES.items():
+        if not arquivo or nome in familias:
+            continue
+        familias[nome] = {"arquivo": arquivo,
+                          "fallback": FALLBACK_FONTE.get(nome, "Helvetica")}
+
     template = {
         "page": {"width": round(page_w, 2), "height": round(page_h, 2)},
-        "fontes": {
-            "Arial": {"arquivo": "assets/arial.ttf", "fallback": "Helvetica"},
-            "Arial-Bold": {"arquivo": "assets/arialbd.ttf", "fallback": "Helvetica-Bold"},
-        },
+        "fontes": familias,
         "fonteCheckbox": {"arquivo": "assets/seguisym.ttf"},
         "images": [], "blackBars": [], "whiteBoxes": [], "texts": [], "checkboxes": []
     }
@@ -405,10 +429,12 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
         p = pdf.pages[page_index]
 
         # IMPORTANTE: o pdf-plumber mede a partir da MEDIA BOX, e nao da Crop
-        # Box. A F-075_37 tem MediaBox [0, 7.83, ...] e CropBox [0, 0, ...]:
-        # usar a altura da pagina (842,25) como origem derruba todas as
-        # divisorias 7,83 pt para fora do lugar. `p.bbox[3]` ja e a base certa
-        # (o topo do recorte, no mesmo sistema do pdf-lib).
+        # Box. A F-075_37 (versao anterior) tinha MediaBox [0, 7.83, ...] e
+        # CropBox [0, 0, ...]: usar a altura da pagina (842,25) como origem
+        # derruba todas as divisorias 7,83 pt para fora do lugar. O v38 tem
+        # MediaBox == CropBox, mas `p.bbox[3]` ja e a base certa (o topo do
+        # recorte, no mesmo sistema do pdf-lib) e nao custa nada depender
+        # dela em vez da altura da pagina.
         ref_h = p.bbox[3]
 
         seen = set()

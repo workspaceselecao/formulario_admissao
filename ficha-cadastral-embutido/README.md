@@ -1,9 +1,10 @@
 # Ficha Cadastral — geração 100% embarcada (prova de conceito)
 
 Este pacote comprova que dá para recriar o PDF da Ficha Cadastral inteiramente
-via `pdf-lib`, sem carregar nenhum arquivo pronto externo. Comparação lado a
-lado (`compare_gen_top.png` vs `compare_orig_top.png`) mostra fidelidade
-praticamente pixel a pixel com o original.
+via `pdf-lib`, sem carregar nenhum arquivo pronto externo. O `template.json`
+atual foi extraído do **F-075_38 (PR-011)**: a página inteira do PDF gerado
+diverge da oficial em **0,790%** dos pixels (ver "Fidelidade medida", abaixo),
+resíduo que é antialiasing das fontes.
 
 ## Arquivos
 
@@ -11,11 +12,10 @@ praticamente pixel a pixel com o original.
   prontos da Atento e gera automaticamente `template.json` + `assets/*.png`.
   Não é preciso mapear coordenada nenhuma na mão.
 - `template.json` — já gerado para a Ficha Cadastral: tamanho da página,
-  imagens (logos + molduras/grades das tabelas), linhas/divisórias vetoriais,
-  caixas brancas de acabamento, todo o texto estático (rótulos) com fonte e
-  posição originais, e os checkboxes convertidos em quadrados vetoriais.
-- `assets/` — as 9 imagens (logo Atento, selo ONE, carimbo "Uso Interno" e as
-  molduras/grades de cada bloco de tabela), já extraídas com transparência.
+  imagens (logo Atento, selo ONE e carimbo "Uso Interno"), linhas/divisórias
+  vetoriais, todo o texto estático (rótulos) com fonte e posição originais,
+  e os checkboxes convertidos em quadrados vetoriais.
+- `assets/` — as 3 imagens do modelo + as 4 TTF declaradas em `template.fontes`.
 - `generate.js` — gerador em `pdf-lib` (a mesma lib que o Atentoform já usa
   no navegador): monta o PDF do zero a partir do `template.json` + `assets/`,
   e desenha os dados do candidato por cima, nas coordenadas de campo.
@@ -56,45 +56,99 @@ praticamente pixel a pixel com o original.
      0,48 pt). `cor` opcional (a "tabelinha" do cabeçalho é azul `#003366`) e
      `tracejado: [0.48, 0.48]` desenha linha pontilhada (`drawLine` +
      `dashArray`).
-   - `whiteBoxes` — caixas de campo: fundo branco + `borda` (0,5 pt). São as
-     linhas verticais/horizontais internas das tabelas; sem elas as colunas
-     somem.
+   - `whiteBoxes` — caixas de campo: fundo branco + `borda` (0,5 pt). No v38 a
+     extração descarta todas (0 no `template.json`): as tabelas vêm inteiras
+     vetoriais, sem os pares preto/branco de acabamento do v37.
    - `checkboxes` — os quadradinhos de marcação, com a **geometria real**
      (`width`/`height` + `borda`) do retângulo que o Canva desenhou.
 4. **Checkboxes (`❑`)**: o glifo `❑` do original é a MESMA marcação que o
    Canva já desenhou como retângulo — extraímos o retângulo (geometria exata,
    inclusive o preenchimento branco que apaga a grade atrás) e descartamos o
    glifo, para não desenhar dois quadradinhos.
-5. **Molduras/grades das tabelas**: ao exportar do Canva, os títulos e
-   textos viraram texto real (vetorial), mas as bordas/linhas de várias
-   tabelas foram "achatadas" em imagens raster (eu confirmei isso abrindo
-   cada uma). Em vez de tentar redesenhar cada linha manualmente (arriscado
-   e caro de manter), mantive essas molduras como imagens PNG com fundo
-   transparente, **embutidas como assets do próprio código** (não como
-   arquivo externo enviado por candidato/admin). É a mesma lógica de manter
-   um logo como asset — só que agora existe *dentro* do projeto, versionado,
-   e não depende de recriar um PDF pronto inteiro a cada ajuste de layout.
+5. **Molduras/grades das tabelas**: no v37 o Canva exportou parte das bordas
+   como imagens raster e elas entraram como assets PNG. No **v38** isso não
+   acontece mais: as tabelas vêm vetoriais e o `template.json` tem só as 3
+   imagens do modelo (logo, selo e carimbo). O `generate.js` continua
+   aceitando imagens em `template.images` com `rotacao`, caso um documento
+   futuro volte a precisá-las.
 6. As poucas linhas divisórias que o Canva exportou como vetor real (ex.:
    as linhas simples da seção "Dados Pessoais") foram mantidas como
    retângulos pretos finos desenhados via código — 100% vetorial.
 
 ## Fidelidade medida (diff de pixels contra o PDF oficial)
 
-Referência: **F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf** (150 dpi,
-tolerância 200/255):
+Referência: **F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf** — é dela que
+o `extract_template.py` extrai o `template.json` atual. Medição reproduzível:
 
-| Estado | página inteira |
+```bash
+node scripts/gerar-ficha-vazia.js            # gera output.pdf (só o template)
+python scripts/fidelidade-ficha.py "F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf" 150
+```
+
+Resultado atual (150 dpi, tolerância 200/255, página inteira — 595,32 × 841,92 pt):
+
+| Métrica | Valor |
 |---|---|
-| template da v37 | 15,2% |
-| reextração do 38 (template + assets) | 2,30% |
-| + letter-spacing (`espacamentoEntreGlifos`) nas linhas do bloco "Atenção" | 2,12% |
-| + carimbo "Uso Interno" recortado do render oficial | 1,68% |
-| + ancoragem caractere a caractere (`chars` no template) | 1,20% |
-| + correção da altura da página na extração (841,92, não 842,25) | 0,47% |
-| + moldura vetorial da tabelinha do cabeçalho + carimbo recalibrado | **0,48%** |
+| pixels diferentes | **0,790%** |
+| falta (tinta do oficial não reproduzida) | 0,344% |
+| sobra (tinta a mais no gerado) | 0,446% |
+| da tinta da referência | 11,27% |
+| maior bloco de 20 pt com diferença | 15,0% (x 403, y 665) |
 
 O resíduo é antialiasing de fonte (o original usa subsets do Canva com
-contornos ligeiramente mais grossos que os TTF do Windows).
+contornos ligeiramente mais grossos que os TTF do Windows) e está espalhado por
+toda a página — nenhum bloco isolado domina o diff.
+
+## Coordenadas dos campos: as 65 caixas do arquivo "com caixa"
+
+`F-075_38 (PR-011) Ficha Cadastral para Admissão_com caixa.pdf` é o **v38 com
+uma camada de anotação**: 65 retângulos de preenchimento (fundo branco, traço
+preto de 0,5 pt) desenhados por cima, marcando onde o candidato escreve. O
+conteúdo textual dos dois arquivos é idêntico — o "com caixa" existe só para
+dar a geometria dos campos.
+
+É dessa lista que saem as coordenadas de `ficha_cadastral_campos.json`
+(`x = x0`, `y = y0`, `largura = x1 − x0`, `altura = y1 − y0`, Y para cima):
+
+```bash
+python scripts/remapear-campos-v38.py --dry    # confere o mapeamento
+python scripts/remapear-campos-v38.py          # grava o schema
+```
+
+39 das 65 caixas têm campo no schema. As outras 26 são o cabeçalho (1–3),
+os rótulos das linhas de dependentes (34–48), a grade de vale-transporte
+(49–56) e a data segmentada ao pé (60–62) — nenhuma delas recebe dado hoje.
+Exceção de mapeamento: `informarpis` começa em `x = 184,5` (e não no `x0` da
+caixa) porque o rótulo impresso "PIS:" invade 1,96 pt da caixa; e
+`conta_bancaria.bradesco_agencia`/`santander_agencia` (e as respectivas
+conta/dígito) compartilham o mesmo par de caixas, porque a ficha tem um só
+conjunto de campos bancário.
+
+## Onde o texto cai dentro da caixa
+
+A coordenada do campo é a **caixa impressa**, e o valor é desenhado com a caixa
+alta centralizada nela:
+
+```
+baseline = y + min((altura − 0,72 × 9) / 2 ; altura × 0,78)      // no mínimo y + 0,5
+```
+
+Não há faixa especial por Y: a regra vale para qualquer altura de caixa, e por
+isso o mesmo texto cabe na caixa de 8,85 pt do checkbox como na de 12,3 pt dos
+campos de texto. A fórmula mora em `EmbeddedDocs.PERFIL_APP` /
+`ALTURA_TINTA_TEXTO` no `ficha_cadastral.html`, e a auditoria
+(`scripts/audit-panel.mjs`) falha se as duas divergirem.
+
+Conferência numérica do resultado (a "revisão visual" medida em pixels — o
+preenchido menos o vazio, que é exatamente a tinta escrita pela engine):
+```bash
+node scripts/gerar-ficha-preenchida.js
+node scripts/gerar-ficha-preenchida.js --vazio
+python scripts/conferir-caixas-v38.py
+```
+
+Estado atual: **41 valores de texto e 5 marcas "X" dentro das 65 caixas**, sem
+nenhum valor fora e sem colisão com rótulo impresso.
 
 ## Ancoragem caractere a caractere (`chars`)
 
@@ -126,7 +180,7 @@ compensação, as linhas longas terminam de 1,5 pt a 17 pt antes do original.
 Entradas de `template.texts` com `"espacamentoEntreGlifos": <pt>` são
 desenhadas com o operador **Tc** (`setCharacterSpacing`, via
 `page.pushOperators`), o que fecha a largura de cada linha. Os valores
-calibrados para o 38 estão no próprio `template.json`.
+calibrados estão no próprio `template.json`.
 
 ## Carimbo "Uso Interno" rotacionado
 

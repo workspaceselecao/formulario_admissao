@@ -2,8 +2,12 @@
  * Gera um PDF de TESTE completamente preenchido da Ficha Cadastral (F-075)
  * via engine embarcada (embedded-docs.js) — mesmo caminho do painel.
  *
- * Uso: node scripts/gerar-ficha-preenchida.js [saida.pdf]
+ * Uso: node scripts/gerar-ficha-preenchida.js [saida.pdf] [--vazio]
  * Saída padrão: .tmp_render/output_preenchido.pdf
+ *
+ * Com --vazio o mesmo template é gerado SEM nenhum dado. O par
+ * (preenchido, vazio) permite medir por diferença de pixels a tinta que a
+ * engine escreveu — usado pela conferência numérica contra as caixas do v38.
  *
  * Serve para verificar visualmente se as coordenadas do schema
  * (ficha_cadastral_campos.json) batem com o template — checkboxes marcadas,
@@ -18,7 +22,10 @@ const fontkit = require("../ficha-cadastral-embutido/node_modules/@pdf-lib/fontk
 const EmbeddedDocs = require("../embedded-docs.js");
 
 const dir = path.join(__dirname, "..", "ficha-cadastral-embutido");
-const saida = process.argv[2] || path.join(__dirname, "..", ".tmp_render", "output_preenchido.pdf");
+const vazio = process.argv.includes("--vazio");
+const saida = process.argv[2] && !process.argv[2].startsWith("--")
+  ? process.argv[2]
+  : path.join(__dirname, "..", ".tmp_render", vazio ? "output_vazio.pdf" : "output_preenchido.pdf");
 
 const template = JSON.parse(fs.readFileSync(path.join(dir, "template.json"), "utf-8"));
 const schema = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "ficha_cadastral_campos.json"), "utf-8")).campos;
@@ -88,7 +95,7 @@ const dados = {
   "assinatura.campos.data.segmentos.ano": "2026"
 };
 
-EmbeddedDocs.gerarPdf(template, schema, dados, PDFLib, { imagens, fontes }, { fontkit, autor: "teste" })
+EmbeddedDocs.gerarPdf(template, schema, vazio ? {} : dados, PDFLib, { imagens, fontes }, { fontkit, autor: "teste" })
   .then(res => {
     fs.writeFileSync(saida, Buffer.from(res.bytes));
     console.log("Gerado:", saida, "(" + res.bytes.length + " bytes)");

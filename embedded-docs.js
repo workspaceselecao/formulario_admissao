@@ -21,8 +21,8 @@
  * tudo (pdf-lib) e escreve os dados por cima. O perfil de texto é o MESMO
  * da aplicação pública (ficha_cadastral.html), conferido pela suíte:
  *   • fonte 9 pt, Helvetica, truncamento na largura do campo − 2 pt;
- *   • baseline = y + min(altura × 0,78; 9 × 1,12), offset −9 pt quando
- *     y > 120 (LIMITE_Y_SEM_OFFSET_TEXTO_PT), x + 0,5 pt.
+ *   • baseline = y + min((altura − 0,72 × 9) / 2; altura × 0,78), x + 0,5 pt —
+ *     a caixa alta do valor centralizada na caixa de preenchimento do campo.
  *
  * Sem DOM, sem fetch, sem localStorage: as imagens chegam prontas
  * ({ imagens: { "assets/img0.png": Uint8Array }, fontes: { "assets/arial.ttf": Uint8Array } })
@@ -80,10 +80,8 @@
     tamanho: 9,
     tamanhoEvidencia: 5.5,   // rodapé de evidência (mesmo corpo do app público)
     offsetX: 0.5,
-    alturaFracao: 0.78,
-    alturaTeto: 1.12,
-    limiteYSemOffset: 120,
-    offsetYUmaLinha: 9
+    alturaFracao: 0.78,       // teto: no máximo 78% da altura do campo
+    alturaTinta: 0.72         // caixa alta dos algarismos em função do corpo
   };
 
   /** Tamanho máximo de template (bytes) — guarda de custo, igual ao upload de PDF. */
@@ -258,13 +256,18 @@
     return linhas.length ? linhas : [""];
   }
 
-  /** Cálculo do Y de baseline (espaço pdf-lib, origem no canto INFERIOR esquerdo). */
+  /**
+   * Cálculo do Y de baseline (espaço pdf-lib, origem no canto INFERIOR esquerdo).
+   * A coordenada do campo é a CAIXA IMPRESA de preenchimento: a caixa alta do
+   * valor (0,72 do corpo) é centralizada nela, para o texto caber dentro da
+   * caixa em qualquer altura de campo — sem faixa especial por Y.
+   */
   function baselinePdf(coordenada, tamanhoFonte) {
     var yBottom = num(coordenada.y);
     var h = num(coordenada.altura != null ? coordenada.altura : coordenada.height, 12);
-    var y = yBottom + Math.min(h * PERFIL_APP.alturaFracao, tamanhoFonte * PERFIL_APP.alturaTeto);
-    if (yBottom > PERFIL_APP.limiteYSemOffset) y -= PERFIL_APP.offsetYUmaLinha;
-    return y;
+    var tinta = tamanhoFonte * PERFIL_APP.alturaTinta;
+    var y = yBottom + Math.min((h - tinta) / 2, h * PERFIL_APP.alturaFracao);
+    return Math.max(yBottom + 0.5, y);
   }
 
   /** Binária de truncamento idêntica a truncarTextoFonte() do app público. */
@@ -685,6 +688,13 @@
           }
           // Opção de radio/checkbox marcada (valor true): desenha um X centralizado
           // na coordenada da opção (a caixinha ❑ já vem do template).
+          //
+          // O centro é o do RETÂNGULO DECLARADO (x + w/2, y + h/2), não o
+          // derivado da baseline. A baseline de um campo de texto é o fundo da
+          // célula (o texto senta em cima da régua); para uma caixinha isso
+          // jogava o X ~2 pt para fora do quadrado. As coordenadas do schema
+          // são hoje a caixa real do PDF oficial, então centralizar no
+          // retângulo é o que faz a marca cair dentro da ❑ impressa.
           if (valor === true) {
             var wOp = num(coordenada.largura != null ? coordenada.largura : coordenada.width, 9.75);
             var hOp = num(coordenada.altura != null ? coordenada.altura : coordenada.height, 8.85);

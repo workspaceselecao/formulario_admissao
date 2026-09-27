@@ -211,9 +211,9 @@ externo é carregado nem enviado: o próprio código desenha tudo (pdf-lib).
   mostra a coordenada e a pendência de overlay, com atalho **✥ Ajustar no Editor
   Visual** — que edita a MESMA chave de overlay usada pela geração embarcada.
 * **Perfil de texto:** o engine usa o MESMO perfil da aplicação pública (Helvetica 9 pt,
-  `x + 0,5`, baseline `y + min(altura × 0,78; 9 × 1,12)`, offset −9 pt acima de y = 120,
-  truncamento na largura − 2 pt) — conferido pela auditoria contra as constantes do
-  `ficha_cadastral.html`.
+  `x + 0,5`, baseline `y + min((altura − 0,72 × 9) / 2; altura × 0,78)` — a caixa alta do
+  valor centralizada na caixa de preenchimento, truncamento na largura − 2 pt) — conferido
+  pela auditoria contra as constantes do `ficha_cadastral.html`.
 * **Comparação** mede a diferença nas **áreas impressas** (o fundo branco não entra na
   conta) e o deslocamento estimado (dx/dy em pt, com desempate pelo menor deslocamento
   — páginas idênticas devolvem `0,0`) contra o template oficial, usando a tolerância de
