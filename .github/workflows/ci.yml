@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: Verificação estrutural, sintaxe e testes de proteção
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sintaxe dos scripts e módulos JavaScript
+        run: |
+          set -e
+          for f in scripts/*.mjs scripts/*.js embedded-docs.js guard.js admin-guard.js admin/*.js Docs/doc-revision.js; do
+            node --check "$f"
+            echo "OK  $f"
+          done
+
+      - name: Estrutura do projeto e JSONs de configuração
+        run: |
+          set -e
+          for f in index.html ficha_cadastral.html assistencia_medica.html carta_bradesco.html termos_aceite.html admin/index.html vercel.json package.json; do
+            test -s "$f" || { echo "FALTANDO: $f"; exit 1; }
+            echo "OK  $f"
+          done
+          node -e "
+            const fs = require('fs');
+            JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+            for (const f of ['ficha_cadastral_campos.json', 'assistencia_medica_campos.json', 'declaracao_plano_saude_campos.json', 'cidades_brasil.json', 'Docs/docs-revision.json']) {
+              JSON.parse(fs.readFileSync(f, 'utf8'));
+              console.log('OK  ' + f);
+            }
+          "
+          ls F-075*.pdf >/dev/null || { echo 'Template F-075 ausente'; exit 1; }
+
+      - name: Testes de rotas e proteção (scripts/run-test.mjs)
+        run: node scripts/run-test.mjs
