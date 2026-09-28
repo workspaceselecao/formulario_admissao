@@ -1927,7 +1927,11 @@ function desenharPngAjustadoNoCampo(page, png, box) {
     w = wImg * scale;
     h = hImg * scale;
   }
-  page.drawImage(png, { x, y: yBottom, width: w, height: h });
+  // Rubrica JUSTIFICADA NO CENTRO da caixa (horizontal e vertical), igual ao
+  // nome legível — o traço fica no meio da área assinável, não colado à esquerda.
+  const cx = x + Math.max(0, (wMax - w) / 2);
+  const cy = yBottom + Math.max(0, (hMax - h) / 2);
+  page.drawImage(png, { x: cx, y: cy, width: w, height: h });
 }
 /** Caixa do rodapé para evidência técnica da assinatura (origem pdf-lib, y=0 na base da página). */
 function caixaRodapeEvidenciaPdf(page, overrides = {}) {

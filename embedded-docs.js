@@ -211,6 +211,7 @@
         label: no.label || "",
         tipo: no.tipo || no.type || null,
         rodape: no.rodape === true,
+        alinhamento: no.alinhamento || null,
         coordenadas: no.coordenadas,
         pagina: num(no.pagina != null ? no.pagina : no.page, 1)
       });
@@ -705,7 +706,9 @@
             continue;
           }
           alvo.drawText(str, {
-            x: x + PERFIL_APP.offsetX,
+            x: x + (f.alinhamento === "centro"
+              ? Math.max(0.5, (w - helv.widthOfTextAtSize(str, PERFIL_APP.tamanho)) / 2)
+              : PERFIL_APP.offsetX),
             y: baselinePdf(coordenada, PERFIL_APP.tamanho),
             size: PERFIL_APP.tamanho,
             font: helv

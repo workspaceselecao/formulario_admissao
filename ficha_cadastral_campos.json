@@ -817,6 +817,7 @@
             "largura": 232.85,
             "altura": 44.25
           },
+          "alinhamento": "centro",
           "obrigatorio": true
         },
         "nome_legivel": {
@@ -829,6 +830,7 @@
             "largura": 232.85,
             "altura": 12.75
           },
+          "alinhamento": "centro",
           "obrigatorio": true,
           "observacao": "Posição padrão quando há assinatura manuscrita (rubrica)"
         },
@@ -842,6 +844,7 @@
             "largura": 232.85,
             "altura": 12.75
           },
+          "alinhamento": "centro",
           "obrigatorio": false,
           "observacao": "Usado somente quando o candidato marca 'Não assinar'"
         },
