@@ -1463,10 +1463,14 @@
 </div>
 
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
+<!-- fontkit: necessário para a engine embutir as TTF declaradas em template.fontes
+     (Arial/Arial Narrow). Sem ele a engine cai no fallback Helvetica e reporta. -->
+<script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js" crossorigin="anonymous"></script>
+<script src="./embedded-docs.js"></script>
 <script>
-const TEMPLATE_PATH = "./F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf";
+const TEMPLATE_EMBARCADO_DIR = "./ficha-cadastral-embutido";
+const TEMPLATE_EMBARCADO_PATH = TEMPLATE_EMBARCADO_DIR + "/template.json";
 const CAMPOS_JSON_PATH = "./ficha_cadastral_campos.json";
-const TEMPLATE_FETCH_PATH = encodeURI(TEMPLATE_PATH);
 const CAMPOS_JSON_FETCH_PATH = encodeURI(CAMPOS_JSON_PATH);
 const PDF_FONT_TEXTO = 9;
 const PDF_FONT_EVIDENCIA = 5.5;
@@ -1569,7 +1573,9 @@ let assinaturaCanvasCtx = null;
 let assinaturaCanvasTemTraço = false;
 let assinaturaDesenhando = false;
 let assinaturaUltPos = null;
-let templateBytes = null;
+/** Pacote do template EMBARCADO (template.json + bytes de assets). A geração é
+ *  feita pela engine EmbeddedDocs — a mesma do painel administrativo. */
+let templateEmbarcado = null;
 let camposSchema = null;
 const cepCache = new Map();
 let cepBuscaEmAndamento = false;
@@ -3139,91 +3145,6 @@ function confirmarLimparAssinaturaFichaExecutar() {
   updateProgress();
 }
 
-function clonarArrayBuffer(buffer){
-  return buffer.slice(0);
-}
-
-/** Coordenadas em pontos PDF (pt), origem canto inferior esquerdo — igual ao pdf-lib. */
-function truncarTextoFonte(font, texto, tamanhoFonte, larguraMax) {
-  let t = String(texto || "").trim();
-  if (!t) return "";
-  if (font.widthOfTextAtSize(t, tamanhoFonte) <= larguraMax) return t;
-  const elipsis = "...";
-  let baixo = 0;
-  let alto = t.length;
-  while (baixo < alto) {
-    const meio = Math.ceil((baixo + alto) / 2);
-    const teste = t.slice(0, meio) + elipsis;
-    if (font.widthOfTextAtSize(teste, tamanhoFonte) <= larguraMax) baixo = meio;
-    else alto = meio - 1;
-  }
-  return t.slice(0, alto) + elipsis;
-}
-
-function baselineYNoCampo(box, tamanhoFonte) {
-  const yBottom = Number(box.y) || 0;
-  const h = Number(box.altura ?? box.height) || 12;
-  const dentro = Math.min((h - tamanhoFonte * ALTURA_TINTA_TEXTO) / 2, h * 0.78);
-  return Math.max(yBottom + 0.5, yBottom + dentro);
-}
-
-function escreverTextoCampoCoord(page, font, coord, texto, options = {}) {
-  if (!coord) return false;
-  const c = coord;
-  const w = Number(c.largura ?? c.width) || 200;
-  const size = options.size ?? PDF_FONT_TEXTO;
-  const str = truncarTextoFonte(font, texto, size, Math.max(8, w - 2));
-  if (!str) return false;
-  const y = baselineYNoCampo(c, size) + (options.offsetY ?? 0);
-  const x = Number(c.x) || 0;
-  page.drawText(str, {
-    x: x + (options.offsetX ?? 0.5),
-    y,
-    size,
-    font,
-    maxWidth: w - 2
-  });
-  return true;
-}
-
-/** Marca "X" centrado no retângulo (x,y) = canto inferior esquerdo; largura/altura em pt — igual ao JSON. */
-function marcarCheckboxCoord(page, font, coord, ativo, options = {}) {
-  if (!ativo || !coord) return false;
-  const x = Number(coord.x) || 0;
-  const yBottom = Number(coord.y) || 0;
-  const w = Number(coord.largura ?? coord.width) || 7;
-  const h = Number(coord.altura ?? coord.height) || 7;
-  const size = options.size ?? 8;
-  const sym = options.simbolo ?? "X";
-  const tw = font.widthOfTextAtSize(sym, size);
-  const cx = x + (w - tw) / 2;
-  const cy = yBottom + (h - size * 0.72) / 2;
-  page.drawText(sym, { x: cx, y: cy, size, font });
-  return true;
-}
-
-function marcarRadioJsonOpcao(page, font, grupoCampo, chaveOpcao) {
-  if (!grupoCampo?.opcoes || !chaveOpcao) return false;
-  const alvo = grupoCampo.opcoes[chaveOpcao];
-  const coord = alvo?.coordenadas;
-  return marcarCheckboxCoord(page, font, coord, true);
-}
-
-/** Campo `data` no JSON com `tipo: data_segmentada` e `segmentos.dia|mes|ano`. */
-function preencherDataSegmentadaAssinatura(page, font, campoData, valorDataIso) {
-  if (!campoData?.segmentos || !valorDataIso) return;
-  const parts = String(valorDataIso).trim().split("-");
-  if (parts.length < 3) return;
-  const [ano, mes, dia] = parts;
-  const d = String(dia || "").replace(/\D/g, "").slice(0, 2);
-  const m = String(mes || "").replace(/\D/g, "").slice(0, 2);
-  const y = String(ano || "").replace(/\D/g, "").slice(0, 4);
-  const s = campoData.segmentos;
-  if (d) escreverTextoCampoCoord(page, font, s.dia.coordenadas, d.padStart(2, "0"));
-  if (m) escreverTextoCampoCoord(page, font, s.mes.coordenadas, m.padStart(2, "0"));
-  if (y) escreverTextoCampoCoord(page, font, s.ano.coordenadas, y);
-}
-
 function normalizarChavePdf(valor) {
   return String(valor || "")
     .normalize("NFD")
@@ -3262,227 +3183,178 @@ async function carregarCamposSchema() {
 
 async function carregarTemplateInicial() {
   try {
-    const res = await fetch(TEMPLATE_FETCH_PATH);
-    if (!res.ok) throw new Error("Template não encontrado");
-    const fetchedBytes = await res.arrayBuffer();
-    templateBytes = clonarArrayBuffer(fetchedBytes);
-  } catch (_error) {
-    showToast(`Template PDF não carregado. Verifique ${TEMPLATE_PATH}`, false);
+    const [tplRes, schemaOk] = await Promise.all([
+      fetch(TEMPLATE_EMBARCADO_PATH, { cache: "no-store" }),
+      carregarCamposSchema()
+    ]);
+    if (!tplRes.ok) throw new Error("template.json não encontrado (" + tplRes.status + ")");
+    if (!schemaOk) throw new Error("schema de campos não carregou");
+    const template = await tplRes.json();
+    const val = EmbeddedDocs.validarTemplate(template, camposSchema.campos);
+    if (!val.ok) throw new Error("template embarcado inválido: " + val.erros.join(" | "));
+    // TTFs em paralelo, apenas as declaradas (imagens seguem no campo separado,
+    // baixadas só quando a geração acontece — a engine exige os BYTES, não a URL).
+    const dir = TEMPLATE_EMBARCADO_DIR + "/";
+    const fontesReq = Object.values(template.fontes || {})
+      .filter((f) => f && f.arquivo)
+      .map((f) => f.arquivo);
+    if (template.fonteCheckbox && template.fonteCheckbox.arquivo) fontesReq.push(template.fonteCheckbox.arquivo);
+    const imagensReq = (template.images || []).map((i) => i.file);
+    const [fontesBytes, imagensBytes] = await Promise.all([
+      Promise.all(fontesReq.map(async (a) => [a, new Uint8Array(await (await fetch(dir + encodeURI(a), { cache: "no-store" })).arrayBuffer())])),
+      Promise.all(imagensReq.map(async (a) => [a, new Uint8Array(await (await fetch(dir + encodeURI(a), { cache: "no-store" })).arrayBuffer())]))
+    ]);
+    templateEmbarcado = {
+      template,
+      fontes: Object.fromEntries(fontesBytes),
+      imagens: Object.fromEntries(imagensBytes)
+    };
+  } catch (error) {
+    console.error(error);
+    templateEmbarcado = null;
+    showToast(`Template embarcado não carregado. Verifique ${TEMPLATE_EMBARCADO_PATH}`, false);
   }
 }
 
-// ── GERAR PDF ──
+/** Mapa FLAT path → valor nos paths EXATOS do schema — a linguagem da engine.
+ *  Regras de negócio do app preservadas: Next → "Conta Corrente" (Bradesco) no
+ *  PDF; Santander usa colunas próprias; linhas de VT zeradas não são escritas.
+ */
+async function montarDadosFicha() {
+  const v = (id) => (document.getElementById(id)?.value || "").trim();
+  const C = camposSchema.campos;
+  const tipoContaSelecionada = radio("tipoConta");
+  const dadosBanco = lerAgenciaContaFormulario(tipoContaSelecionada);
+  const tipoContaPdf = tipoContaEhNext(tipoContaSelecionada) ? "conta_corrente" : tipoContaSelecionada;
+  const dados = {};
+  const dt = dadosDataAssinaturaIso();
+  const P = "dados_pessoais.campos.", E = "endereco.campos.", CB = "conta_bancaria.campos.";
+  dados[P + "nome"] = v("nomeCompleto");
+  dados[P + "craxá"] = v("nomeSocial");
+  dados[P + "fone"] = formatarTelefoneBR(v("telefone"));
+  dados[P + "celular"] = formatarTelefoneBR(v("celular"));
+  dados[P + "email"] = v("email");
+  dados[P + "estadocivil"] = v("estadoCivil");
+  dados[P + "primeiro_emprego.opcoes.sim"] = radio("primeiroEmprego") === "sim";
+  dados[P + "primeiro_emprego.opcoes.nao"] = radio("primeiroEmprego") === "nao";
+  dados[P + "informarpis"] = v("pis");
+  dados[E + "rua"] = v("endereco");
+  dados[E + "numero"] = v("endNum");
+  dados[E + "complemento"] = v("complemento").slice(0, 35);
+  dados[E + "cep"] = v("cep");
+  dados[E + "bairro"] = v("bairro");
+  dados[E + "cidadeuf"] = v("cidade");
+  const defSim = radio("deficiencia") === "sim";
+  dados["deficiencia.campos.possui_deficiencia.opcoes.sim"] = defSim;
+  dados["deficiencia.campos.possui_deficiencia.opcoes.nao"] = radio("deficiencia") === "nao";
+  if (defSim) {
+    checks("tipoDeficiencia").forEach((label) => {
+      const k = chaveTipoDeficienciaDoForm(label);
+      if (k) dados["deficiencia.campos.tipo_deficiencia.opcoes." + k] = true;
+    });
+  }
+  if (tipoContaPdf && C.conta_bancaria.campos.tipo_conta.opcoes[tipoContaPdf]) {
+    dados[CB + "tipo_conta.opcoes." + tipoContaPdf] = true;
+  }
+  if (tipoContaRequerAgenciaConta(tipoContaSelecionada)) {
+    const ag = tipoContaEhSantander(tipoContaSelecionada) ? "santander_agencia" : "bradesco_agencia";
+    const cc = tipoContaEhSantander(tipoContaSelecionada) ? "santander_conta_digito" : "bradesco_conta_digito";
+    dados[CB + ag] = valorAgenciaContaPdf(tipoContaSelecionada, dadosBanco.agencia);
+    dados[CB + cc] = valorAgenciaContaPdf(tipoContaSelecionada, dadosBanco.conta);
+  }
+  if (tipoContaRequerCpfTitularPdf(tipoContaSelecionada)) dados[CB + "cpf_titular"] = v("cpf");
+  const itensDep = C.dependentes.itens || [];
+  lerDependentesFormulario().slice(0, itensDep.length).forEach((dep, idx) => {
+    const d = "dependentes." + idx + ".campos.";
+    dados[d + "nome"] = dep.nome;
+    dados[d + "dtnasc"] = formatDate(dep.nascimento);
+    dados[d + "cpf"] = dep.cpf;
+  });
+  const vtNaoOptante = document.getElementById("vtNaoOptante")?.checked === true;
+  if (!vtNaoOptante) {
+    const vt = C.vale_transporte.itens;
+    const linhas = [["onibus", v("vtOnibusQtd"), moedaParaPdf(v("vtOnibusVal"))], ["metro_trem", v("vtMetroQtd"), moedaParaPdf(v("vtMetroVal"))], ["intermunicipal", v("vtInterQtd"), moedaParaPdf(v("vtInterVal"))], ["integracao", v("vtIntegracaoQtd"), moedaParaPdf(v("vtIntegracaoVal"))]];
+    linhas.forEach(([item, qtd, val]) => {
+      if (vt[item] && !valeTransporteLinhaTodaZero(qtd, val)) {
+        dados["vale_transporte.itens." + item + ".quantidade"] = qtd;
+        dados["vale_transporte.itens." + item + ".valor_unitario"] = val;
+      }
+    });
+  }
+  const valeSel = radio("valeRef");
+  if (valeSel === "va") dados["vale_alimentacao_refeicao.opcoes.alimentacao"] = true;
+  if (valeSel === "vr") dados["vale_alimentacao_refeicao.opcoes.refeicao"] = true;
+  if (valeSel === "flex") dados["vale_alimentacao_refeicao.opcoes.flex"] = true;
+  const semRubricaManual = isNaoAssinarManualmente();
+  dados["assinatura.campos." + (semRubricaManual && C.assinatura.campos.nome_legivel_sem_rubrica ? "nome_legivel_sem_rubrica" : "nome_legivel")] = assinaturaNomeLegivelPdf();
+  dados["assinatura.campos.data.segmentos.dia"] = dt.dia;
+  dados["assinatura.campos.data.segmentos.mes"] = dt.mes;
+  dados["assinatura.campos.data.segmentos.ano"] = dt.ano;
+  // Evidência técnica no rodapé (schema marca o campo com rodape: true; a
+  // engine quebra as linhas no mesmo desenho do app): mesmo parágrafo de antes.
+  const agora = new Date();
+  const docId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc-${agora.getTime()}`;
+  const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
+  const dataHoraBr = new Intl.DateTimeFormat("pt-BR", { timeZone: fuso, dateStyle: "short", timeStyle: "medium" }).format(agora);
+  const ipRef = await obterIpPublicoEvidencia();
+  dados["assinatura.campos.evidencia"] =
+    (semRubricaManual ? "Assinatura por nome legível (sem rubrica manual). " : "Assinatura manuscrita no navegador. ") +
+    "Doc. " + docId + ". Reg.: " + dataHoraBr + " (fuso " + fuso + "). IP: " + (ipRef || "n/d") + ".";
+  return { dados, semRubricaManual, vtNaoOptante };
+}
+
+/** Dia/mês/ano da assinatura no fuso local (a engine escreve cada segmento). */
+function dadosDataAssinaturaIso() {
+  const p = dataAssinaturaIsoAtual().split("-");
+  return { ano: p[0], mes: (p[1] || "").padStart(2, "0"), dia: (p[2] || "").padStart(2, "0") };
+}
+
+// ── GERAR PDF (engine embarcada — mesma do painel) ──
 async function gerarPDF(){
   try {
     if (!validarCamposObrigatorios()) return;
     if (!(await confirmarPoliticaLGPD())) return;
-    if (!(await carregarCamposSchema())) return;
-    if (!templateBytes) await carregarTemplateInicial();
-    if (!templateBytes) return;
+    if (!templateEmbarcado) await carregarTemplateInicial();
+    if (!templateEmbarcado) return;
 
-    const primeiroEmpregoSelecionado = radio("primeiroEmprego");
-    const possuiDeficienciaSelecionada = radio("deficiencia");
-    const valeSelecionado = radio("valeRef");
-    const vtNaoOptanteMarcado = document.getElementById("vtNaoOptante")?.checked === true;
-    const tipoContaSelecionada = radio("tipoConta");
-    const dadosBanco = lerAgenciaContaFormulario(tipoContaSelecionada);
-    const data = {
-      nomeCompleto: v("nomeCompleto"),
-      nomeSocial: v("nomeSocial"),
-      telefone: formatarTelefoneBR(v("telefone")),
-      celular: formatarTelefoneBR(v("celular")),
-      email: v("email"),
-      estadoCivil: v("estadoCivil"),
-      pis: v("pis"),
-      endereco: v("endereco"),
-      numero: v("endNum"),
-      complemento: v("complemento").slice(0, 35),
-      cep: v("cep"),
-      bairro: v("bairro"),
-      cidade: v("cidade"),
-      tipoConta: tipoContaSelecionada,
-      // Para Next, mapeamos para conta_corrente (Bradesco) no PDF
-      contaCorrenteBradesco: tipoContaSelecionada === "conta_corrente" || tipoContaSelecionada === "next_digital",
-      contaSalarioBradesco: tipoContaSelecionada === "bradesco",
-      poupancaBradesco: tipoContaSelecionada === "poupanca_bradesco",
-      santanderCorrente: tipoContaSelecionada === "santander_corrente",
-      santanderSalario: tipoContaSelecionada === "santander_salario",
-      cpfConta: v("cpf"),
-      agencia: dadosBanco.agencia,
-      contaDigito: dadosBanco.conta,
-      dependentes: lerDependentesFormulario().map((dep) => ({
-        nome: dep.nome,
-        nascimento: formatDate(dep.nascimento),
-        cpf: dep.cpf
-      })),
-      onibusQtd: v("vtOnibusQtd"),
-      onibusValor: moedaParaPdf(v("vtOnibusVal")),
-      metroQtd: v("vtMetroQtd"),
-      metroValor: moedaParaPdf(v("vtMetroVal")),
-      interQtd: v("vtInterQtd"),
-      interValor: moedaParaPdf(v("vtInterVal")),
-      integracaoQtd: v("vtIntegracaoQtd"),
-      integracaoValor: moedaParaPdf(v("vtIntegracaoVal")),
-      assinaturaNome: assinaturaNomeLegivelPdf(),
-      assinaturaData: assinaturaDataPdfFormatada()
-    };
+    const { dados, semRubricaManual, vtNaoOptante } = await montarDadosFicha();
 
-    const pdfDoc = await PDFLib.PDFDocument.load(clonarArrayBuffer(templateBytes));
+    const gerado = await EmbeddedDocs.gerarPdf(
+      templateEmbarcado.template,
+      camposSchema.campos,
+      dados,
+      PDFLib,
+      { fontkit, imagens: templateEmbarcado.imagens, fontes: templateEmbarcado.fontes },
+      { autor: "ficha_cadastral.html" }
+    );
+    const ignoradosReais = gerado.ignorados.filter((i) => i.motivo !== "sem valor informado");
+    if (ignoradosReais.length) {
+      console.warn("[ficha] campos ignorados pela engine:", ignoradosReais);
+    }
+
+    // Pós-processamento exclusivo do app público (a engine não conhece):
+    // rubrica manuscrita (PNG do canvas) e marca d'água de não optante do VT.
+    const pdfDoc = await PDFLib.PDFDocument.load(gerado.bytes.slice(0));
     const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
     const C = camposSchema.campos;
-
-    const dp = C.dados_pessoais.campos;
-    escreverTextoCampoCoord(page, font, dp.nome.coordenadas, data.nomeCompleto);
-    escreverTextoCampoCoord(page, font, dp["craxá"].coordenadas, data.nomeSocial);
-    escreverTextoCampoCoord(page, font, dp.fone.coordenadas, data.telefone);
-    escreverTextoCampoCoord(page, font, dp.celular.coordenadas, data.celular);
-    escreverTextoCampoCoord(page, font, dp.email.coordenadas, data.email);
-    escreverTextoCampoCoord(page, font, dp.estadocivil.coordenadas, data.estadoCivil);
-
-    const pe = dp.primeiro_emprego;
-    if (primeiroEmpregoSelecionado === "sim") marcarRadioJsonOpcao(page, font, pe, "sim");
-    if (primeiroEmpregoSelecionado === "nao") marcarRadioJsonOpcao(page, font, pe, "nao");
-    escreverTextoCampoCoord(page, font, dp.informarpis.coordenadas, data.pis);
-
-    const en = C.endereco.campos;
-    escreverTextoCampoCoord(page, font, en.rua.coordenadas, data.endereco);
-    escreverTextoCampoCoord(page, font, en.numero.coordenadas, data.numero);
-    escreverTextoCampoCoord(page, font, en.complemento.coordenadas, data.complemento);
-    escreverTextoCampoCoord(page, font, en.cep.coordenadas, data.cep);
-    escreverTextoCampoCoord(page, font, en.bairro.coordenadas, data.bairro);
-    escreverTextoCampoCoord(page, font, en.cidadeuf.coordenadas, data.cidade);
-
-    const def = C.deficiencia.campos;
-    if (possuiDeficienciaSelecionada === "sim") marcarRadioJsonOpcao(page, font, def.possui_deficiencia, "sim");
-    if (possuiDeficienciaSelecionada === "nao") marcarRadioJsonOpcao(page, font, def.possui_deficiencia, "nao");
-    if (possuiDeficienciaSelecionada === "sim" && def.tipo_deficiencia?.opcoes) {
-      const opT = def.tipo_deficiencia.opcoes;
-      checks("tipoDeficiencia").forEach((label) => {
-        const k = chaveTipoDeficienciaDoForm(label);
-        if (k && opT[k]?.coordenadas) marcarCheckboxCoord(page, font, opT[k].coordenadas, true);
-      });
-    }
-
-    const cb = C.conta_bancaria.campos;
-    const tipoContaPdf = data.tipoConta;
-    // Para Next, marca "Conta Corrente" (Bradesco) no PDF
-    const tipoContaPdfOpcao = tipoContaEhNext(tipoContaPdf) ? 'conta_corrente' : tipoContaPdf;
-    if (tipoContaPdfOpcao && cb.tipo_conta?.opcoes?.[tipoContaPdfOpcao]) {
-      marcarRadioJsonOpcao(page, font, cb.tipo_conta, tipoContaPdfOpcao);
-    }
-    if (tipoContaRequerAgenciaConta(tipoContaPdf)) {
-      // Santander usa colunas próprias; Bradesco e Next usam as colunas Bradesco do PDF
-      const campoAgencia = tipoContaEhSantander(tipoContaPdf) ? cb.santander_agencia : cb.bradesco_agencia;
-      const campoConta = tipoContaEhSantander(tipoContaPdf) ? cb.santander_conta_digito : cb.bradesco_conta_digito;
-      if (campoAgencia?.coordenadas) {
-        escreverTextoCampoCoord(page, font, campoAgencia.coordenadas, valorAgenciaContaPdf(tipoContaPdf, data.agencia));
-      }
-      if (campoConta?.coordenadas) {
-        escreverTextoCampoCoord(page, font, campoConta.coordenadas, valorAgenciaContaPdf(tipoContaPdf, data.contaDigito));
+    let bufPng = null;
+    if (!semRubricaManual) {
+      bufPng = await canvasAssinaturaParaPngArrayBuffer();
+      if (bufPng) {
+        const rubrica = C.assinatura.campos.rubrica;
+        if (rubrica?.coordenadas) {
+          const png = await pdfDoc.embedPng(bufPng);
+          desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
+        }
       }
     }
-    if (tipoContaRequerCpfTitularPdf(tipoContaPdf)) {
-      escreverTextoCampoCoord(page, font, cb.cpf_titular.coordenadas, data.cpfConta);
-    }
-
-    const itensDep = C.dependentes.itens || [];
-    data.dependentes.slice(0, itensDep.length).forEach((dep, idx) => {
-      const item = itensDep[idx];
-      if (!item?.campos) return;
-      escreverTextoCampoCoord(page, font, item.campos.nome.coordenadas, dep.nome);
-      escreverTextoCampoCoord(page, font, item.campos.dtnasc.coordenadas, dep.nascimento);
-      escreverTextoCampoCoord(page, font, item.campos.cpf.coordenadas, dep.cpf);
-    });
-
-    const vt = C.vale_transporte.itens;
-    if (vtNaoOptanteMarcado) {
+    if (vtNaoOptante) {
       desenharMarcaDaguaNaoOptanteValeTransporte(page, font, C);
-    } else if (vt) {
-      if (!valeTransporteLinhaTodaZero(data.onibusQtd, data.onibusValor) && vt?.onibus) {
-        escreverTextoCampoCoord(page, font, vt.onibus.quantidade.coordenadas, data.onibusQtd);
-        escreverTextoCampoCoord(page, font, vt.onibus.valor_unitario.coordenadas, data.onibusValor);
-      }
-      if (!valeTransporteLinhaTodaZero(data.metroQtd, data.metroValor) && vt?.metro_trem) {
-        escreverTextoCampoCoord(page, font, vt.metro_trem.quantidade.coordenadas, data.metroQtd);
-        escreverTextoCampoCoord(page, font, vt.metro_trem.valor_unitario.coordenadas, data.metroValor);
-      }
-      if (!valeTransporteLinhaTodaZero(data.interQtd, data.interValor) && vt?.intermunicipal) {
-        escreverTextoCampoCoord(page, font, vt.intermunicipal.quantidade.coordenadas, data.interQtd);
-        escreverTextoCampoCoord(page, font, vt.intermunicipal.valor_unitario.coordenadas, data.interValor);
-      }
-      if (!valeTransporteLinhaTodaZero(data.integracaoQtd, data.integracaoValor) && vt?.integracao) {
-        escreverTextoCampoCoord(page, font, vt.integracao.quantidade.coordenadas, data.integracaoQtd);
-        escreverTextoCampoCoord(page, font, vt.integracao.valor_unitario.coordenadas, data.integracaoValor);
-      }
     }
-
-    const varf = C.vale_alimentacao_refeicao;
-    const opV = varf?.opcoes;
-    if (opV) {
-      if (valeSelecionado === "va") marcarCheckboxCoord(page, font, opV.alimentacao.coordenadas, true);
-      if (valeSelecionado === "vr") marcarCheckboxCoord(page, font, opV.refeicao.coordenadas, true);
-      if (valeSelecionado === "flex") marcarCheckboxCoord(page, font, opV.flex.coordenadas, true);
-    }
-
-    const ass = C.assinatura.campos;
-    const semRubricaManual = isNaoAssinarManualmente();
-    const [bufPng, ipRef] = await Promise.all([
-      semRubricaManual ? Promise.resolve(null) : canvasAssinaturaParaPngArrayBuffer(),
-      obterIpPublicoEvidencia()
-    ]);
-    if (bufPng) {
-      const rubrica = ass.rubrica;
-      if (rubrica?.coordenadas) {
-        const png = await pdfDoc.embedPng(bufPng);
-        desenharPngAjustadoNoCampo(page, png, rubrica.coordenadas);
-      }
-    }
-    const coordsNomeLegivel = semRubricaManual
-      ? (ass.nome_legivel_sem_rubrica?.coordenadas || ass.nome_legivel?.coordenadas)
-      : ass.nome_legivel?.coordenadas;
-    if (coordsNomeLegivel) {
-      escreverTextoCampoCoord(page, font, coordsNomeLegivel, data.assinaturaNome);
-    }
-    if (ass.data?.segmentos) {
-      preencherDataSegmentadaAssinatura(page, font, ass.data, dataAssinaturaIsoAtual());
-    } else if (ass.data?.coordenadas) {
-      escreverTextoCampoCoord(page, font, ass.data.coordenadas, data.assinaturaData);
-    }
-    const agora = new Date();
-    const docId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `doc-${agora.getTime()}`;
-    const fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || "—";
-    const dataHoraBr = new Intl.DateTimeFormat("pt-BR", {
-      timeZone: fuso,
-      dateStyle: "short",
-      timeStyle: "medium"
-    }).format(agora);
-    const parEvid =
-      (semRubricaManual ? "Assinatura por nome legível (sem rubrica manual). " : "Assinatura manuscrita no navegador. ") +
-      "Doc. " +
-      docId +
-      ". Reg.: " +
-      dataHoraBr +
-      " (fuso " +
-      fuso +
-      "). IP: " +
-      (ipRef || "n/d") +
-      ".";
-    const caixaRodapeEvid = caixaRodapeEvidenciaPdf(page, ass.evidencia?.coordenadas);
-    const wEv = Math.max(120, (Number(caixaRodapeEvid.largura) || 550) - 2);
-    const linhasE = quebrarTextoEvidencia(font, parEvid, PDF_FONT_EVIDENCIA, wEv);
-    desenharEvidenciaAssinatura(page, font, caixaRodapeEvid, linhasE);
 
     const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Ficha Cadastral para Admissão");
-    const primeiroNome = primeiroNomeUsuarioParaArquivo(data.nomeCompleto);
-    link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
-    link.click();
-    URL.revokeObjectURL(url);
+    baixarPdfFicha(pdfBytes, dados);
     const payloadCopiaAssistencia = construirPayloadCopiaParaAssistencia();
     salvarRascunhoLocalSincrono();
     showToast("PDF gerado com sucesso!");
@@ -3492,16 +3364,33 @@ async function gerarPDF(){
     showToast("Falha ao gerar PDF. Verifique o console.", false);
   }
 }
+
+/** Download com o mesmo nome de arquivo de antes (título + primeiro nome). */
+function baixarPdfFicha(pdfBytes, dados) {
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  const nomeTituloPdf = sanitizarSegmentoNomeArquivo("Ficha Cadastral para Admissão");
+  const primeiroNome = primeiroNomeUsuarioParaArquivo(dados["dados_pessoais.campos.nome"] || "");
+  link.download = `${nomeTituloPdf} ${primeiroNome}.pdf`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 async function baixarFichaVazia(){
   try {
-    let bytes = templateBytes;
-    if (!bytes) {
-      const resp = await fetch(TEMPLATE_FETCH_PATH, { cache: "no-store" });
-      if (!resp.ok) throw new Error(`Falha ao baixar template (${resp.status})`);
-      bytes = await resp.arrayBuffer();
-    }
-
-    const blob = new Blob([clonarArrayBuffer(bytes)], { type: "application/pdf" });
+    if (!templateEmbarcado) await carregarTemplateInicial();
+    if (!templateEmbarcado) return;
+    const gerado = await EmbeddedDocs.gerarPdf(
+      templateEmbarcado.template,
+      camposSchema.campos,
+      {},
+      PDFLib,
+      { fontkit, imagens: templateEmbarcado.imagens, fontes: templateEmbarcado.fontes },
+      { autor: "ficha_cadastral.html" }
+    );
+    const blob = new Blob([gerado.bytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;

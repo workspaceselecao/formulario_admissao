@@ -21,6 +21,12 @@ resíduo que é antialiasing das fontes.
   e desenha os dados do candidato por cima, nas coordenadas de campo.
 - `output.pdf` — exemplo gerado.
 
+**Em produção desde a unificação:** o `ficha_cadastral.html` gera pela
+`EmbeddedDocs.gerarPdf` (mesma engine do painel) — baixa `template.json`, as
+4 TTF e as 3 PNG, monta o mapa flat de dados (`montarDadosFicha()`) e depois
+aplica o que é exclusivo do app: rubrica manuscrita e marca d'água de não
+optante do VT. O PDF canônico não é mais baixado pelo formulário.
+
 ## Decisões técnicas (documentadas para não se perderem)
 
 1. **Fonte**: as TTF reais (Arial, Arial Bold, Arial Narrow, Arial Narrow Bold,

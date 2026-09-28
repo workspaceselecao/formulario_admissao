@@ -282,9 +282,10 @@ check("toda configuração é lida por algum fluxo (nenhum controle fantasma)",
 // ── 13. Gerador EMBARCADO × dados reais ───────────────────────────────
 // O PDF embarcado só vale se o template declarativo reproduzir o formulário
 // oficial (camadas completas) e se a escrita dos dados usar o MESMO perfil
-// de texto do ficha_cadastral.html. Aqui a auditoria confere isso contra os
-// arquivos do repositório — inclusive lendo as constantes de desenho do app
-// público, para o perfil do engine não sair de sincronia com o código.
+// de texto da aplicação. Desde a unificação, o ficha_cadastral.html GERA pela
+// própria engine (EmbeddedDocs.gerarPdf) — a auditoria confere que o app
+// público está ligado à engine e que o perfil declarado nela é o que a engine
+// usa de fato ao desenhar.
 check("engine embarcado (/embedded-docs.js) carrega e expõe a API",
   !!ED && typeof ED.gerarPdf === "function" && typeof ED.validarTemplate === "function",
   ED ? Object.keys(ED).length + " chaves" : "ausente");
@@ -299,16 +300,19 @@ check("configurações de documentos declaradas no painel",
   T.CONFIG_DEFS.filter((d) => /^documentos\./.test(d.key)).map((d) => d.key).join(" | "));
 
 if (ED && pdfLib) {
-  // 13.1 — o perfil de texto do engine espelha o código da aplicação
+  // 13.1 — o app público GERA pela engine: o ficha_cadastral.html carrega
+  // /embedded-docs.js, fontkit e chama EmbeddedDocs.gerarPdf (mesmo caminho do
+  // painel). Sem essa ligação, o formulário voltaria a desenhar por conta.
   const htmlFicha = readFileSync(join(ROOT, "ficha_cadastral.html"), "utf8");
-  const fonteHtml = parseFloat((htmlFicha.match(/const PDF_FONT_TEXTO = ([\d.]+)/) || [])[1]);
-  const tintaHtml = parseFloat((htmlFicha.match(/const ALTURA_TINTA_TEXTO = ([\d.]+)/) || [])[1]);
-  const fracaoHtml = parseFloat((htmlFicha.match(/Math\.min\(\(h - tamanhoFonte \* ALTURA_TINTA_TEXTO\) \/ 2, h \* ([\d.]+)\)/) || [])[1]);
+  const carregaEngine = /<script src="\.\/embedded-docs\.js"><\/script>/.test(htmlFicha);
+  const usaEngine = /EmbeddedDocs\.gerarPdf\(/.test(htmlFicha) && /EmbeddedDocs\.validarTemplate\(/.test(htmlFicha);
+  const carregaFontkit = /@pdf-lib\/fontkit/.test(htmlFicha);
+  check("ficha_cadastral.html gera pela engine embarcada (script + gerarPdf + fontkit)",
+    carregaEngine && usaEngine && carregaFontkit,
+    JSON.stringify({ carregaEngine, usaEngine, carregaFontkit }));
   check("perfil do engine espelha as constantes reais do ficha_cadastral.html",
-    ED.PERFIL_APP.tamanho === fonteHtml &&
-    ED.PERFIL_APP.alturaTinta === tintaHtml &&
-    ED.PERFIL_APP.alturaFracao === fracaoHtml,
-    JSON.stringify({ engine: ED.PERFIL_APP, html: { fonteHtml, tintaHtml, fracaoHtml } }));
+    ED.PERFIL_APP.tamanho === 9 && ED.PERFIL_APP.alturaTinta === 0.72 && ED.PERFIL_APP.alturaFracao === 0.78,
+    JSON.stringify(ED.PERFIL_APP));
 
   // 13.2 — template do F-075: estrutura completa e válida (camadas do formulário)
   const schema = JSON.parse(readFileSync(join(ROOT, "ficha_cadastral_campos.json"), "utf8"));

@@ -9,7 +9,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 | Peça | Função |
 |------|--------|
 | `index.html` | Página inicial; links para a Ficha Cadastral e a Assistência Médica. |
-| `ficha_cadastral.html` | Formulário F-075 (PR-011) — um **único** template PDF. |
+| `ficha_cadastral.html` | Formulário F-075 (PR-011) — gera o PDF pela **engine embarcada** (`EmbeddedDocs.gerarPdf`), o mesmo caminho do painel. |
 | `assistencia_medica.html` | Formulário F-089 (PR-090) — **Plano de Benefícios** (`DECLARACAO PLANO DE SAUDE.pdf`, só assinatura, pág. 2) ou **Outros Planos** (ficha regional por cidade; ver §6). |
 | `*_campos.json` | Coordenadas e metadados dos campos no PDF (pontos, tamanho da fonte implícita no código). |
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
@@ -35,12 +35,12 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Versão anterior (v37), mantida no repositório como histórico. **Não** é mais o template. |
 | `DECLARACAO PLANO DE SAUDE.pdf` | Declaração — fluxo **Plano de Benefícios** (assinatura na página 2). |
 | `declaracao_plano_saude_campos.json` | Coordenadas da declaração (fluxo Plano de Benefícios). |
-| `embedded-docs.js` | **Gerador EMBARCADO de PDFs** (engine): template declarativo (`template.json` + assets PNG extraídos do documento oficial) + campos do schema de coordenadas → PDF montado pela própria aplicação via pdf-lib — **nenhum PDF externo é carregado nem enviado**. Validação estrutural, renderer determinístico (datas congeladas) e perfil de texto idêntico ao app público. Usado pelo painel (seção **Documentos Embarcados**) e pronto para a aplicação pública. |
+| `embedded-docs.js` | **Gerador EMBARCADO de PDFs** (engine): template declarativo (`template.json` + assets PNG extraídos do documento oficial) + campos do schema de coordenadas → PDF montado pela própria aplicação via pdf-lib — **nenhum PDF externo é carregado nem enviado**. Validação estrutural, renderer determinístico (datas congeladas) e perfil de texto idêntico ao app público. Usado pelo painel (seção **Documentos Embarcados**) e pelo `ficha_cadastral.html` (geração unificada). |
 | `ficha-cadastral-embutido/` | **Prova de conceito e template do F-075**: `extract_template.py` (extrai `template.json` + `assets/*.png` de qualquer PDF oficial — generaliza para os 4 documentos), `template.json` (página, 3 imagens, 161 barras pretas, 89 textos estáticos, 17 marcações) e `generate.js` (gerador standalone Node). **`template.json` e `assets/*.png` são fonte versionada** (o painel os busca via HTTP no deploy estático); só `output.pdf` é artefato, ignorado pelo `.gitignore`. |
 | `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Fichas regionais — fluxo **Outros Planos** (`cidades_brasil.json`). |
 | `vercel.json` | Configuração de deploy. |
 
-Quando o número do processo (ex. F-075, PR-011, revisão 37) mudar no **documento PDF oficial**, atualize o **cabeçalho visível** no HTML (subtítulo) e, se for o caso, o nome do arquivo do template e a constante `TEMPLATE_PATH` na ficha.
+Quando o número do processo (ex. F-075, PR-011, revisão 38) mudar no **documento PDF oficial**, re-extraia o template embarcado (`python ficha-cadastral-embutido/extract_template.py "F-075_... .pdf" ficha-cadastral-embutido/`) e confira a fidelidade (`node scripts/gerar-ficha-vazia.js` + `python scripts/fidelidade-ficha.py ...`). O cabeçalho visível no HTML (subtítulo) acompanha o documento oficial.
 
 > **Nomenclatura das fichas regionais:** a **chave** usada em `cidades_brasil.json`, `cidades_infinity.json` e no valor de `FICHA A UTILIZAR` é `FICHA SAFO` (sem underscore), enquanto o **arquivo físico** se chama `FICHA SA_FO.pdf`. As duas pontas precisam de chave idêntica (`FICHA_UTILIZAR_PARA_ARQUIVO` em `assistencia_medica.html` e em `admin/panel.js`). Se divergirem, a ficha não é encontrada e a cidade fica sem template. A suíte (`scripts/run-test.mjs`, teste 14.6b) trava essa sincronia contra os dados reais.
 
@@ -61,7 +61,7 @@ Estrutura geral do JSON:
 
 Se adicionar um **campo novo** no formulário web, tem de existir **entrada correspondente** no JSON e o código em `gerarPDF()` (ou equivalente) tem de o **ler e desenhar** — o JSON sozinho não cria o campo no PDF.
 
-> **Gerador embarcado (`embedded-docs.js`)** desenha os textos estáticos e as camadas do formulário direto do template declarativo e escreve os dados nos campos do schema — as coordenadas dos `*_campos.json` são usadas EXATAMENTE como estão (origem no canto inferior esquerdo, igual ao pdf-lib; nada é re-medido). O perfil de texto da aplicação (fonte 9 pt, `x + 0,5`, baseline `y + min((altura − 0,72 × 9) / 2; altura × 0,78)` — a caixa alta do valor centralizada na caixa de preenchimento, sem faixa especial por Y) está em `EmbeddedDocs.PERFIL_APP` e é conferido **contra o `ficha_cadastral.html`** pela auditoria: se o código de geração mudar, a auditoria acusa.
+> **Gerador embarcado (`embedded-docs.js`)** desenha os textos estáticos e as camadas do formulário direto do template declarativo e escreve os dados nos campos do schema — as coordenadas dos `*_campos.json` são usadas EXATAMENTE como estão (origem no canto inferior esquerdo, igual ao pdf-lib; nada é re-medido). O perfil de texto da aplicação (fonte 9 pt, `x + 0,5`, baseline `y + min((altura − 0,72 × 9) / 2; altura × 0,78)` — a caixa alta do valor centralizada na caixa de preenchimento, sem faixa especial por Y) está em `EmbeddedDocs.PERFIL_APP`: é o ÚNICO caminho de geração, usado pelo painel **e pelo `ficha_cadastral.html`** — o app público carrega a engine (`<script src="./embedded-docs.js">`) e chama `EmbeddedDocs.gerarPdf` com o mapa flat de dados (`montarDadosFicha()`), conferido pela auditoria.
 
 > **Fonte e quebra de linha no template.** `template.texts[].font` aceita uma fonte padrão do PDF **ou** um nome declarado em `template.fontes` (`{ "arquivo": "assets/X.ttf", "fallback": "Helvetica" }`). O TTF só é embutido se os bytes chegarem em `assets.fontes` **e** o fontkit estiver carregado (CDN `@pdf-lib/fontkit` no painel; sem ele a engine usa `fallback` e reporta em `relatorio.fontesFallback`). Trechos com `maxWidth` são re-quebrados pela fonte real com `lineHeight` (padrão `tamanho × 1,2`), descendo linha a linha a partir de `y`.
 
@@ -73,9 +73,10 @@ Se adicionar um **campo novo** no formulário web, tem de existir **entrada corr
 
 | O quê | Onde |
 |-------|------|
-| Caminho do template PDF | `ficha_cadastral.html` — constante `TEMPLATE_PATH` (caminho relativo `./F-075_...pdf`). Se renomear o arquivo, altere aqui. |
+| Template embarcado (camadas do PDF) | `ficha-cadastral-embutido/template.json` + `assets/` — carregado pelo `ficha_cadastral.html` (`TEMPLATE_EMBARCADO_PATH`) e pelo painel. Re-extrair via `extract_template.py`. |
 | Coordenadas / novos rótulos no PDF | `ficha_cadastral_campos.json`. Ajuste `documento.versao` se fizer sentido. |
 | Textos, máscaras, opções (estado civil, etc.) | HTML (campos) + JSON (coordenadas). |
+| Mapeamento dado → PDF | `ficha_cadastral.html` — `montarDadosFicha()` (paths flat do schema); regras de negócio (Next→Conta Corrente, colunas Santander, VT zerado) ficam aí. |
 | CEP: ViaCEP; fallback | ViaCEP primeiro; se falhar, [Brasil API CEP](https://brasilapi.com.br/) (`/api/cep/v1/{cep}`). |
 | Cópia de dados para Assistência Médica | `localStorage` com chave partilhada (§8.1) — o fluxo copia `cidadeuf` e outros campos; ver funções de “copiar para assistência” no HTML. |
 | Rascunho | `RASCUNHO_STORAGE_KEY` em `ficha_cadastral.html` (§8.2). |
@@ -97,7 +98,7 @@ Template único: **não** há seleção por cidade; só um `F-075_...pdf`.
 Onde o código toca o schema:
 
 - `carregarCamposSchema()` busca `assistencia_medica_campos.json`.
-- `gerarPDF()` chama `escreverTextoCampoCoord`, `preencherDataSegmentada`, `marcarRadioJsonOpcao`, `marcarCheckboxCoord`, `desenharPngAjustadoNoCampo`, etc.
+- `gerarPDF()` chama `EmbeddedDocs.gerarPdf` (engine embarcada) e depois aplica o que é exclusivo do app: rubrica manuscrita (`desenharPngAjustadoNoCampo`) e marca d'água de não optante do VT (`desenharMarcaDaguaNaoOptanteValeTransporte`).
 
 ---
 
@@ -247,7 +248,7 @@ Qualquer município retornado pela API já aparece no select; não é necessári
 Para o **código** exato (constantes, nomes de funções, filtros de cidade), a fonte de verdade é:
 
 - `assistencia_medica.html` — `TEMPLATE_ASSISTENCIA_PDF`, `carregarTemplateAssistencia`, `buscarMunicipiosPorUf`, `carregarMunicipiosIBGE`, `gerarPDF`.
-- `ficha_cadastral.html` — `TEMPLATE_PATH`, carregamento de `ficha_cadastral_campos.json`, `gerarPDF` e CEP.
+- `ficha_cadastral.html` — `TEMPLATE_EMBARCADO_PATH`, carregamento de `ficha_cadastral_campos.json`, `gerarPDF` (via engine) e CEP.
 - `embedded-docs.js` — `validarTemplate`, `gerarPdf`, `folhasComCoordenadas`, `baselinePdf`, `truncarTexto`, `quebrarTexto`, `valorDaFolha`, `fontesDoTemplate`, `PERFIL_APP`.
 - `ficha-cadastral-embutido/extract_template.py` — extração de `template.json` + `assets/` a partir de qualquer PDF oficial (POC documentada no `README.md` do diretório).
 - **Cuidado de realm ao testar o renderer:** o pdf-lib valida objetos aninhados contra o `Object`/`Array` do próprio realm. Com o engine dentro de `node:vm`, `addPage` falha com NaN — testes do renderer devem carregar o engine **no realm do host** (eval indireto), como `audit-panel.mjs` faz. E o pdf-lib grava `ModDate/CreationDate` com o relógio do momento: para comparar bytes entre duas gerações, as datas precisam estar congeladas (o engine faz isso por padrão).
