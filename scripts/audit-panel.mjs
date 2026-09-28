@@ -348,8 +348,10 @@ if (ED && pdfLib) {
     wrapsRuins.length === 0 && (wraps.length > 0 || ancorados === (template.texts || []).length),
     wrapsRuins.length ? JSON.stringify(wrapsRuins.slice(0, 2))
       : wraps.length + " trecho(s) com quebra | " + ancorados + " trecho(s) ancorados");
-  // 13.2d — a grade do F-075_38 é feita de réguas pretas vetoriais (161 no
-  // total: as divisórias das tabelas mais as molduras dos avisos). Esta versão
+  // 13.2d — a grade do F-075_38 é feita de réguas vetoriais (184 no total:
+  // as divisórias das tabelas, as molduras dos avisos e a tabela do
+  // cabeçalho — capturada também quando desenhada como linhas/retângulos
+  // preenchidos de stroke, não só como retângulos fechados). Esta versão
   // do Canva não usa caixas brancas de ACABAMENTO — elas existem no v37. A
   // regra abaixo continua valendo: caixa branca de acabamento é opaca e sem
   // borda (o par preto que a acompanha no PDF oficial é desenhado com alfa 0
@@ -361,7 +363,7 @@ if (ED && pdfLib) {
   const checksSemGeom = checks.filter((c) =>
     !(c.width > 0 && c.height > 0) && !(c.base != null && c.size > 0));
   check("template embarcado traz a grade do formulário (réguas vetoriais, sem borda inventada)",
-    caixasComBorda.length === 0 && (template.blackBars || []).length >= 150,
+    caixasComBorda.length === 0 && (template.blackBars || []).length >= 180,
     `${(template.blackBars || []).length} régua(s), ${caixas.length} caixa(s) branca(s), com borda: ${caixasComBorda.length}`);
   check("marcações da tabela têm geometria real (glifo ancorado ou width/height)",
     checks.length === 17 && checksSemGeom.length === 0,

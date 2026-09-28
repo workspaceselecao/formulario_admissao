@@ -77,24 +77,23 @@ resíduo que é antialiasing das fontes.
 
 ## Fidelidade medida (diff de pixels contra o PDF oficial)
 
-Referência: **F-075_37__PR-011__Ficha_Cadastral_para_Admissão_corrigido.pdf** —
-é o v38 canônico (renomeado no repositório); é dela que o `extract_template.py`
-extrai o `template.json` atual. Medição reproduzível:
+Referência: **F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf** — é dela que
+o `extract_template.py` extrai o `template.json` atual. Medição reproduzível:
 
 ```bash
 node scripts/gerar-ficha-vazia.js            # gera output.pdf (só o template)
-python scripts/fidelidade-ficha.py "F-075_37__PR-011__Ficha_Cadastral_para_Admissão_corrigido.pdf" 150
+python scripts/fidelidade-ficha.py "F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf" 150
 ```
 
 Resultado atual (150 dpi, tolerância 200/255, página inteira — 595,32 × 841,92 pt):
 
 | Métrica | Valor |
 |---|---|
-| pixels diferentes | **0,790%** |
-| falta (tinta do oficial não reproduzida) | 0,344% |
-| sobra (tinta a mais no gerado) | 0,446% |
-| da tinta da referência | 11,27% |
-| maior bloco de 20 pt com diferença | 37,7% (x 544, y 40 — borda da logo reamostrada; ruído de raster, sem texto) |
+| pixels diferentes | **0,714%** |
+| falta (tinta do oficial não reproduzida) | 0,294% |
+| sobra (tinta a mais no gerado) | 0,420% |
+| da tinta da referência | 9,50% |
+| maior bloco de 20 pt com diferença | ~11,5% (antialiasing de fonte espalhado; a tabela do cabeçalho agora é reproduzida — 184 réguas) |
 
 O resíduo é antialiasing de fonte (o original usa subsets do Canva com
 contornos ligeiramente mais grossos que os TTF do Windows) e está espalhado por

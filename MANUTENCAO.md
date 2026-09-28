@@ -30,7 +30,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
 | `cidades_brasil.json` | Base de cidades do fluxo **Outros Planos** (REGIONAL/CIDADE/FICHA A UTILIZAR — **sem** UF). Lida pela aplicação pública e pelo painel. |
 | `cidades_infinity.json` | Mesmas cidades com a coluna **UF**; usada pelo fluxo Outros Planos → variante Infinity e para o painel exibir/validar UF. |
-| `F-075_37__PR-011__Ficha_Cadastral_para_Admissão_corrigido.pdf` | Template da ficha (documento canônico v38; nome referenciado no HTML e no painel). |
+| `F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf` | Template da ficha (documento canônico v38; nome referenciado no HTML e no painel). |
 | `F-075_38 (PR-011) Ficha Cadastral para Admissão_com caixa.pdf` | Mesmo v38 com as 65 caixas de preenchimento desenhadas por cima — fonte das coordenadas de `ficha_cadastral_campos.json`. |
 | `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Versão anterior (v37), mantida no repositório como histórico. **Não** é mais o template. |
 | `DECLARACAO PLANO DE SAUDE.pdf` | Declaração — fluxo **Plano de Benefícios** (assinatura na página 2). |

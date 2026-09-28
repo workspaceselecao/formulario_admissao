@@ -478,6 +478,33 @@ def extract(pdf_path: str, out_dir: str, page_index: int = 0):
             # acabamento (o preto vem com alfa 0 e nao aparece no original):
             # descartado junto com o branco correspondente.
 
+        # ---- Linhas vetoriais de stroke puro (p.lines) -------------------
+        # A tabela do CABECALHO do v38 (moldura do titulo + divisoria
+        # Codigo/Revisao x Data/Vigencia) nao e feita de retangulos fechados:
+        # sao 20+ segmentos `l` com bbox de espessura ~0,48 pt — o bloco de
+        # rects acima nunca os viu e a tabela sumia do template. Cada linha
+        # vira uma barra FINA preenchida (mesma geometria da tinta), com a
+        # cor de contorno quando nao preta. Os "cap" de canto (segmento de
+        # comprimento zero que fecha a juncao) ganham a espessura da linha
+        # centrada no ponto, para nao deixar fresta na moldura.
+        vistos_linha = set()
+        for l in p.lines:
+            lw = round(l.get("linewidth") or 0.48, 2) or 0.48
+            w, h = l["x1"] - l["x0"], l["bottom"] - l["top"]
+            rgb = l.get("stroking_color")
+            tup = tuple(round(c, 2) for c in rgb) if rgb is not None else (0.0, 0.0, 0.0)
+            key = (round(l["x0"], 1), round(l["x1"], 1), round(l["top"], 1), round(l["bottom"], 1), tup)
+            if key in vistos_linha:
+                continue
+            vistos_linha.add(key)
+            w2, h2 = max(w, lw), max(h, lw)
+            entry = {"x": round(l["x0"] - (w2 - w) / 2, 2),
+                     "y": round(ref_h - l["bottom"] - (h2 - h) / 2, 2),
+                     "width": round(w2, 2), "height": round(h2, 2)}
+            if tup != (0.0, 0.0, 0.0):
+                entry["cor"] = "#%02X%02X%02X" % tuple(int(round(c * 255)) for c in tup)
+            template["blackBars"].append(entry)
+
     with open(os.path.join(out_dir, "template.json"), "w", encoding="utf-8") as f:
         cataloga_campos(template)
         json.dump(template, f, ensure_ascii=False, indent=2)

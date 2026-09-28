@@ -9,6 +9,9 @@ keys*.txt
 # Node
 node_modules/
 
+# Python
+__pycache__/
+
 # OS
 .DS_Store
 Thumbs.db
