@@ -66,7 +66,7 @@
   // e as coordenadas dos campos de dado saem do MESMO PDF: as caixas de
   // preenchimento foram medidas em "F-075_38 (PR-011) ..._com caixa.pdf", que
   // é este layout com uma camada de anotação por cima.
-  const FICHA_PDF = "F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf";
+  const FICHA_PDF = "F-075_37__PR-011__Ficha_Cadastral_para_Admissão_corrigido.pdf";
   const DECLARACAO_PDF = "DECLARACAO PLANO DE SAUDE.pdf";
   const FICHA_UTILIZAR_PARA_ARQUIVO = {
     "FICHA BH": "FICHA BH.pdf",

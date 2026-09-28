@@ -122,12 +122,12 @@
           "label": "PIS (informar se não for primeiro emprego)",
           "tipo": "texto",
           "pagina": 1,
-      "coordenadas": {
-        "x": 184.5,
-        "y": 580.93,
-        "largura": 130.65,
-        "altura": 12.3
-      },
+          "coordenadas": {
+            "x": 184.5,
+            "y": 580.93,
+            "largura": 130.65,
+            "altura": 12.3
+          },
           "obrigatorio": false,
           "mascara": "999.99999.99-9",
           "dependencia": {
@@ -464,9 +464,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 45.5,
-                "y": 435.39,
-                "largura": 255,
+                "x": 47.6,
+                "y": 419.9,
+                "largura": 253.15,
                 "altura": 12.3
               },
               "obrigatorio": false
@@ -476,9 +476,9 @@
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 380.0,
-                "y": 435.39,
-                "largura": 48,
+                "x": 308.45,
+                "y": 420.1,
+                "largura": 112.25,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -489,9 +489,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 506.5,
-                "y": 435.39,
-                "largura": 68,
+                "x": 430.6,
+                "y": 420.1,
+                "largura": 134.4,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -507,9 +507,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 45.5,
-                "y": 405.38,
-                "largura": 255,
+                "x": 47.6,
+                "y": 398.8,
+                "largura": 253.15,
                 "altura": 12.3
               },
               "obrigatorio": false
@@ -519,9 +519,9 @@
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 380.0,
-                "y": 405.38,
-                "largura": 48,
+                "x": 308.45,
+                "y": 399.0,
+                "largura": 112.25,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -532,9 +532,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 506.5,
-                "y": 405.38,
-                "largura": 68,
+                "x": 430.6,
+                "y": 399.0,
+                "largura": 134.4,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -550,9 +550,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 45.5,
-                "y": 377.75,
-                "largura": 255,
+                "x": 47.6,
+                "y": 377.35,
+                "largura": 253.15,
                 "altura": 12.3
               },
               "obrigatorio": false
@@ -562,9 +562,9 @@
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 380.0,
-                "y": 377.75,
-                "largura": 48,
+                "x": 308.45,
+                "y": 377.55,
+                "largura": 112.25,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -575,9 +575,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 506.5,
-                "y": 377.75,
-                "largura": 68,
+                "x": 430.6,
+                "y": 377.55,
+                "largura": 134.4,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -593,9 +593,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 45.5,
-                "y": 351.82,
-                "largura": 255,
+                "x": 47.6,
+                "y": 356.25,
+                "largura": 253.15,
                 "altura": 12.3
               },
               "obrigatorio": false
@@ -605,9 +605,9 @@
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 380.0,
-                "y": 351.82,
-                "largura": 48,
+                "x": 308.45,
+                "y": 356.45,
+                "largura": 112.25,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -618,9 +618,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 506.5,
-                "y": 351.82,
-                "largura": 68,
+                "x": 430.6,
+                "y": 356.45,
+                "largura": 134.4,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -636,9 +636,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 45.5,
-                "y": 328.29,
-                "largura": 255,
+                "x": 47.6,
+                "y": 334.5,
+                "largura": 253.15,
                 "altura": 12.3
               },
               "obrigatorio": false
@@ -648,9 +648,9 @@
               "tipo": "data",
               "pagina": 1,
               "coordenadas": {
-                "x": 380.0,
-                "y": 328.29,
-                "largura": 48,
+                "x": 308.45,
+                "y": 334.7,
+                "largura": 112.25,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -661,9 +661,9 @@
               "tipo": "texto",
               "pagina": 1,
               "coordenadas": {
-                "x": 506.5,
-                "y": 328.29,
-                "largura": 68,
+                "x": 430.6,
+                "y": 334.7,
+                "largura": 134.4,
                 "altura": 12.3
               },
               "obrigatorio": false,
@@ -682,9 +682,9 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 321.81,
-              "y": 251.82,
-              "largura": 44,
+              "x": 266.3,
+              "y": 273.37,
+              "largura": 60.55,
               "altura": 12.3
             }
           },
@@ -692,9 +692,9 @@
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 515.23,
-              "y": 251.82,
-              "largura": 56,
+              "x": 453.65,
+              "y": 273.9,
+              "largura": 60.55,
               "altura": 12.3
             }
           }
@@ -705,9 +705,9 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 321.81,
-              "y": 230.33,
-              "largura": 44,
+              "x": 266.5,
+              "y": 252.52,
+              "largura": 60.55,
               "altura": 12.3
             }
           },
@@ -715,9 +715,9 @@
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 515.23,
-              "y": 230.33,
-              "largura": 56,
+              "x": 453.85,
+              "y": 253.07,
+              "largura": 60.55,
               "altura": 12.3
             }
           }
@@ -728,9 +728,9 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 321.81,
-              "y": 208.93,
-              "largura": 44,
+              "x": 266.6,
+              "y": 233.65,
+              "largura": 60.55,
               "altura": 12.3
             }
           },
@@ -738,9 +738,9 @@
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 515.23,
-              "y": 208.93,
-              "largura": 56,
+              "x": 453.95,
+              "y": 234.2,
+              "largura": 60.55,
               "altura": 12.3
             }
           }
@@ -751,9 +751,9 @@
             "tipo": "numero",
             "pagina": 1,
             "coordenadas": {
-              "x": 321.81,
-              "y": 187.57,
-              "largura": 44,
+              "x": 266.35,
+              "y": 213.6,
+              "largura": 60.55,
               "altura": 12.3
             }
           },
@@ -761,9 +761,9 @@
             "tipo": "moeda",
             "pagina": 1,
             "coordenadas": {
-              "x": 515.23,
-              "y": 187.57,
-              "largura": 56,
+              "x": 453.7,
+              "y": 214.15,
+              "largura": 60.55,
               "altura": 12.3
             }
           }
@@ -853,27 +853,27 @@
           "segmentos": {
             "dia": {
               "coordenadas": {
-                "x": 431.69,
-                "y": 34.87,
-                "largura": 16,
+                "x": 437.45,
+                "y": 73.35,
+                "largura": 26.9,
                 "altura": 12.75
               },
               "mascara": "99"
             },
             "mes": {
               "coordenadas": {
-                "x": 471.59,
-                "y": 34.87,
-                "largura": 16,
+                "x": 478.05,
+                "y": 73.35,
+                "largura": 27.6,
                 "altura": 12.75
               },
               "mascara": "99"
             },
             "ano": {
               "coordenadas": {
-                "x": 517.63,
-                "y": 34.87,
-                "largura": 30,
+                "x": 519.35,
+                "y": 73.35,
+                "largura": 28.25,
                 "altura": 12.75
               },
               "mascara": "9999"

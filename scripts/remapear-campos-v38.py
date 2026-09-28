@@ -54,6 +54,12 @@ FOLGA_X_PT = 2.5        # o rótulo começa no máximo 2,5 pt à esquerda da cai
 AJUSTES = {
     # o rótulo "PIS:" (x 165,14..182,86) invade 1,96 pt da caixa 12
     "dados_pessoais.informarpis": {"x0": 184.5, "motivo": "rótulo PIS: invade a caixa"},
+    # o rótulo "Nome:" (x 19,56..46,64) invade 27 pt da caixa de nome do dependente
+    "dependentes.0.nome": {"x0": 47.6, "motivo": "rótulo Nome: invade a caixa"},
+    "dependentes.1.nome": {"x0": 47.6, "motivo": "rótulo Nome: invade a caixa"},
+    "dependentes.2.nome": {"x0": 47.6, "motivo": "rótulo Nome: invade a caixa"},
+    "dependentes.3.nome": {"x0": 47.6, "motivo": "rótulo Nome: invade a caixa"},
+    "dependentes.4.nome": {"x0": 47.6, "motivo": "rótulo Nome: invade a caixa"},
 }
 
 # campo → (índice da caixa 1-based, âncora)
@@ -93,6 +99,41 @@ MAPA = {
     "vale_alimentacao_refeicao.alimentacao":        (59, ("quadro", "❑")),
     "vale_alimentacao_refeicao.refeicao":           (57, ("quadro", "❑")),
     "vale_alimentacao_refeicao.flex":               (58, ("quadro", "❑")),
+    # dependentes: 5 linhas × (nome | data de nascimento | CPF). Nas linhas,
+    # "Data de nascimento:" e "CPF (do dependente):" começam ANTES da caixa da
+    # coluna do meio/direita (x0 307,85 e 430,51) e "Nome:" invade a caixa da
+    # esquerda (ver AJUSTES). O valor entra depois do rótulo sem cobri-lo.
+    "dependentes.0.nome":                           (36, ("rotulo", "Nome:")),
+    "dependentes.0.dtnasc":                         (34, ("rotulo", "Data de nascimento:")),
+    "dependentes.0.cpf":                            (35, ("rotulo", "CPF (do dependente):")),
+    "dependentes.1.nome":                           (39, ("rotulo", "Nome:")),
+    "dependentes.1.dtnasc":                         (37, ("rotulo", "Data de nascimento:")),
+    "dependentes.1.cpf":                            (38, ("rotulo", "CPF (do dependente):")),
+    "dependentes.2.nome":                           (42, ("rotulo", "Nome:")),
+    "dependentes.2.dtnasc":                         (40, ("rotulo", "Data de nascimento:")),
+    "dependentes.2.cpf":                            (41, ("rotulo", "CPF (do dependente):")),
+    "dependentes.3.nome":                           (45, ("rotulo", "Nome:")),
+    "dependentes.3.dtnasc":                         (43, ("rotulo", "Data de nascimento:")),
+    "dependentes.3.cpf":                            (44, ("rotulo", "CPF (do dependente):")),
+    "dependentes.4.nome":                           (48, ("rotulo", "Nome:")),
+    "dependentes.4.dtnasc":                         (46, ("rotulo", "Data de nascimento:")),
+    "dependentes.4.cpf":                            (47, ("rotulo", "CPF (do dependente):")),
+    # grade de vale-transporte: cada linha tem o rótulo à esquerda (ÔNIBUS,
+    # METRÔ/TREM…); a coluna QUANTIDADE fica em x≈266 e a VALOR UNITÁRIO em
+    # x≈454 — os cabeçalhos ficam 8 pt acima das caixas, sem invasão.
+    "vale_transporte.itens.onibus.quantidade":      (50, ("rotulo", "ÔNIBUS")),
+    "vale_transporte.itens.onibus.valor_unitario":  (49, ("rotulo", "ÔNIBUS")),
+    "vale_transporte.itens.metro_trem.quantidade":  (52, ("rotulo", "METRÔ/TREM")),
+    "vale_transporte.itens.metro_trem.valor_unitario": (51, ("rotulo", "METRÔ/TREM")),
+    "vale_transporte.itens.intermunicipal.quantidade": (54, ("rotulo", "INTERMUNICIPAL")),
+    "vale_transporte.itens.intermunicipal.valor_unitario": (53, ("rotulo", "INTERMUNICIPAL")),
+    "vale_transporte.itens.integracao.quantidade":  (56, ("rotulo", "INTEGRAÇÃO")),
+    "vale_transporte.itens.integracao.valor_unitario": (55, ("rotulo", "INTEGRAÇÃO")),
+    # data segmentada da assinatura: três caixinhas sem rótulo na linha
+    # (o trecho "DATA" fica embaixo, base 63,74); âncora só pela geometria.
+    "assinatura.data.segmentos.dia":                (60, ("solto", "dia da assinatura")),
+    "assinatura.data.segmentos.mes":                (61, ("solto", "mês da assinatura")),
+    "assinatura.data.segmentos.ano":                (62, ("solto", "ano da assinatura")),
     "assinatura.rubrica":                           (63, ("solto", "linha de assinatura")),
     "assinatura.nome_legivel":                      (64, ("solto", "nome legível")),
     "assinatura.nome_legivel_sem_rubrica":          (64, ("solto", "nome legível sem rubrica")),

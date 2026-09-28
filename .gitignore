@@ -29,5 +29,10 @@ ficha-cadastral-embutido/output.pdf
 ficha-cadastral-embutido/.tmp_deps/
 ficha-cadastral-embutido/.tmp_render/
 
+# Renders de comparação na raiz (gerar-ficha-preenchida.js) e bytecode Python dos
+# scripts de verificação — artefatos locais, nunca versionados
+.tmp_render/
+scripts/__pycache__/
+
 # Painel administrativo (modo API — dados locais do test-server)
 data/
