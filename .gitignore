@@ -39,3 +39,7 @@ scripts/__pycache__/
 
 # Painel administrativo (modo API — dados locais do test-server)
 data/
+
+# Artefatos de perícia/depuração removidos do versionamento (permanecem apenas locais)
+.tmp_viz/
+scratch_mapped_*.json

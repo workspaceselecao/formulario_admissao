@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-06-04T14:41:36-03:00",
-  "gitCommit": "1a294c1",
-  "gitSubject": "Historico RIPD: guia publico em MD sem JSON nem detalhes tecnicos",
+  "ultimaValidacaoIso": "2026-09-28T03:30:00-03:00",
+  "gitCommit": "f57aac3",
+  "gitSubject": "docs(legal): copia DOCX das 9 paginas de Privacidade e seguranca",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
