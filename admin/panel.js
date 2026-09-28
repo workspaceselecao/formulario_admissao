@@ -5181,7 +5181,12 @@
         alteracao: "diferença " + (r ? r.percentual : "?") + "% · deslocamento dx " + (r ? r.dx : "?") + "pt dy " + (r ? r.dy : "?") + "pt (tolerância " + tol + "pt)"
       });
     } catch (e) {
-      box.innerHTML = '<div class="notice err">Falha na comparação: ' + esc(e.message) + "</div>";
+      // Aba carregada ANTES de um deploy: o pdfFile vem do JavaScript em memória
+      // (o repositório já tem outro nome) e a busca falha com "Missing PDF".
+      // Em vez do erro críptico, instrui o recarregamento do painel.
+      const abaVelha = /Missing PDF|Failed to fetch/i.test(String((e && e.message) || ""));
+      box.innerHTML = '<div class="notice err">Falha na comparação: ' + esc(e.message) +
+        (abaVelha ? "<br>Se o arquivo existe no repositório, <strong>recarregue o painel (F5)</strong>: o JavaScript desta aba pode ser anterior ao último deploy." : "") + "</div>";
     }
   }
 
