@@ -4,6 +4,11 @@
  * --destructive, --destructive-bg, --separator-subtle, --separator-medium, --accent-tap-hover,
  * --accent-tap-focus, --accent-focus-ring, --accent-shadow-medium (além de --text, --border, etc.).
  */
+.modal-head.modal-head--rascunho {
+  background: #b42318;
+  color: #fff;
+}
+
 /* ── HEADER ── */
 .page-header {
   background: #fff;

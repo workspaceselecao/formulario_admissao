@@ -15,7 +15,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
 | `vercel.json` | Redireciona `/` → `index.html` na Vercel. |
 
-Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. Após gerar o PDF com sucesso, preenchimento e rascunho no `localStorage` **permanecem** no dispositivo até o uso de **Descartar rascunho** no menu ou limpeza manual do armazenamento do navegador (ver §7 e §8). Além disso, por segurança o rascunho é **descartado automaticamente 1 hora após o último salvamento** (`rascunho-ttl.js`): na primeira vez que existe um rascunho sem decisão registrada, um modal pergunta se o usuário prefere **manter o rascunho** ou permitir o descarte automático (ver §7.2).
+Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. O rascunho local é **excluído automaticamente 1 hora após o último salvamento**, salvo se o usuário escolher **Manter rascunho** no modal de decisão (`rascunho-ttl.js`). Rascunhos de versões anteriores sem horário recuperável recebem prazo de até 1 hora desde a primeira abertura após a atualização, informado no modal. Quando o prazo vence com a página aberta, os dados do formulário também são limpos; quando a página está fechada, o rascunho vencido é removido ao reabri-la. O usuário também pode descartar o rascunho a qualquer momento pelo menu ou limpar o armazenamento do navegador (ver §7 e §8).
 
 ---
 
@@ -138,9 +138,11 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 ## 7. Chaves e políticas no navegador
 
-### 7.1 Cópia ficha → assistência (partilhada)
+### 7.1 Cópias temporárias entre formulários
 
-- `cross_copy_ficha_para_assistencia_v1` — payload JSON escrito na ficha e lido na assistência ao abrir (campos, dependentes, `assinaturaCanvasPng`, `naoAssinarManualmente`, nome/data); removido após consumir.
+- `atento.forms:v1:cross_copy_ficha_para_assistencia` (legada: `cross_copy_ficha_para_assistencia_v1`) — payload JSON escrito na ficha e lido na assistência ao abrir (campos, dependentes, `assinaturaCanvasPng`, `naoAssinarManualmente`, nome/data).
+- `atento.forms:v1:carta_bradesco_prefill_v1` — dados pessoais copiados da ficha para iniciar a Carta Bradesco.
+- Esses payloads são removidos após consumo, no descarte manual da Ficha ou junto com a expiração do rascunho da Ficha (1 hora após o último salvamento, salvo escolha por manter).
 
 ### 7.2 Rascunhos (versão no nome da chave)
 
@@ -161,7 +163,7 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 ### 7.4 LGPD
 
-- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`) e chama **`RascunhoTTL.verificarAposSalvar()`**, que apresenta o modal de verificação do rascunho (manter/descartar após 1 h) quando ainda não há decisão registrada; formulário não é zerado automaticamente — limpeza explícita em **Descartar rascunho**. O rascunho não permanece indefinidamente: sem escolha do usuário vale o **descarte automático após 1 h** do último salvamento (`rascunho-ttl.js`, §7.2); quem preferir pode optar por **manter o rascunho** no modal de proteção de dados.
+- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`) e chama **`RascunhoTTL.verificarAposSalvar()`**, que apresenta o modal de verificação do rascunho (manter/excluir após 1 h) quando ainda não há decisão registrada; o formulário não é zerado ao gerar o PDF, mas é limpo automaticamente quando o rascunho expira (na sessão aberta ou ao reabrir a página) ou manualmente em **Descartar rascunho**. Sem escolha por manter, vale o **descarte automático após 1 h** do último salvamento (`rascunho-ttl.js`, §7.2).
 
 ### 7.5 Documentos em `/Docs` (revisão jurídica)
 

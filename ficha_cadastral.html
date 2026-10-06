@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="icone.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
+<script src="./rascunho-ttl.js"></script>
 <style>
   /* ── TOKENS (página) ─────────────────── */
   :root {
@@ -1534,6 +1535,7 @@ function lsRemoveDual(newKey, legacyKey) {
   appStorage.removeItem(legacyKey);
 }
 const CROSS_COPY_FICHA_ASSISTENCIA_KEY = LS_NS + "cross_copy_ficha_para_assistencia";
+const PREFILL_CARTA_STORAGE_KEY = LS_NS + "carta_bradesco_prefill_v1";
 lsMigrateLegacy(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY.crossCopy);
 const STORAGE_NAO_PERGUNTAR_COPIA_ASSIST = LS_NS + "ficha_cadastral_nao_perguntar_copia_assistencia";
 lsMigrateLegacy(STORAGE_NAO_PERGUNTAR_COPIA_ASSIST, LS_LEGACY.fichaNaoPerguntar);
@@ -2611,7 +2613,9 @@ function fecharModalCopiaAssistencia() {
 
 function salvarPayloadCopiaAssistenciaNoStorage(payload) {
   try {
-    appStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(payload));
+    const payloadComRetencao = Object.assign({}, payload, { __atentoSavedAt: Date.now() });
+    const salvo = appStorage.setItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY, JSON.stringify(payloadComRetencao));
+    window.RascunhoTTL?.registrarSalvamento(salvo);
   } catch (e) {
     console.warn(e);
   }
@@ -2652,6 +2656,10 @@ function limparRascunhoLocal() {
   } catch (_) {
     /* storage indisponível */
   }
+  appStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY);
+  appStorage.removeItem(LS_LEGACY.crossCopy);
+  appStorage.removeItem(PREFILL_CARTA_STORAGE_KEY);
+  window.RascunhoTTL?.limparDecisao();
 }
 
 function coletarEstadoRascunho() {
@@ -2840,7 +2848,8 @@ function salvarRascunhoLocalSincrono() {
   clearTimeout(rascunhoSalvarTimer);
   rascunhoSalvarTimer = null;
   try {
-    appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    const salvo = appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    window.RascunhoTTL?.registrarSalvamento(salvo);
   } catch (e) {
     console.warn("Rascunho não salvo:", e);
   }
@@ -3428,9 +3437,11 @@ function baixarCartaAberturaConta(){
     endNum: c("endNum"),
     complemento: c("complemento"),
     bairro: c("bairro"),
-    municipio: c("cidade")
+    municipio: c("cidade"),
+    __atentoSavedAt: Date.now()
   };
-  appStorage.setItem(LS_NS + "carta_bradesco_prefill_v1", JSON.stringify(prefill));
+  const salvo = appStorage.setItem(PREFILL_CARTA_STORAGE_KEY, JSON.stringify(prefill));
+  window.RascunhoTTL?.registrarSalvamento(salvo);
   window.location.assign("carta_bradesco.html");
 }
 
@@ -3443,6 +3454,14 @@ document.getElementById("naoAssinarManualmente")?.addEventListener("change", () 
   sincronizarCheckLabelNaoAssinarManualmente();
   atualizarUiNaoAssinarManualmente();
   agendarSalvarRascunho();
+});
+RascunhoTTL.init({
+  draftKey: RASCUNHO_STORAGE_KEY,
+  legacyKeys: [LS_LEGACY.fichaRascunho],
+  metaKey: LS_NS + "rascunho_ttl_ficha_v1",
+  relatedKeys: [CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY.crossCopy, PREFILL_CARTA_STORAGE_KEY],
+  limparFormulario: function () { limparDadosFormulario(); },
+  notificar: function (msg, ok) { showToast(msg, ok); }
 });
 tentarRestaurarRascunho();
 ["telefone", "celular"].forEach((id) => {
@@ -3718,16 +3737,5 @@ carregarTemplateInicial();
 })();
 </script>
 
-<!-- Descarte automático de rascunho (TTL 1h) — ver MANUTENCAO.md §7.2 -->
-<script src="./rascunho-ttl.js"></script>
-<script>
-RascunhoTTL.init({
-  draftKey: RASCUNHO_STORAGE_KEY,
-  legacyKeys: [LS_LEGACY.fichaRascunho],
-  metaKey: LS_NS + "rascunho_ttl_ficha_v1",
-  limparFormulario: function () { limparDadosFormulario(); },
-  notificar: function (msg, ok) { showToast(msg, ok); }
-});
-</script>
 </body>
 </html>

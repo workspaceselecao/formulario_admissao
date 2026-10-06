@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="icone.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
+<script src="./rascunho-ttl.js"></script>
 <style>
   /* ── TOKENS (página) ─────────────────── */
   :root {
@@ -1022,7 +1023,8 @@ let salvarRascunhoTimer = null;
 function salvarRascunho() {
   const obj = {};
   RASCUNHO_IDS.forEach((id) => { obj[id] = v(id); });
-  appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(obj));
+  const salvo = appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(obj));
+  window.RascunhoTTL?.registrarSalvamento(salvo);
 }
 function agendarSalvarRascunho() {
   clearTimeout(salvarRascunhoTimer);
@@ -1067,6 +1069,7 @@ function limparDadosFormulario() {
 }
 function descartarRascunhoEFormulario() {
   appStorage.removeItem(RASCUNHO_STORAGE_KEY);
+  window.RascunhoTTL?.limparDecisao();
   limparDadosFormulario();
   showToast("Rascunho descartado.", true);
 }
@@ -1506,6 +1509,7 @@ function aplicarPrefillFichaCadastral() {
   let obj = null;
   try { obj = JSON.parse(raw); } catch (_e) { return; }
   if (!obj || typeof obj !== "object") return;
+  if (window.RascunhoTTL?.payloadExpirou(obj.__atentoSavedAt, LS_NS + "rascunho_ttl_ficha_v1")) return;
   let copiou = false;
   let grupo = typeof obj.grupoDeCargo === "string" ? obj.grupoDeCargo.trim() : "";
   const cargo = typeof obj.cargo === "string" ? obj.cargo.trim() : "";
@@ -1539,15 +1543,6 @@ function aplicarPrefillFichaCadastral() {
   showToast("Dados pessoais e endereço copiados da Ficha Cadastral.", true);
 }
 
-restaurarRascunho();
-aplicarPrefillFichaCadastral();
-updateProgress();
-carregarAssetsCarta();
-</script>
-
-<!-- Descarte automático de rascunho (TTL 1h) — ver MANUTENCAO.md §7.2 -->
-<script src="./rascunho-ttl.js"></script>
-<script>
 RascunhoTTL.init({
   draftKey: RASCUNHO_STORAGE_KEY,
   legacyKeys: [],
@@ -1555,6 +1550,11 @@ RascunhoTTL.init({
   limparFormulario: function () { limparDadosFormulario(); },
   notificar: function (msg, ok) { showToast(msg, ok); }
 });
+restaurarRascunho();
+aplicarPrefillFichaCadastral();
+updateProgress();
+carregarAssetsCarta();
 </script>
+
 </body>
 </html>

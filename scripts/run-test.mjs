@@ -1272,11 +1272,31 @@ async function testarRascunhoTTL(assert) {
     const html = readFileSync(join(ROOT, pag), "utf8");
     assert(`${pag}: inclui rascunho-ttl.js`, html.includes('src="./rascunho-ttl.js"'), "script tag ausente");
     assert(`${pag}: RascunhoTTL.init com draftKey e metaKey`, html.includes("RascunhoTTL.init(") && html.includes(chave) && html.includes(metaChave), "init incompleto");
+    const ttlScriptIndex = html.indexOf('src="./rascunho-ttl.js"');
+    const ttlInitIndex = html.indexOf("RascunhoTTL.init(");
+    const restoreIndex = [
+      html.indexOf("tentarRestaurarRascunho();"),
+      html.indexOf("tentarRestaurarRascunho())"),
+      html.indexOf("restaurarRascunho();")
+    ].filter((index) => index >= 0).sort((a, b) => a - b)[0] ?? -1;
+    assert(`${pag}: TTL inicializa antes de restaurar rascunho`, ttlScriptIndex < ttlInitIndex && ttlInitIndex < restoreIndex, "restauração pode usar dados vencidos");
+    assert(`${pag}: cada gravação informa o resultado ao TTL`, html.includes("RascunhoTTL?.registrarSalvamento(salvo)"), "sinal de salvamento ausente");
     assert(`${pag}: chama verificarAposSalvar pós-geração do PDF`, html.includes("RascunhoTTL?.verificarAposSalvar"), "chamada pós-geração ausente");
+    assert(`${pag}: descarte manual reinicia decisão do TTL`, html.includes("RascunhoTTL?.limparDecisao()"), "decisão antiga não é limpa");
   }
   const metas = paginas.map((p) => p[2]);
   assert("metaKeys únicas por página (mesma origem)", new Set(metas).size === metas.length, metas.join(","));
   assert("ttl: modal usa o layout geral (modal-overlay/modal-card/btn-modal)", code.includes('"modal-overlay"') && code.includes('"modal-card"') && code.includes('"btn-modal confirm"'), "classes da aplicação ausentes");
+  const sharedCss = readFileSync(join(ROOT, "shared-header-nav.css"), "utf8");
+  assert("ttl: cabeçalho vermelho definido no CSS compartilhado", /\.modal-head\.modal-head--rascunho\s*\{[^}]*background(?:-color)?\s*:\s*#b42318/i.test(sharedCss), "regra vermelha ausente");
+  const fichaHtml = readFileSync(join(ROOT, "ficha_cadastral.html"), "utf8");
+  assert("ficha: TTL remove payloads de transferência junto do rascunho", fichaHtml.includes("relatedKeys: [CROSS_COPY_FICHA_ASSISTENCIA_KEY") && fichaHtml.includes("PREFILL_CARTA_STORAGE_KEY"), "payloads não vinculados ao TTL");
+  assert("ficha: descarte manual elimina cópias locais pendentes", fichaHtml.includes("appStorage.removeItem(CROSS_COPY_FICHA_ASSISTENCIA_KEY)") && fichaHtml.includes("appStorage.removeItem(PREFILL_CARTA_STORAGE_KEY)"), "cópias não removidas manualmente");
+  const assistHtml = readFileSync(join(ROOT, "assistencia_medica.html"), "utf8");
+  const cartaHtml = readFileSync(join(ROOT, "carta_bradesco.html"), "utf8");
+  assert("assistência valida prazo da cópia antes de aplicar", assistHtml.includes("payloadExpirou(obj.__atentoSavedAt, LS_NS + \"rascunho_ttl_ficha_v1\")"), "cópia pode ser aplicada vencida");
+  assert("carta valida prazo do prefill antes de aplicar", cartaHtml.includes("payloadExpirou(obj.__atentoSavedAt, LS_NS + \"rascunho_ttl_ficha_v1\")"), "prefill pode ser aplicado vencido");
+  assert("ficha carimba data nas cópias temporárias", fichaHtml.includes("__atentoSavedAt: Date.now()"), "timestamp ausente");
   assert("ttl: sem estilos próprios (rttl- removido)", !code.includes("rttl-overlay") && !code.includes("rttl-card") && !code.includes("rttl-btn"), "CSS próprio presente");
   assert("ttl: API verificarAposSalvar exportada", /verificarAposSalvar:\s*verificarAposSalvar/.test(code), "API ausente");
 
@@ -1284,6 +1304,8 @@ async function testarRascunhoTTL(assert) {
   function novoAmbiente() {
     const store = new Map();
     const listeners = {};
+    const intervals = [];
+    const clock = { now: Date.now() };
     const ls = {
       getItem: (k) => (store.has(k) ? store.get(k) : null),
       setItem: (k, v) => { store.set(String(k), String(v)); },
@@ -1293,20 +1315,36 @@ async function testarRascunhoTTL(assert) {
       readyState: "loading",
       hidden: false,
       _listeners: listeners,
+      _elements: [],
       addEventListener: (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); },
       removeEventListener: (ev, fn) => { listeners[ev] = (listeners[ev] || []).filter((f) => f !== fn); },
       querySelector: () => null,
       getElementById: () => null,
-      createElement: () => ({ style: {}, classList: { add() {}, remove() {} }, setAttribute() {}, removeAttribute() {}, appendChild() {}, addEventListener() {}, focus() {}, remove() {} }),
-      body: { appendChild() {}, removeChild() {}, classList: { add() {}, remove() {} } },
+      createElement: () => {
+        const element = {
+          style: {},
+          children: [],
+          listeners: {},
+          classList: { add() {}, remove() {} },
+          setAttribute() {},
+          removeAttribute() {},
+          appendChild(child) { this.children.push(child); },
+          addEventListener(event, listener) { this.listeners[event] = listener; },
+          focus() {},
+          remove() {}
+        };
+        documentStub._elements.push(element);
+        return element;
+      },
+      body: { children: [], appendChild(child) { this.children.push(child); }, removeChild() {}, classList: { add() {}, remove() {} } },
       head: { appendChild() {} }
     };
-    const windowStub = { localStorage: ls, document: documentStub, setInterval: () => 0, setTimeout: () => 0 };
-    const ctx = { window: windowStub, document: documentStub, Date, JSON, console, Math };
+    const windowStub = { localStorage: ls, document: documentStub, setInterval: (fn) => { intervals.push(fn); return intervals.length; }, setTimeout: () => 0 };
+    const ctx = { window: windowStub, document: documentStub, Date: { now: () => clock.now }, JSON, console, Math };
     ctx.globalThis = ctx;
     vm.createContext(ctx);
     vm.runInContext(code, ctx, { filename: "rascunho-ttl.js" });
-    return { ctx, store, listeners };
+    return { ctx, store, listeners, documentStub, intervals, clock };
   }
 
   // 1) rascunho com +1h (campo t do blob) → descartado silenciosamente no load
@@ -1325,6 +1363,7 @@ async function testarRascunhoTTL(assert) {
     ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
     const meta = JSON.parse(store.get("m"));
     assert("ttl: blob sem t → savedAt agora (carência de 1h)", meta.choice === "auto" && Math.abs(meta.savedAt - agora) < 5000, JSON.stringify(meta));
+    assert("ttl: blob sem t marca origem do prazo como estimada", meta.savedAtEstimated === true, JSON.stringify(meta));
     assert("ttl: rascunho recente permanece", store.has("k"), "removido");
   }
 
@@ -1394,18 +1433,121 @@ async function testarRascunhoTTL(assert) {
 
   // 8) modal de verificação ao finalizar a geração do PDF (rascunho recém-salvo)
   {
-    const { ctx, store } = novoAmbiente();
+    const { ctx, store, documentStub } = novoAmbiente();
     ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 }); // load sem rascunho → sem modal
     assert("ttl: load sem rascunho não abre modal", !ctx.window.RascunhoTTL._internais.modalEstaAberto(), "aberto");
     store.set("k", JSON.stringify({ v: 3, t: agora - 60 * 1000, campos: { nomeCompleto: "X" } })); // salvarRascunhoLocalSincrono() pós-geração
     ctx.window.RascunhoTTL.verificarAposSalvar();
     assert("ttl: verificarAposSalvar abre o modal ao finalizar a geração (rascunho sem decisão)", ctx.window.RascunhoTTL._internais.modalEstaAberto(), "modal não aberto");
-    ctx.window.RascunhoTTL._internais.decidir("keep");
+    const titulo = documentStub._elements.find((element) => element.id === "rttl-titulo");
+    const textoModal = documentStub._elements.map((element) => element.textContent || "").join(" ");
+    const btnManter = documentStub._elements.find((element) => element.textContent === "Manter rascunho");
+    const btnExcluir = documentStub._elements.find((element) => element.textContent === "Excluir após 1 hora");
+    assert("ttl: modal usa cabeçalho vermelho de atenção", titulo && titulo.className.includes("modal-head--rascunho"), titulo && titulo.className);
+    assert("ttl: modal informa exclusão dos dados após 1h do último salvamento", /dados preenchidos.*excluídos automaticamente 1 hora após o último salvamento/i.test(textoModal), textoModal);
+    assert("ttl: modal explicita Manter como exceção à exclusão", /única opção que impede a exclusão automática/i.test(textoModal), textoModal);
+    assert("ttl: modal oferece as decisões de manter ou excluir", !!btnManter && !!btnExcluir, textoModal);
+    btnManter?.listeners.click();
     const meta = JSON.parse(store.get("m"));
     assert("ttl: decisão pós-geração grava choice + decidedAt e fecha o modal", meta.choice === "keep" && meta.decidedAt > 0 && !ctx.window.RascunhoTTL._internais.modalEstaAberto(), JSON.stringify(meta));
     store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "Y" } }));
     ctx.window.RascunhoTTL.verificarAposSalvar();
     assert("ttl: decisão existente → nova geração não reabre o modal", !ctx.window.RascunhoTTL._internais.modalEstaAberto(), "reaberto");
+  }
+
+  // 9) escolher descarte não pode estender o prazo além do último salvamento
+  {
+    const { ctx, store, documentStub } = novoAmbiente();
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
+    store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "X" } }));
+    ctx.window.RascunhoTTL.verificarAposSalvar();
+    const btnExcluir = documentStub._elements.find((element) => (element.className || "").includes("btn-modal confirm"));
+    assert("ttl: decisão de descarte é acionável pelo botão primário", !!btnExcluir, "botão não encontrado");
+    const metaAntes = JSON.parse(store.get("m"));
+    metaAntes.savedAt = agora - 45 * 60 * 1000;
+    store.set("m", JSON.stringify(metaAntes));
+    const savedAt = JSON.parse(store.get("m")).savedAt;
+    btnExcluir?.listeners.click();
+    const meta = JSON.parse(store.get("m"));
+    assert("ttl: decisão de excluir mantém o prazo contado do último salvamento", meta.choice === "auto" && meta.savedAt === savedAt, JSON.stringify(meta));
+  }
+
+  // 10) o monitor também precisa observar rascunhos criados após a abertura
+  {
+    const { ctx, store, intervals } = novoAmbiente();
+    let limpou = false;
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 1000, limparFormulario: () => { limpou = true; } });
+    assert("ttl: monitor é instalado mesmo sem rascunho no carregamento", intervals.length === 1, String(intervals.length));
+    store.set("k", JSON.stringify({ v: 3, t: agora - 2 * HORA, campos: { nomeCompleto: "X" } }));
+    intervals[0]?.();
+    assert("ttl: rascunho surgido após carregar expira durante a sessão", !store.has("k") && !store.has("m") && limpou, JSON.stringify([...store.keys()]));
+  }
+
+  // 11) descarte manual inicia um ciclo sem herdar a decisão anterior
+  {
+    const { ctx, store } = novoAmbiente();
+    store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "X" } }));
+    store.set("m", JSON.stringify({ choice: "keep", savedAt: agora, sig: "rascunho-anterior", decidedAt: agora }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
+    store.delete("k");
+    ctx.window.RascunhoTTL.limparDecisao?.();
+    store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "Y" } }));
+    ctx.window.RascunhoTTL.tick();
+    const meta = JSON.parse(store.get("m"));
+    assert("ttl: novo rascunho após descarte manual não herda Manter", meta.choice === "auto" && meta.decidedAt === 0, JSON.stringify(meta));
+  }
+
+  // 12) salvar novamente conteúdo idêntico renova o prazo de retenção
+  {
+    const { ctx, store, clock } = novoAmbiente();
+    store.set("k", JSON.stringify({ nomeCompleto: "X" }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
+    const assinatura = JSON.parse(store.get("m")).sig;
+    const initialSavedAt = clock.now;
+    clock.now += 10 * 60 * 1000;
+    ctx.window.RascunhoTTL.registrarSalvamento?.(false);
+    assert("ttl: falha ao gravar não renova prazo", JSON.parse(store.get("m")).savedAt === initialSavedAt, JSON.stringify(JSON.parse(store.get("m"))));
+    ctx.window.RascunhoTTL.registrarSalvamento?.(undefined);
+    assert("ttl: ausência de confirmação não renova prazo", JSON.parse(store.get("m")).savedAt === initialSavedAt, JSON.stringify(JSON.parse(store.get("m"))));
+    ctx.window.RascunhoTTL.registrarSalvamento?.(true);
+    const meta = JSON.parse(store.get("m"));
+    assert("ttl: API registra nova gravação mesmo sem mudança no conteúdo", typeof ctx.window.RascunhoTTL.registrarSalvamento === "function" && meta.sig === assinatura && meta.savedAt === clock.now, JSON.stringify(meta));
+    assert("ttl: salvamento confirmado encerra prazo estimado", meta.savedAtEstimated === false, JSON.stringify(meta));
+    clock.now += HORA - 1000;
+    ctx.window.RascunhoTTL.tick();
+    assert("ttl: salvamento idêntico mantém rascunho dentro da hora", store.has("k"), "removido antes do prazo");
+  }
+
+  // 13) dados auxiliares do mesmo formulário também são eliminados ao expirar
+  {
+    const { ctx, store } = novoAmbiente();
+    store.set("k", JSON.stringify({ v: 3, t: agora - 2 * HORA, campos: {} }));
+    store.set("dados-copiados", JSON.stringify({ cpf: "123" }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", relatedKeys: ["dados-copiados"], pollMs: 0 });
+    assert("ttl: expiração também remove dados relacionados do formulário", !store.has("k") && !store.has("m") && !store.has("dados-copiados"), JSON.stringify([...store.keys()]));
+  }
+
+  // 14) cópias entre páginas vencem pela origem, salvo escolha explícita de manter
+  {
+    const { ctx, store, clock } = novoAmbiente();
+    store.set("origem", JSON.stringify({ choice: "auto", savedAt: clock.now - 2 * HORA }));
+    const expirou = ctx.window.RascunhoTTL.payloadExpirou?.(clock.now - 2 * HORA, "origem");
+    assert("ttl: payload transferido vencido é rejeitado na rota destino", typeof ctx.window.RascunhoTTL.payloadExpirou === "function" && expirou === true, String(expirou));
+    store.set("origem", JSON.stringify({ choice: "keep", savedAt: clock.now - 5 * HORA }));
+    const mantido = ctx.window.RascunhoTTL.payloadExpirou?.(clock.now - 5 * HORA, "origem");
+    assert("ttl: escolha Manter também preserva cópia entre formulários", mantido === false, String(mantido));
+    const semData = ctx.window.RascunhoTTL.payloadExpirou?.(null, "origem-ausente");
+    assert("ttl: cópia antiga sem data recuperável é descartada", semData === true, String(semData));
+  }
+
+  // 15) o modal explica o prazo transitório para rascunho legado sem timestamp
+  {
+    const { ctx, store, listeners, documentStub } = novoAmbiente();
+    store.set("k", JSON.stringify({ nomeCompleto: "Legado" }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
+    listeners.DOMContentLoaded.forEach((fn) => fn());
+    const textoModal = documentStub._elements.map((element) => element.textContent || "").join(" ");
+    assert("ttl: modal informa prazo de primeira abertura para rascunho legado", /não foi possível determinar.*excluídos em até 1 hora a partir desta abertura/i.test(textoModal), textoModal);
   }
 }
 

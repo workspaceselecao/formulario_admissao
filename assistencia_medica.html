@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="icone.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
+<script src="./rascunho-ttl.js"></script>
 <style>
   /* ── TOKENS (página) ─────────────────── */
   :root {
@@ -2745,6 +2746,7 @@ function limparRascunhoLocal() {
   try {
     lsRemoveDual(RASCUNHO_STORAGE_KEY, LS_LEGACY_RASCUNHO_ASSIST);
   } catch (_) {}
+  window.RascunhoTTL?.limparDecisao();
 }
 
 function coletarEstadoRascunho() {
@@ -2873,6 +2875,12 @@ function tentarAplicarCopiaFichaCadastral() {
     return;
   }
   if (!obj || !obj.campos) {
+    try {
+      lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
+    } catch (e2) {}
+    return;
+  }
+  if (window.RascunhoTTL?.payloadExpirou(obj.__atentoSavedAt, LS_NS + "rascunho_ttl_ficha_v1")) {
     try {
       lsRemoveDual(CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY_CROSS_COPY);
     } catch (e2) {}
@@ -3031,7 +3039,8 @@ function salvarRascunhoLocalSincrono() {
   clearTimeout(rascunhoSalvarTimer);
   rascunhoSalvarTimer = null;
   try {
-    appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    const salvo = appStorage.setItem(RASCUNHO_STORAGE_KEY, JSON.stringify(coletarEstadoRascunho()));
+    window.RascunhoTTL?.registrarSalvamento(salvo);
   } catch (_) {}
 }
 
@@ -3520,6 +3529,13 @@ document.getElementById("naoAssinarManualmente")?.addEventListener("change", () 
   atualizarUiNaoAssinarManualmente();
   agendarSalvarRascunho();
 });
+RascunhoTTL.init({
+  draftKey: RASCUNHO_STORAGE_KEY,
+  legacyKeys: [LS_LEGACY_RASCUNHO_ASSIST],
+  metaKey: LS_NS + "rascunho_ttl_assist_v1",
+  limparFormulario: function () { limparDadosFormulario(); },
+  notificar: function (msg, ok) { showToast(msg, ok); }
+});
 if (!tentarRestaurarRascunho()) {
   const elData = document.getElementById("dataAssinatura");
   if (elData) elData.valueAsDate = new Date();
@@ -3643,16 +3659,5 @@ document.addEventListener("visibilitychange", function () {
 })();
 </script>
 
-<!-- Descarte automático de rascunho (TTL 1h) — ver MANUTENCAO.md §7.2 -->
-<script src="./rascunho-ttl.js"></script>
-<script>
-RascunhoTTL.init({
-  draftKey: RASCUNHO_STORAGE_KEY,
-  legacyKeys: [LS_LEGACY_RASCUNHO_ASSIST],
-  metaKey: LS_NS + "rascunho_ttl_assist_v1",
-  limparFormulario: function () { limparDadosFormulario(); },
-  notificar: function (msg, ok) { showToast(msg, ok); }
-});
-</script>
 </body>
 </html>

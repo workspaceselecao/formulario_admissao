@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="icone.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
+<script src="./rascunho-ttl.js"></script>
 <style>
   /* ── TOKENS (página) ─────────────────── */
   :root {
@@ -1148,7 +1149,7 @@ const RASCUNHO_IDS = ['regiao', 'nomeCompleto', 'reRgTipo', 'reRg'];
 
 const appStorage = {
   getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
-  setItem(k, v) { try { localStorage.setItem(k, v); } catch(e) {} },
+  setItem(k, v) { try { localStorage.setItem(k, v); return true; } catch(e) { return false; } },
   removeItem(k) { try { localStorage.removeItem(k); } catch(e) {} }
 };
 
@@ -1156,7 +1157,8 @@ let salvarRascunhoTimer = null;
 function salvarRascunho() {
   const obj = {};
   RASCUNHO_IDS.forEach(id => { obj[id] = v(id); });
-  appStorage.setItem(RASCUNHO_KEY, JSON.stringify(obj));
+  const salvo = appStorage.setItem(RASCUNHO_KEY, JSON.stringify(obj));
+  window.RascunhoTTL?.registrarSalvamento(salvo);
 }
 function agendarSalvarRascunho() {
   clearTimeout(salvarRascunhoTimer);
@@ -1199,6 +1201,7 @@ function limparDadosFormulario() {
 }
 function descartarRascunhoEFormulario() {
   appStorage.removeItem(RASCUNHO_KEY);
+  window.RascunhoTTL?.limparDecisao();
   limparDadosFormulario();
   showToast('Rascunho descartado.', true);
 }
@@ -1573,6 +1576,13 @@ async function gerarPDF() {
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
+RascunhoTTL.init({
+  draftKey: RASCUNHO_KEY,
+  legacyKeys: [],
+  metaKey: LS_NS + 'rascunho_ttl_termos_v1',
+  limparFormulario: function () { limparDadosFormulario(); },
+  notificar: function (msg, ok) { showToast(msg, ok); }
+});
 document.addEventListener('DOMContentLoaded', () => {
   restaurarRascunho();
   updateProgress();
@@ -1581,16 +1591,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Descarte automático de rascunho (TTL 1h) — ver MANUTENCAO.md §7.2 -->
-<script src="./rascunho-ttl.js"></script>
-<script>
-RascunhoTTL.init({
-  draftKey: RASCUNHO_KEY,
-  legacyKeys: [],
-  metaKey: LS_NS + 'rascunho_ttl_termos_v1',
-  limparFormulario: function () { limparDadosFormulario(); },
-  notificar: function (msg, ok) { showToast(msg, ok); }
-});
-</script>
 </body>
 </html>

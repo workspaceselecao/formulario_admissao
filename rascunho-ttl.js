@@ -17,12 +17,11 @@
  *    .modal-head/.modal-body/.modal-actions/.btn-modal), herdando o tema.
  *  - A decisão vale para aquele rascunho; ao descartar manualmente (menu
  *    "Descartar rascunho") a decisão é limpa e o ciclo recomeça no próximo.
- *  - O horário do último salvamento é deduzido do próprio rascunho (campo
- *    `t` quando existir — ficha/assistência) ou da detecção de mudança de
- *    conteúdo (carta/termos), sem alterar as rotinas de salvamento das páginas.
+ *  - As páginas informam cada salvamento ao módulo; rascunhos antigos sem
+ *    horário recuperável recebem prazo transitório desde a primeira abertura.
  *
- * Integração (fim do <body>, após o script principal da página):
- *   <script src="./rascunho-ttl.js"></script>
+ * Integração: carregue o módulo no <head> e inicialize após as funções de
+ * storage/limpeza da página estarem definidas, antes de restaurar o rascunho:
  *   <script>
  *     RascunhoTTL.init({
  *       draftKey: RASCUNHO_STORAGE_KEY,
@@ -85,6 +84,38 @@
     if (cfg) lsDel(cfg.metaKey);
   }
 
+  function limparDecisao() {
+    limparMeta();
+  }
+
+  function registrarSalvamento(salvoComSucesso) {
+    if (!cfg || salvoComSucesso !== true) return;
+    var agora = Date.now();
+    var meta = sincronizarMeta(agora);
+    if (!meta) return;
+    meta.savedAt = agora;
+    meta.savedAtEstimated = false;
+    gravarMeta(meta);
+  }
+
+  function payloadExpirou(savedAt, metaKey) {
+    var meta = null;
+    var raw = metaKey ? lsGet(metaKey) : null;
+    if (raw) {
+      try {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") meta = parsed;
+      } catch (_) { /* payload sem metadados de origem */ }
+    }
+    if (meta && meta.choice === "keep") return false;
+    var salvo = (typeof savedAt === "number" && isFinite(savedAt) && savedAt > 0)
+      ? savedAt
+      : (meta && typeof meta.savedAt === "number" ? meta.savedAt : 0);
+    if (!salvo) return true;
+    var ttl = (cfg && typeof cfg.ttlMs === "number" && cfg.ttlMs > 0) ? cfg.ttlMs : TTL_PADRAO_MS;
+    return (Date.now() - salvo) >= ttl;
+  }
+
   // Campo `t` embutido no blob do rascunho (ficha/assistência) — null se ausente.
   function tstampDoBlob(raw) {
     try {
@@ -118,11 +149,14 @@
     var sig = hashDjb2(raw);
     var meta = lerMeta();
     if (!meta) {
-      meta = { choice: "auto", savedAt: tstampDoBlob(raw) || agora, sig: sig, decidedAt: 0 };
+      var tInicial = tstampDoBlob(raw);
+      meta = { choice: "auto", savedAt: tInicial || agora, savedAtEstimated: !tInicial, sig: sig, decidedAt: 0 };
       gravarMeta(meta);
     } else if (meta.sig !== sig) {
+      var tAtual = tstampDoBlob(raw);
       meta.sig = sig;
-      meta.savedAt = tstampDoBlob(raw) || agora;
+      meta.savedAt = tAtual || agora;
+      meta.savedAtEstimated = !tAtual;
       gravarMeta(meta);
     }
     return meta;
@@ -142,6 +176,8 @@
     lsDel(cfg.draftKey);
     var legacy = cfg.legacyKeys || [];
     for (var i = 0; i < legacy.length; i += 1) lsDel(legacy[i]);
+    var related = cfg.relatedKeys || [];
+    for (var j = 0; j < related.length; j += 1) lsDel(related[j]);
     limparMeta();
   }
 
@@ -164,7 +200,6 @@
     var agora = Date.now();
     meta.choice = (choice === "keep") ? "keep" : "auto";
     meta.decidedAt = agora;
-    meta.savedAt = agora; // recomeça a contagem a partir da decisão
     gravarMeta(meta);
     fecharModal();
   }
@@ -227,21 +262,24 @@
     card.className = "modal-card";
 
     var titulo = doc.createElement("div");
-    titulo.className = "modal-head";
+    titulo.className = "modal-head modal-head--rascunho";
     titulo.id = "rttl-titulo";
-    titulo.textContent = "Proteção dos seus dados";
+    titulo.textContent = "Atenção aos dados do rascunho";
 
     var corpo = doc.createElement("div");
     corpo.className = "modal-body";
 
     var p1 = doc.createElement("p");
-    p1.textContent = "O rascunho deste formulário fica salvo somente neste dispositivo. Por segurança, ele é descartado automaticamente 1 hora após o último salvamento.";
+    var metaAtual = lerMeta();
+    p1.textContent = metaAtual && metaAtual.savedAtEstimated
+      ? "Não foi possível determinar quando este rascunho foi salvo. Se você não escolher Manter, o rascunho e os dados preenchidos serão excluídos em até 1 hora a partir desta abertura."
+      : "Os dados preenchidos e o rascunho salvos neste dispositivo serão excluídos automaticamente 1 hora após o último salvamento.";
 
     var p2 = doc.createElement("p");
-    p2.textContent = "Deseja manter o rascunho neste dispositivo?";
+    p2.textContent = "Manter rascunho é a única opção que impede a exclusão automática e conserva esses dados até você descartar o rascunho ou limpar o armazenamento do navegador.";
 
     var p3 = doc.createElement("p");
-    p3.textContent = "Você também pode descartá-lo agora pelo menu \u201CDescartar rascunho\u201D do cabeçalho.";
+    p3.textContent = "Se fechar esta janela sem escolher, será aplicada a exclusão após 1 hora. Você também pode descartar os dados imediatamente pelo menu \u201CDescartar rascunho\u201D.";
 
     corpo.appendChild(p1);
     corpo.appendChild(p2);
@@ -259,7 +297,7 @@
     var btnDescartar = doc.createElement("button");
     btnDescartar.type = "button";
     btnDescartar.className = "btn-modal confirm";
-    btnDescartar.textContent = "Descartar após 1 hora";
+    btnDescartar.textContent = "Excluir após 1 hora";
     btnDescartar.addEventListener("click", function () { decidir("auto"); });
 
     acoes.appendChild(btnDescartar);
@@ -322,20 +360,13 @@
     cfg = {
       draftKey: config.draftKey,
       legacyKeys: Array.isArray(config.legacyKeys) ? config.legacyKeys : [],
+      relatedKeys: Array.isArray(config.relatedKeys) ? config.relatedKeys : [],
       metaKey: config.metaKey,
       limparFormulario: (typeof config.limparFormulario === "function") ? config.limparFormulario : null,
       notificar: (typeof config.notificar === "function") ? config.notificar : null,
       ttlMs: (typeof config.ttlMs === "number" && config.ttlMs > 0) ? config.ttlMs : TTL_PADRAO_MS,
       pollMs: (typeof config.pollMs === "number") ? config.pollMs : POLL_PADRAO_MS
     };
-
-    var meta = sincronizarMeta(Date.now());
-    if (!meta) return; // sem rascunho — nada a fazer
-    if (expirou(meta, Date.now())) {
-      descartar(true); // no load: silencioso (o usuário ainda não viu o rascunho)
-      return;
-    }
-    if (!meta.decidedAt) agendarModal();
 
     if (cfg.pollMs > 0 && typeof global.setInterval === "function") {
       global.setInterval(tick, cfg.pollMs);
@@ -346,12 +377,23 @@
         });
       }
     }
+
+    var meta = sincronizarMeta(Date.now());
+    if (!meta) return; // sem rascunho — nada a fazer
+    if (expirou(meta, Date.now())) {
+      descartar(true); // no load: silencioso (o usuário ainda não viu o rascunho)
+      return;
+    }
+    if (!meta.decidedAt) agendarModal();
   }
 
   global.RascunhoTTL = {
     init: init,
     tick: tick,
     verificarAposSalvar: verificarAposSalvar,
+    limparDecisao: limparDecisao,
+    registrarSalvamento: registrarSalvamento,
+    payloadExpirou: payloadExpirou,
     _internais: { hashDjb2: hashDjb2, sincronizarMeta: sincronizarMeta, expirou: expirou, decidir: decidir, lerMeta: lerMeta, modalEstaAberto: function () { return modalAberto; } }
   };
 })(typeof window !== "undefined" ? window : globalThis);
