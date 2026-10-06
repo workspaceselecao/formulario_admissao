@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-09-28T04:50:00-03:00",
-  "gitCommit": "d2427c7",
-  "gitSubject": "ci: adiciona workflow minimo com verificacao estrutural, sintaxe JS e testes de protecao",
+  "ultimaValidacaoIso": "2026-10-06T00:52:09-03:00",
+  "gitCommit": "1aa24bf",
+  "gitSubject": "feat: aviso de privacidade do hub (PO-026/027/029) e descarte automatico de rascunhos apos 1 hora",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
