@@ -28,7 +28,7 @@
 
     <h2>2. Natureza da Plataforma</h2>
     <p>A plataforma consiste em uma ferramenta digital destinada ao preenchimento de formulários e geração de arquivos PDF.</p>
-    <p>Trata-se de uma <strong>plataforma destinada ao uso interno da empresa</strong>.</p>
+    <p>Trata-se de uma <strong>plataforma destinada ao uso interno da Atento Brasil S.A.</strong>, como ferramenta de apoio aos processos de admissão e benefícios (ver <a href="/Docs/aviso-de-privacidade.html">Aviso de Privacidade</a>).</p>
 
     <h2>3. Funcionamento</h2>
     <p>A aplicação:</p>
@@ -38,7 +38,7 @@
       <li><strong>Não realiza</strong>, nos termos desta arquitetura, persistência em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
       <li>Após gerar o PDF, mantém os dados no formulário e no rascunho local (quando ativo) até o usuário acionar <strong>Descartar rascunho</strong> ou limpar o armazenamento do navegador, conforme comunicado na modal de política no momento da geração;</li>
     </ul>
-    <p><strong>Nota sobre rascunho:</strong> versões da ferramenta podem disponibilizar <strong>armazenamento local opcional no próprio navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir continuar o preenchimento no mesmo dispositivo. Esse recurso não substitui arquivo institucional nem transfere dados para servidores da aplicação; o usuário pode <strong>descartar o rascunho</strong> a qualquer momento pelos controles indicados na interface.</p>
+    <p><strong>Nota sobre rascunho:</strong> versões da ferramenta podem disponibilizar <strong>armazenamento local temporário no próprio navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir continuar o preenchimento no mesmo dispositivo. O rascunho é <strong>descartado automaticamente 1 hora após o último salvamento</strong>, salvo se o usuário optar por mantê-lo quando questionado; o usuário também pode <strong>descartá-lo a qualquer momento</strong> pelos controles indicados na interface. Esse recurso não substitui arquivo institucional nem transfere dados para servidores da aplicação.</p>
 
     <h2>4. Responsabilidade do Usuário</h2>
     <p>O usuário é integralmente responsável por:</p>
@@ -46,7 +46,7 @@
       <li>A veracidade das informações inseridas;</li>
       <li>O uso adequado do documento gerado;</li>
       <li>A guarda e proteção do arquivo após download;</li>
-      <li>O uso de equipamentos adequados e a gestão de sessões em ambientes partilhados (especialmente quando existir rascunho local);</li>
+      <li>O uso de equipamentos adequados e a gestão de sessões em ambientes partilhados (especialmente quando existir rascunho local), incluindo o <strong>descarte do rascunho</strong> quando o armazenamento local não for mais necessário;</li>
       <li>Manter a confidencialidade da chave de acesso atribuída, não compartilhando-a com terceiros não autorizados;</li>
       <li>Utilizar o botão <strong>Encerrar acesso</strong> ao terminar o uso, especialmente em dispositivos partilhados.</li>
     </ul>

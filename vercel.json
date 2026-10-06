@@ -54,6 +54,11 @@
       "permanent": true
     },
     {
+      "source": "/aviso-de-privacidade",
+      "destination": "/Docs/aviso-de-privacidade.html",
+      "permanent": true
+    },
+    {
       "source": "/termos-de-uso",
       "destination": "/Docs/terms-of-use.html",
       "permanent": true

@@ -24,8 +24,9 @@
   </header>
   <article class="doc-shell-main doc-prose">
     <h2>1. Introdução</h2>
-    <p>Esta plataforma foi desenvolvida com base no princípio de Privacy by Design, priorizando a <strong>minimização</strong> e a <strong>não retenção centralizada</strong> de dados pessoais nos sistemas desta aplicação.</p>
-    <p>Trata-se de uma <strong>plataforma destinada ao uso interno da empresa</strong>, disponibilizada como ferramenta de apoio ao preenchimento de formulários.</p>
+    <p>Esta plataforma foi desenvolvida com base no princípio de Privacy by Design (PO-029_05 — Política Interna de Privacidade e Proteção de Dados Pessoais), priorizando a <strong>minimização</strong> e a <strong>não retenção centralizada</strong> de dados pessoais nos sistemas desta aplicação.</p>
+    <p>Trata-se de uma <strong>plataforma destinada ao uso interno da empresa</strong>, disponibilizada como ferramenta de apoio ao preenchimento de formulários de admissão e benefícios.</p>
+    <p>Este documento deve ser lido em conjunto com o <a href="/Docs/aviso-de-privacidade.html">Aviso de Privacidade — Hub Formulários RH</a>, complementar às políticas corporativas PO-026_04 (Funcionários), PO-027_04 (Candidatos) e PO-029_05 (Privacidade e Proteção de Dados).</p>
 
     <h2>2. Natureza do Tratamento de Dados</h2>
     <p>Os dados inseridos pelo usuário:</p>
@@ -35,45 +36,56 @@
       <li><strong>Não são armazenados</strong> em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
       <li><strong>Não são compartilhados</strong> com terceiros por intermédio desta aplicação no fluxo técnico descrito em <a href="/Docs/data-flow.html">Fluxo de dados</a>;</li>
       <li>Permanecem durante o preenchimento na <strong>memória do dispositivo</strong> e, quando aplicável, em <strong>armazenamento local opcional</strong> exclusivamente no navegador (ver §7);</li>
-      <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) até o usuário acionar <strong>Descartar rascunho</strong>, limpar o armazenamento do navegador ou encerrar o uso pretendido neste fluxo;</li>
+      <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) — o rascunho é <strong>descartado automaticamente 1 hora após o último salvamento</strong>, salvo se o usuário optar por mantê-lo, e pode ser eliminado a qualquer momento com <strong>Descartar rascunho</strong> ou limpeza do navegador;</li>
     </ul>
 
     <h2>3. Dados Inseridos pelo Usuário</h2>
     <p>O usuário poderá inserir, voluntariamente:</p>
     <ul>
-      <li>Nome, CPF, RG</li>
-      <li>Endereço e contatos</li>
-      <li>Dados profissionais e bancários</li>
-      <li>Informações de dependentes</li>
+      <li>Dados de identificação: nome, CPF, RG e data de nascimento</li>
+      <li>Dados de contato e informações de endereço</li>
+      <li>Dados profissionais e relacionados à admissão</li>
+      <li>Dados bancários</li>
+      <li>Informações relacionadas a benefícios, familiares e dependentes</li>
+      <li>Dados necessários à assistência médica e outros benefícios</li>
+      <li>Quando aplicável, dados pessoais sensíveis, incluindo informações relacionadas à saúde</li>
       <li>Demais campos previstos nos modelos de formulário institucional em uso</li>
     </ul>
-    <p>Esses dados são utilizados exclusivamente para composição do documento PDF gerado localmente.</p>
+    <p>Os dados tratados variam de acordo com o formulário utilizado e devem se limitar àqueles necessários para a respectiva finalidade (minimização). Categorias completas no <a href="/Docs/aviso-de-privacidade.html">Aviso de Privacidade</a>, § 3.</p>
 
     <h2>4. Finalidade</h2>
-    <p>A finalidade do tratamento neste contexto é:</p>
+    <p>Os dados pessoais tratados por meio da ferramenta poderão ser utilizados, conforme aplicável, para:</p>
+    <ul>
+      <li>viabilizar etapas do processo de admissão;</li>
+      <li>realizar o cadastramento necessário à formalização do vínculo de trabalho;</li>
+      <li>cumprir obrigações relacionadas à administração do vínculo empregatício;</li>
+      <li>viabilizar pagamentos e informações bancárias necessárias;</li>
+      <li>disponibilizar benefícios, inclusive a inclusão de dependentes;</li>
+      <li>viabilizar procedimentos relacionados à assistência médica; e</li>
+      <li>gerar os documentos necessários à execução dessas atividades.</li>
+    </ul>
     <blockquote>
-      Gerar um arquivo PDF com base nas informações inseridas pelo próprio usuário, no âmbito dos processos de admissão e assistência médica conforme os formulários disponibilizados.
+      A geração do arquivo PDF com base nas informações inseridas pelo próprio usuário é uma <strong>funcionalidade</strong> que viabiliza as finalidades acima — não é a finalidade principal do tratamento (ver <a href="/Docs/aviso-de-privacidade.html">Aviso de Privacidade</a>, § 4).
     </blockquote>
 
     <h2>5. Base Legal</h2>
-    <p>O tratamento ocorre com base em:</p>
-    <ul>
-      <li><strong>Execução de procedimento solicitado pelo titular</strong> (preenchimento e geração do documento solicitado pelo próprio usuário).</li>
-    </ul>
-    <p>Fundamentos adicionais ou específicos por tipo de dado devem constar do inventário corporativo de tratamentos e do documento <a href="/Docs/legal-basis.html">Base legal (LGPD)</a>.</p>
+    <p>O tratamento observa as bases legais aplicáveis às respectivas atividades de <strong>admissão, relação de trabalho, cumprimento de obrigações legais ou regulatórias, execução das obrigações relacionadas ao vínculo e disponibilização de benefícios</strong>, conforme as políticas corporativas (PO-026_04 e PO-027_04) e os registros de tratamento da Atento — não havendo alteração da fundamentação jurídica exclusivamente em razão da utilização da ferramenta.</p>
+    <p>Para dados pessoais sensíveis, aplicam-se as hipóteses legais específicas dessas categorias. Fundamentos detalhados constam do inventário corporativo de tratamentos e do documento <a href="/Docs/legal-basis.html">Base legal (LGPD)</a>.</p>
 
     <h2>6. Compartilhamento de Dados</h2>
-    <p>Não há qualquer compartilhamento de dados <strong>por intermédio desta aplicação</strong> com terceiros para os fins de tratamento descritos nesta política.</p>
-    <p>Serviços de infraestrutura (por exemplo hospedagem estática ou CDN) podem processar metadados de acesso conforme políticas do fornecedor; não devem incluir o <strong>corpo dos formulários</strong> nos registros operacionais da aplicação.</p>
+    <p>Não há encaminhamento do conteúdo integral dos formulários para terceiros com finalidade de armazenamento centralizado ou geração remota do documento.</p>
+    <p>Funcionalidades técnicas podem utilizar serviços externos necessários ao funcionamento (por exemplo, consultas de CEP e de lista de municípios), transmitindo somente os dados <strong>estritamente necessários</strong> à execução da funcionalidade, observando os princípios da necessidade, segurança e transparência.</p>
+    <p>Serviços de infraestrutura (por exemplo hospedagem estática ou CDN) podem processar metadados de acesso conforme políticas do fornecedor; não devem incluir o <strong>corpo dos formulários</strong> nos registros operacionais da aplicação. O eventual compartilhamento posterior com prestadores relacionados ao vínculo e benefícios (bancos, operadoras de assistência médica, fornecedores tecnológicos) segue as regras corporativas das políticas da Atento.</p>
 
     <h2>7. Armazenamento e Retenção</h2>
     <p><strong>7.1 Ausência de base centralizada:</strong> não há armazenamento dos dados do formulário em <strong>servidor de aplicação</strong> operado por esta solução para consulta posterior típica de “cadastro web”.</p>
-    <p><strong>7.2 Após a geração do PDF:</strong> o formulário e o rascunho local opcional permanecem no dispositivo para permitir revisão, correções ou nova geração do arquivo até o usuário utilizar <strong>Descartar rascunho</strong>, limpar o navegador ou outra ação equivalente sob seu controle.</p>
+    <p><strong>7.2 Após a geração do PDF:</strong> o formulário e o rascunho local opcional permanecem no dispositivo para permitir revisão, correções ou nova geração do arquivo. O rascunho não é conservado indefinidamente: é <strong>descartado automaticamente 1 hora após o último salvamento</strong>, salvo opção expressa do usuário por mantê-lo (modal de proteção de dados), e pode ser eliminado a qualquer momento com <strong>Descartar rascunho</strong> ou limpeza do navegador.</p>
     <p><strong>7.3 Rascunho local (quando ativo na versão implantada):</strong> pode existir <strong>persistência opcional no navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir retomar o preenchimento no mesmo dispositivo. Tal persistência:</p>
     <ul>
       <li>permanece sob controle local do usuário;</li>
       <li>pode ser <strong>eliminada</strong> pelo usuário através da função <strong>Descartar rascunho</strong> ou equivalente;</li>
-      <li>não substitui políticas de arquivo físico ou sistemas oficiais da empresa.</li>
+      <li>está sujeita ao <strong>descarte automático 1 hora após o último salvamento</strong> (mecanismo de expiração), salvo escolha do usuário por manter o rascunho;</li>
+      <li>não substitui políticas de arquivo físico ou sistemas oficiais da empresa nem constitui registro funcional oficial.</li>
     </ul>
     <p><strong>7.4 Controle de acesso por chave (quando ativo):</strong> páginas protegidas podem utilizar <strong>verificação criptográfica client-side</strong> para restringir o acesso. Esta funcionalidade:</p>
     <ul>
@@ -85,14 +97,14 @@
     </ul>
 
     <h2>8. Segurança</h2>
-    <p>A aplicação utiliza <strong>HTTPS</strong> em ambiente de produção e arquitetura que reduz persistência e transmissão desnecessárias de dados pessoais. Medidas complementares constam de <a href="/Docs/security-baseline.html">Baseline de segurança</a>.</p>
+    <p>A aplicação utiliza <strong>HTTPS</strong> em ambiente de produção e arquitetura que reduz a transmissão e a persistência desnecessárias de dados pessoais, priorizando o processamento local dos formulários e documentos, em consonância com os princípios de Privacy by Design (PO-029_05). O acesso a dados pessoais é limitado a profissionais com necessidade legítima (menor privilégio, necessidade e segregação de funções); dados sensíveis estão sujeitos a controles adicionais. Medidas complementares constam de <a href="/Docs/security-baseline.html">Baseline de segurança</a>.</p>
 
     <h2>9. Direitos do Titular</h2>
-    <p>O titular pode exercer seus direitos previstos na LGPD junto aos <strong>canais institucionais</strong> da empresa indicados pelo responsável pelo tratamento.</p>
-    <p>Na medida em que não há base de dados centralizada desta aplicação para os dados digitados pelo usuário, parte dos direitos pode relacionar-se a informações sob <strong>custódia local</strong> do dispositivo ou a processos de RH/arquivo já existentes na empresa.</p>
+    <p>O titular pode exercer os direitos previstos na LGPD — confirmação de tratamento, acesso, correção, anonimização/bloqueio/eliminação, portabilidade, informação sobre compartilhamentos, eliminação de dados tratados com base em consentimento, revogação do consentimento, oposição e revisão de decisões unicamente automatizadas, quando aplicável — pelos <strong>canais institucionais</strong> da Atento.</p>
+    <p>Canais: <strong>Formulário de Solicitação dos Titulares de Dados Pessoais</strong> e o Encarregado pelo Tratamento de Dados Pessoais (DPO) — <a href="mailto:dpo-br@atento.com.br">dpo-br@atento.com.br</a>. Na medida em que não há base de dados centralizada desta aplicação para os dados digitados pelo usuário, parte dos direitos pode relacionar-se a informações sob <strong>custódia local</strong> do dispositivo ou a processos de RH/arquivo já existentes na empresa.</p>
 
-    <h2>10. Responsável pela Plataforma</h2>
-    <p>Plataforma destinada ao uso interno da empresa.</p>
+    <h2>10. Responsável pelo Tratamento</h2>
+    <p>A <strong>Atento Brasil S.A.</strong> é responsável pelas atividades de tratamento de dados pessoais realizadas no âmbito dos processos de admissão, vínculo de trabalho e benefícios abrangidos por esta política, conforme as políticas corporativas aplicáveis. A ferramenta atua como <strong>apoio à execução</strong> dessas atividades, sem estabelecer, por si só, novas finalidades.</p>
 
     <h2>11. Alterações</h2>
     <p>Esta política pode ser atualizada a qualquer momento para refletir mudanças legais, organizacionais ou de versão da aplicação.</p>

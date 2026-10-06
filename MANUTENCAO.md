@@ -15,7 +15,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
 | `vercel.json` | Redireciona `/` → `index.html` na Vercel. |
 
-Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. Após gerar o PDF com sucesso, preenchimento e rascunho no `localStorage` **permanecem** no dispositivo até o uso de **Descartar rascunho** no menu ou limpeza manual do armazenamento do navegador (ver §7 e §8).
+Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. Após gerar o PDF com sucesso, preenchimento e rascunho no `localStorage` **permanecem** no dispositivo até o uso de **Descartar rascunho** no menu ou limpeza manual do armazenamento do navegador (ver §7 e §8). Além disso, por segurança o rascunho é **descartado automaticamente 1 hora após o último salvamento** (`rascunho-ttl.js`): na primeira vez que existe um rascunho sem decisão registrada, um modal pergunta se o usuário prefere **manter o rascunho** ou permitir o descarte automático (ver §7.2).
 
 ---
 
@@ -38,6 +38,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `embedded-docs.js` | **Gerador EMBARCADO de PDFs** (engine): template declarativo (`template.json` + assets PNG extraídos do documento oficial) + campos do schema de coordenadas → PDF montado pela própria aplicação via pdf-lib — **nenhum PDF externo é carregado nem enviado**. Validação estrutural, renderer determinístico (datas congeladas) e perfil de texto idêntico ao app público. Usado pelo painel (seção **Documentos Embarcados**) e pelo `ficha_cadastral.html` (geração unificada). |
 | `ficha-cadastral-embutido/` | **Prova de conceito e template do F-075**: `extract_template.py` (extrai `template.json` + `assets/*.png` de qualquer PDF oficial — generaliza para os 4 documentos), `template.json` (página, 3 imagens, 161 barras pretas, 89 textos estáticos, 17 marcações) e `generate.js` (gerador standalone Node). **`template.json` e `assets/*.png` são fonte versionada** (o painel os busca via HTTP no deploy estático); só `output.pdf` é artefato, ignorado pelo `.gitignore`. |
 | `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Fichas regionais — fluxo **Outros Planos** (`cidades_brasil.json`). |
+| `rascunho-ttl.js` | **Descarte automático de rascunhos (LGPD)**: TTL de 1 h após o último salvamento + modal “manter rascunho / descartar após 1 hora”. Compartilhado pelas 4 páginas públicas; chaves e política em §7.2. |
 | `vercel.json` | Configuração de deploy. |
 
 Quando o número do processo (ex. F-075, PR-011, revisão 38) mudar no **documento PDF oficial**, re-extraia o template embarcado (`python ficha-cadastral-embutido/extract_template.py "F-075_... .pdf" ficha-cadastral-embutido/`) e confira a fidelidade (`node scripts/gerar-ficha-vazia.js` + `python scripts/fidelidade-ficha.py ...`). O cabeçalho visível no HTML (subtítulo) acompanha o documento oficial.
@@ -143,12 +144,16 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 ### 7.2 Rascunhos (versão no nome da chave)
 
-| Página | Chave `localStorage` |
-|--------|------------------------|
-| Ficha | `ficha_cadastral_rascunho_v2` |
-| Assistência | `assistencia_medica_rascunho_v4` |
+| Página | Chave `localStorage` do rascunho | Chave da decisão TTL (`rascunho-ttl.js`) |
+|--------|------------------------|--------|
+| Ficha | `atento.forms:v1:ficha_cadastral_rascunho_v2` | `atento.forms:v1:rascunho_ttl_ficha_v1` |
+| Assistência | `atento.forms:v1:assistencia_medica_rascunho_v5` | `atento.forms:v1:rascunho_ttl_assist_v1` |
+| Carta Bradesco | `atento.forms:v1:carta_bradesco_rascunho_v1` | `atento.forms:v1:rascunho_ttl_carta_v1` |
+| Termos de Aceite | `atento.forms:v1:termos_aceite_rascunho_v1` | `atento.forms:v1:rascunho_ttl_termos_v1` |
 
 Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no rascunho), considere **incrementar a versão** (ex. `v3`, `v5`) para evitar rascunhos incompatíveis; atualize a constante no arquivo HTML correspondente e documente a mudança.
+
+**Descarte automático (TTL 1 h — LGPD):** o módulo compartilhado `rascunho-ttl.js` guarda em `rascunho_ttl_<página>_v1` a decisão do usuário (`choice`: `auto` — padrão — ou `keep`), o horário do último salvamento (`savedAt`) e a assinatura do conteúdo (`sig`). Sem decisão explícita, o rascunho é apagado 1 hora após o último salvamento; no primeiro acesso com rascunho sem decisão, um modal pergunta **Manter rascunho** ou **Descartar após 1 hora** (fechar o modal — ESC ou clique no fundo — vale **Descartar após 1 hora**). Descartar manualmente pelo menu limpa a decisão e o ciclo recomeça no próximo rascunho. Se **incrementar a versão** da chave do rascunho de uma página, atualize também `draftKey` (e `legacyKeys`, se houver) no bloco `RascunhoTTL.init(...)` no fim do `<body>` da mesma página — a suíte trava essa sincronia (teste 18).
 
 ### 7.3 Outras chaves (ficha)
 
@@ -156,11 +161,12 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 ### 7.4 LGPD
 
-- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`); formulário não é zerado automaticamente — limpeza explícita em **Descartar rascunho**.
+- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`); formulário não é zerado automaticamente — limpeza explícita em **Descartar rascunho**. O rascunho não permanece indefinidamente: sem escolha do usuário vale o **descarte automático após 1 h** do último salvamento (`rascunho-ttl.js`, §7.2); quem preferir pode optar por **manter o rascunho** no modal de proteção de dados.
 
 ### 7.5 Documentos em `/Docs` (revisão jurídica)
 
 - Texto padrão no rodapé dos HTML em `/Docs`: revisão validada com Jurídico e Privacidade; **Última validação em** lida de `Docs/docs-revision.json` (data/hora e commit do último push).
+- `Docs/aviso-de-privacidade.html` (rota `/aviso-de-privacidade`) transcreve o **Aviso de Privacidade — Hub Formulários RH** (políticas corporativas PO-026_04, PO-027_04 e PO-029_05; DPO `dpo-br@atento.com.br`). Alteração relevante no funcionamento do Hub, nas categorias de dados, finalidades, integrações externas ou formas de armazenamento exige **reavaliar e atualizar o Aviso** (§ 13 do documento); a suíte trava o essencial dessa adequação (Teste 19).
 - Após alterar política, termos ou base legal, executar: `node scripts/atualizar-docs-revision.mjs` e commitar o JSON atualizado junto com os HTML.
 - Guia público de atualizações (RIPD): `node scripts/gerar-historico-versionamento.mjs` gera `Docs/historico-versionamento.md` (link em `ripd.html`).
 

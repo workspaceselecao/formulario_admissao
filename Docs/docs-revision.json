@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-09-28T03:30:00-03:00",
-  "gitCommit": "f57aac3",
-  "gitSubject": "docs(legal): copia DOCX das 9 paginas de Privacidade e seguranca",
+  "ultimaValidacaoIso": "2026-09-28T04:50:00-03:00",
+  "gitCommit": "d2427c7",
+  "gitSubject": "ci: adiciona workflow minimo com verificacao estrutural, sintaxe JS e testes de protecao",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
