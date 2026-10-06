@@ -1272,9 +1272,13 @@ async function testarRascunhoTTL(assert) {
     const html = readFileSync(join(ROOT, pag), "utf8");
     assert(`${pag}: inclui rascunho-ttl.js`, html.includes('src="./rascunho-ttl.js"'), "script tag ausente");
     assert(`${pag}: RascunhoTTL.init com draftKey e metaKey`, html.includes("RascunhoTTL.init(") && html.includes(chave) && html.includes(metaChave), "init incompleto");
+    assert(`${pag}: chama verificarAposSalvar pós-geração do PDF`, html.includes("RascunhoTTL?.verificarAposSalvar"), "chamada pós-geração ausente");
   }
   const metas = paginas.map((p) => p[2]);
   assert("metaKeys únicas por página (mesma origem)", new Set(metas).size === metas.length, metas.join(","));
+  assert("ttl: modal usa o layout geral (modal-overlay/modal-card/btn-modal)", code.includes('"modal-overlay"') && code.includes('"modal-card"') && code.includes('"btn-modal confirm"'), "classes da aplicação ausentes");
+  assert("ttl: sem estilos próprios (rttl- removido)", !code.includes("rttl-overlay") && !code.includes("rttl-card") && !code.includes("rttl-btn"), "CSS próprio presente");
+  assert("ttl: API verificarAposSalvar exportada", /verificarAposSalvar:\s*verificarAposSalvar/.test(code), "API ausente");
 
   // ── 18.b — comportamentais (vm + stubs) ──
   function novoAmbiente() {
@@ -1290,9 +1294,11 @@ async function testarRascunhoTTL(assert) {
       hidden: false,
       _listeners: listeners,
       addEventListener: (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); },
+      removeEventListener: (ev, fn) => { listeners[ev] = (listeners[ev] || []).filter((f) => f !== fn); },
+      querySelector: () => null,
       getElementById: () => null,
-      createElement: () => ({ style: {}, classList: { add() {}, remove() {} }, setAttribute() {}, appendChild() {}, addEventListener() {}, focus() {}, remove() {} }),
-      body: { appendChild() {}, removeChild() {} },
+      createElement: () => ({ style: {}, classList: { add() {}, remove() {} }, setAttribute() {}, removeAttribute() {}, appendChild() {}, addEventListener() {}, focus() {}, remove() {} }),
+      body: { appendChild() {}, removeChild() {}, classList: { add() {}, remove() {} } },
       head: { appendChild() {} }
     };
     const windowStub = { localStorage: ls, document: documentStub, setInterval: () => 0, setTimeout: () => 0 };
@@ -1384,6 +1390,22 @@ async function testarRascunhoTTL(assert) {
     store.set("legado", JSON.stringify({ v: 1, t: agora - 3 * HORA }));
     ctx.window.RascunhoTTL.init({ draftKey: "k", legacyKeys: ["legado"], metaKey: "m", pollMs: 0 });
     assert("ttl: rascunho legado expirado é descartado", !store.has("legado") && !store.has("m"), JSON.stringify([...store.keys()]));
+  }
+
+  // 8) modal de verificação ao finalizar a geração do PDF (rascunho recém-salvo)
+  {
+    const { ctx, store } = novoAmbiente();
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 }); // load sem rascunho → sem modal
+    assert("ttl: load sem rascunho não abre modal", !ctx.window.RascunhoTTL._internais.modalEstaAberto(), "aberto");
+    store.set("k", JSON.stringify({ v: 3, t: agora - 60 * 1000, campos: { nomeCompleto: "X" } })); // salvarRascunhoLocalSincrono() pós-geração
+    ctx.window.RascunhoTTL.verificarAposSalvar();
+    assert("ttl: verificarAposSalvar abre o modal ao finalizar a geração (rascunho sem decisão)", ctx.window.RascunhoTTL._internais.modalEstaAberto(), "modal não aberto");
+    ctx.window.RascunhoTTL._internais.decidir("keep");
+    const meta = JSON.parse(store.get("m"));
+    assert("ttl: decisão pós-geração grava choice + decidedAt e fecha o modal", meta.choice === "keep" && meta.decidedAt > 0 && !ctx.window.RascunhoTTL._internais.modalEstaAberto(), JSON.stringify(meta));
+    store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "Y" } }));
+    ctx.window.RascunhoTTL.verificarAposSalvar();
+    assert("ttl: decisão existente → nova geração não reabre o modal", !ctx.window.RascunhoTTL._internais.modalEstaAberto(), "reaberto");
   }
 }
 

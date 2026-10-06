@@ -3367,6 +3367,7 @@ async function gerarPDF(){
     baixarPdfFicha(pdfBytes, dados);
     const payloadCopiaAssistencia = construirPayloadCopiaParaAssistencia();
     salvarRascunhoLocalSincrono();
+    window.RascunhoTTL?.verificarAposSalvar();
     showToast("PDF gerado com sucesso!");
     oferecerIrParaAssistenciaAposPdf(payloadCopiaAssistencia);
   } catch (error) {

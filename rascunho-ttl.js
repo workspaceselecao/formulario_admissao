@@ -10,6 +10,11 @@
  *  - Na primeira vez que um rascunho existe sem decisão registrada, um modal
  *    pergunta: "Manter rascunho" ou "Descartar após 1 hora". Fechar o modal
  *    (ESC/fundo) equivale a "Descartar após 1 hora" (padrão seguro).
+ *  - O modal também é apresentado ao finalizar a geração do PDF, quando o
+ *    rascunho acaba de ser gravado sem decisão registrada: a página chama
+ *    RascunhoTTL.verificarAposSalvar() após o salvamento pós-geração.
+ *  - O modal usa o layout geral da aplicação (.modal-overlay/.modal-card/
+ *    .modal-head/.modal-body/.modal-actions/.btn-modal), herdando o tema.
  *  - A decisão vale para aquele rascunho; ao descartar manualmente (menu
  *    "Descartar rascunho") a decisão é limpa e o ciclo recomeça no próximo.
  *  - O horário do último salvamento é deduzido do próprio rascunho (campo
@@ -27,6 +32,9 @@
  *       notificar: function (msg, ok) { showToast(msg, ok); }
  *     });
  *   </script>
+ *
+ *   Pós-geração do PDF (após gravar o rascunho, na rotina de sucesso da página):
+ *     window.RascunhoTTL?.verificarAposSalvar();
  */
 (function (global) {
   "use strict";
@@ -37,6 +45,7 @@
   var cfg = null;
   var modalAberto = false;
   var overlayEl = null;
+  var escHandler = null;
 
   // ── storage seguro (modo privado, quota, SecurityError) ──
   function lsGet(key) {
@@ -160,35 +169,14 @@
     fecharModal();
   }
 
-  // ── modal de decisão (DOM injetado; sem dependências da página) ──
-  function garantirEstilo() {
-    var doc = global.document;
-    if (!doc || doc.getElementById("rttl-style")) return;
-    var style = doc.createElement("style");
-    style.id = "rttl-style";
-    style.type = "text/css";
-    style.textContent = [
-      ".rttl-overlay{position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:2147483000;",
-      "display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;}",
-      ".rttl-card{background:var(--surface,#fff);color:var(--text,#111827);border-radius:12px;",
-      "box-shadow:0 20px 50px rgba(0,0,0,.25);max-width:430px;width:100%;padding:22px;box-sizing:border-box;}",
-      ".rttl-card h2{font-size:17px;margin:0 0 10px;color:var(--text,#111827);}",
-      ".rttl-card p{font-size:14px;line-height:1.55;color:var(--text-2,#4b5563);margin:0 0 8px;}",
-      ".rttl-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}",
-      ".rttl-btn{flex:1;min-width:150px;padding:10px 14px;border-radius:8px;font-size:14px;font-weight:600;",
-      "cursor:pointer;border:1px solid var(--border,#e5e7eb);background:var(--surface,#fff);color:var(--text,#111827);}",
-      ".rttl-btn:hover{background:var(--surface-2,#f9fafb);}",
-      ".rttl-btn--primario{background:var(--brand,#1a56db);border-color:var(--brand,#1a56db);color:#fff;}",
-      ".rttl-btn--primario:hover{background:var(--brand,#1a56db);filter:brightness(1.08);}",
-      ".rttl-nota{font-size:12px;color:var(--text-3,#9ca3af);margin:12px 0 0;}"
-    ].join("");
-    (doc.head || doc.body).appendChild(style);
-  }
+  // ── modal de decisão (mesmo layout geral da aplicação:
+  //    .modal-overlay/.modal-card/.modal-head/.modal-body/.modal-actions/.btn-modal) ──
 
-  function fecharModal() {
-    modalAberto = false;
-    if (overlayEl && overlayEl.remove) overlayEl.remove();
-    overlayEl = null;
+  function sincronizarBodyModalOpen() {
+    var doc = global.document;
+    if (!doc || !doc.body || !doc.body.classList || !doc.querySelector) return;
+    if (doc.querySelector(".modal-overlay.show")) doc.body.classList.add("modal-open");
+    else doc.body.classList.remove("modal-open");
   }
 
   function aoTeclarEsc(ev) {
@@ -197,24 +185,54 @@
     }
   }
 
+  function fecharModal() {
+    modalAberto = false;
+    var doc = global.document;
+    if (escHandler && doc && typeof doc.removeEventListener === "function") {
+      doc.removeEventListener("keydown", escHandler, true);
+    }
+    escHandler = null;
+    if (overlayEl) {
+      if (typeof overlayEl.setAttribute === "function") {
+        overlayEl.setAttribute("hidden", "");
+        overlayEl.setAttribute("aria-hidden", "true");
+      }
+      if (overlayEl.classList && overlayEl.classList.remove) overlayEl.classList.remove("show");
+      if (typeof overlayEl.remove === "function") overlayEl.remove();
+    }
+    overlayEl = null;
+    sincronizarBodyModalOpen();
+  }
+
+  // Chamada após a gravação do rascunho (ex.: ao finalizar a geração do PDF):
+  // se o rascunho acabou de nascer sem decisão registrada, apresenta o modal.
+  function verificarAposSalvar() {
+    if (!cfg || modalAberto) return;
+    var meta = sincronizarMeta(Date.now());
+    if (meta && !meta.decidedAt) mostrarModal();
+  }
+
   function mostrarModal() {
     var doc = global.document;
     if (!doc || modalAberto) return;
     modalAberto = true;
-    garantirEstilo();
 
     var overlay = doc.createElement("div");
-    overlay.className = "rttl-overlay";
+    overlay.className = "modal-overlay";
     overlay.setAttribute("role", "dialog");
     overlay.setAttribute("aria-modal", "true");
     overlay.setAttribute("aria-labelledby", "rttl-titulo");
 
     var card = doc.createElement("div");
-    card.className = "rttl-card";
+    card.className = "modal-card";
 
-    var titulo = doc.createElement("h2");
+    var titulo = doc.createElement("div");
+    titulo.className = "modal-head";
     titulo.id = "rttl-titulo";
     titulo.textContent = "Proteção dos seus dados";
+
+    var corpo = doc.createElement("div");
+    corpo.className = "modal-body";
 
     var p1 = doc.createElement("p");
     p1.textContent = "O rascunho deste formulário fica salvo somente neste dispositivo. Por segurança, ele é descartado automaticamente 1 hora após o último salvamento.";
@@ -222,32 +240,33 @@
     var p2 = doc.createElement("p");
     p2.textContent = "Deseja manter o rascunho neste dispositivo?";
 
+    var p3 = doc.createElement("p");
+    p3.textContent = "Você também pode descartá-lo agora pelo menu \u201CDescartar rascunho\u201D do cabeçalho.";
+
+    corpo.appendChild(p1);
+    corpo.appendChild(p2);
+    corpo.appendChild(p3);
+
     var acoes = doc.createElement("div");
-    acoes.className = "rttl-actions";
+    acoes.className = "modal-actions";
 
     var btnManter = doc.createElement("button");
     btnManter.type = "button";
-    btnManter.className = "rttl-btn";
+    btnManter.className = "btn-modal cancel";
     btnManter.textContent = "Manter rascunho";
     btnManter.addEventListener("click", function () { decidir("keep"); });
 
     var btnDescartar = doc.createElement("button");
     btnDescartar.type = "button";
-    btnDescartar.className = "rttl-btn rttl-btn--primario";
+    btnDescartar.className = "btn-modal confirm";
     btnDescartar.textContent = "Descartar após 1 hora";
     btnDescartar.addEventListener("click", function () { decidir("auto"); });
-
-    var nota = doc.createElement("p");
-    nota.className = "rttl-nota";
-    nota.textContent = "Você também pode descartá-lo agora pelo menu \u201CDescartar rascunho\u201D do cabeçalho.";
 
     acoes.appendChild(btnDescartar);
     acoes.appendChild(btnManter);
     card.appendChild(titulo);
-    card.appendChild(p1);
-    card.appendChild(p2);
+    card.appendChild(corpo);
     card.appendChild(acoes);
-    card.appendChild(nota);
     overlay.appendChild(card);
 
     overlay.addEventListener("click", function (ev) {
@@ -256,11 +275,19 @@
 
     doc.body.appendChild(overlay);
     overlayEl = overlay;
+
+    // mesmo mecanismo das modais da aplicação (setModalOverlayVisible)
+    if (typeof overlay.removeAttribute === "function") overlay.removeAttribute("hidden");
+    if (overlay.classList && overlay.classList.add) overlay.classList.add("show");
+    if (typeof overlay.setAttribute === "function") overlay.setAttribute("aria-hidden", "false");
+    sincronizarBodyModalOpen();
+
     if (typeof btnDescartar.focus === "function") {
       try { btnDescartar.focus(); } catch (_) { /* noop */ }
     }
     if (doc.addEventListener) {
-      doc.addEventListener("keydown", aoTeclarEsc, true);
+      escHandler = aoTeclarEsc;
+      doc.addEventListener("keydown", escHandler, true);
     }
   }
 
@@ -324,6 +351,7 @@
   global.RascunhoTTL = {
     init: init,
     tick: tick,
-    _internais: { hashDjb2: hashDjb2, sincronizarMeta: sincronizarMeta, expirou: expirou, decidir: decidir, lerMeta: lerMeta }
+    verificarAposSalvar: verificarAposSalvar,
+    _internais: { hashDjb2: hashDjb2, sincronizarMeta: sincronizarMeta, expirou: expirou, decidir: decidir, lerMeta: lerMeta, modalEstaAberto: function () { return modalAberto; } }
   };
 })(typeof window !== "undefined" ? window : globalThis);

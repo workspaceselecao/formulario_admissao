@@ -1379,6 +1379,7 @@ async function gerarPDF() {
     const primeiroNome = primeiroNomeUsuarioParaArquivo(data.nomeCompleto);
     baixarPdfBytes(pdfBytes, `${nomeTituloPdf} ${primeiroNome}.pdf`);
     showToast("PDF gerado com sucesso!", true);
+    window.RascunhoTTL?.verificarAposSalvar();
   } catch (e) {
     console.error(e);
     showToast("Erro ao gerar o PDF. Tente novamente.", false);

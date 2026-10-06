@@ -3205,6 +3205,7 @@ async function gerarPDF() {
       link.click();
       URL.revokeObjectURL(url);
       salvarRascunhoLocalSincrono();
+      window.RascunhoTTL?.verificarAposSalvar();
       showToast("PDF gerado com sucesso!");
       return;
     }
@@ -3314,6 +3315,7 @@ async function gerarPDF() {
     link.click();
     URL.revokeObjectURL(url);
     salvarRascunhoLocalSincrono();
+    window.RascunhoTTL?.verificarAposSalvar();
     showToast("PDF gerado com sucesso!");
   } catch (error) {
     console.error(error);
