@@ -10,6 +10,8 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 06/10/2026 | Expira rascunhos e dados locais após 1 hora |
+| 06/10/2026 | Apresenta o modal de verificacao do rascunho apos gerar o PDF, no layout da aplicacao |
 | 06/10/2026 | Aviso de privacidade do hub e descarte automatico de rascunhos apos 1 hora |
 
 ## Setembro de 2026
