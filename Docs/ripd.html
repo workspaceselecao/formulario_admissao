@@ -61,6 +61,10 @@
           <td>Dependências</td>
           <td>Vulnerabilidades em bibliotecas JS de terceiros</td>
         </tr>
+        <tr>
+          <td>Transmissão a serviços externos (CEP/município/IP)</td>
+          <td>ViaCEP e BrasilAPI recebem o CEP para consulta de endereço; <code>api.kstrtech.com.br</code> recebe a UF para listar municípios; <code>api.ipify.org</code> identifica o IP público de origem e o retorna como evidência técnica. Todos recebem o IP de origem e metadados técnicos da requisição. Há risco inerente de acesso, registro ou retenção desses dados pelos provedores conforme suas políticas; o IP é dado pessoal. Risco inerente médio; residual baixo a médio, sujeito à validação dos provedores, após HTTPS, minimização e ausência de envio do formulário completo ou PDF.</td>
+        </tr>
       </tbody>
     </table>
 
@@ -69,6 +73,7 @@
       <li><strong>Não persistência central</strong> nos termos da arquitetura atual da ferramenta;</li>
       <li>Processamento local para geração do PDF;</li>
       <li>Uso de <strong>HTTPS</strong> em produção;</li>
+      <li>Limitação das chamadas externas a CEP, UF ou IP, sem envio do formulário completo ou PDF; identificação dos provedores, finalidades e dados no fluxo e no inventário ROPA, com retenção e condições de tratamento submetidas à revisão do DPO/Jurídico;</li>
       <li>Baseline de segurança e gestão de dependências (<a href="/Docs/security-baseline.html">Baseline de segurança</a>);</li>
       <li>Comunicações na UI (ex.: decisões LGPD na geração do PDF);</li>
       <li>Função de <strong>descarte de rascunho</strong> e <strong>expiração automática</strong> (24 horas após o último salvamento, com modal de decisão) quando aplicável.</li>
@@ -77,11 +82,11 @@
     <h2>5. Avaliação de risco</h2>
     <p><strong>Risco BAIXO a MÉDIO-BAIXO</strong> no que respeita a tratamentos remotos centralizados por esta app, considerando:</p>
     <ul>
-      <li>Não há retenção em bases remotas desta solução para os dados digitados no formulário;</li>
-      <li>Não há compartilhamento por esta camada com terceiros para fins descritos na política;</li>
+      <li>Não há retenção em bases de dados remotas operadas pela aplicação; os serviços externos podem processar ou registrar os dados mínimos das requisições conforme suas próprias políticas;</li>
+      <li>Há transmissão técnica limitada a ViaCEP, BrasilAPI, <code>api.kstrtech.com.br</code> e <code>api.ipify.org</code>: CEP, UF e IP de origem conforme a funcionalidade, sem envio do formulário completo ou do PDF;</li>
       <li>Tráfego obrigatório dos campos do formulário para servidores próprios da aplicação <strong>não</strong> faz parte do fluxo de conclusão do PDF.</li>
     </ul>
-    <p>Riscos residuais concentram-se em <strong>ambiente do usuário</strong>, <strong>integridade do deploy</strong> e <strong>cadeia de dependências</strong> — ver mitigações acima.</p>
+    <p>Riscos residuais concentram-se em <strong>ambiente do usuário</strong>, <strong>integridade do deploy</strong>, <strong>cadeia de dependências</strong> e eventual registro ou retenção por provedores externos — ver mitigações acima e validação pendente no ROPA.</p>
 
     <h2>6. Conclusão</h2>
     <p>A solução, adequadamente documentada e operada, tende a ser compatível com os princípios da LGPD:</p>

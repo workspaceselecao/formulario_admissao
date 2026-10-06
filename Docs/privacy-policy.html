@@ -34,10 +34,43 @@
       <li>São processados <strong>exclusivamente no navegador</strong> (client-side), para composição do PDF;</li>
       <li><strong>Não são enviados</strong> a servidores desta aplicação para armazenamento de formulário ou finalização obrigatória do PDF;</li>
       <li><strong>Não são armazenados</strong> em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
-      <li><strong>Não são compartilhados</strong> com terceiros por intermédio desta aplicação no fluxo técnico descrito em <a href="/Docs/data-flow.html">Fluxo de dados</a>;</li>
+      <li>Algumas funcionalidades fazem chamadas técnicas a serviços externos para consultar CEP, listar municípios ou obter o IP público usado como evidência no PDF. Essas chamadas transmitem somente os dados mínimos indicados abaixo; o conteúdo integral do formulário não é enviado a esses serviços, nem o PDF gerado.</li>
       <li>Permanecem durante o preenchimento na <strong>memória do dispositivo</strong> e, quando aplicável, em <strong>armazenamento local opcional</strong> exclusivamente no navegador (ver §7);</li>
       <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) — o rascunho é <strong>descartado automaticamente 24 horas após o último salvamento</strong>, salvo se o usuário optar por mantê-lo, e pode ser eliminado a qualquer momento com <strong>Descartar rascunho</strong> ou limpeza do navegador;</li>
     </ul>
+    <table>
+      <caption>Serviços externos usados nessas chamadas técnicas</caption>
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th>Finalidade</th>
+          <th>Dados mínimos da funcionalidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ViaCEP</td>
+          <td>Consultar endereço pelo CEP informado.</td>
+          <td>CEP enviado no caminho da requisição.</td>
+        </tr>
+        <tr>
+          <td>BrasilAPI</td>
+          <td>Alternativa de consulta de endereço quando a consulta principal não retorna resultado.</td>
+          <td>CEP enviado no caminho da requisição.</td>
+        </tr>
+        <tr>
+          <td><code>api.kstrtech.com.br</code></td>
+          <td>Consultar a lista de municípios correspondente à UF.</td>
+          <td>Sigla da UF enviada no caminho da requisição.</td>
+        </tr>
+        <tr>
+          <td><code>api.ipify.org</code></td>
+          <td>Obter o IP público para compor a evidência técnica no PDF.</td>
+          <td>Nenhum campo do formulário; o serviço identifica o IP público de origem da própria requisição e o retorna ao navegador.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Além dos dados específicos indicados na tabela, os serviços recebem o IP de origem (IP público) e metadados técnicos inerentes às requisições; podem registrar esses dados de acesso conforme suas próprias políticas. A aplicação não envia a esses serviços os demais campos do formulário nem o PDF gerado.</p>
 
     <h2>3. Dados Inseridos pelo Usuário</h2>
     <p>O usuário poderá inserir, voluntariamente:</p>

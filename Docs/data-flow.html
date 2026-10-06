@@ -30,9 +30,43 @@
 
     <h2>Processamento</h2>
     <ul>
-      <li>Processamento ocorre exclusivamente no navegador.</li>
+      <li>O preenchimento, a composição dos campos e a geração do PDF ocorrem no navegador; as consultas externas descritas abaixo processam apenas os dados mínimos necessários a cada funcionalidade.</li>
       <li>Dados mantidos em <strong>memória (RAM)</strong> durante a sessão de preenchimento e geração do PDF.</li>
     </ul>
+    <h2>Integrações externas da solução</h2>
+    <p>Para funcionalidades específicas, o navegador faz requisições a serviços externos. Cada serviço recebe somente o dado funcional indicado abaixo, além do IP público de origem e dos metadados técnicos inerentes à requisição:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th>Finalidade</th>
+          <th>Dado funcional transmitido</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ViaCEP</td>
+          <td>Consultar endereço.</td>
+          <td>CEP enviado no caminho da requisição.</td>
+        </tr>
+        <tr>
+          <td>BrasilAPI</td>
+          <td>Alternativa para consulta de endereço quando a consulta principal não retorna resultado.</td>
+          <td>CEP enviado no caminho da requisição.</td>
+        </tr>
+        <tr>
+          <td><code>api.kstrtech.com.br</code></td>
+          <td>Consultar municípios da unidade federativa selecionada.</td>
+          <td>Sigla da UF enviada no caminho da requisição.</td>
+        </tr>
+        <tr>
+          <td><code>api.ipify.org</code></td>
+          <td>Obter o IP público para incluí-lo como evidência técnica no PDF.</td>
+          <td>Nenhum campo do formulário; o serviço identifica o IP público de origem da própria requisição e o retorna ao navegador.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Os provedores podem registrar o IP de origem e metadados de acesso conforme suas próprias políticas. O PDF gerado não é enviado a esses serviços; o conteúdo integral do formulário não é enviado.</p>
     <p><strong>Modelo corporativo original (minimização máxima):</strong> ausência de uso de <code>localStorage</code>, <code>sessionStorage</code> ou <code>IndexedDB</code> para dados pessoais — estado puramente efêmero.</p>
     <p><strong>Versões implantadas com recurso de rascunho:</strong> pode existir uso <strong>controlado</strong> de <code>localStorage</code> (ou equivalente) <strong>apenas</strong> para permitir retomar o preenchimento no mesmo navegador/dispositivo, com:</p>
     <ul>
