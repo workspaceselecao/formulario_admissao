@@ -13,7 +13,7 @@ Deploy de referência: **Vercel** (site estático). Sem banco de dados — os PD
 - **Carta Bradesco** — geração do zero a partir do modelo timbrado, cargos TB-047_09, autopreenchimento a partir da Ficha Cadastral, busca de endereço por CEP.
 - **Termos de Aceite** — sobreposição de dados no modelo PDF por região (BA/SP), RE/RG, data por extenso, "Não assinar".
 - **Assinatura manuscrita** — canvas com PNG transparente, linha-guia, evidência técnica carimbada no PDF (documento, IP, fuso).
-- **Rascunho com descarte automático (LGPD)** — retomada do preenchimento no mesmo dispositivo, com **expiração automática 1 hora após o último salvamento** e modal "manter rascunho / descartar após 1 hora".
+- **Rascunho com descarte automático (LGPD)** — retomada do preenchimento no mesmo dispositivo, com **expiração automática 24 horas após o último salvamento** e modal de decisão sobre a retenção.
 - **Autenticação por chaves de acesso** — derivadas (SHA-256 + salt), sessão com expiração; painel administrativo com códigos exclusivos apartados.
 - **Painel Administrativo** — CRUD de cidades e templates PDF, editor visual de coordenadas, Field Builder, diff/histórico, exportação/importação.
 - **Hub Docs (LGPD)** — aviso de privacidade corporativo (PO-026/027/029), política de privacidade, termos, base legal, RIPD e revisão jurídica versionada.
@@ -51,7 +51,7 @@ carta_bradesco.html + .js      Carta Bradesco + cargos
 termos_aceite.html             Termos de Aceite
 embedded-docs.js               Engine de geração embarcada (POC v38, fidelidade ≥ 99,5%)
 guard.js / admin-guard.js      Autenticação por chaves derivadas (pública e admin)
-rascunho-ttl.js                Descarte automático de rascunhos (TTL 1 h + modal LGPD)
+rascunho-ttl.js                Descarte automático de rascunhos (TTL 24 h + modal LGPD)
 admin/                         Painel administrativo (HTML/CSS/JS)
 Docs/                          Hub LGPD (HTML, revisão jurídica, doc-revision)
 scripts/                       Utilitários, servidor de testes e suíte run-test.mjs
@@ -84,7 +84,7 @@ Abrir `index.html` diretamente também funciona para inspeção rápida; para o 
 
 - **Headers** (`vercel.json`): CSP com SRI, HSTS, X-Frame-Options DENY, COOP/COEP require-corp, CORP same-origin, Permissions-Policy restritiva, X-Permitted-Cross-Domain-Policies.
 - **Autenticação client-side** (decisão de projeto documentada): os formulários e o painel usam chaves com verificadores derivados (SHA-256 + salt + transformações); códigos reais **nunca** estão no código-fonte. Sessão em `sessionStorage` com expiração de 60 min (painel). Não é substituto de autenticação server-side.
-- **LGPD**: hub Docs público com aviso de privacidade corporativo (PO-026/027/029), política de privacidade, termos de uso, base legal, RIPD e carimbo de revisão jurídica derivado do Git (`Docs/docs-revision.json`, atualizado por `scripts/atualizar-docs-revision.mjs`). Rascunhos locais expiram automaticamente 1 hora após o último salvamento (`rascunho-ttl.js`), com opção de manutenção pelo titular.
+- **LGPD**: hub Docs público com aviso de privacidade corporativo (PO-026/027/029), política de privacidade, termos de uso, base legal, RIPD e carimbo de revisão jurídica derivado do Git (`Docs/docs-revision.json`, atualizado por `scripts/atualizar-docs-revision.mjs`). Rascunhos locais expiram automaticamente 24 horas após o último salvamento (`rascunho-ttl.js`), com opção de manutenção pelo titular.
 
 ## ☁️ Deploy (Vercel)
 

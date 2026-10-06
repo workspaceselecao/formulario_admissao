@@ -9,7 +9,7 @@
 
 ## 1. Resumo executivo
 
-O site é uma **aplicação web estática** que permite ao candidato ou ao RH preencher dois formulários oficiais de admissão no navegador e **gerar o PDF preenchido** sobre os modelos corporativos (F-075 e F-089), sem servidor de aplicação nem base de dados. Os dados e o **rascunho local opcional** permanecem no dispositivo também após gerar o PDF até o usuário acionar **Descartar rascunho**, até a **expiração automática do rascunho (1 hora após o último salvamento**, salvo opção por mantê-lo) ou até a limpeza do armazenamento do navegador; as modais LGPD comunicam esse comportamento.
+O site é uma **aplicação web estática** que permite ao candidato ou ao RH preencher dois formulários oficiais de admissão no navegador e **gerar o PDF preenchido** sobre os modelos corporativos (F-075 e F-089), sem servidor de aplicação nem base de dados. Os dados e o **rascunho local opcional** permanecem no dispositivo também após gerar o PDF até o usuário acionar **Descartar rascunho**, até a **expiração automática do rascunho (24 horas após o último salvamento**, salvo opção por mantê-lo) ou até a limpeza do armazenamento do navegador; as modais LGPD comunicam esse comportamento.
 
 **Proposta de valor:** reduzir fricção no preenchimento, manter aderência aos PDFs oficiais, operar com custo baixo (hospedagem estática) e privacidade por desenho (processamento no cliente).
 
@@ -22,7 +22,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | Permitir conclusão do preenchimento e download do PDF sem instalação de software | Taxa de conclusão até “download iniciado” (se instrumentado) |
 | Garantir correspondência visual com os templates oficiais | Zero desvios não documentados em revisão de amostras |
 | Minimizar perda de dados durante o preenchimento | Uso de rascunho em `localStorage` + recuperação ao reabrir |
-| Cumprir expectativa de privacidade e gestão dos dados locais | Rascunho em `localStorage` + recuperação ao reabrir + descarte por **Descartar rascunho** ou **automaticamente 1 hora após o último salvamento** (mensagens LGPD antes de exportar) |
+| Cumprir expectativa de privacidade e gestão dos dados locais | Rascunho em `localStorage` + recuperação ao reabrir + descarte por **Descartar rascunho** ou **automaticamente 24 horas após o último salvamento** (mensagens LGPD antes de exportar) |
 | Funcionar em desktop e mobile (incluindo assinatura e teclado) | Testes manuais / dispositivos reais nas principais combinações SO+navegador |
 
 ---
@@ -44,9 +44,9 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 - **Assistência médica** (F-089 / PR-090): escolha inicial **Plano de Benefícios** (declaração `DECLARACAO PLANO DE SAUDE.pdf`, só assinatura na pág. 2) ou **Outros Planos** (formulário completo + ficha regional por cidade via `cidades_brasil.json`); evidência no PDF regional (metadados, IP, etc.).
 - **Geração de PDF no cliente** com [pdf-lib](https://github.com/Hopding/pdf-lib) (CDN); coordenadas em `*_campos.json`.
 - **CEP:** ViaCEP (e fallback Brasil API na ficha, conforme implementação).
-- **Rascunho** por formulário em `localStorage` (chaves versionadas) com **descarte automático após 1 hora** do último salvamento (`rascunho-ttl.js`) e modal de decisão (manter/descartar).
+- **Rascunho** por formulário em `localStorage` (chaves versionadas) com **descarte automático após 24 horas** do último salvamento (`rascunho-ttl.js`) e modal de decisão (manter/apagar agora/manter por 24 horas).
 - **Cópia de dados** da ficha para a assistência (payload em `localStorage`, fluxo com modal e opção de não perguntar novamente).
-- **LGPD:** modal antes de exportar; **Descartar rascunho** apaga formulário + rascunho local quando o utilizador escolher; descarte automático do rascunho após 1 hora (modal de proteção de dados na primeira visita com rascunho sem decisão); **Aviso de Privacidade — Hub Formulários RH** publicado em `/Docs`.
+- **LGPD:** modal antes de exportar; **Descartar rascunho** apaga formulário + rascunho local quando o utilizador escolher; descarte automático do rascunho após 24 horas (modal de proteção de dados na primeira visita com rascunho sem decisão); **Aviso de Privacidade — Hub Formulários RH** publicado em `/Docs`.
 - **UX mobile:** cabeçalho recolhível ao scroll (retrato e paisagem em dispositivos touch), layout responsivo.
 - **Deploy:** Vercel (`vercel.json`), site estático.
 
@@ -80,7 +80,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | RF-13 | Dependentes dinâmicos até limite máximo definido no código | Must |
 | RF-14 | Capturar assinatura desenhada e incluir no PDF | Must |
 | RF-15 | Oferecer download opcional de carta Bradesco (`.docx`) quando aplicável ao fluxo de conta | Should |
-| RF-16 | Após PDF gerado com sucesso: persistir rascunho local e manter o formulário preenchido até **Descartar rascunho** ou a expiração automática (1 h) | Must |
+| RF-16 | Após PDF gerado com sucesso: persistir rascunho local e manter o formulário preenchido até **Descartar rascunho** ou a expiração automática (24 h) | Must |
 | RF-17 | Opcional: sugerir cópia de dados para fluxo de Assistência Médica | Should |
 
 ### 5.3 Assistência médica
@@ -111,7 +111,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | RF-40 | Modal LGPD antes da exportação; cancelar interrompe a geração | Must |
 | RF-41 | Dados são apagados do formulário e do `localStorage` quando o utilizador aciona **Descartar rascunho** (ou limpa o navegador), ou automaticamente pelo mecanismo de expiração | Must |
 | RF-42 | Chaves `localStorage` documentadas; versão incrementada quando o schema de rascunho quebrar compatibilidade | Should |
-| RF-43 | Rascunho sem decisão registrada é descartado automaticamente 1 hora após o último salvamento; no carregamento, modal oferece **Manter rascunho** ou **Descartar após 1 hora** (ESC/fundo = descartar) | Must |
+| RF-43 | Rascunho sem decisão registrada é descartado automaticamente 24 horas após o último salvamento; no carregamento, modal oferece **Manter rascunho**, **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (ESC/fundo = manter por 24 horas) | Must |
 | RF-44 | Aviso de Privacidade — Hub Formulários RH (PO-026/027/029) publicado em `/Docs` e linkado nas páginas e na home | Must |
 
 ---
@@ -213,7 +213,7 @@ O produto atual **não exige** analytics no PRD; para evolução:
 
 - **Template PDF:** ficheiro oficial não modificado em disco; o desenho é composto na exportação.  
 - **Coordenadas:** retângulos em pontos PDF definidos no `*_campos.json`.  
-- **Rascunho:** serialização local do estado do formulário; eliminação por expiração automática (1 hora após o último salvamento), **Descartar rascunho** ou limpeza do navegador.  
+- **Rascunho:** serialização local do estado do formulário; eliminação por expiração automática (24 horas após o último salvamento), **Descartar rascunho** ou limpeza do navegador.
 - **LGPD (fluxo UI):** confirmação explícita antes de gerar o documento e modal de decisão sobre o rascunho; textos alinhados ao Aviso de Privacidade e à política publicados em `/Docs`.
 
 ---

@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-06T03:19:58-03:00",
-  "gitCommit": "c3fcbfd",
-  "gitSubject": "fix(forms): expira rascunhos e dados locais após 1 hora",
+  "ultimaValidacaoIso": "2026-10-06T03:20:53-03:00",
+  "gitCommit": "e98a439",
+  "gitSubject": "docs(forms): registra expiração obrigatória de rascunhos",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

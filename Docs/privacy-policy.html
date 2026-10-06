@@ -36,7 +36,7 @@
       <li><strong>Não são armazenados</strong> em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
       <li><strong>Não são compartilhados</strong> com terceiros por intermédio desta aplicação no fluxo técnico descrito em <a href="/Docs/data-flow.html">Fluxo de dados</a>;</li>
       <li>Permanecem durante o preenchimento na <strong>memória do dispositivo</strong> e, quando aplicável, em <strong>armazenamento local opcional</strong> exclusivamente no navegador (ver §7);</li>
-      <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) — o rascunho é <strong>descartado automaticamente 1 hora após o último salvamento</strong>, salvo se o usuário optar por mantê-lo, e pode ser eliminado a qualquer momento com <strong>Descartar rascunho</strong> ou limpeza do navegador;</li>
+      <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) — o rascunho é <strong>descartado automaticamente 24 horas após o último salvamento</strong>, salvo se o usuário optar por mantê-lo, e pode ser eliminado a qualquer momento com <strong>Descartar rascunho</strong> ou limpeza do navegador;</li>
     </ul>
 
     <h2>3. Dados Inseridos pelo Usuário</h2>
@@ -79,12 +79,12 @@
 
     <h2>7. Armazenamento e Retenção</h2>
     <p><strong>7.1 Ausência de base centralizada:</strong> não há armazenamento dos dados do formulário em <strong>servidor de aplicação</strong> operado por esta solução para consulta posterior típica de “cadastro web”.</p>
-    <p><strong>7.2 Após a geração do PDF:</strong> os dados permanecem no formulário aberto, no rascunho local opcional e em cópias temporárias usadas para transferir dados entre formulários, para permitir revisão, correções ou nova geração do arquivo. O rascunho, os dados preenchidos e as cópias pendentes são <strong>excluídos automaticamente 1 hora após o último salvamento</strong>, salvo se o usuário escolher expressamente <strong>Manter rascunho</strong> no modal de proteção de dados. Para rascunhos de versões anteriores que não registravam o horário, o modal informa que o prazo será contado da primeira abertura após esta atualização. Quando o prazo vence com a página aberta, o formulário também é limpo; a exclusão manual pelo menu <strong>Descartar rascunho</strong> ou a limpeza do navegador continuam disponíveis.</p>
+    <p><strong>7.2 Após a geração do PDF:</strong> os dados permanecem no formulário aberto, no rascunho local opcional e em cópias temporárias usadas para transferir dados entre formulários, para permitir revisão, correções ou nova geração do arquivo. O rascunho, os dados preenchidos e as cópias pendentes são <strong>excluídos automaticamente 24 horas após o último salvamento</strong>, salvo se o usuário escolher expressamente <strong>Manter rascunho</strong> no modal de proteção de dados. Para rascunhos de versões anteriores que não registravam o horário, o modal informa que o prazo será contado da primeira abertura após esta atualização. Quando o prazo vence com a página aberta, o formulário também é limpo; a exclusão manual pelo menu <strong>Descartar rascunho</strong> ou a limpeza do navegador continuam disponíveis.</p>
     <p><strong>7.3 Rascunho local (quando ativo na versão implantada):</strong> pode existir <strong>persistência opcional no navegador</strong> (por exemplo <code>localStorage</code>) apenas para permitir retomar o preenchimento no mesmo dispositivo. Tal persistência:</p>
     <ul>
       <li>permanece sob controle local do usuário;</li>
       <li>pode ser <strong>eliminada</strong> pelo usuário através da função <strong>Descartar rascunho</strong> ou equivalente;</li>
-      <li>está sujeita ao <strong>descarte automático 1 hora após o último salvamento</strong> (mecanismo de expiração), salvo escolha do usuário por manter o rascunho;</li>
+      <li>está sujeita ao <strong>descarte automático 24 horas após o último salvamento</strong> (mecanismo de expiração), salvo escolha do usuário por manter o rascunho;</li>
       <li>não substitui políticas de arquivo físico ou sistemas oficiais da empresa nem constitui registro funcional oficial.</li>
     </ul>
     <p><strong>7.4 Controle de acesso por chave (quando ativo):</strong> páginas protegidas podem utilizar <strong>verificação criptográfica client-side</strong> para restringir o acesso. Esta funcionalidade:</p>

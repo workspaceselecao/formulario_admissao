@@ -37,7 +37,7 @@
     <p><strong>Versões implantadas com recurso de rascunho:</strong> pode existir uso <strong>controlado</strong> de <code>localStorage</code> (ou equivalente) <strong>apenas</strong> para permitir retomar o preenchimento no mesmo navegador/dispositivo, com:</p>
     <ul>
       <li>eliminação disponível via <strong>Descartar rascunho</strong>;</li>
-      <li><strong>expiração automática</strong>: descarte do rascunho <strong>1 hora após o último salvamento</strong> (módulo <code>rascunho-ttl.js</code>), salvo opção do usuário por mantê-lo no modal de proteção de dados; para rascunhos antigos sem horário registrado, o prazo começa na primeira abertura após a atualização, conforme informado no modal;</li>
+      <li><strong>expiração automática</strong>: descarte do rascunho <strong>24 horas após o último salvamento</strong> (módulo <code>rascunho-ttl.js</code>), salvo opção do usuário por mantê-lo no modal de proteção de dados; para rascunhos antigos sem horário registrado, o prazo começa na primeira abertura após a atualização, conforme informado no modal;</li>
       <li>finalidade limitada à conveniência do usuário no mesmo dispositivo, até eliminação por expiração, <strong>Descartar rascunho</strong> ou limpeza local do navegador;</li>
       <li><strong>sem</strong> envio desses dados ao servidor da aplicação para armazenamento remoto do formulário.</li>
     </ul>
@@ -55,7 +55,7 @@
     <h2>Descarte</h2>
     <ul>
       <li>Após gerar o PDF, os dados permanecem no formulário aberto, no rascunho local e em cópias temporárias pendentes de transferência entre formulários até a expiração, o descarte explícito ou a limpeza do armazenamento local.</li>
-      <li><strong>Expiração automática:</strong> o rascunho, os dados do formulário e as cópias temporárias pendentes são excluídos <strong>1 hora após o último salvamento</strong> (<code>rascunho-ttl.js</code>), com notificação na sessão aberta e descarte silencioso ao reabrir a página; o titular pode optar por <strong>manter o rascunho</strong> no modal de proteção de dados. Rascunhos de versões anteriores sem horário registrado iniciam esse prazo na primeira abertura após a atualização, conforme informado no modal.</li>
+      <li><strong>Expiração automática:</strong> o rascunho, os dados do formulário e as cópias temporárias pendentes são excluídos <strong>24 horas após o último salvamento</strong> (<code>rascunho-ttl.js</code>), com notificação na sessão aberta e descarte silencioso ao reabrir a página; o titular pode optar por <strong>manter o rascunho</strong> no modal de proteção de dados. Rascunhos de versões anteriores sem horário registrado iniciam esse prazo na primeira abertura após a atualização, conforme informado no modal.</li>
       <li>Rascunho local é removido imediatamente quando o usuário aciona <strong>Descartar rascunho</strong>.</li>
       <li>O armazenamento local não substitui os sistemas corporativos oficiais nem constitui registro funcional oficial; a exclusão no Hub não alcança informações já incorporadas a esses sistemas (ver <a href="/Docs/aviso-de-privacidade.html">Aviso de Privacidade</a>, § 7).</li>
     </ul>
@@ -87,7 +87,7 @@
                     └──────────┬──────────┘
                                │ opcional (versão com rascunho)
                                ▼
-                    [ Rascunho só no navegador — expira em 1 h ]</pre>
+                    [ Rascunho só no navegador — expira em 24 h ]</pre>
 
     <section class="doc-revisao-juridica" aria-label="Revisão jurídica">
       <p><strong>Revisão:</strong> validado periodicamente com Jurídico e Privacidade sempre que há mudança de versão da aplicação ou o fluxo de dados.</p>

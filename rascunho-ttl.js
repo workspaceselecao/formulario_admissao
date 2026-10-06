@@ -1,15 +1,15 @@
 /*!
- * rascunho-ttl.js — Descarte automático de rascunhos após 1 hora (LGPD)
+ * rascunho-ttl.js — Descarte automático de rascunhos após 24 horas (LGPD)
  *
  * Compartilhado pelas páginas públicas (ficha_cadastral, assistencia_medica,
  * carta_bradesco, termos_aceite). Ver MANUTENCAO.md §7.2.
  *
  * Comportamento:
- *  - Por segurança, o rascunho é descartado automaticamente 1 hora após o
+ *  - Por segurança, o rascunho é descartado automaticamente 24 horas após o
  *    último salvamento observado (padrão; pode ser mantido pelo usuário).
  *  - Na primeira vez que um rascunho existe sem decisão registrada, um modal
- *    pergunta: "Manter rascunho" ou "Descartar após 1 hora". Fechar o modal
- *    (ESC/fundo) equivale a "Descartar após 1 hora" (padrão seguro).
+ *    oferece manter até descarte manual, apagar agora ou manter por 24 horas.
+ *    Fechar o modal (ESC/fundo) equivale a manter por 24 horas (padrão seguro).
  *  - O modal também é apresentado ao finalizar a geração do PDF, quando o
  *    rascunho acaba de ser gravado sem decisão registrada: a página chama
  *    RascunhoTTL.verificarAposSalvar() após o salvamento pós-geração.
@@ -38,7 +38,7 @@
 (function (global) {
   "use strict";
 
-  var TTL_PADRAO_MS = 60 * 60 * 1000; // 1 hora
+  var TTL_PADRAO_MS = 24 * 60 * 60 * 1000; // 24 horas
   var POLL_PADRAO_MS = 30 * 1000; // reavalia a cada 30s com a página aberta
 
   var cfg = null;
@@ -182,20 +182,25 @@
   }
 
   // Descarte completo: storage + formulário da página (+ aviso, se aplicável).
-  function descartar(silencioso) {
+  function descartar(silencioso, mensagem) {
     if (!cfg) return;
     removerRascunhoStorage();
     if (typeof cfg.limparFormulario === "function") {
       try { cfg.limparFormulario(); } catch (_) { /* noop */ }
     }
     if (!silencioso && typeof cfg.notificar === "function") {
-      try { cfg.notificar("Rascunho descartado automaticamente (1 hora).", true); } catch (_) { /* noop */ }
+      try { cfg.notificar(mensagem || "Rascunho descartado automaticamente (24 horas).", true); } catch (_) { /* noop */ }
     }
   }
 
   // Registra a decisão do usuário (modal, ESC ou fundo). null → padrão seguro.
   function decidir(choice) {
     if (!cfg) return;
+    if (choice === "delete") {
+      fecharModal();
+      descartar(false, "Rascunho apagado.");
+      return;
+    }
     var meta = lerMeta() || { sig: "" };
     var agora = Date.now();
     meta.choice = (choice === "keep") ? "keep" : "auto";
@@ -272,14 +277,14 @@
     var p1 = doc.createElement("p");
     var metaAtual = lerMeta();
     p1.textContent = metaAtual && metaAtual.savedAtEstimated
-      ? "Não foi possível determinar quando este rascunho foi salvo. Se você não escolher Manter, o rascunho e os dados preenchidos serão excluídos em até 1 hora a partir desta abertura."
-      : "Os dados preenchidos e o rascunho salvos neste dispositivo serão excluídos automaticamente 1 hora após o último salvamento.";
+      ? "Não foi possível determinar quando este rascunho foi salvo. Se você não escolher Manter, o rascunho e os dados preenchidos serão excluídos em até 24 horas a partir desta abertura."
+      : "Os dados preenchidos e o rascunho salvos neste dispositivo serão excluídos automaticamente 24 horas após o último salvamento.";
 
     var p2 = doc.createElement("p");
-    p2.textContent = "Manter rascunho é a única opção que impede a exclusão automática e conserva esses dados até você descartar o rascunho ou limpar o armazenamento do navegador.";
+    p2.textContent = "Manter rascunho conserva esses dados até você descartar o rascunho pelo menu ou limpar o armazenamento do navegador.";
 
     var p3 = doc.createElement("p");
-    p3.textContent = "Se fechar esta janela sem escolher, será aplicada a exclusão após 1 hora. Você também pode descartar os dados imediatamente pelo menu \u201CDescartar rascunho\u201D.";
+    p3.textContent = "Se fechar esta janela sem escolher, o rascunho será apagado após 24 horas. Você também pode apagá-lo agora ou manter por 24 horas.";
 
     corpo.appendChild(p1);
     corpo.appendChild(p2);
@@ -297,10 +302,17 @@
     var btnDescartar = doc.createElement("button");
     btnDescartar.type = "button";
     btnDescartar.className = "btn-modal confirm";
-    btnDescartar.textContent = "Excluir após 1 hora";
+    btnDescartar.textContent = "Manter rascunho por 24 horas";
     btnDescartar.addEventListener("click", function () { decidir("auto"); });
 
+    var btnApagarAgora = doc.createElement("button");
+    btnApagarAgora.type = "button";
+    btnApagarAgora.className = "btn-modal confirm";
+    btnApagarAgora.textContent = "Apagar rascunho agora";
+    btnApagarAgora.addEventListener("click", function () { decidir("delete"); });
+
     acoes.appendChild(btnDescartar);
+    acoes.appendChild(btnApagarAgora);
     acoes.appendChild(btnManter);
     card.appendChild(titulo);
     card.appendChild(corpo);
@@ -344,7 +356,7 @@
   // ── avaliação periódica (página aberta): sincroniza meta e expira ──
   // O modal NÃO é disparado aqui para não interromper o preenchimento; ele
   // aparece no carregamento da página (agendarModal) quando há rascunho sem
-  // decisão registrada — até lá vale o padrão seguro (descarte após 1 h).
+  // decisão registrada — até lá vale o padrão seguro (descarte após 24 h).
   function tick() {
     if (!cfg) return;
     var agora = Date.now();
