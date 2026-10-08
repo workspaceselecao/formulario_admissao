@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 6 de outubro de 2026
+**Última atualização deste guia:** 8 de outubro de 2026
 
 ---
 
@@ -10,6 +10,10 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 08/10/2026 | Remove retenção indefinida do rascunho |
+| 06/10/2026 | Document external integrations and legal bases |
+| 06/10/2026 | Extend draft expiry to 24 hours |
+| 06/10/2026 | Registra expiração obrigatória de rascunhos |
 | 06/10/2026 | Expira rascunhos e dados locais após 1 hora |
 | 06/10/2026 | Apresenta o modal de verificacao do rascunho apos gerar o PDF, no layout da aplicacao |
 | 06/10/2026 | Aviso de privacidade do hub e descarte automatico de rascunhos apos 1 hora |

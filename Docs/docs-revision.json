@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-06T03:20:53-03:00",
-  "gitCommit": "e98a439",
-  "gitSubject": "docs(forms): registra expiração obrigatória de rascunhos",
+  "ultimaValidacaoIso": "2026-10-08T19:37:36-03:00",
+  "gitCommit": "74cc0ef",
+  "gitSubject": "fix(lgpd): remove retenção indefinida do rascunho",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
