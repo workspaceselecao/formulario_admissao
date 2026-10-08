@@ -9,7 +9,7 @@
 
 ## 1. Resumo executivo
 
-O site é uma **aplicação web estática** que permite ao candidato ou ao RH preencher dois formulários oficiais de admissão no navegador e **gerar o PDF preenchido** sobre os modelos corporativos (F-075 e F-089), sem servidor de aplicação nem base de dados. Os dados e o **rascunho local opcional** permanecem no dispositivo também após gerar o PDF até o usuário acionar **Descartar rascunho**, até a **expiração automática do rascunho (24 horas após o último salvamento**, salvo opção por mantê-lo) ou até a limpeza do armazenamento do navegador; as modais LGPD comunicam esse comportamento.
+O site é uma **aplicação web estática** que permite ao candidato ou ao RH preencher dois formulários oficiais de admissão no navegador e **gerar o PDF preenchido** sobre os modelos corporativos (F-075 e F-089), sem servidor de aplicação nem base de dados. Os dados e o **rascunho local opcional** permanecem no dispositivo também após gerar o PDF até o usuário acionar **Descartar rascunho**, até a **expiração automática do rascunho (24 horas após o último salvamento, sem retenção indefinida)** ou até a limpeza do armazenamento do navegador; as modais LGPD comunicam esse comportamento.
 
 **Proposta de valor:** reduzir fricção no preenchimento, manter aderência aos PDFs oficiais, operar com custo baixo (hospedagem estática) e privacidade por desenho (processamento no cliente).
 
