@@ -38,7 +38,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `embedded-docs.js` | **Gerador EMBARCADO de PDFs** (engine): template declarativo (`template.json` + assets PNG extraídos do documento oficial) + campos do schema de coordenadas → PDF montado pela própria aplicação via pdf-lib — **nenhum PDF externo é carregado nem enviado**. Validação estrutural, renderer determinístico (datas congeladas) e perfil de texto idêntico ao app público. Usado pelo painel (seção **Documentos Embarcados**) e pelo `ficha_cadastral.html` (geração unificada). |
 | `ficha-cadastral-embutido/` | **Prova de conceito e template do F-075**: `extract_template.py` (extrai `template.json` + `assets/*.png` de qualquer PDF oficial — generaliza para os 4 documentos), `template.json` (página, 3 imagens, 161 barras pretas, 89 textos estáticos, 17 marcações) e `generate.js` (gerador standalone Node). **`template.json` e `assets/*.png` são fonte versionada** (o painel os busca via HTTP no deploy estático); só `output.pdf` é artefato, ignorado pelo `.gitignore`. |
 | `FICHA GOIANIA.pdf`, `FICHA GNDI.pdf`, `FICHA REEMBOLSO.pdf`, `FICHA FSA.pdf`, `FICHA SA_FO.pdf`, `FICHA BH.pdf` | Fichas regionais — fluxo **Outros Planos** (`cidades_brasil.json`). |
-| `rascunho-ttl.js` | **Descarte automático de rascunhos (LGPD)**: TTL de 24 h após o último salvamento + modal de decisão sobre a retenção. Compartilhado pelas 4 páginas públicas; chaves e política em §7.2. |
+| `rascunho-ttl.js` | **Descarte automático de rascunhos (LGPD)**: TTL fixo de 24 h após o último salvamento (sem retenção indefinida) + modal de decisão (apagar agora/manter por 24 h). Compartilhado pelas 4 páginas públicas; chaves e política em §7.2. |
 | `vercel.json` | Configuração de deploy. |
 
 Quando o número do processo (ex. F-075, PR-011, revisão 38) mudar no **documento PDF oficial**, re-extraia o template embarcado (`python ficha-cadastral-embutido/extract_template.py "F-075_... .pdf" ficha-cadastral-embutido/`) e confira a fidelidade (`node scripts/gerar-ficha-vazia.js` + `python scripts/fidelidade-ficha.py ...`). O cabeçalho visível no HTML (subtítulo) acompanha o documento oficial.
@@ -146,7 +146,7 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 ### 7.2 Rascunhos (versão no nome da chave)
 
-| Página | Chave `localStorage` do rascunho | Chave da decisão TTL (`rascunho-ttl.js`) |
+| Página | Chave `localStorage` do rascunho | Chave da meta do TTL (`rascunho-ttl.js`) |
 |--------|------------------------|--------|
 | Ficha | `atento.forms:v1:ficha_cadastral_rascunho_v2` | `atento.forms:v1:rascunho_ttl_ficha_v1` |
 | Assistência | `atento.forms:v1:assistencia_medica_rascunho_v5` | `atento.forms:v1:rascunho_ttl_assist_v1` |
@@ -155,7 +155,7 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no rascunho), considere **incrementar a versão** (ex. `v3`, `v5`) para evitar rascunhos incompatíveis; atualize a constante no arquivo HTML correspondente e documente a mudança.
 
-**Descarte automático (TTL 24 h — LGPD):** o módulo compartilhado `rascunho-ttl.js` guarda em `rascunho_ttl_<página>_v1` o horário do último salvamento (`savedAt`), a assinatura do conteúdo (`sig`) e o registro da decisão do usuário (`decidedAt`). O rascunho é **sempre** apagado 24 horas após o último salvamento — não existe retenção indefinida (LGPD); metas legadas que registravam essa decisão são saneadas na primeira sincronização. No primeiro acesso com rascunho sem decisão, um modal oferece **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (fechar o modal — ESC ou clique no fundo — vale **Manter rascunho por 24 horas**). O mesmo modal também é apresentado **ao finalizar a geração do PDF**: cada página chama `window.RascunhoTTL?.verificarAposSalvar();` logo após o salvamento pós-geração (`salvarRascunhoLocalSincrono()`/`salvarRascunho()`), quando o rascunho recém-gravado ainda não tem decisão. O modal usa o **layout geral da aplicação** (`.modal-overlay`/`.modal-card`/`.modal-head`/`.modal-body`/`.modal-actions`/`.btn-modal`, mesmo mecanismo `hidden`/`show`/aria do `setModalOverlayVisible`). Descartar manualmente pelo menu limpa a decisão e o ciclo recomeça no próximo rascunho. Se **incrementar a versão** da chave do rascunho de uma página, atualize também `draftKey` (e `legacyKeys`, se houver) no bloco `RascunhoTTL.init(...)` no fim do `<body>` da mesma página — a suíte trava essa sincronia (teste 18).
+**Descarte automático (TTL 24 h — LGPD):** o módulo compartilhado `rascunho-ttl.js` guarda em `rascunho_ttl_<página>_v1` o horário do último salvamento (`savedAt`), a assinatura do conteúdo (`sig`) e o registro da última decisão do usuário (`decidedAt`). O rascunho é **sempre** apagado 24 horas após o último salvamento — **não existe retenção indefinida** (LGPD); metas legadas que registravam a decisão antiga são saneadas na primeira sincronização e o rascunho segue o prazo normal. No primeiro acesso com rascunho sem decisão, um modal oferece **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (fechar o modal — ESC ou clique no fundo — vale **Manter rascunho por 24 horas**). O mesmo modal também é apresentado **ao finalizar a geração do PDF**: cada página chama `window.RascunhoTTL?.verificarAposSalvar();` logo após o salvamento pós-geração (`salvarRascunhoLocalSincrono()`/`salvarRascunho()`), quando o rascunho recém-gravado ainda não tem decisão. O modal usa o **layout geral da aplicação** (`.modal-overlay`/`.modal-card`/`.modal-head`/`.modal-body`/`.modal-actions`/`.btn-modal`, mesmo mecanismo `hidden`/`show`/aria do `setModalOverlayVisible`). Descartar manualmente pelo menu limpa a decisão e o ciclo recomeça no próximo rascunho. Se **incrementar a versão** da chave do rascunho de uma página, atualize também `draftKey` (e `legacyKeys`, se houver) no bloco `RascunhoTTL.init(...)` no fim do `<body>` da mesma página — a suíte trava essa sincronia (teste 18).
 
 ### 7.3 Outras chaves (ficha)
 
@@ -170,6 +170,7 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 - Texto padrão no rodapé dos HTML em `/Docs`: revisão validada com Jurídico e Privacidade; **Última validação em** lida de `Docs/docs-revision.json` (data/hora e commit do último push).
 - `Docs/aviso-de-privacidade.html` (rota `/aviso-de-privacidade`) transcreve o **Aviso de Privacidade — Hub Formulários RH** (políticas corporativas PO-026_04, PO-027_04 e PO-029_05; DPO `dpo-br@atento.com.br`). Alteração relevante no funcionamento do Hub, nas categorias de dados, finalidades, integrações externas ou formas de armazenamento exige **reavaliar e atualizar o Aviso** (§ 13 do documento); a suíte trava o essencial dessa adequação (Teste 19).
 - Após alterar política, termos ou base legal, executar: `node scripts/atualizar-docs-revision.mjs` e commitar o JSON atualizado junto com os HTML.
+- A cópia DOCX de referência (`Docs/Servicos_Privacidade_Termos.docx`) é **gerada** a partir destes HTMLs: `python scripts/gerar-docx-privacidade.py`. Rode o script sempre que os textos de privacidade/segurança mudarem e commite o DOCX junto (não editar o binário à mão).
 - Guia público de atualizações (RIPD): `node scripts/gerar-historico-versionamento.mjs` gera `Docs/historico-versionamento.md` (link em `ripd.html`).
 
 ---
@@ -188,13 +189,14 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 ---
 
-## 9. Scripts Node na pasta `scripts/`
+## 9. Scripts na pasta `scripts/`
 
 - `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/termos`, `/admin`), além da API administrativa `/api/admin/*` (config com backup automático, uploads validados, histórico) gravando em `data/` (gitignored). Executar com `node scripts/test-server.mjs`.
 - `run-test.mjs` — suíte de testes do projeto (o 14 cobre o painel v2, o 15/16 o painel v3/Field Builder e o 17 a auditoria de dados); executar com `node scripts/run-test.mjs`.
 - `audit-panel.mjs` — auditoria do painel contra os dados reais do repositório: roda o pipeline do painel (`carregarTudo` + coletores + gate de publicação) em `node:vm` e falha em qualquer falso positivo ou configuração sem consumidor. Executar com `node scripts/audit-panel.mjs` (também roda no Teste 17).
 - `atualizar-docs-revision.mjs` — atualiza `Docs/docs-revision.json` após alterar política, termos ou base legal (ver seção LGPD/Docs).
 - `gerar-historico-versionamento.mjs` — regenera `Docs/historico-versionamento.md` (guia público de atualizações, RIPD).
+- `gerar-docx-privacidade.py` — regenera a cópia DOCX de referência (`Docs/Servicos_Privacidade_Termos.docx`) a partir das páginas de `/Docs` (python-docx + lxml). Executar com `python scripts/gerar-docx-privacidade.py` sempre que os textos de privacidade/segurança mudarem (ver §7.5).
 - Não há script de build: o deploy é de site estático e não depende destes scripts.
 
 ## 9.1 Painel Administrativo

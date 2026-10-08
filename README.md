@@ -55,7 +55,7 @@ rascunho-ttl.js                Descarte automático de rascunhos (TTL 24 h + mod
 admin/                         Painel administrativo (HTML/CSS/JS)
 Docs/                          Hub LGPD (HTML, revisão jurídica, doc-revision)
 scripts/                       Utilitários, servidor de testes e suíte run-test.mjs
-F-075_38 ... .pdf/.docx        Modelos oficiais (template canônico v38)
+F-075_38 ... .pdf             Modelo oficial da ficha (template canônico v38)
 FICHA *.pdf                    Templates regionais (Outros Planos)
 vercel.json                    Headers de segurança, redirects e rewrites
 ```

@@ -79,7 +79,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | RF-12 | Integrar CEP com preenchimento de endereço (ViaCEP + fallback) | Must |
 | RF-13 | Dependentes dinâmicos até limite máximo definido no código | Must |
 | RF-14 | Capturar assinatura desenhada e incluir no PDF | Must |
-| RF-15 | Oferecer download opcional de carta Bradesco (`.docx`) quando aplicável ao fluxo de conta | Should |
+| RF-15 | Download opcional da carta Bradesco em `.docx` — **não implementado**: a versão atual gera apenas PDF | Should |
 | RF-16 | Após PDF gerado com sucesso: persistir rascunho local e manter o formulário preenchido até **Descartar rascunho** ou a expiração automática (24 h) | Must |
 | RF-17 | Opcional: sugerir cópia de dados para fluxo de Assistência Médica | Should |
 
