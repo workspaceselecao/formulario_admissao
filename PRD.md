@@ -44,7 +44,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 - **Assistência médica** (F-089 / PR-090): escolha inicial **Plano de Benefícios** (declaração `DECLARACAO PLANO DE SAUDE.pdf`, só assinatura na pág. 2) ou **Outros Planos** (formulário completo + ficha regional por cidade via `cidades_brasil.json`); evidência no PDF regional (metadados, IP, etc.).
 - **Geração de PDF no cliente** com [pdf-lib](https://github.com/Hopding/pdf-lib) (CDN); coordenadas em `*_campos.json`.
 - **CEP:** ViaCEP (e fallback Brasil API na ficha, conforme implementação).
-- **Rascunho** por formulário em `localStorage` (chaves versionadas) com **descarte automático após 24 horas** do último salvamento (`rascunho-ttl.js`) e modal de decisão (manter/apagar agora/manter por 24 horas).
+- **Rascunho** por formulário em `localStorage` (chaves versionadas) com **descarte automático após 24 horas** do último salvamento (`rascunho-ttl.js`), sem retenção indefinida, e modal de decisão (apagar agora/manter por 24 horas).
 - **Cópia de dados** da ficha para a assistência (payload em `localStorage`, fluxo com modal e opção de não perguntar novamente).
 - **LGPD:** modal antes de exportar; **Descartar rascunho** apaga formulário + rascunho local quando o utilizador escolher; descarte automático do rascunho após 24 horas (modal de proteção de dados na primeira visita com rascunho sem decisão); **Aviso de Privacidade — Hub Formulários RH** publicado em `/Docs`.
 - **UX mobile:** cabeçalho recolhível ao scroll (retrato e paisagem em dispositivos touch), layout responsivo.
@@ -111,7 +111,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | RF-40 | Modal LGPD antes da exportação; cancelar interrompe a geração | Must |
 | RF-41 | Dados são apagados do formulário e do `localStorage` quando o utilizador aciona **Descartar rascunho** (ou limpa o navegador), ou automaticamente pelo mecanismo de expiração | Must |
 | RF-42 | Chaves `localStorage` documentadas; versão incrementada quando o schema de rascunho quebrar compatibilidade | Should |
-| RF-43 | Rascunho sem decisão registrada é descartado automaticamente 24 horas após o último salvamento; no carregamento, modal oferece **Manter rascunho**, **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (ESC/fundo = manter por 24 horas) | Must |
+| RF-43 | Rascunho é sempre descartado automaticamente 24 horas após o último salvamento, sem opção de retenção indefinida (LGPD); no carregamento, modal oferece **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (ESC/fundo = manter por 24 horas) | Must |
 | RF-44 | Aviso de Privacidade — Hub Formulários RH (PO-026/027/029) publicado em `/Docs` e linkado nas páginas e na home | Must |
 
 ---

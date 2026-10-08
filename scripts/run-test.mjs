@@ -1271,9 +1271,10 @@ async function testarPainelV3FieldBuilder(assert) {
 // Estrutural: rascunho-ttl.js servido e integrado nas 4 páginas públicas
 // (script tag + RascunhoTTL.init com a chave do rascunho e metaKey própria).
 // Comportamental: o módulo roda em node:vm com stubs de localStorage/DOM —
-// expira após 24h do último salvamento, respeita choice=keep, usa o campo `t`
-// do blob quando existente, limpa a meta após descarte manual e registra a
-// decisão do modal (ESC/fundo = padrão seguro: manter por 24 h).
+// expira sempre após 24h do último salvamento (sem retenção indefinida; metas
+// legadas de manter são saneadas), usa o campo `t` do blob quando existente,
+// limpa a meta após descarte manual e registra a decisão do modal
+// (ESC/fundo = padrão seguro: manter por 24 h).
 // ═══════════════════════════════════════════════════════════════════
 async function testarRascunhoTTL(assert) {
   const vm = await import("node:vm");
@@ -1322,6 +1323,8 @@ async function testarRascunhoTTL(assert) {
   assert("ficha carimba data nas cópias temporárias", fichaHtml.includes("__atentoSavedAt: Date.now()"), "timestamp ausente");
   assert("ttl: sem estilos próprios (rttl- removido)", !code.includes("rttl-overlay") && !code.includes("rttl-card") && !code.includes("rttl-btn"), "CSS próprio presente");
   assert("ttl: API verificarAposSalvar exportada", /verificarAposSalvar:\s*verificarAposSalvar/.test(code), "API ausente");
+  assert("ttl: módulo não implementa retenção indefinida (sem decisão keep)", !code.includes('"keep"') && !/meta\.choice\s*=/.test(code), "código de retenção indefinida presente");
+  assert("ttl: modal não oferece mais 'Manter rascunho' indefinido", !code.includes('"Manter rascunho"') && code.includes('"Manter rascunho por 24 horas"'), "botão de retenção indefinida presente");
 
   // ── 18.b — comportamentais (vm + stubs) ──
   function novoAmbiente() {
@@ -1393,7 +1396,8 @@ async function testarRascunhoTTL(assert) {
     store.set("k", JSON.stringify({ nomeCompleto: "X" }));
     ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
     const meta = JSON.parse(store.get("m"));
-    assert("ttl: blob sem t → savedAt agora (carência de 24h)", meta.choice === "auto" && Math.abs(meta.savedAt - agora) < 5000, JSON.stringify(meta));
+    assert("ttl: blob sem t → savedAt agora (carência de 24h)", meta.decidedAt === 0 && Math.abs(meta.savedAt - agora) < 5000, JSON.stringify(meta));
+    assert("ttl: meta não registra decisão de retenção indefinida", !("choice" in meta), JSON.stringify(meta));
     assert("ttl: blob sem t marca origem do prazo como estimada", meta.savedAtEstimated === true, JSON.stringify(meta));
     assert("ttl: rascunho recente permanece", store.has("k"), "removido");
   }
@@ -1407,15 +1411,24 @@ async function testarRascunhoTTL(assert) {
     assert("ttl: blob com t recente define savedAt = t", meta.savedAt === agora - 10 * 60 * 1000 && store.has("k"), JSON.stringify(meta));
   }
 
-  // 4) choice=keep preserva mesmo com conteúdo antigo/alterado
+  // 4) decisão legada de retenção indefinida não é mais honrada (LGPD)
+  {
+    const { ctx, store } = novoAmbiente();
+    store.set("k", JSON.stringify({ v: 3, t: agora - 2 * PRAZO_RASCUNHO, campos: {} }));
+    store.set("m", JSON.stringify({ choice: "keep", savedAt: agora - 2 * PRAZO_RASCUNHO, sig: "velho", decidedAt: agora - 5 * HORA }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
+    assert("ttl: decisão legada de manter não impede o descarte após 24h", !store.has("k") && !store.has("m"), JSON.stringify([...store.keys()]));
+  }
+
+  // 4.a) metadados legados ainda dentro do prazo são saneados e seguem a retenção fixa
   {
     const { ctx, store } = novoAmbiente();
     store.set("k", JSON.stringify({ v: 3, t: agora - 5 * HORA, campos: {} }));
     store.set("m", JSON.stringify({ choice: "keep", savedAt: agora - 5 * HORA, sig: "velho", decidedAt: agora - 5 * HORA }));
     ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
-    assert("ttl: choice=keep preserva o rascunho", store.has("k"), "removido");
     const meta = JSON.parse(store.get("m"));
-    assert("ttl: keep sobrevive a mudança de conteúdo (sig)", meta.choice === "keep" && meta.sig !== "velho", JSON.stringify(meta));
+    assert("ttl: rascunho legado recente permanece com o prazo fixo", store.has("k") && meta.savedAt === agora - 5 * HORA, JSON.stringify(meta));
+    assert("ttl: meta legada é saneada (sem decisão de retenção indefinida)", !("choice" in meta) && meta.sig !== "velho", JSON.stringify(meta));
   }
 
   // 5) tick em sessão aberta: expira, limpa e notifica
@@ -1439,9 +1452,9 @@ async function testarRascunhoTTL(assert) {
     ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
     assert("ttl: modal agendado para o DOMContentLoaded", Array.isArray(listeners.DOMContentLoaded) && listeners.DOMContentLoaded.length > 0, "sem listener");
     listeners.DOMContentLoaded.forEach((fn) => fn()); // dispara o modal
-    ctx.window.RascunhoTTL._internais.decidir("keep");
+    ctx.window.RascunhoTTL._internais.decidir(null); // manter por 24 h (ESC/fundo = padrão seguro)
     let meta = JSON.parse(store.get("m"));
-    assert("ttl: 'Manter rascunho' grava choice=keep + decidedAt", meta.choice === "keep" && meta.decidedAt > 0, JSON.stringify(meta));
+    assert("ttl: 'Manter rascunho por 24 horas' grava decidedAt e fecha o modal", meta.decidedAt > 0 && !ctx.window.RascunhoTTL._internais.modalEstaAberto(), JSON.stringify(meta));
     store.delete("k"); // simula Descartar rascunho do menu
     ctx.window.RascunhoTTL.tick();
     assert("ttl: meta é limpa após descarte manual", !store.has("m"), JSON.stringify([...store.keys()]));
@@ -1449,9 +1462,7 @@ async function testarRascunhoTTL(assert) {
     ctx.window.RascunhoTTL.tick();
     meta = JSON.parse(store.get("m"));
     assert("ttl: novo rascunho recomeça sem decisão (decidedAt=0)", meta.decidedAt === 0, JSON.stringify(meta));
-    ctx.window.RascunhoTTL._internais.decidir(null); // ESC/fundo = padrão seguro
-    meta = JSON.parse(store.get("m"));
-    assert("ttl: ESC/fundo registra descarte automático", meta.choice === "auto" && meta.decidedAt > 0, JSON.stringify(meta));
+    assert("ttl: novo rascunho não herda decisão de retenção indefinida", !("choice" in meta), JSON.stringify(meta));
   }
 
   // 7) rascunho só na chave legada → tratado como existente e expirável
@@ -1472,35 +1483,36 @@ async function testarRascunhoTTL(assert) {
     assert("ttl: verificarAposSalvar abre o modal ao finalizar a geração (rascunho sem decisão)", ctx.window.RascunhoTTL._internais.modalEstaAberto(), "modal não aberto");
     const titulo = documentStub._elements.find((element) => element.id === "rttl-titulo");
     const textoModal = documentStub._elements.map((element) => element.textContent || "").join(" ");
-    const btnManter = documentStub._elements.find((element) => element.textContent === "Manter rascunho");
-    const btnExcluir = documentStub._elements.find((element) => element.textContent === "Manter rascunho por 24 horas");
+    const btnManter24h = documentStub._elements.find((element) => element.textContent === "Manter rascunho por 24 horas");
+    const btnApagarAgora = documentStub._elements.find((element) => element.textContent === "Apagar rascunho agora");
     assert("ttl: modal usa cabeçalho vermelho de atenção", titulo && titulo.className.includes("modal-head--rascunho"), titulo && titulo.className);
     assert("ttl: modal informa exclusão dos dados após 24h do último salvamento", /dados preenchidos.*excluídos automaticamente 24 horas após o último salvamento/i.test(textoModal), textoModal);
-    assert("ttl: modal explica Manter até descarte manual", /manter rascunho conserva.*até você descartar o rascunho pelo menu/i.test(textoModal), textoModal);
-    assert("ttl: modal oferece manter, apagar agora ou manter por 24 horas", !!btnManter && !!btnExcluir && textoModal.includes("Apagar rascunho agora"), textoModal);
-    btnManter?.listeners.click();
+    assert("ttl: modal declara a ausência de retenção indefinida", /não há opção de retenção indefinida/i.test(textoModal), textoModal);
+    assert("ttl: modal não oferece 'Manter rascunho' indefinido", !documentStub._elements.some((element) => element.textContent === "Manter rascunho"), textoModal);
+    assert("ttl: modal oferece apagar agora ou manter por 24 horas", !!btnManter24h && !!btnApagarAgora, textoModal);
+    btnManter24h?.listeners.click();
     const meta = JSON.parse(store.get("m"));
-    assert("ttl: decisão pós-geração grava choice + decidedAt e fecha o modal", meta.choice === "keep" && meta.decidedAt > 0 && !ctx.window.RascunhoTTL._internais.modalEstaAberto(), JSON.stringify(meta));
+    assert("ttl: decisão pós-geração grava decidedAt e fecha o modal", meta.decidedAt > 0 && !ctx.window.RascunhoTTL._internais.modalEstaAberto(), JSON.stringify(meta));
     store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "Y" } }));
     ctx.window.RascunhoTTL.verificarAposSalvar();
     assert("ttl: decisão existente → nova geração não reabre o modal", !ctx.window.RascunhoTTL._internais.modalEstaAberto(), "reaberto");
   }
 
-  // 9) escolher descarte não pode estender o prazo além do último salvamento
+  // 9) manter por 24 h não pode estender o prazo além do último salvamento
   {
     const { ctx, store, documentStub } = novoAmbiente();
     ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", pollMs: 0 });
     store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "X" } }));
     ctx.window.RascunhoTTL.verificarAposSalvar();
-    const btnExcluir = documentStub._elements.find((element) => (element.className || "").includes("btn-modal confirm"));
-    assert("ttl: decisão de descarte é acionável pelo botão primário", !!btnExcluir, "botão não encontrado");
+    const btnManter24h = documentStub._elements.find((element) => element.textContent === "Manter rascunho por 24 horas");
+    assert("ttl: decisão de manter por 24 h é acionável pelo botão primário", !!btnManter24h, "botão não encontrado");
     const metaAntes = JSON.parse(store.get("m"));
     metaAntes.savedAt = agora - 45 * 60 * 1000;
     store.set("m", JSON.stringify(metaAntes));
     const savedAt = JSON.parse(store.get("m")).savedAt;
-    btnExcluir?.listeners.click();
+    btnManter24h?.listeners.click();
     const meta = JSON.parse(store.get("m"));
-    assert("ttl: decisão de excluir mantém o prazo contado do último salvamento", meta.choice === "auto" && meta.savedAt === savedAt, JSON.stringify(meta));
+    assert("ttl: manter por 24 h mantém o prazo contado do último salvamento", meta.decidedAt > 0 && meta.savedAt === savedAt, JSON.stringify(meta));
   }
 
   // 9.a) apagar agora remove rascunho, cópias e conteúdo do formulário
@@ -1540,7 +1552,7 @@ async function testarRascunhoTTL(assert) {
     assert("ttl: rascunho surgido após carregar expira durante a sessão", !store.has("k") && !store.has("m") && limpou, JSON.stringify([...store.keys()]));
   }
 
-  // 11) descarte manual inicia um ciclo sem herdar a decisão anterior
+  // 11) descarte manual inicia um ciclo sem herdar a decisão anterior (nem metas legadas)
   {
     const { ctx, store } = novoAmbiente();
     store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "X" } }));
@@ -1551,7 +1563,7 @@ async function testarRascunhoTTL(assert) {
     store.set("k", JSON.stringify({ v: 3, t: agora, campos: { nomeCompleto: "Y" } }));
     ctx.window.RascunhoTTL.tick();
     const meta = JSON.parse(store.get("m"));
-    assert("ttl: novo rascunho após descarte manual não herda Manter", meta.choice === "auto" && meta.decidedAt === 0, JSON.stringify(meta));
+    assert("ttl: novo rascunho após descarte manual não herda decisão anterior", !("choice" in meta) && meta.decidedAt === 0, JSON.stringify(meta));
   }
 
   // 12) salvar novamente conteúdo idêntico renova o prazo de retenção
@@ -1584,15 +1596,16 @@ async function testarRascunhoTTL(assert) {
     assert("ttl: expiração também remove dados relacionados do formulário", !store.has("k") && !store.has("m") && !store.has("dados-copiados"), JSON.stringify([...store.keys()]));
   }
 
-  // 14) cópias entre páginas vencem pela origem, salvo escolha explícita de manter
+  // 14) cópias entre páginas vencem pela origem (inclusive metas legadas de manter)
   {
     const { ctx, store, clock } = novoAmbiente();
-    store.set("origem", JSON.stringify({ choice: "auto", savedAt: clock.now - 2 * PRAZO_RASCUNHO }));
+    store.set("origem", JSON.stringify({ savedAt: clock.now - 2 * PRAZO_RASCUNHO }));
     const expirou = ctx.window.RascunhoTTL.payloadExpirou?.(clock.now - 2 * PRAZO_RASCUNHO, "origem");
     assert("ttl: payload transferido vencido é rejeitado na rota destino", typeof ctx.window.RascunhoTTL.payloadExpirou === "function" && expirou === true, String(expirou));
+    store.set("origem", JSON.stringify({ savedAt: clock.now - HORA }));
+    assert("ttl: payload transferido recente continua aceito", ctx.window.RascunhoTTL.payloadExpirou?.(null, "origem") === false, "rejeitado");
     store.set("origem", JSON.stringify({ choice: "keep", savedAt: clock.now - 5 * PRAZO_RASCUNHO }));
-    const mantido = ctx.window.RascunhoTTL.payloadExpirou?.(clock.now - 5 * PRAZO_RASCUNHO, "origem");
-    assert("ttl: escolha Manter também preserva cópia entre formulários", mantido === false, String(mantido));
+    assert("ttl: meta legada de manter não preserva cópia entre formulários", ctx.window.RascunhoTTL.payloadExpirou?.(null, "origem") === true, "preservado");
     const semData = ctx.window.RascunhoTTL.payloadExpirou?.(null, "origem-ausente");
     assert("ttl: cópia antiga sem data recuperável é descartada", semData === true, String(semData));
   }

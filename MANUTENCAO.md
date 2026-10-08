@@ -15,7 +15,7 @@ Documento de referência para quem alterar modelos oficiais, coordenadas, cidade
 | Arquivos `FICHA *.pdf` / `F-075_*.pdf` | Modelos oficiais; o código **não** altera o arquivo no disco, apenas desenha por cima na exportação. |
 | `vercel.json` | Redireciona `/` → `index.html` na Vercel. |
 
-Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. O rascunho local é **excluído automaticamente 24 horas após o último salvamento**, salvo se o usuário escolher **Manter rascunho** no modal de decisão (`rascunho-ttl.js`). Rascunhos de versões anteriores sem horário recuperável recebem prazo de até 24 horas desde a primeira abertura após a atualização, informado no modal. Quando o prazo vence com a página aberta, os dados do formulário também são limpos; quando a página está fechada, o rascunho vencido é removido ao reabri-la. O usuário também pode descartar o rascunho a qualquer momento pelo menu ou limpar o armazenamento do navegador (ver §7 e §8).
+Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no próprio navegador. O rascunho local é **excluído automaticamente 24 horas após o último salvamento** — não há opção de retenção indefinida (`rascunho-ttl.js`). Rascunhos de versões anteriores sem horário recuperável recebem prazo de até 24 horas desde a primeira abertura após a atualização, informado no modal. Quando o prazo vence com a página aberta, os dados do formulário também são limpos; quando a página está fechada, o rascunho vencido é removido ao reabri-la. O usuário também pode descartar o rascunho a qualquer momento pelo menu ou limpar o armazenamento do navegador (ver §7 e §8).
 
 ---
 
@@ -142,7 +142,7 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 - `atento.forms:v1:cross_copy_ficha_para_assistencia` (legada: `cross_copy_ficha_para_assistencia_v1`) — payload JSON escrito na ficha e lido na assistência ao abrir (campos, dependentes, `assinaturaCanvasPng`, `naoAssinarManualmente`, nome/data).
 - `atento.forms:v1:carta_bradesco_prefill_v1` — dados pessoais copiados da ficha para iniciar a Carta Bradesco.
-- Esses payloads são removidos após consumo, no descarte manual da Ficha ou junto com a expiração do rascunho da Ficha (24 horas após o último salvamento, salvo escolha por manter).
+- Esses payloads são removidos após consumo, no descarte manual da Ficha ou junto com a expiração do rascunho da Ficha (24 horas após o último salvamento).
 
 ### 7.2 Rascunhos (versão no nome da chave)
 
@@ -155,7 +155,7 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 
 Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no rascunho), considere **incrementar a versão** (ex. `v3`, `v5`) para evitar rascunhos incompatíveis; atualize a constante no arquivo HTML correspondente e documente a mudança.
 
-**Descarte automático (TTL 24 h — LGPD):** o módulo compartilhado `rascunho-ttl.js` guarda em `rascunho_ttl_<página>_v1` a decisão do usuário (`choice`: `auto` — padrão — ou `keep`), o horário do último salvamento (`savedAt`) e a assinatura do conteúdo (`sig`). Sem decisão explícita, o rascunho é apagado 24 horas após o último salvamento; no primeiro acesso com rascunho sem decisão, um modal oferece **Manter rascunho**, **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (fechar o modal — ESC ou clique no fundo — vale **Manter rascunho por 24 horas**). O mesmo modal também é apresentado **ao finalizar a geração do PDF**: cada página chama `window.RascunhoTTL?.verificarAposSalvar();` logo após o salvamento pós-geração (`salvarRascunhoLocalSincrono()`/`salvarRascunho()`), quando o rascunho recém-gravado ainda não tem decisão. O modal usa o **layout geral da aplicação** (`.modal-overlay`/`.modal-card`/`.modal-head`/`.modal-body`/`.modal-actions`/`.btn-modal`, mesmo mecanismo `hidden`/`show`/aria do `setModalOverlayVisible`). Descartar manualmente pelo menu limpa a decisão e o ciclo recomeça no próximo rascunho. Se **incrementar a versão** da chave do rascunho de uma página, atualize também `draftKey` (e `legacyKeys`, se houver) no bloco `RascunhoTTL.init(...)` no fim do `<body>` da mesma página — a suíte trava essa sincronia (teste 18).
+**Descarte automático (TTL 24 h — LGPD):** o módulo compartilhado `rascunho-ttl.js` guarda em `rascunho_ttl_<página>_v1` o horário do último salvamento (`savedAt`), a assinatura do conteúdo (`sig`) e o registro da decisão do usuário (`decidedAt`). O rascunho é **sempre** apagado 24 horas após o último salvamento — não existe retenção indefinida (LGPD); metas legadas que registravam essa decisão são saneadas na primeira sincronização. No primeiro acesso com rascunho sem decisão, um modal oferece **Apagar rascunho agora** ou **Manter rascunho por 24 horas** (fechar o modal — ESC ou clique no fundo — vale **Manter rascunho por 24 horas**). O mesmo modal também é apresentado **ao finalizar a geração do PDF**: cada página chama `window.RascunhoTTL?.verificarAposSalvar();` logo após o salvamento pós-geração (`salvarRascunhoLocalSincrono()`/`salvarRascunho()`), quando o rascunho recém-gravado ainda não tem decisão. O modal usa o **layout geral da aplicação** (`.modal-overlay`/`.modal-card`/`.modal-head`/`.modal-body`/`.modal-actions`/`.btn-modal`, mesmo mecanismo `hidden`/`show`/aria do `setModalOverlayVisible`). Descartar manualmente pelo menu limpa a decisão e o ciclo recomeça no próximo rascunho. Se **incrementar a versão** da chave do rascunho de uma página, atualize também `draftKey` (e `legacyKeys`, se houver) no bloco `RascunhoTTL.init(...)` no fim do `<body>` da mesma página — a suíte trava essa sincronia (teste 18).
 
 ### 7.3 Outras chaves (ficha)
 
@@ -163,7 +163,7 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 ### 7.4 LGPD
 
-- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`) e chama **`RascunhoTTL.verificarAposSalvar()`**, que apresenta o modal de verificação do rascunho quando ainda não há decisão registrada; o formulário não é zerado ao gerar o PDF, mas é limpo automaticamente quando o rascunho expira (na sessão aberta ou ao reabrir a página) ou manualmente em **Descartar rascunho**. Sem escolha por manter, vale o **descarte automático após 24 h** do último salvamento (`rascunho-ttl.js`, §7.2).
+- Antes de exportar, modal de confirmação (LGPD). Após PDF gerado com sucesso, **`gerarPDF()`** grava o estado atual no rascunho (`salvarRascunhoLocalSincrono()`) e chama **`RascunhoTTL.verificarAposSalvar()`**, que apresenta o modal de verificação do rascunho quando ainda não há decisão registrada; o formulário não é zerado ao gerar o PDF, mas é limpo automaticamente quando o rascunho expira (na sessão aberta ou ao reabrir a página) ou manualmente em **Descartar rascunho**. Vale sempre o **descarte automático após 24 h** do último salvamento (`rascunho-ttl.js`, §7.2), sem retenção indefinida.
 
 ### 7.5 Documentos em `/Docs` (revisão jurídica)
 

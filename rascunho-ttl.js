@@ -5,18 +5,19 @@
  * carta_bradesco, termos_aceite). Ver MANUTENCAO.md §7.2.
  *
  * Comportamento:
- *  - Por segurança, o rascunho é descartado automaticamente 24 horas após o
- *    último salvamento observado (padrão; pode ser mantido pelo usuário).
+ *  - Retenção máxima fixa: o rascunho é descartado automaticamente 24 horas
+ *    após o último salvamento observado — não há retenção indefinida (LGPD).
  *  - Na primeira vez que um rascunho existe sem decisão registrada, um modal
- *    oferece manter até descarte manual, apagar agora ou manter por 24 horas.
+ *    oferece apagar agora ou manter por 24 horas.
  *    Fechar o modal (ESC/fundo) equivale a manter por 24 horas (padrão seguro).
  *  - O modal também é apresentado ao finalizar a geração do PDF, quando o
  *    rascunho acaba de ser gravado sem decisão registrada: a página chama
  *    RascunhoTTL.verificarAposSalvar() após o salvamento pós-geração.
  *  - O modal usa o layout geral da aplicação (.modal-overlay/.modal-card/
  *    .modal-head/.modal-body/.modal-actions/.btn-modal), herdando o tema.
- *  - A decisão vale para aquele rascunho; ao descartar manualmente (menu
- *    "Descartar rascunho") a decisão é limpa e o ciclo recomeça no próximo.
+ *  - A decisão (apagar agora/manter por 24 horas) vale para aquele rascunho;
+ *    ao descartar manualmente (menu "Descartar rascunho") a decisão é limpa e
+ *    o ciclo recomeça no próximo.
  *  - As páginas informam cada salvamento ao módulo; rascunhos antigos sem
  *    horário recuperável recebem prazo transitório desde a primeira abertura.
  *
@@ -107,7 +108,6 @@
         if (parsed && typeof parsed === "object") meta = parsed;
       } catch (_) { /* payload sem metadados de origem */ }
     }
-    if (meta && meta.choice === "keep") return false;
     var salvo = (typeof savedAt === "number" && isFinite(savedAt) && savedAt > 0)
       ? savedAt
       : (meta && typeof meta.savedAt === "number" ? meta.savedAt : 0);
@@ -150,20 +150,29 @@
     var meta = lerMeta();
     if (!meta) {
       var tInicial = tstampDoBlob(raw);
-      meta = { choice: "auto", savedAt: tInicial || agora, savedAtEstimated: !tInicial, sig: sig, decidedAt: 0 };
+      meta = { savedAt: tInicial || agora, savedAtEstimated: !tInicial, sig: sig, decidedAt: 0 };
       gravarMeta(meta);
-    } else if (meta.sig !== sig) {
-      var tAtual = tstampDoBlob(raw);
-      meta.sig = sig;
-      meta.savedAt = tAtual || agora;
-      meta.savedAtEstimated = !tAtual;
-      gravarMeta(meta);
+    } else {
+      var alterou = false;
+      if (meta.sig !== sig) {
+        var tAtual = tstampDoBlob(raw);
+        meta.sig = sig;
+        meta.savedAt = tAtual || agora;
+        meta.savedAtEstimated = !tAtual;
+        alterou = true;
+      }
+      // Metadados legados de retenção indefinida deixam de valer (LGPD).
+      if ("choice" in meta) {
+        delete meta.choice;
+        alterou = true;
+      }
+      if (alterou) gravarMeta(meta);
     }
     return meta;
   }
 
   function expirou(meta, agora) {
-    if (!meta || meta.choice === "keep") return false;
+    if (!meta) return false;
     var ttl = (cfg && typeof cfg.ttlMs === "number" && cfg.ttlMs > 0) ? cfg.ttlMs : TTL_PADRAO_MS;
     var salvo = typeof meta.savedAt === "number" ? meta.savedAt : 0;
     if (!salvo) return false;
@@ -193,7 +202,9 @@
     }
   }
 
-  // Registra a decisão do usuário (modal, ESC ou fundo). null → padrão seguro.
+  // Registra a decisão do usuário (modal, ESC ou fundo): manter por 24 h
+  // (decidedAt evita reabrir o modal) ou apagar agora. Não existe decisão de
+  // retenção indefinida — o prazo de 24 h é sempre aplicado (LGPD).
   function decidir(choice) {
     if (!cfg) return;
     if (choice === "delete") {
@@ -202,9 +213,7 @@
       return;
     }
     var meta = lerMeta() || { sig: "" };
-    var agora = Date.now();
-    meta.choice = (choice === "keep") ? "keep" : "auto";
-    meta.decidedAt = agora;
+    meta.decidedAt = Date.now();
     gravarMeta(meta);
     fecharModal();
   }
@@ -277,14 +286,14 @@
     var p1 = doc.createElement("p");
     var metaAtual = lerMeta();
     p1.textContent = metaAtual && metaAtual.savedAtEstimated
-      ? "Não foi possível determinar quando este rascunho foi salvo. Se você não escolher Manter, o rascunho e os dados preenchidos serão excluídos em até 24 horas a partir desta abertura."
+      ? "Não foi possível determinar quando este rascunho foi salvo. O rascunho e os dados preenchidos serão excluídos em até 24 horas a partir desta abertura."
       : "Os dados preenchidos e o rascunho salvos neste dispositivo serão excluídos automaticamente 24 horas após o último salvamento.";
 
     var p2 = doc.createElement("p");
-    p2.textContent = "Manter rascunho conserva esses dados até você descartar o rascunho pelo menu ou limpar o armazenamento do navegador.";
+    p2.textContent = "Não há opção de retenção indefinida: o rascunho e os dados não permanecem neste dispositivo além do prazo de 24 horas.";
 
     var p3 = doc.createElement("p");
-    p3.textContent = "Se fechar esta janela sem escolher, o rascunho será apagado após 24 horas. Você também pode apagá-lo agora ou manter por 24 horas.";
+    p3.textContent = "Se fechar esta janela sem escolher, o rascunho será apagado após 24 horas. Você também pode apagá-lo agora.";
 
     corpo.appendChild(p1);
     corpo.appendChild(p2);
@@ -293,17 +302,11 @@
     var acoes = doc.createElement("div");
     acoes.className = "modal-actions";
 
-    var btnManter = doc.createElement("button");
-    btnManter.type = "button";
-    btnManter.className = "btn-modal cancel";
-    btnManter.textContent = "Manter rascunho";
-    btnManter.addEventListener("click", function () { decidir("keep"); });
-
-    var btnDescartar = doc.createElement("button");
-    btnDescartar.type = "button";
-    btnDescartar.className = "btn-modal confirm";
-    btnDescartar.textContent = "Manter rascunho por 24 horas";
-    btnDescartar.addEventListener("click", function () { decidir("auto"); });
+    var btnManter24h = doc.createElement("button");
+    btnManter24h.type = "button";
+    btnManter24h.className = "btn-modal confirm";
+    btnManter24h.textContent = "Manter rascunho por 24 horas";
+    btnManter24h.addEventListener("click", function () { decidir("auto"); });
 
     var btnApagarAgora = doc.createElement("button");
     btnApagarAgora.type = "button";
@@ -311,9 +314,8 @@
     btnApagarAgora.textContent = "Apagar rascunho agora";
     btnApagarAgora.addEventListener("click", function () { decidir("delete"); });
 
-    acoes.appendChild(btnDescartar);
+    acoes.appendChild(btnManter24h);
     acoes.appendChild(btnApagarAgora);
-    acoes.appendChild(btnManter);
     card.appendChild(titulo);
     card.appendChild(corpo);
     card.appendChild(acoes);
@@ -332,8 +334,8 @@
     if (typeof overlay.setAttribute === "function") overlay.setAttribute("aria-hidden", "false");
     sincronizarBodyModalOpen();
 
-    if (typeof btnDescartar.focus === "function") {
-      try { btnDescartar.focus(); } catch (_) { /* noop */ }
+    if (typeof btnManter24h.focus === "function") {
+      try { btnManter24h.focus(); } catch (_) { /* noop */ }
     }
     if (doc.addEventListener) {
       escHandler = aoTeclarEsc;
