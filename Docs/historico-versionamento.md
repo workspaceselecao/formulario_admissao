@@ -10,6 +10,8 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 08/10/2026 | Chore : remove o modelo DOCX da ficha e o lock do Word |
+| 08/10/2026 | Alinha documentos à retenção fixa do rascunho |
 | 08/10/2026 | Remove retenção indefinida do rascunho |
 | 06/10/2026 | Document external integrations and legal bases |
 | 06/10/2026 | Extend draft expiry to 24 hours |
