@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 8 de outubro de 2026
+**Última atualização deste guia:** 9 de outubro de 2026
 
 ---
 
@@ -10,6 +10,8 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 09/10/2026 | Merge pull request #5 from workspaceselecao/feat/ficha-cadastral-conta-salario-e-aviso-pdf |
+| 09/10/2026 | Melhorias no preenchimento e na geração da assinatura nos PDFs |
 | 08/10/2026 | Remove resquício da opção de manter o rascunho |
 | 08/10/2026 | Alinha documentos à retenção fixa do rascunho |
 | 08/10/2026 | Remove retenção indefinida do rascunho |
