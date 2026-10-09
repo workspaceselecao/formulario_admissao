@@ -367,6 +367,74 @@
       grid-template-columns: 1fr 1fr;
     }
   }
+  /* Gate Bradesco Conta Salário */
+  .gate-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 12px;
+  }
+  .salario-question {
+    font-size: 13px;
+    color: var(--text-mid);
+    margin: 0;
+  }
+  .salario-gate-btns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .salario-gate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface, #fafbfc);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .salario-gate-btn input {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .salario-gate-btn:hover {
+    border-color: var(--accent);
+  }
+
+  .gate-row.gate-selecionado .salario-gate-btn {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .gate-row.gate-selecionado .salario-gate-btn span {
+    color: var(--accent);
+  }
+
+
+  .salvar-pdf-aviso {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border-subtle);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+  .salvar-pdf-aviso strong { color: var(--text); }
+  .salvar-pdf-aviso em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
   /* Banco principal: oculta colunas de detalhes até seleção */
   .banco-col--bradesco,
   .banco-col--next,
@@ -1253,7 +1321,20 @@
                 </div>
               </div>
               <div id="cartaBradescoField" hidden>
-                <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()">
+                <div class="gate-row" id="cartaBradescoGate">
+                  <p class="salario-question">Você já possui Conta Salário Bradesco ou ainda vai abrir?</p>
+                  <div class="salario-gate-btns">
+                    <label class="salario-gate-btn">
+                      <input type="radio" name="salarioBradesco" value="ja_possui" onchange="salarioBradescoDecisao(this)">
+                      <span>Já possuo Conta Salário Bradesco</span>
+                    </label>
+                    <label class="salario-gate-btn">
+                      <input type="radio" name="salarioBradesco" value="vai_abrir" onchange="salarioBradescoDecisao(this)">
+                      <span>Ainda vou abrir</span>
+                    </label>
+                  </div>
+                </div>
+                <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()" id="btnBradescoAbrirConta" hidden>
                   Preencher Carta de Abertura de Conta
                 </button>
               </div>
@@ -1384,6 +1465,10 @@
             Não assinar
           </label>
         </div>
+
+        <div class="salvar-pdf-aviso" id="salvarPdfAvisoBox" hidden>
+          <strong>Salve o PDF antes de assinar.</strong> Quando estiver confortável com a assinatura, clique em <em>Gerar PDF da Ficha de Admissão</em> abaixo para baixar o arquivo e depois assine com o Adobe Reader ou Acrobat usando o campo de assinatura. Depois, encaminhe o PDF salvo no seu Portal do Candidato, na área de Ficha Única Cadastral.
+        </div>
       </div>
       <div class="section-progress">
         <div class="section-progress-track"><div class="section-progress-fill" id="progressDeclaracao"></div></div>
@@ -1392,10 +1477,6 @@
   </div>
 
   <div id="etapaAcoes" class="etapa-fluxo" hidden>
-  <div class="aviso-box" style="margin:20px 0 14px">
-    <strong>ATENÇÃO:</strong> Salve e baixe o arquivo PDF gerado, clicando no botão abaixo e encaminhe o arquivo PDF salvo no seu Portal do Candidato, na área de Ficha Única Cadastral.
-  </div>
-
   <div class="form-actions-bottom">
     <button class="btn-export" type="button" onclick="gerarPDF()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1769,6 +1850,21 @@ function atualizarUiNaoAssinarManualmente() {
   if (ativo) marcarAssinaturaInvalidaCanvas(false);
   updateProgress();
 }
+function definirEstadoEtapaAcoes(pcts) {
+  const avisoBox = document.getElementById("salvarPdfAvisoBox");
+  const sigSection = document.getElementById("etapaDeclaracao");
+  const fichaPreenchida =
+    pcts.pessoal >= 100 &&
+    pcts.endereco >= 100 &&
+    pcts.bancario >= 100 &&
+    pcts.dependentes === 100 &&
+    pcts.transporte >= 100 &&
+    pcts.refeicao >= 100;
+  if (avisoBox) {
+    const sigOpen = sigSection && !sigSection.hasAttribute("hidden");
+    avisoBox.hidden = !(fichaPreenchida && sigOpen);
+  }
+}
 function initAssinaturaCanvas() {
   const canvas = document.getElementById("assinaturaCanvas");
   if (!canvas) return;
@@ -1787,11 +1883,17 @@ function initAssinaturaCanvas() {
     e.preventDefault();
     marcarAssinaturaInvalidaCanvas(false);
     assinaturaUltPos = obterPontoNoCanvas(e, canvas);
+    const avisoBox = document.getElementById("salvarPdfAvisoBox");
+    if (avisoBox) avisoBox.hidden = true;
   };
   const fimTraco = () => {
     assinaturaDesenhando = false;
     assinaturaUltPos = null;
-    if (isAssinaturaManuscritaPreenchida()) assinaturaCanvasTemTraço = true;
+    if (isAssinaturaManuscritaPreenchida()) {
+      assinaturaCanvasTemTraço = true;
+      const avisoBox = document.getElementById("salvarPdfAvisoBox");
+      if (avisoBox) avisoBox.hidden = true;
+    }
     updateProgress();
   };
   const mover = (e) => {
@@ -1806,6 +1908,8 @@ function initAssinaturaCanvas() {
     assinaturaCanvasTemTraço = true;
     agendarSalvarRascunho();
     updateProgress();
+    const avisoBox = document.getElementById("salvarPdfAvisoBox");
+    if (avisoBox) avisoBox.hidden = true;
   };
   canvas.addEventListener("pointerdown", inícioTraco);
   canvas.addEventListener("pointermove", mover);
@@ -2254,6 +2358,20 @@ function selecionarBancoPrincipal(el){
   updateProgress();
   agendarSalvarRascunho();
 }
+function salarioBradescoDecisao(el){
+  const decisao = el?.value || 'nao_informado';
+  const btnAbrir = document.getElementById('btnBradescoAbrirConta');
+  const gate = document.getElementById('cartaBradescoGate');
+  if (!btnAbrir) return;
+  const liberarBotao = decisao === 'ja_possui';
+  btnAbrir.hidden = !liberarBotao;
+  gate?.classList.toggle('gate-selecionado', liberarBotao);
+  agendarSalvarRascunho();
+}
+function salarioBradescoSynchronizarPainel(el){
+  if (!el) return;
+  salarioBradescoDecisao(el);
+}
 function toggleBanco(el){
   const tipo = el?.value || radio('tipoConta');
   const bradescoAtivo = tipoContaEhBradesco(tipo);
@@ -2277,8 +2395,19 @@ function toggleBanco(el){
   );
   const cartaBradescoField = document.getElementById('cartaBradescoField');
   if (cartaBradescoField) {
-    if (isSalarioBradesco) cartaBradescoField.removeAttribute('hidden');
-    else cartaBradescoField.setAttribute('hidden', '');
+    if (isSalarioBradesco) {
+      cartaBradescoField.removeAttribute('hidden');
+      salarioBradescoSynchronizarPainel(
+        document.querySelector('input[name="salarioBradesco"]:checked')
+      );
+    } else {
+      cartaBradescoField.setAttribute('hidden', '');
+      definirVisibilidadeDetalheBanco(
+        document.getElementById('bradescoDetalhes'),
+        false,
+        { agencia: 'agenciaBradesco', conta: 'contaBradesco' }
+      );
+    }
   }
   if (!bradescoAtivo) {
     marcarCampoInvalido('agenciaBradesco', false);
@@ -2420,6 +2549,7 @@ function calcularPercentuaisSecoes() {
   const declaracao = calcPct([
     () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida()
   ]);
+  definirEstadoEtapaAcoes({ pessoal, endereco, bancario, dependentes, transporte, refeicao, declaracao });
 
   return { pessoal, endereco, bancario, dependentes, transporte, refeicao, declaracao };
 }
