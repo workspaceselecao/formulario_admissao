@@ -10,8 +10,10 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
-| 09/10/2026 | Merge pull request #5 from workspaceselecao/feat/ficha-cadastral-conta-salario-e-aviso-pdf |
+| 09/10/2026 | Merge pull request #6 from workspaceselecao/feat/ficha-cadastral-conta-salario-e-aviso-pdf |
 | 09/10/2026 | Melhorias no preenchimento e na geração da assinatura nos PDFs |
+| 09/10/2026 | Corrige o gate da Conta Salário Bradesco e estabiliza o aviso de PDF |
+| 09/10/2026 | Merge pull request #5 from workspaceselecao/feat/ficha-cadastral-conta-salario-e-aviso-pdf |
 | 08/10/2026 | Remove resquício da opção de manter o rascunho |
 | 08/10/2026 | Alinha documentos à retenção fixa do rascunho |
 | 08/10/2026 | Remove retenção indefinida do rascunho |
