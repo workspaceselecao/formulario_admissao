@@ -1,0 +1,72 @@
+name: Carimbo de revisão jurídica e histórico
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-automacao
+  cancel-in-progress: false
+
+jobs:
+  carimbar:
+    name: Regenera carimbo de revisão e guia de atualizações
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (histórico completo)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Atualiza o carimbo de revisão jurídica (Docs/docs-revision.json)
+        run: node scripts/atualizar-docs-revision.mjs
+
+      - name: Regenera o guia público de atualizações (Docs/historico-versionamento.md)
+        run: node scripts/gerar-historico-versionamento.mjs
+
+      - name: Valida os artefatos gerados
+        run: |
+          set -euo pipefail
+          node -e "JSON.parse(require('fs').readFileSync('Docs/docs-revision.json', 'utf8')); console.log('OK  docs-revision.json');"
+          test -s Docs/historico-versionamento.md
+          grep -q '^# Histórico de atualizações' Docs/historico-versionamento.md
+          echo "OK  historico-versionamento.md"
+
+      - name: Publica carimbo e guia no main
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mensagem="chore(docs): atualiza docs-revision e historico de versionamento [skip ci]"
+
+          for tentativa in 1 2 3; do
+            git add -- Docs/docs-revision.json Docs/historico-versionamento.md
+            if git diff --cached --quiet; then
+              echo "Carimbo e guia já estão atualizados — nada a publicar."
+              exit 0
+            fi
+            git commit --quiet -m "$mensagem"
+            if git push --quiet origin HEAD:main; then
+              echo "Carimbo e guia publicados no main (tentativa ${tentativa})."
+              exit 0
+            fi
+            echo "Push rejeitado (o main avançou); sincronizando e regenerando..."
+            git fetch --quiet origin main
+            git reset --hard --quiet FETCH_HEAD
+            node scripts/atualizar-docs-revision.mjs >/dev/null
+            node scripts/gerar-historico-versionamento.mjs >/dev/null
+            sleep 3
+          done
+
+          echo "Não foi possível publicar o carimbo e o guia após 3 tentativas." >&2
+          echo "Se o erro for 403, habilite Settings → Actions → General → Workflow permissions: Read and write." >&2
+          exit 1

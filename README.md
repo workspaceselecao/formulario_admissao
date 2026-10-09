@@ -27,7 +27,7 @@ Deploy de referência: **Vercel** (site estático). Sem banco de dados — os PD
 | Geração de PDF | [pdf-lib](https://github.com/Hopding/pdf-lib) via CDN (com SRI), pdf.js (worker em blob) |
 | APIs externas | ViaCEP, Brasil API, IBGE (cidades), ipify, kstrtech (municípios) |
 | Infra | [Vercel](https://vercel.com) (headers de segurança, redirects e rewrites em `vercel.json`) |
-| Qualidade | GitHub Actions (CI mínimo), suíte `scripts/run-test.mjs` |
+| Qualidade | GitHub Actions (CI + carimbo de revisão jurídica e histórico automáticos), suíte `scripts/run-test.mjs` |
 
 ## 🗺️ Rotas (vercel.json)
 
@@ -84,13 +84,13 @@ Abrir `index.html` diretamente também funciona para inspeção rápida; para o 
 
 - **Headers** (`vercel.json`): CSP com SRI, HSTS, X-Frame-Options DENY, COOP/COEP require-corp, CORP same-origin, Permissions-Policy restritiva, X-Permitted-Cross-Domain-Policies.
 - **Autenticação client-side** (decisão de projeto documentada): os formulários e o painel usam chaves com verificadores derivados (SHA-256 + salt + transformações); códigos reais **nunca** estão no código-fonte. Sessão em `sessionStorage` com expiração de 60 min (painel). Não é substituto de autenticação server-side.
-- **LGPD**: hub Docs público com aviso de privacidade corporativo (PO-026/027/029), política de privacidade, termos de uso, base legal, RIPD e carimbo de revisão jurídica derivado do Git (`Docs/docs-revision.json`, atualizado por `scripts/atualizar-docs-revision.mjs`). Rascunhos locais expiram automaticamente 24 horas após o último salvamento (`rascunho-ttl.js`), sem retenção indefinida.
+- **LGPD**: hub Docs público com aviso de privacidade corporativo (PO-026/027/029), política de privacidade, termos de uso, base legal, RIPD e carimbo de revisão jurídica derivado do Git (`Docs/docs-revision.json`, regenerado automaticamente a cada push pelo workflow `.github/workflows/docs-automacao.yml`). Rascunhos locais expiram automaticamente 24 horas após o último salvamento (`rascunho-ttl.js`), sem retenção indefinida.
 
 ## ☁️ Deploy (Vercel)
 
 1. Importe o repositório em [vercel.com/new](https://vercel.com/new) (preset **Other**, detecção automática).
 2. O deploy usa apenas `vercel.json` — sem build step.
-3. `main` é a Production Branch; qualquer push dispara deploy automático.
+3. `main` é a Production Branch; qualquer push dispara deploy automático (o commit automático do workflow `docs-automacao.yml` também é publicado).
 4. Rotas, headers e redirects são geridos pelo `vercel.json` versionado.
 
 ## 🔁 Fluxo de desenvolvimento
@@ -99,6 +99,7 @@ Abrir `index.html` diretamente também funciona para inspeção rápida; para o 
 - `main` mantém **histórico linear**: preferir **Squash and merge** em PRs de mudança única; **Rebase and merge** quando os commits individuais tiverem valor histórico.
 - Conventional Commits (`feat`, `fix`, `refactor`, `security`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `perf`) com escopo do módulo (`forms`, `pdf`, `admin`, `security`, `ui`, `embedded`, ...).
 - CI obrigatório antes do merge: verificação estrutural, sintaxe JS e suíte `scripts/run-test.mjs`.
+- Push no `main` dispara o workflow `docs-automacao.yml`, que regenera e commita o carimbo de revisão jurídica e o guia de atualizações (`Docs/docs-revision.json` e `Docs/historico-versionamento.md`) — sem etapa manual.
 
 ## 🏷️ Versionamento
 

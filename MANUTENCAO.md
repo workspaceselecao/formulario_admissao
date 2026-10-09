@@ -169,9 +169,9 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 - Texto padrão no rodapé dos HTML em `/Docs`: revisão validada com Jurídico e Privacidade; **Última validação em** lida de `Docs/docs-revision.json` (data/hora e commit do último push).
 - `Docs/aviso-de-privacidade.html` (rota `/aviso-de-privacidade`) transcreve o **Aviso de Privacidade — Hub Formulários RH** (políticas corporativas PO-026_04, PO-027_04 e PO-029_05; DPO `dpo-br@atento.com.br`). Alteração relevante no funcionamento do Hub, nas categorias de dados, finalidades, integrações externas ou formas de armazenamento exige **reavaliar e atualizar o Aviso** (§ 13 do documento); a suíte trava o essencial dessa adequação (Teste 19).
-- Após alterar política, termos ou base legal, executar: `node scripts/atualizar-docs-revision.mjs` e commitar o JSON atualizado junto com os HTML.
+- **Carimbo e guia automáticos:** `Docs/docs-revision.json` (carimbo) e `Docs/historico-versionamento.md` (guia público) são regenerados e commitados **a cada push no `main`** pelo workflow `.github/workflows/docs-automacao.yml` — não é preciso rodar os scripts nem commitar esses arquivos à mão. Para pré-visualizar antes de subir, use `node scripts/atualizar-docs-revision.mjs` e `node scripts/gerar-historico-versionamento.mjs` (o workflow regrava os dois no push).
 - A cópia DOCX de referência (`Docs/Servicos_Privacidade_Termos.docx`) é **gerada** a partir destes HTMLs: `python scripts/gerar-docx-privacidade.py`. Rode o script sempre que os textos de privacidade/segurança mudarem e commite o DOCX junto (não editar o binário à mão).
-- Guia público de atualizações (RIPD): `node scripts/gerar-historico-versionamento.mjs` gera `Docs/historico-versionamento.md` (link em `ripd.html`).
+- Guia público de atualizações (RIPD): `Docs/historico-versionamento.md` (link em `ripd.html`), regenerado pelo mesmo workflow automático; `node scripts/gerar-historico-versionamento.mjs` segue disponível para pré-visualização local.
 
 ---
 
@@ -194,8 +194,8 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 - `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/termos`, `/admin`), além da API administrativa `/api/admin/*` (config com backup automático, uploads validados, histórico) gravando em `data/` (gitignored). Executar com `node scripts/test-server.mjs`.
 - `run-test.mjs` — suíte de testes do projeto (o 14 cobre o painel v2, o 15/16 o painel v3/Field Builder e o 17 a auditoria de dados); executar com `node scripts/run-test.mjs`.
 - `audit-panel.mjs` — auditoria do painel contra os dados reais do repositório: roda o pipeline do painel (`carregarTudo` + coletores + gate de publicação) em `node:vm` e falha em qualquer falso positivo ou configuração sem consumidor. Executar com `node scripts/audit-panel.mjs` (também roda no Teste 17).
-- `atualizar-docs-revision.mjs` — atualiza `Docs/docs-revision.json` após alterar política, termos ou base legal (ver seção LGPD/Docs).
-- `gerar-historico-versionamento.mjs` — regenera `Docs/historico-versionamento.md` (guia público de atualizações, RIPD).
+- `atualizar-docs-revision.mjs` — regenera `Docs/docs-revision.json` (carimbo de revisão jurídica). Roda **automaticamente a cada push no `main`** pelo workflow `.github/workflows/docs-automacao.yml` (ver §7.5); localmente serve para pré-visualizar.
+- `gerar-historico-versionamento.mjs` — regenera `Docs/historico-versionamento.md` (guia público de atualizações, RIPD). Também automático no push (ver §7.5).
 - `gerar-docx-privacidade.py` — regenera a cópia DOCX de referência (`Docs/Servicos_Privacidade_Termos.docx`) a partir das páginas de `/Docs` (python-docx + lxml). Executar com `python scripts/gerar-docx-privacidade.py` sempre que os textos de privacidade/segurança mudarem (ver §7.5).
 - Não há script de build: o deploy é de site estático e não depende destes scripts.
 
@@ -227,6 +227,7 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 - Arquivo `vercel.json`: `cleanUrls` e rewrite de `/` para `index.html`.
 - Projeto: **estático**; faça `git push` e ligue o repositório na Vercel.
+- Cada push no `main` dispara, além do deploy, o workflow `.github/workflows/docs-automacao.yml` (§7.5), que regenera e commita o carimbo e o guia — esse commit automático também é publicado pela Vercel.
 - Todos os caminhos a recursos (JSON, PDF) devem existir no **repositório** (ou URLs absolutas estáticas).
 
 ---
