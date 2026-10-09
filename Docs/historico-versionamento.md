@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 08/10/2026 | Registra o fallback manual do carimbo e do guia automáticos |
 | 08/10/2026 | Remove resquício da opção de manter o rascunho |
 | 08/10/2026 | Chore : remove o modelo DOCX da ficha e o lock do Word |
 | 08/10/2026 | Alinha documentos à retenção fixa do rascunho |
