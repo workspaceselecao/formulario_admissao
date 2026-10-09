@@ -409,13 +409,18 @@
     border-color: var(--accent);
   }
 
-  .gate-row.gate-selecionado .salario-gate-btn {
+  .salario-gate-btn--ativo {
     background: var(--accent-soft);
     border-color: var(--accent);
   }
-  .gate-row.gate-selecionado .salario-gate-btn span {
+  .salario-gate-btn--ativo span {
     color: var(--accent);
   }
+
+  /* O atributo `hidden` precisa vencer regras de display do próprio componente
+     (`display:flex` em botões/rótulos, `display:grid` em grades); sem isso o
+     elemento continua visível na tela mesmo “escondido”. */
+  .container [hidden] { display: none !important; }
 
 
   .salvar-pdf-aviso {
@@ -1861,6 +1866,9 @@ function definirEstadoEtapaAcoes(pcts) {
     pcts.transporte >= 100 &&
     pcts.refeicao >= 100;
   if (avisoBox) {
+    // O aviso é liberado junto com o módulo de assinatura e fica estável a partir
+    // daí: nenhuma mudança de DOM ocorre durante o traço, então o campo não se
+    // movimenta enquanto o candidato assina.
     const sigOpen = sigSection && !sigSection.hasAttribute("hidden");
     avisoBox.hidden = !(fichaPreenchida && sigOpen);
   }
@@ -1883,16 +1891,12 @@ function initAssinaturaCanvas() {
     e.preventDefault();
     marcarAssinaturaInvalidaCanvas(false);
     assinaturaUltPos = obterPontoNoCanvas(e, canvas);
-    const avisoBox = document.getElementById("salvarPdfAvisoBox");
-    if (avisoBox) avisoBox.hidden = true;
   };
   const fimTraco = () => {
     assinaturaDesenhando = false;
     assinaturaUltPos = null;
     if (isAssinaturaManuscritaPreenchida()) {
       assinaturaCanvasTemTraço = true;
-      const avisoBox = document.getElementById("salvarPdfAvisoBox");
-      if (avisoBox) avisoBox.hidden = true;
     }
     updateProgress();
   };
@@ -1908,8 +1912,6 @@ function initAssinaturaCanvas() {
     assinaturaCanvasTemTraço = true;
     agendarSalvarRascunho();
     updateProgress();
-    const avisoBox = document.getElementById("salvarPdfAvisoBox");
-    if (avisoBox) avisoBox.hidden = true;
   };
   canvas.addEventListener("pointerdown", inícioTraco);
   canvas.addEventListener("pointermove", mover);
@@ -2358,19 +2360,35 @@ function selecionarBancoPrincipal(el){
   updateProgress();
   agendarSalvarRascunho();
 }
-function salarioBradescoDecisao(el){
-  const decisao = el?.value || 'nao_informado';
-  const btnAbrir = document.getElementById('btnBradescoAbrirConta');
-  const gate = document.getElementById('cartaBradescoGate');
-  if (!btnAbrir) return;
-  const liberarBotao = decisao === 'ja_possui';
-  btnAbrir.hidden = !liberarBotao;
-  gate?.classList.toggle('gate-selecionado', liberarBotao);
+function salarioBradescoDecisao(){
+  sincronizarGateContaSalario();
   agendarSalvarRascunho();
 }
-function salarioBradescoSynchronizarPainel(el){
-  if (!el) return;
-  salarioBradescoDecisao(el);
+/** Conta Salário (Bradesco): "Já possuo" libera o preenchimento de agência/conta;
+ *  "Ainda vou abrir" libera apenas o botão da Carta de Abertura de Conta. */
+function sincronizarGateContaSalario(){
+  const decisao = radio('salarioBradesco');
+  const jaPossui = decisao === 'ja_possui';
+  const vaiAbrir = decisao === 'vai_abrir';
+  document.querySelectorAll('.salario-gate-btn').forEach((label) => {
+    const input = label.querySelector('input');
+    label.classList.toggle('salario-gate-btn--ativo', !!input && input.checked);
+  });
+  if (radio('tipoConta') !== 'bradesco') return;
+  const btnAbrir = document.getElementById('btnBradescoAbrirConta');
+  if (btnAbrir) btnAbrir.hidden = !vaiAbrir;
+  const detalhes = document.getElementById('bradescoDetalhes');
+  const agencia = document.getElementById('agenciaBradesco');
+  const conta = document.getElementById('contaBradesco');
+  [agencia, conta].forEach((el) => {
+    if (!el) return;
+    el.required = jaPossui;
+    if (vaiAbrir) { el.value = ''; el.classList.remove('invalid'); }
+  });
+  if (detalhes) {
+    if (jaPossui) detalhes.removeAttribute('hidden');
+    else detalhes.setAttribute('hidden', '');
+  }
 }
 function toggleBanco(el){
   const tipo = el?.value || radio('tipoConta');
@@ -2395,20 +2413,10 @@ function toggleBanco(el){
   );
   const cartaBradescoField = document.getElementById('cartaBradescoField');
   if (cartaBradescoField) {
-    if (isSalarioBradesco) {
-      cartaBradescoField.removeAttribute('hidden');
-      salarioBradescoSynchronizarPainel(
-        document.querySelector('input[name="salarioBradesco"]:checked')
-      );
-    } else {
-      cartaBradescoField.setAttribute('hidden', '');
-      definirVisibilidadeDetalheBanco(
-        document.getElementById('bradescoDetalhes'),
-        false,
-        { agencia: 'agenciaBradesco', conta: 'contaBradesco' }
-      );
-    }
+    if (isSalarioBradesco) cartaBradescoField.removeAttribute('hidden');
+    else cartaBradescoField.setAttribute('hidden', '');
   }
+  sincronizarGateContaSalario();
   if (!bradescoAtivo) {
     marcarCampoInvalido('agenciaBradesco', false);
     marcarCampoInvalido('contaBradesco', false);
@@ -2508,14 +2516,21 @@ function calcularPercentuaisSecoes() {
     () => hasValue("cidade")
   ]);
 
+  const contaSalarioBradesco = () => radio("tipoConta") === "bradesco";
+  const contaSalarioVaiAbrir = () => contaSalarioBradesco() && radio("salarioBradesco") === "vai_abrir";
   const bancario = calcPct([
     () => TIPOS_CONTA_VALIDOS.includes(radio("tipoConta")),
+    // Conta Salário exige a decisão antes de liberar o preenchimento dos dados
+    () => !contaSalarioBradesco() || ["ja_possui", "vai_abrir"].includes(radio("salarioBradesco")),
+    // Quem ainda vai abrir a conta não tem agência/conta para informar
     () => {
+      if (contaSalarioVaiAbrir()) return true;
       const tipo = radio("tipoConta");
       const ids = idsAgenciaContaAtivos(tipo);
       return ids ? hasValue(ids.agencia) : true;
     },
     () => {
+      if (contaSalarioVaiAbrir()) return true;
       const tipo = radio("tipoConta");
       const ids = idsAgenciaContaAtivos(tipo);
       return ids ? hasValue(ids.conta) : true;
@@ -2549,8 +2564,6 @@ function calcularPercentuaisSecoes() {
   const declaracao = calcPct([
     () => isNaoAssinarManualmente() || assinaturaCanvasTemTraço || isAssinaturaManuscritaPreenchida()
   ]);
-  definirEstadoEtapaAcoes({ pessoal, endereco, bancario, dependentes, transporte, refeicao, declaracao });
-
   return { pessoal, endereco, bancario, dependentes, transporte, refeicao, declaracao };
 }
 
@@ -2589,6 +2602,9 @@ function atualizarVisibilidadeEtapas(pcts) {
     definirEtapaVisivel(id, visivel);
     etapasDesbloqueadasAnterior[id] = !!visivel;
   });
+  // Depois de aplicar a visibilidade: o aviso depende de a seção de assinatura
+  // já estar aberta.
+  definirEstadoEtapaAcoes(pcts);
 }
 
 function resetarFluxoEtapas() {
@@ -2819,7 +2835,8 @@ function coletarEstadoRascunho() {
       deficiencia: radio("deficiencia"),
       tipoConta: radio("tipoConta"),
       bancoPrincipal: radio("bancoPrincipal"),
-      valeRef: radio("valeRef")
+      valeRef: radio("valeRef"),
+      salarioBradesco: radio("salarioBradesco")
     },
     tipoDeficiencia: checks("tipoDeficiencia"),
     dependentes: lerDependentesFormulario(),
@@ -2839,6 +2856,7 @@ function marcarRadioRestaurar(name, value) {
     toggleDef(el);
     syncRadioActive(name);
   } else if (name === "tipoConta") toggleBanco(el);
+  else if (name === "salarioBradesco") sincronizarGateContaSalario();
   else syncRadioActive(name);
 }
 
@@ -2887,6 +2905,8 @@ function aplicarEstadoRascunho(obj) {
     const bpEl = document.querySelector(`input[name="bancoPrincipal"][value="${rad.bancoPrincipal}"]`);
     if (bpEl) { bpEl.checked = true; syncRadioActive("bancoPrincipal"); }
   }
+  // Decisão da conta salário antes do tipo de conta: o gate a consulta ao sincronizar
+  marcarRadioRestaurar("salarioBradesco", rad.salarioBradesco);
   marcarRadioRestaurar("tipoConta", rad.tipoConta === "mentore" ? "conta_corrente" : rad.tipoConta);
   marcarRadioRestaurar("valeRef", rad.valeRef);
 
