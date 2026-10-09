@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-08T19:54:36-03:00",
-  "gitCommit": "8644c86",
-  "gitSubject": "docs(lgpd): alinha documentos à retenção fixa do rascunho",
+  "ultimaValidacaoIso": "2026-10-08T21:29:20-03:00",
+  "gitCommit": "2fc71ea",
+  "gitSubject": "ci(docs): automatiza o carimbo de revisão jurídica e o histórico de versionamento no push",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
