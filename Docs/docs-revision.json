@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-09T01:51:02-03:00",
-  "gitCommit": "52fe5c4",
-  "gitSubject": "Merge pull request #6 from workspaceselecao/feat/ficha-cadastral-conta-salario-e-aviso-pdf",
+  "ultimaValidacaoIso": "2026-10-09T02:37:00-03:00",
+  "gitCommit": "08cc8a7",
+  "gitSubject": "Merge remote-tracking branch 'origin/main' into feat/ficha-cadastral-conta-salario-e-aviso-pdf",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
