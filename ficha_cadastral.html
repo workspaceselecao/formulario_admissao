@@ -3624,6 +3624,12 @@ function baixarCartaAberturaConta(){
   };
   const salvo = appStorage.setItem(PREFILL_CARTA_STORAGE_KEY, JSON.stringify(prefill));
   window.RascunhoTTL?.registrarSalvamento(salvo);
+  // A Carta é uma página protegida. Quem chegou até este botão passou pelo
+  // modal de dados bancários com a sessão ativa, então a Carta entra na mesma
+  // sessão e abre sem pedir o código de acesso de novo. Demais entradas (URL
+  // direta, links do cabeçalho, home) continuam exigindo a chave.
+  window.atentoGrantPath?.("/carta_bradesco");
+  window.atentoGrantPath?.("/carta_bradesco.html");
   window.location.assign("carta_bradesco.html");
 }
 

@@ -30,13 +30,17 @@
   // ══════════════════════════════════════════════════════
   // ROTAS PROTEGIDAS
   // ══════════════════════════════════════════════════════
-  const PROTECTED = ["/f075", "/f089", "/bradesco", "/termos", "/ficha_cadastral", "/assistencia_medica", "/carta_bradesco", "/termos_aceite"];
+  // "/carta_bradesco.html": a Vercel (cleanUrls) redireciona para o caminho limpo,
+  // mas a rota com extensão também precisa ser guardada — é onde o botão da
+  // ficha aterrissa no servidor local.
+  const PROTECTED = ["/f075", "/f089", "/bradesco", "/termos", "/ficha_cadastral", "/assistencia_medica", "/carta_bradesco", "/termos_aceite", "/carta_bradesco.html"];
 
   // ══════════════════════════════════════════════════════
   // SESSÃO
   // ══════════════════════════════════════════════════════
   const TK = "atf_t";
   const TX = "atf_x";
+  // `atf_p` guarda os caminhos liberados nesta sessão, separados por "|".
   const TP = "atf_p";
   const EXPIRY_MS = 60 * 60 * 1000;
   var _refreshTimer = null;
@@ -125,21 +129,36 @@
     return Array.from(a, function (b) { return b.toString(16).padStart(2, "0"); }).join("");
   }
 
-  function sessionValid(path) {
+  // Sessão emitida e ainda dentro do prazo (qualquer caminho).
+  function sessaoAtiva() {
     try {
       var tk = sessionStorage.getItem(TK);
       var tx = sessionStorage.getItem(TX);
-      var tp = sessionStorage.getItem(TP);
-      if (!tk || !tx || !tp) return false;
-      if (tp !== path) return false;
+      if (!tk || !tx) return false;
       return Date.now() < parseInt(tx, 10);
     } catch (e) { return false; }
   }
 
+  function caminhosLiberados() {
+    try {
+      var tp = sessionStorage.getItem(TP);
+      return tp ? tp.split("|") : [];
+    } catch (e) { return []; }
+  }
+
+  function sessionValid(path) {
+    if (!sessaoAtiva()) return false;
+    return caminhosLiberados().indexOf(path) !== -1;
+  }
+
   function grantSession(path) {
+    // Preserva os caminhos já liberados e ainda válidos: quem digitou a chave
+    // na ficha continua autenticado ao voltar para ela depois de abrir a Carta.
+    var keep = sessaoAtiva() ? caminhosLiberados() : [];
+    if (keep.indexOf(path) === -1) keep.push(path);
     sessionStorage.setItem(TK, genToken());
     sessionStorage.setItem(TX, String(Date.now() + EXPIRY_MS));
-    sessionStorage.setItem(TP, path);
+    sessionStorage.setItem(TP, keep.join("|"));
   }
 
   function refreshSession() {
@@ -306,6 +325,24 @@
       sessionStorage.removeItem(TP);
     } catch (e) { /* ignore */ }
     window.location.reload();
+  };
+
+  /**
+   * Libera um caminho protegido na sessão corrente, sem nova chave.
+   *
+   * Só funciona com sessão já ativa (o chamador já passou pela chave) e apenas
+   * para caminhos protegidos: é o formulário autenticado que decide abrir um
+   * fluxo ligado a ele — no caso, a ficha abrindo a Carta de Abertura de Conta
+   * a partir do modal de dados bancários. Acesso direto à URL, sem sessão,
+   * continua exigindo a chave.
+   */
+  window.atentoGrantPath = function (path) {
+    try {
+      if (!path || !isProtected(path)) return false;
+      if (!sessaoAtiva()) return false;
+      grantSession(path);
+      return true;
+    } catch (e) { return false; }
   };
 
   // ══════════════════════════════════════════════════════
