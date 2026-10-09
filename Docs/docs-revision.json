@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-08T21:50:53-03:00",
-  "gitCommit": "6f251c3",
-  "gitSubject": "docs(docs): oculta do guia público os commits internos de manutenção",
+  "ultimaValidacaoIso": "2026-10-09T01:51:02-03:00",
+  "gitCommit": "52fe5c4",
+  "gitSubject": "Merge pull request #6 from workspaceselecao/feat/ficha-cadastral-conta-salario-e-aviso-pdf",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
