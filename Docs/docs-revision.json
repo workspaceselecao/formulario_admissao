@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-10T00:22:01-03:00",
-  "gitCommit": "6946535",
-  "gitSubject": "docs(manutencao): documenta modelo de branch única main e limitação da proteção no GitHub",
+  "ultimaValidacaoIso": "2026-10-10T00:38:00-03:00",
+  "gitCommit": "16338e0",
+  "gitSubject": "refactor: remove o formulário Termos de Aceite (descontinuado)",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 10/10/2026 | Remove o formulário Termos de Aceite |
 | 09/10/2026 | Merge remote-tracking branch 'origin/main' into feat/ficha-cadastral-conta-salario-e-aviso-pdf |
 | 09/10/2026 | Chore: remove a regra de automação de commit/push |
 | 09/10/2026 | Abre a Carta Bradesco sem novo código quando vem do modal da ficha |
