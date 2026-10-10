@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-10T00:38:00-03:00",
-  "gitCommit": "16338e0",
-  "gitSubject": "refactor: remove o formulário Termos de Aceite (descontinuado)",
+  "ultimaValidacaoIso": "2026-10-10T00:57:02-03:00",
+  "gitCommit": "5c4549c",
+  "gitSubject": "feat(lgpd): migração descarta rascunhos legados de formulários descontinuados",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
