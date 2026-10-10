@@ -253,6 +253,14 @@ Qualquer município retornado pela API já aparece no select; não é necessári
 
 ---
 
+## 11.1 Modelo de trabalho: branch única `main`
+
+- O repositório trabalha com **uma única branch**: `main`. Fluxo local: `git fetch` → commit → `git push` (o `push.default=simple` envia direto para a `main`).
+- **Proteção de branch no GitHub (status: procurar)**: a API de proteção de branch exige permissão **admin** no repositório — o token de trabalho atual tem apenas `push/triage` e o `PUT .../branches/main/protection` responde 404. Enquanto não houver um administrador para aplicá-la, a disciplina é: **CI verde antes de cada push** (`node scripts/run-test.mjs`; a mesma suíte roda na CI em `.github/workflows/ci.yml`) e revisão do `git diff` antes do commit.
+- Quando um admin estiver disponível, a proteção recomendada (sem restringir este fluxo) é: `required_status_checks` (CI) com `strict: false`, `enforce_admins: false`, `required_pull_request_reviews: null` e `restrictions: null` — protege só a documentação/status sem bloquear push direto.
+
+---
+
 ## 12. Referência cruzada
 
 - O `README.md` na raiz resume arquivos e publicação; este documento aprofunda **manutenção e pontos de extensão**.
