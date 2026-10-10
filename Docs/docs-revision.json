@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-09T02:37:00-03:00",
-  "gitCommit": "08cc8a7",
-  "gitSubject": "Merge remote-tracking branch 'origin/main' into feat/ficha-cadastral-conta-salario-e-aviso-pdf",
+  "ultimaValidacaoIso": "2026-10-10T00:22:01-03:00",
+  "gitCommit": "6946535",
+  "gitSubject": "docs(manutencao): documenta modelo de branch única main e limitação da proteção no GitHub",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

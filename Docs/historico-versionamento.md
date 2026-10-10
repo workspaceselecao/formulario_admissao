@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 9 de outubro de 2026
+**Última atualização deste guia:** 10 de outubro de 2026
 
 ---
 
