@@ -2,7 +2,7 @@
  * rascunho-ttl.js — Descarte automático de rascunhos após 24 horas (LGPD)
  *
  * Compartilhado pelas páginas públicas (ficha_cadastral, assistencia_medica,
- * carta_bradesco, termos_aceite). Ver MANUTENCAO.md §7.2.
+ * carta_bradesco). Ver MANUTENCAO.md §7.2.
  *
  * Comportamento:
  *  - Retenção máxima fixa: o rascunho é descartado automaticamente 24 horas

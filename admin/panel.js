@@ -80,8 +80,6 @@
   const PDFS = [
     { arquivo: FICHA_PDF, tipo: "Template principal", formulario: "F-075 Ficha Cadastral", path: FICHA_PDF },
     { arquivo: DECLARACAO_PDF, tipo: "Template principal", formulario: "F-089 (Plano de Benefícios)", path: DECLARACAO_PDF },
-    { arquivo: "ARQUIVO MODELO.pdf", tipo: "Template (download)", formulario: "Termos de Aceite", path: "ARQUIVO MODELO.pdf" },
-    { arquivo: "TERMO DE SIGILO_SP.pdf", tipo: "Template (download)", formulario: "Termos de Aceite (SP)", path: "TERMO DE SIGILO_SP.pdf" },
     { arquivo: "FICHA BH.pdf", tipo: "Regional", formulario: "F-089 (Outros Planos)", path: "FICHA BH.pdf" },
     { arquivo: "FICHA FSA.pdf", tipo: "Regional", formulario: "F-089 (Outros Planos)", path: "FICHA FSA.pdf" },
     { arquivo: "FICHA GNDI.pdf", tipo: "Regional", formulario: "F-089 (Outros Planos)", path: "FICHA GNDI.pdf" },
@@ -124,8 +122,7 @@
     // `pdfFiles` ao(s) template(s) que o alimentam (contagem de cidades).
     { nome: "F-075 · Ficha Cadastral", rota: "/f075", arquivo: "ficha_cadastral.html", template: FICHA_PDF, status: "Ativo", schema: "ficha_cadastral_campos.json", docKey: "ficha_cadastral", pdfFile: FICHA_PDF },
     { nome: "F-089 · Assistência Médica", rota: "/f089", arquivo: "assistencia_medica.html", template: "DECLARACAO (Plano de Benefícios) ou FICHA regional por cidade", status: "Ativo", schema: "assistencia_medica_campos.json + declaracao_plano_saude_campos.json", docKey: "declaracao_plano_saude", pdfFile: DECLARACAO_PDF, pdfFiles: [DECLARACAO_PDF].concat(PDFS.filter(function (p) { return p.tipo === "Regional"; }).map(function (p) { return p.arquivo; })) },
-    { nome: "Carta Conta Salário Bradesco", rota: "/bradesco", arquivo: "carta_bradesco.html", template: "Gerado do zero (sem template)", status: "Ativo", schema: "—" },
-    { nome: "Termos de Aceite", rota: "/termos", arquivo: "termos_aceite.html", template: "ARQUIVO MODELO.pdf / TERMO DE SIGILO_SP.pdf", status: "Indisponível (na home)", schema: "—" }
+    { nome: "Carta Conta Salário Bradesco", rota: "/bradesco", arquivo: "carta_bradesco.html", template: "Gerado do zero (sem template)", status: "Ativo", schema: "—" }
   ];
   const REGRAS = [
     { id: "RN-PIS", nome: "Primeiro Emprego → PIS", desc: "PIS é sempre visível e obrigatório, tanto para SIM quanto para NÃO.", class: "codigo" },
@@ -1422,7 +1419,6 @@
     status += "<tr><td>F-075 Ficha Cadastral</td><td><span class='badge ok'>Ativo</span></td><td>" + nCoordFicha + " campos</td></tr>";
     status += "<tr><td>F-089 Assistência Médica</td><td><span class='badge ok'>Ativo</span></td><td>Plano de Benefícios + " + Object.keys(FICHA_UTILIZAR_PARA_ARQUIVO).length + " fichas regionais</td></tr>";
     status += "<tr><td>Carta Conta Salário</td><td><span class='badge ok'>Ativo</span></td><td>geração programática</td></tr>";
-    status += "<tr><td>Termos de Aceite</td><td><span class='badge warn'>Indisponível</span></td><td>marcado na home</td></tr>";
     for (const reg of Object.keys(regioes).sort()) {
       status += "<tr><td>Regional " + esc(reg) + "</td><td><span class='badge muted'>" + regioes[reg] + " cidades</span></td><td></td></tr>";
     }

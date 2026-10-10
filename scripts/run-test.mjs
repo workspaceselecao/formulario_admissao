@@ -22,7 +22,6 @@ const REWRITES = {
   "/f075": "/ficha_cadastral.html",
   "/f089": "/assistencia_medica.html",
   "/bradesco": "/carta_bradesco.html",
-  "/termos": "/termos_aceite.html",
   "/admin": "/admin/index.html",
   "/": "/index.html"
 };
@@ -152,7 +151,7 @@ async function runTests() {
 
   // ── TEST 3: Protected pages include guard ──
   console.log("\n📋 Teste 3: Páginas protegidas incluem guard");
-  for (const route of ["/f075", "/f089", "/bradesco", "/termos"]) {
+  for (const route of ["/f075", "/f089", "/bradesco"]) {
     const r = await fetch(`http://127.0.0.1:${PORT}${route}`);
     assert(`${route} inclui <script src="guard.js">`, r.body.includes('src="guard.js"'), "missing guard.js script");
     assert(`${route} inclui data-guard-hidden CSS`, r.body.includes("data-guard-hidden"), "missing guard CSS");
@@ -166,7 +165,7 @@ async function runTests() {
 
   // ── TEST 5: No real keys in source ──
   console.log("\n📋 Teste 5: Chaves reais ausentes do código");
-  const guardedPages = ["/f075", "/f089", "/bradesco", "/termos"];
+  const guardedPages = ["/f075", "/f089", "/bradesco"];
   const keys = lerChavesTestes().slice(0, 5);
   if (keys.length) assert("chaves de teste disponíveis (keys-testes.txt)", keys.length === 5, "incompleto: " + keys.length);
   const normalized = keys.map(k => k.replace(/[\s\-]/g, ""));
@@ -210,7 +209,6 @@ async function runTests() {
     assert("vercel.json tem rewrite /f075", rewrites.some(r => r.source === "/f075"), "missing");
     assert("vercel.json tem rewrite /f089", rewrites.some(r => r.source === "/f089"), "missing");
     assert("vercel.json tem rewrite /bradesco", rewrites.some(r => r.source === "/bradesco"), "missing");
-    assert("vercel.json tem rewrite /termos", rewrites.some(r => r.source === "/termos"), "missing");
     assert("vercel.json tem rewrite /admin", rewrites.some(r => r.source === "/admin"), "missing");
     assert("destinos de rewrite sem extensão .html (forma cleanUrls)", rewrites.every(r => !String(r.destination || "").endsWith(".html")), "destination with .html found");
     assert("rewrite /admin aponta para /admin/ (índice físico)", (rewrites.find(r => r.source === "/admin") || {}).destination === "/admin/", "wrong destination");
@@ -301,16 +299,17 @@ async function runTests() {
       !pairs.some(p => deriveVerifierNode("ATNXXXXXXXXXXXXX", p.s) === p.v), "unexpected match");
   }
 
-  // ── TEST 12: Sidebar ⚙ Configurações nas 4 páginas + card na Home ──
+  // ── TEST 12: Sidebar ⚙ Configurações nas 3 páginas + card na Home ──
   console.log("\n📋 Teste 12: Sidebar — Configurações");
-  for (const page of ["ficha_cadastral.html", "assistencia_medica.html", "carta_bradesco.html", "termos_aceite.html"]) {
+  for (const page of ["ficha_cadastral.html", "assistencia_medica.html", "carta_bradesco.html"]) {
     const r = await fetch(`http://127.0.0.1:${PORT}/${page}`);
     assert(`${page} contém link Configurações`, r.status === 200 && r.body.includes('href="/admin"') && r.body.includes("Configurações"), "missing");
   }
   const homeCardR = await fetch(`http://127.0.0.1:${PORT}/index.html`);
   assert("Home tem card Configurações apontando para o painel", homeCardR.status === 200 && homeCardR.body.includes('href="/admin"') && homeCardR.body.includes(">Configurações<"), "missing");
   assert("Home não usa mais o caminho admin/admin.html", !homeCardR.body.includes("admin/admin.html"), "legacy link");
-  assert("Home não linka mais termos_aceite.html", !homeCardR.body.includes('href="termos_aceite.html"'), "still linked");
+  assert("Home não linka termos_aceite.html", !homeCardR.body.includes('href="termos_aceite.html"'), "still linked");
+  assert("Home não linka mais a rota /termos", !homeCardR.body.includes('href="/termos"'), "still linked");
   assert("Home marca o card como Acesso restrito", homeCardR.body.includes("Acesso restrito"), "missing");
 
   // ── TEST 13: API administrativa (integração com test-server.mjs) ──
@@ -396,7 +395,7 @@ async function runTests() {
     }
     const hubR = await fetch(`http://127.0.0.1:${PORT}/Docs/index.html`);
     assert("hub Docs linka o Aviso", hubR.body.includes("/Docs/aviso-de-privacidade.html"), "missing link");
-    for (const page of ["/f075", "/f089", "/bradesco", "/termos", "/"]) {
+    for (const page of ["/f075", "/f089", "/bradesco", "/"]) {
       const r = await fetch(`http://127.0.0.1:${PORT}${page}`);
       assert(`${page} linka /aviso-de-privacidade`, r.body.includes('href="/aviso-de-privacidade"'), "missing link");
     }
@@ -432,11 +431,13 @@ async function runTests() {
     assert("fluxo de dados relaciona api.kstrtech.com.br à UF", /api\.kstrtech\.com\.br[\s\S]*UF/i.test(fluxoR.body), fluxoR.body);
     assert("fluxo de dados explica o IP de origem no ipify", /api\.ipify\.org[\s\S]*IP público de origem/i.test(fluxoR.body), fluxoR.body);
     assert("fluxo de dados informa que PDF e formulário integral não são enviados", /PDF gerado não é enviado[\s\S]*conteúdo integral do formulário não é enviado/i.test(fluxoR.body), fluxoR.body);
-    const termosR = await fetch(`http://127.0.0.1:${PORT}/Docs/terms-of-use.html`);
-    assert("termos de uso declaram expiração de 24 horas", termosR.body.includes("descartado automaticamente 24 horas"), "missing");
+    const servR = await fetch(`http://127.0.0.1:${PORT}/termos-de-uso`);
+    if (servR.ok) {
+      assert("/termos-de-uso servido", servR.status === 200, `got ${servR.status}`);
+    }
     const vjson = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8"));
     assert("vercel.json redireciona /aviso-de-privacidade", (vjson.redirects || []).some(r => r.source === "/aviso-de-privacidade" && r.destination === "/Docs/aviso-de-privacidade.html"), "missing redirect");
-    for (const page of ["/f075", "/f089", "/bradesco", "/termos"]) {
+    for (const page of ["/f075", "/f089", "/bradesco"]) {
       const r = await fetch(`http://127.0.0.1:${PORT}${page}`);
       assert(`${page}: modal LGPD comunica expiração de 24 horas`, r.body.includes("descartado automaticamente 24 horas"), "missing");
     }
@@ -1289,8 +1290,7 @@ async function testarRascunhoTTL(assert) {
   const paginas = [
     ["ficha_cadastral.html", "ficha_cadastral_rascunho_v2", "rascunho_ttl_ficha_v1"],
     ["assistencia_medica.html", "assistencia_medica_rascunho_v5", "rascunho_ttl_assist_v1"],
-    ["carta_bradesco.html", "carta_bradesco_rascunho_v1", "rascunho_ttl_carta_v1"],
-    ["termos_aceite.html", "termos_aceite_rascunho_v1", "rascunho_ttl_termos_v1"]
+    ["carta_bradesco.html", "carta_bradesco_rascunho_v1", "rascunho_ttl_carta_v1"]
   ];
   for (const [pag, chave, metaChave] of paginas) {
     const html = readFileSync(join(ROOT, pag), "utf8");
@@ -1390,7 +1390,7 @@ async function testarRascunhoTTL(assert) {
     assert("ttl: rascunho com +24h é descartado no load (sem modal)", !store.has("k") && !store.has("m") && limpou, JSON.stringify([...store.keys()]));
   }
 
-  // 2) blob sem campo t (carta/termos): meta nova inicia o relógio agora
+  // 2) blob sem campo t: meta nova inicia o relógio agora
   {
     const { ctx, store } = novoAmbiente();
     store.set("k", JSON.stringify({ nomeCompleto: "X" }));

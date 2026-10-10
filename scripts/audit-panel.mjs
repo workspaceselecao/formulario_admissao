@@ -198,7 +198,7 @@ check("toda configuração retorna default do tipo/range correto", cfgRuins.leng
 
 // ── 7. Métricas por formulário ────────────────────────────────────────
 const metr = T.metricasFormularios();
-check("métricas cobrem os 4 formulários do inventário", Array.isArray(metr) && metr.length === 4, "n=" + (metr || []).length);
+check("métricas cobrem os 3 formulários do inventário", Array.isArray(metr) && metr.length === 3, "n=" + (metr || []).length);
 check("F-075/F-089 com contagem de campos > 0",
   metr.filter((m) => /F-075|F-089/.test(m.codigo || m.nome || "")).every((m) => (m.nCampos || 0) > 0),
   JSON.stringify(metr.map((m) => (m.codigo || m.nome) + ":" + m.nCampos)));

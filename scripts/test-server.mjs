@@ -7,7 +7,6 @@
  *   /f075          → ficha_cadastral.html
  *   /f089          → assistencia_medica.html
  *   /bradesco      → carta_bradesco.html
- *   /termos        → termos_aceite.html
  *   /admin         → admin/admin.html
  *   /              → index.html
  *   /*.html        → arquivo.html (cleanUrls)
@@ -51,7 +50,6 @@ const REWRITES = {
   "/f075": "/ficha_cadastral.html",
   "/f089": "/assistencia_medica.html",
   "/bradesco": "/carta_bradesco.html",
-  "/termos": "/termos_aceite.html",
   // O painel é o índice físico do diretório (admin/index.html): em produção
   // a Vercel o serve por filesystem em /admin — a rewrite é redundante, mas
   // mantida por semântica/compatibilidade.
@@ -365,7 +363,6 @@ server.listen(PORT, () => {
   console.log(`   http://localhost:${PORT}/f075       → ficha_cadastral.html (protegido)`);
   console.log(`   http://localhost:${PORT}/f089       → assistencia_medica.html (protegido)`);
   console.log(`   http://localhost:${PORT}/bradesco   → carta_bradesco.html (protegido)`);
-  console.log(`   http://localhost:${PORT}/termos     → termos_aceite.html (protegido)`);
   console.log(`   http://localhost:${PORT}/admin      → admin/index.html (painel — e-mail @atento.com)`);
   console.log("\nAPI administrativa:");
   console.log("   GET/PUT  /api/admin/config     (overlay + backup automático)");

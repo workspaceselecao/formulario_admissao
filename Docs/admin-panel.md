@@ -23,7 +23,7 @@
 
 ## Como acessar
 
-1. Na **Home**, clique no card **Configurações** (substituiu o card Termos de Aceite) ou use o item **⚙ Configurações** do menu;
+1. Na **Home**, clique no card **Configurações** ou use o item **⚙ Configurações** do menu;
 2. Informe seu e-mail **@atento.com**;
 3. Informe o **código de acesso exclusivo do painel**;
 4. **Validar acesso** — a sessão administrativa dura 60 minutos e se renova automaticamente enquanto a página estiver em uso;

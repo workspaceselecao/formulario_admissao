@@ -30,7 +30,6 @@ const ROUTES = [
   "/f075",
   "/f089",
   "/bradesco",
-  "/termos",
   "/admin",
   "/Docs/",
 ];

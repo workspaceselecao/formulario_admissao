@@ -29,7 +29,7 @@ jobs:
       - name: Estrutura do projeto e JSONs de configuração
         run: |
           set -e
-          for f in index.html ficha_cadastral.html assistencia_medica.html carta_bradesco.html termos_aceite.html admin/index.html vercel.json package.json; do
+          for f in index.html ficha_cadastral.html assistencia_medica.html carta_bradesco.html admin/index.html vercel.json package.json; do
             test -s "$f" || { echo "FALTANDO: $f"; exit 1; }
             echo "OK  $f"
           done

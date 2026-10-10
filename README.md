@@ -1,6 +1,6 @@
 # Hub de Recrutamento & Seleção — Formulários de Admissão
 
-Aplicação **estática** (sem backend) que gera documentos oficiais de admissão preenchidos em PDF diretamente no navegador: Ficha Cadastral F-075 (PR-011), Assistência Médica F-089 (PR-090), Carta de Abertura de Conta Salário Bradesco e Termos de Aceite (BA/SP), com assinatura manuscrita, evidências técnicas de assinatura e painel administrativo de configuração.
+Aplicação **estática** (sem backend) que gera documentos oficiais de admissão preenchidos em PDF diretamente no navegador: Ficha Cadastral F-075 (PR-011), Assistência Médica F-089 (PR-090), Carta de Abertura de Conta Salário Bradesco, com assinatura manuscrita, evidências técnicas de assinatura e painel administrativo de configuração.
 
 Deploy de referência: **Vercel** (site estático). Sem banco de dados — os PDFs são preenchidos sobre os modelos oficiais por coordenadas em pontos PDF (origem no canto inferior esquerdo, convenção do [pdf-lib](https://github.com/Hopding/pdf-lib)).
 
@@ -11,7 +11,6 @@ Deploy de referência: **Vercel** (site estático). Sem banco de dados — os PD
 - **Ficha Cadastral F-075** — preenchimento completo, dependentes dinâmicos, vale-transporte, seleção bancária (Bradesco/Next/Santander), fluxo progressivo por etapas.
 - **Assistência Médica F-089** — template PDF por região/UF, planos por região, cidades via JSON estático, dependentes/filhos 2–4.
 - **Carta Bradesco** — geração do zero a partir do modelo timbrado, cargos TB-047_09, autopreenchimento a partir da Ficha Cadastral, busca de endereço por CEP.
-- **Termos de Aceite** — sobreposição de dados no modelo PDF por região (BA/SP), RE/RG, data por extenso, "Não assinar".
 - **Assinatura manuscrita** — canvas com PNG transparente, linha-guia, evidência técnica carimbada no PDF (documento, IP, fuso).
 - **Rascunho com descarte automático (LGPD)** — retomada do preenchimento no mesmo dispositivo, com **expiração automática 24 horas após o último salvamento** (sem retenção indefinida) e modal de decisão sobre o descarte.
 - **Autenticação por chaves de acesso** — derivadas (SHA-256 + salt), sessão com expiração; painel administrativo com códigos exclusivos apartados.
@@ -37,7 +36,6 @@ Deploy de referência: **Vercel** (site estático). Sem banco de dados — os PD
 | `/f075` | Ficha Cadastral |
 | `/f089` | Assistência Médica |
 | `/bradesco` | Carta Bradesco |
-| `/termos` | Termos de Aceite |
 | `/admin` | Painel Administrativo |
 | `/aviso-de-privacidade`, `/politica-de-privacidade`, `/termos-de-uso`, `/privacidade-e-seguranca` | Hub Docs |
 
@@ -48,7 +46,6 @@ index.html                     Home do hub
 ficha_cadastral.html + .json   F-075 + coordenadas dos campos
 assistencia_medica.html + .json F-089 + coordenadas
 carta_bradesco.html + .js      Carta Bradesco + cargos
-termos_aceite.html             Termos de Aceite
 embedded-docs.js               Engine de geração embarcada (POC v38, fidelidade ≥ 99,5%)
 guard.js / admin-guard.js      Autenticação por chaves derivadas (pública e admin)
 rascunho-ttl.js                Descarte automático de rascunhos (TTL 24 h + modal LGPD)

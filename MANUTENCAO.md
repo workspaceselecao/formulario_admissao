@@ -151,7 +151,6 @@ Mantido no repositório apenas como referência regional/histórica; **não** é
 | Ficha | `atento.forms:v1:ficha_cadastral_rascunho_v2` | `atento.forms:v1:rascunho_ttl_ficha_v1` |
 | Assistência | `atento.forms:v1:assistencia_medica_rascunho_v5` | `atento.forms:v1:rascunho_ttl_assist_v1` |
 | Carta Bradesco | `atento.forms:v1:carta_bradesco_rascunho_v1` | `atento.forms:v1:rascunho_ttl_carta_v1` |
-| Termos de Aceite | `atento.forms:v1:termos_aceite_rascunho_v1` | `atento.forms:v1:rascunho_ttl_termos_v1` |
 
 Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no rascunho), considere **incrementar a versão** (ex. `v3`, `v5`) para evitar rascunhos incompatíveis; atualize a constante no arquivo HTML correspondente e documente a mudança.
 
@@ -192,7 +191,7 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 ## 9. Scripts na pasta `scripts/`
 
-- `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/termos`, `/admin`), além da API administrativa `/api/admin/*` (config com backup automático, uploads validados, histórico) gravando em `data/` (gitignored). Executar com `node scripts/test-server.mjs`.
+- `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/admin`), além da API administrativa `/api/admin/*` (config com backup automático, uploads validados, histórico) gravando em `data/` (gitignored). Executar com `node scripts/test-server.mjs`.
 - `run-test.mjs` — suíte de testes do projeto (o 14 cobre o painel v2, o 15/16 o painel v3/Field Builder e o 17 a auditoria de dados); executar com `node scripts/run-test.mjs`.
 - `audit-panel.mjs` — auditoria do painel contra os dados reais do repositório: roda o pipeline do painel (`carregarTudo` + coletores + gate de publicação) em `node:vm` e falha em qualquer falso positivo ou configuração sem consumidor. Executar com `node scripts/audit-panel.mjs` (também roda no Teste 17).
 - `atualizar-docs-revision.mjs` — regenera `Docs/docs-revision.json` (carimbo de revisão jurídica). Roda **automaticamente a cada push no `main`** pelo workflow `.github/workflows/docs-automacao.yml` (ver §7.5); localmente serve para pré-visualizar.

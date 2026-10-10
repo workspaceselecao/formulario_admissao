@@ -258,7 +258,7 @@ acompanham automaticamente qualquer reextração futura do layout.
 
 ## Como usar para os outros 3 documentos
 
-Envie os PDFs prontos (Assistência Médica, Carta Bradesco, Termos de Aceite)
+Envie os PDFs prontos (Assistência Médica, Carta Bradesco)
 e eu rodo o mesmo `extract_template.py` em cada um — ele já generaliza tudo
 que fiz manualmente aqui. O resultado é um `template.json` + `assets/` por
 documento, prontos para o mesmo `generate.js` (só trocando o arquivo de

@@ -33,7 +33,7 @@
   // "/carta_bradesco.html": a Vercel (cleanUrls) redireciona para o caminho limpo,
   // mas a rota com extensão também precisa ser guardada — é onde o botão da
   // ficha aterrissa no servidor local.
-  const PROTECTED = ["/f075", "/f089", "/bradesco", "/termos", "/ficha_cadastral", "/assistencia_medica", "/carta_bradesco", "/termos_aceite", "/carta_bradesco.html"];
+  const PROTECTED = ["/f075", "/f089", "/bradesco", "/ficha_cadastral", "/assistencia_medica", "/carta_bradesco", "/carta_bradesco.html"];
 
   // ══════════════════════════════════════════════════════
   // SESSÃO
