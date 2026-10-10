@@ -27,6 +27,7 @@
  *     RascunhoTTL.init({
  *       draftKey: RASCUNHO_STORAGE_KEY,
  *       legacyKeys: [/* chaves legadas, se houver *\/],
+ *       descartarChaves: ["atento.forms:v1:termos_aceite_*", "..."], // migração de formulários descontinuados
  *       metaKey: LS_NS + "rascunho_ttl_<pagina>_v1",
  *       limparFormulario: function () { limparDadosFormulario(); },
  *       notificar: function (msg, ok) { showToast(msg, ok); }
@@ -369,8 +370,36 @@
     }
   }
 
+  // ── migração de formulários descontinuados ──
+  // Remove do armazenamento chaves de rascunho/TTL de formulários que não
+  // existem mais na aplicação (ex.: termos_aceite_*) — os dados são LGPD-
+  // protegidos e nada lê essas chaves; descartar é o comportamento seguro.
+  // Roda uma única vez por carregamento, antes de qualquer decisão.
+  function descartarChavesLegadas(nomes) {
+    if (!Array.isArray(nomes)) return 0;
+    var removidas = 0;
+    for (var i = 0; i < nomes.length; i += 1) {
+      var nome = nomes[i];
+      if (typeof nome !== "string" || nome.indexOf("*") === -1) continue; // apenas sufixos/curingas
+      var prefixo = nome.slice(0, nome.indexOf("*"));
+      var alvos = [];
+      try {
+        for (var j = 0; j < global.localStorage.length; j += 1) {
+          var chave = global.localStorage.key(j);
+          if (chave && chave.indexOf(prefixo) === 0) alvos.push(chave);
+        }
+      } catch (_) { return removidas; }
+      for (var k = 0; k < alvos.length; k += 1) {
+        lsDel(alvos[k]);
+        removidas += 1;
+      }
+    }
+    return removidas;
+  }
+
   function init(config) {
     if (!config || !config.draftKey || !config.metaKey) return;
+    descartarChavesLegadas(config.descartarChaves);
     cfg = {
       draftKey: config.draftKey,
       legacyKeys: Array.isArray(config.legacyKeys) ? config.legacyKeys : [],

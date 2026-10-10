@@ -3640,6 +3640,7 @@ document.getElementById("naoAssinarManualmente")?.addEventListener("change", () 
 RascunhoTTL.init({
   draftKey: RASCUNHO_STORAGE_KEY,
   legacyKeys: [LS_LEGACY.fichaRascunho],
+  descartarChaves: [LS_NS + "termos_aceite_*", LS_NS + "rascunho_ttl_termos_*"],
   metaKey: LS_NS + "rascunho_ttl_ficha_v1",
   relatedKeys: [CROSS_COPY_FICHA_ASSISTENCIA_KEY, LS_LEGACY.crossCopy, PREFILL_CARTA_STORAGE_KEY],
   limparFormulario: function () { limparDadosFormulario(); },

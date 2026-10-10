@@ -1540,6 +1540,7 @@ function aplicarPrefillFichaCadastral() {
 RascunhoTTL.init({
   draftKey: RASCUNHO_STORAGE_KEY,
   legacyKeys: [],
+  descartarChaves: [LS_NS + "termos_aceite_*", LS_NS + "rascunho_ttl_termos_*"],
   metaKey: LS_NS + "rascunho_ttl_carta_v1",
   limparFormulario: function () { limparDadosFormulario(); },
   notificar: function (msg, ok) { showToast(msg, ok); }

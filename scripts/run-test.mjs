@@ -1335,7 +1335,9 @@ async function testarRascunhoTTL(assert) {
     const ls = {
       getItem: (k) => (store.has(k) ? store.get(k) : null),
       setItem: (k, v) => { store.set(String(k), String(v)); },
-      removeItem: (k) => { store.delete(k); }
+      removeItem: (k) => { store.delete(k); },
+      get length() { return store.size; },
+      key: (i) => { const arr = [...store.keys()]; return arr[i] != null ? arr[i] : null; }
     };
     const documentStub = {
       readyState: "loading",
@@ -1618,6 +1620,48 @@ async function testarRascunhoTTL(assert) {
     listeners.DOMContentLoaded.forEach((fn) => fn());
     const textoModal = documentStub._elements.map((element) => element.textContent || "").join(" ");
     assert("ttl: modal informa prazo de primeira abertura para rascunho legado", /não foi possível determinar.*excluídos em até 24 horas a partir desta abertura/i.test(textoModal), textoModal);
+  }
+
+  // 16) migração: descartarChaves remove rascunhos/TTL de formulários descontinuados
+  {
+    const { ctx, store } = novoAmbiente();
+    // lixo de um usuário antigo: rascunho + meta TTL + rascunho legado/relacionado
+    store.set("atento.forms:v1:termos_aceite_rascunho_v1", JSON.stringify({ nomeCompleto: "Antigo" }));
+    store.set("atento.forms:v1:rascunho_ttl_termos_v1", JSON.stringify({ savedAt: agora, sig: "x", decidedAt: 0 }));
+    store.set("atento.forms:v1:termos_aceite_rascunho_v0", JSON.stringify({ nomeCompleto: "Mais antigo ainda" }));
+    // rascunho vivo do formulário atual NÃO pode ser atingido pelo prefixo
+    store.set("atento.forms:v1:ficha_cadastral_rascunho_v2", JSON.stringify({ nomeCompleto: "Vivo" }));
+    ctx.window.RascunhoTTL.init({
+      draftKey: "atento.forms:v1:ficha_cadastral_rascunho_v2",
+      metaKey: "atento.forms:v1:rascunho_ttl_ficha_v1",
+      descartarChaves: ["atento.forms:v1:termos_aceite_*", "atento.forms:v1:rascunho_ttl_termos_*"],
+      pollMs: 0
+    });
+    assert("ttl: migração descarta rascunho/TTL/legado de formulário descontinuado (termos_aceite_*)",
+      !store.has("atento.forms:v1:termos_aceite_rascunho_v1") &&
+      !store.has("atento.forms:v1:rascunho_ttl_termos_v1") &&
+      !store.has("atento.forms:v1:termos_aceite_rascunho_v0"),
+      JSON.stringify([...store.keys()]));
+    assert("ttl: migração preserva o rascunho vivo do formulário atual",
+      store.has("atento.forms:v1:ficha_cadastral_rascunho_v2"), "rascunho vivo removido");
+  }
+
+  // 16.b) migração sem padrão curinga não faz nada (config segura)
+  {
+    const { ctx, store } = novoAmbiente();
+    store.set("qualquer", JSON.stringify({ a: 1 }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", descartarChaves: ["qualquer"], pollMs: 0 });
+    assert("ttl: descartarChaves sem curinga é ignorado (proteção contra config errada)", store.has("qualquer"), "chave removida sem curinga");
+  }
+
+  // 16.c) migração roda mesmo sem rascunho no formulário atual (usuário antigo só do termos)
+  {
+    const { ctx, store } = novoAmbiente();
+    store.set("atento.forms:v1:termos_aceite_rascunho_v1", JSON.stringify({ nomeCompleto: "SomenteTermos" }));
+    ctx.window.RascunhoTTL.init({ draftKey: "k", metaKey: "m", descartarChaves: ["atento.forms:v1:termos_aceite_*", "atento.forms:v1:rascunho_ttl_termos_*"], pollMs: 0 });
+    assert("ttl: migração limpa lixo legado mesmo sem rascunho atual",
+      !store.has("atento.forms:v1:termos_aceite_rascunho_v1") && !store.has("k") && !store.has("m"),
+      JSON.stringify([...store.keys()]));
   }
 }
 
