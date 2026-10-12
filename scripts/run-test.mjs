@@ -1788,6 +1788,28 @@ async function testarContaSalarioSemDados(assert) {
   assert("ESC/fundo: persiste o rascunho por 24 h, avisa o prazo e NÃO redireciona",
     !!manter && manter[0] === "persistir-24h" && manter.includes("fechar:manter") && manter.some((c) => c.startsWith("toast:Rascunho mantido por 24 horas")) && !manter.includes("ir-para-carta"),
     JSON.stringify(manter));
+
+  // ── 20.d — layout da seção bancária ──
+  const colBradesco = ficha.slice(
+    ficha.indexOf('<div class="banco-col banco-col--bradesco">'),
+    ficha.indexOf('<div class="banco-col banco-col--next">')
+  );
+  const posGate = colBradesco.indexOf(">AINDA VOU ABRIR</span>");
+  const posDetalhes = colBradesco.indexOf('id="bradescoDetalhes"');
+  assert("conta salário: agência/conta abrem ABAIXO da linha JÁ POSSUO / AINDA VOU ABRIR",
+    posGate > 0 && posDetalhes > posGate && colBradesco.indexOf('id="cartaBradescoField"') < posDetalhes,
+    JSON.stringify({ posGate, posDetalhes }));
+  assert("conta salário: agência e conta seguem na mesma coluna do Bradesco",
+    colBradesco.includes('id="agenciaBradesco"') && colBradesco.includes('id="contaBradesco"'),
+    "campos fora da coluna");
+  const rotulosAgencia = (ficha.match(/<label>Agência \/ Dígito <span class="req">\*<\/span><\/label>/g) || []).length;
+  assert("agência: rótulo 'Agência / Dígito' em todas as alternativas (Bradesco, Next, Santander)",
+    rotulosAgencia === 3 && !/<label>Agência <span class="req">\*<\/span><\/label>/.test(ficha),
+    `ocorrências: ${rotulosAgencia}`);
+  const placeholdersAgencia = (ficha.match(/id="agencia(?:Bradesco|Next|Santander)" placeholder="0000-0"/g) || []).length;
+  assert("agência: placeholder com dígito nas três alternativas",
+    placeholdersAgencia === 3,
+    `ocorrências: ${placeholdersAgencia}`);
 }
 
 

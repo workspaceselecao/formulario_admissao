@@ -1328,16 +1328,6 @@
                 <label class="radio-label"><input type="radio" name="tipoConta" value="bradesco" onchange="toggleBanco(this)"> Conta Salário</label>
                 <label class="radio-label"><input type="radio" name="tipoConta" value="poupanca_bradesco" onchange="toggleBanco(this)"> Conta Poupança</label>
               </div>
-              <div class="banco-col-detalhes" id="bradescoDetalhes" hidden>
-                <div class="field">
-                  <label>Agência <span class="req">*</span></label>
-                  <input type="text" id="agenciaBradesco" placeholder="0000" inputmode="numeric" autocomplete="off">
-                </div>
-                <div class="field">
-                  <label>Conta / Dígito <span class="req">*</span></label>
-                  <input type="text" id="contaBradesco" placeholder="00000-0" inputmode="numeric" autocomplete="off">
-                </div>
-              </div>
               <div id="cartaBradescoField" hidden>
                 <div class="gate-row" id="cartaBradescoGate">
                   <p class="salario-question">Você já possui Conta Salário Bradesco ou ainda vai abrir?</p>
@@ -1356,6 +1346,18 @@
                   Preencher Carta de Abertura de Conta
                 </button>
               </div>
+              <!-- Agência/Conta ficam DEPOIS da linha JÁ POSSUO / AINDA VOU ABRIR:
+                   em "Já possuo" os campos abrem logo abaixo dos botões do gate. -->
+              <div class="banco-col-detalhes" id="bradescoDetalhes" hidden>
+                <div class="field">
+                  <label>Agência / Dígito <span class="req">*</span></label>
+                  <input type="text" id="agenciaBradesco" placeholder="0000-0" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label>Conta / Dígito <span class="req">*</span></label>
+                  <input type="text" id="contaBradesco" placeholder="00000-0" inputmode="numeric" autocomplete="off">
+                </div>
+              </div>
             </div>
             <div class="banco-col banco-col--next">
               <p class="banco-col-titulo">Next</p>
@@ -1364,8 +1366,8 @@
               </div>
               <div class="banco-col-detalhes" id="nextDetalhes" hidden>
                 <div class="field">
-                  <label>Agência <span class="req">*</span></label>
-                  <input type="text" id="agenciaNext" placeholder="0000" inputmode="numeric" autocomplete="off">
+                  <label>Agência / Dígito <span class="req">*</span></label>
+                  <input type="text" id="agenciaNext" placeholder="0000-0" inputmode="numeric" autocomplete="off">
                 </div>
                 <div class="field">
                   <label>Conta / Dígito <span class="req">*</span></label>
@@ -1381,8 +1383,8 @@
               </div>
               <div class="banco-col-detalhes" id="santanderDetalhes" hidden>
                 <div class="field">
-                  <label>Agência <span class="req">*</span></label>
-                  <input type="text" id="agenciaSantander" placeholder="0000" inputmode="numeric" autocomplete="off">
+                  <label>Agência / Dígito <span class="req">*</span></label>
+                  <input type="text" id="agenciaSantander" placeholder="0000-0" inputmode="numeric" autocomplete="off">
                 </div>
                 <div class="field">
                   <label>Conta / Dígito <span class="req">*</span></label>
@@ -3206,7 +3208,7 @@ function validarCamposObrigatorios(){
     radio('tipoConta') === 'bradesco' && radio('salarioBradesco') === 'vai_abrir';
   const idsBanco = dadosDeContaDispensados ? null : idsAgenciaContaAtivos(radio('tipoConta'));
   if (idsBanco) {
-    validarCampo({ id: idsBanco.agencia, nome: 'Agência' });
+    validarCampo({ id: idsBanco.agencia, nome: 'Agência / Dígito' });
     validarCampo({ id: idsBanco.conta, nome: 'Conta / Dígito' });
   } else {
     ['agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) =>
