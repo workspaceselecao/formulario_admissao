@@ -1063,6 +1063,30 @@
     .gate-dependentes-acoes .btn-gate-radio {
       display: none;
     }
+    /* Mobile: SIM/NÃO de Primeiro Emprego e Deficiência em 2 colunas iguais
+       (mesmo tamanho do gate de Dependentes) */
+    #grupoPrimeiroEmprego,
+    #grupoDeficiencia {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+    #grupoPrimeiroEmprego .radio-label,
+    #grupoDeficiencia .radio-label {
+      width: 100%;
+      justify-content: flex-start;
+      margin: 0;
+    }
+    /* Mobile: Banco na mesma linha (3 colunas iguais) — sem as chaves há espaço */
+    #bancoPrincipalRadioGroup {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    #bancoPrincipalRadioGroup .radio-label {
+      justify-content: center;
+      text-align: center;
+      padding: 7px 8px;
+    }
     .nome-cpf-row {
       grid-template-columns: 1fr;
       grid-column: span 1;
