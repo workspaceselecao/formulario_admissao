@@ -254,33 +254,55 @@
     display: none !important;
   }
   .gate-dependentes-acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
     margin-top: 8px;
+    align-items: stretch;
   }
   .gate-dependentes-acoes .btn-gate {
-    min-width: 120px;
-    padding: 10px 20px;
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    padding: 7px 16px;
     border-radius: 8px;
     font-family: 'Poppins', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
     cursor: pointer;
     border: 1.5px solid var(--border);
     background: var(--surface);
-    color: var(--text-mid);
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    color: var(--label);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  /* Chave visual — mesma caixa do gate SIM/NÃO da Conta (pílula surface
+     com borda, à esquerda do texto; idêntica no ativo e no inativo). */
+  .gate-dependentes-acoes .btn-gate-radio {
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    display: inline-block;
   }
   .gate-dependentes-acoes .btn-gate:hover:not(.btn-gate--selecionado) {
     border-color: var(--accent);
-    color: var(--accent-dark);
+    background: var(--accent-soft);
   }
   .gate-dependentes-acoes .btn-gate--selecionado {
     border-color: var(--accent);
     background: var(--accent);
     color: #fff;
     box-shadow: 0 2px 10px rgba(1, 66, 106, 0.28);
+  }
+  .gate-dependentes-acoes .btn-gate--selecionado span {
+    color: #fff;
   }
   .gate-dependentes-acoes .btn-gate--selecionado:hover {
     border-color: var(--accent-dark);
@@ -356,6 +378,25 @@
   }
   .banco-col .radio-label {
     width: 100%;
+  }
+  /* Banco principal — mesmo tamanho e distribuição dos botões de conta:
+     3 colunas iguais no desktop; empilhado em largura total no mobile. */
+  #bancoPrincipalRadioGroup {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+  #bancoPrincipalRadioGroup .radio-label {
+    width: 100%;
+    justify-content: flex-start;
+    white-space: nowrap;
+    margin: 0;
+  }
+  @media (min-width: 700px) {
+    #bancoPrincipalRadioGroup {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
   /* Opções de tipo de conta na MESMA linha, em partes iguais: grade de colunas
      automáticas — 3 no Bradesco, 2 no Santander e 1 na Next — sem quebra de
@@ -1015,6 +1056,13 @@
       align-items: stretch;
       gap: 8px;
     }
+    /* Mobile: remove as chaves visuais dos botões de opção (ganho de espaço) */
+    .radio-label input,
+    .salario-gate-btn input,
+    .check-label input,
+    .gate-dependentes-acoes .btn-gate-radio {
+      display: none;
+    }
     .nome-cpf-row {
       grid-template-columns: 1fr;
       grid-column: span 1;
@@ -1271,8 +1319,8 @@
           Deseja incluir dependentes?
         </p>
         <div class="gate-dependentes-acoes">
-          <button type="button" class="btn-gate" id="btnDependentesSim">Sim</button>
-          <button type="button" class="btn-gate" id="btnDependentesNao">Não</button>
+          <button type="button" class="btn-gate" id="btnDependentesSim"><span class="btn-gate-radio" aria-hidden="true"></span><span>Sim</span></button>
+          <button type="button" class="btn-gate" id="btnDependentesNao"><span class="btn-gate-radio" aria-hidden="true"></span><span>Não</span></button>
         </div>
       </div>
       <div id="dependentesConteudo" hidden>
