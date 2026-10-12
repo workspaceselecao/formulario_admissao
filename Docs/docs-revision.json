@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T02:45:36-03:00",
-  "gitCommit": "8cda112",
-  "gitSubject": "feat(ficha): bloqueia a geração sem agência/conta na Conta Salário \"Ainda vou abrir\"",
+  "ultimaValidacaoIso": "2026-10-12T03:19:20-03:00",
+  "gitCommit": "9919dd6",
+  "gitSubject": "refactor(ficha): ação única \"Preencher Carta\" no modal da Conta Salário",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

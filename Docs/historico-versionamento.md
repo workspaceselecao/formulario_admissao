@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/10/2026 | Ação única "Preencher Carta" no modal da Conta Salário |
 | 12/10/2026 | Bloqueia a geração sem agência/conta na Conta Salário "Ainda vou abrir" |
 | 10/10/2026 | Migração descarta rascunhos legados de formulários descontinuados |
 | 10/10/2026 | Remove o formulário Termos de Aceite |
