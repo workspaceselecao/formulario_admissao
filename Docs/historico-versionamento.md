@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 10 de outubro de 2026
+**Última atualização deste guia:** 12 de outubro de 2026
 
 ---
 
@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/10/2026 | Bloqueia a geração sem agência/conta na Conta Salário "Ainda vou abrir" |
 | 10/10/2026 | Migração descarta rascunhos legados de formulários descontinuados |
 | 10/10/2026 | Remove o formulário Termos de Aceite |
 | 09/10/2026 | Merge remote-tracking branch 'origin/main' into feat/ficha-cadastral-conta-salario-e-aviso-pdf |

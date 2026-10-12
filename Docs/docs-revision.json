@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-10T00:57:02-03:00",
-  "gitCommit": "5c4549c",
-  "gitSubject": "feat(lgpd): migração descarta rascunhos legados de formulários descontinuados",
+  "ultimaValidacaoIso": "2026-10-12T02:45:36-03:00",
+  "gitCommit": "8cda112",
+  "gitSubject": "feat(ficha): bloqueia a geração sem agência/conta na Conta Salário \"Ainda vou abrir\"",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
