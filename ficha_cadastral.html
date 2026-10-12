@@ -1568,6 +1568,21 @@
   </div>
 </div>
 
+<!-- Conta Salário Bradesco "Ainda vou abrir": sem agência/conta a geração fica
+     bloqueada até o candidato preencher a Carta na agência e voltar com os dados. -->
+<div id="modalContaSalarioSemDados" class="modal-overlay" role="dialog" aria-labelledby="modalContaSalarioTitulo" hidden aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head modal-head--atencao" id="modalContaSalarioTitulo">Dados da Conta Salário</div>
+    <div class="modal-body">
+      Antes de gerar sua Ficha, é necessário informar AGÊNCIA e CONTA. Preencha a carta e dirija-se a uma agência de sua preferência.
+    </div>
+    <div class="modal-actions">
+      <button type="button" id="btnContaSalarioManter24h" class="btn-modal cancel" onclick="manterRascunho24hContaSalario()">Manter rascunho por 24 horas</button>
+      <button type="button" id="btnContaSalarioPreencherCarta" class="btn-modal confirm" onclick="preencherCartaContaSalario()">Preencher Carta</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
 <!-- fontkit: necessário para a engine embutir as TTF declaradas em template.fontes
      (Arial/Arial Narrow). Sem ele a engine cai no fallback Helvetica e reporta. -->
@@ -3340,6 +3355,50 @@ function confirmarLimparAssinaturaFichaExecutar() {
   updateProgress();
 }
 
+// ── MODAL: Conta Salário "Ainda vou abrir" sem agência/conta ──
+// Quem ainda vai abrir a Conta Salário Bradesco não tem agência/conta para
+// informar (campos ocultos e limpos pelo gate), então a geração do PDF é
+// interrompida com a mensagem do RH e as duas saídas do fluxo: manter o
+// rascunho por 24 horas (decisão registrada no TTL) ou preencher a Carta de
+// Abertura de Conta (carta_bradesco.html, com os dados já copiados).
+let contaSalarioSemDadosResolver = null;
+function pendenciaContaSalarioSemDados(){
+  if (radio('tipoConta') !== 'bradesco' || radio('salarioBradesco') !== 'vai_abrir') return false;
+  return v('agenciaBradesco').length === 0 || v('contaBradesco').length === 0;
+}
+function abrirModalContaSalarioSemDados(){
+  const modal = document.getElementById('modalContaSalarioSemDados');
+  if (!modal) return Promise.resolve('manter');
+  setModalOverlayVisible(modal, true);
+  sincronizarBodyModalOpenFicha();
+  setTimeout(() => document.getElementById('btnContaSalarioManter24h')?.focus(), 0);
+  return new Promise((resolve) => { contaSalarioSemDadosResolver = resolve; });
+}
+function fecharModalContaSalarioSemDados(acao){
+  const modal = document.getElementById('modalContaSalarioSemDados');
+  if (modal) setModalOverlayVisible(modal, false);
+  sincronizarBodyModalOpenFicha();
+  if (contaSalarioSemDadosResolver) {
+    const resolve = contaSalarioSemDadosResolver;
+    contaSalarioSemDadosResolver = null;
+    resolve(acao);
+  }
+}
+/** Saída 1: grava o rascunho agora e registra a decisão de mantê-lo por 24 h
+ *  (mesma semântica do modal do TTL — não há retenção indefinida). */
+function manterRascunho24hContaSalario(){
+  salvarRascunhoLocalSincrono();
+  window.RascunhoTTL?._internais?.decidir?.('auto');
+  fecharModalContaSalarioSemDados('manter');
+  showToast('Rascunho mantido por 24 horas. Retome quando quiser.', true);
+}
+/** Saída 2: grava o rascunho e segue para a Carta de Abertura de Conta. */
+function preencherCartaContaSalario(){
+  salvarRascunhoLocalSincrono();
+  fecharModalContaSalarioSemDados('carta');
+  baixarCartaAberturaConta();
+}
+
 function normalizarChavePdf(valor) {
   return String(valor || "")
     .normalize("NFD")
@@ -3508,6 +3567,12 @@ function dadosDataAssinaturaIso() {
 async function gerarPDF(){
   try {
     if (!validarCamposObrigatorios()) return;
+    // Conta Salário "Ainda vou abrir": sem agência/conta o PDF é bloqueado
+    // pelo modal com as duas saídas (manter rascunho / preencher a Carta).
+    if (pendenciaContaSalarioSemDados()) {
+      await abrirModalContaSalarioSemDados();
+      return;
+    }
     if (!(await confirmarPoliticaLGPD())) return;
     if (!templateEmbarcado) await carregarTemplateInicial();
     if (!templateEmbarcado) return;

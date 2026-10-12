@@ -443,6 +443,10 @@ async function runTests() {
     }
   }
 
+  // ── TEST 20: Conta Salário "Ainda vou abrir" — geração bloqueada até a Carta ──
+  console.log("\n📋 Teste 20: Conta Salário sem agência/conta — modal de bloqueio na geração");
+  await testarContaSalarioSemDados(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -1663,6 +1667,110 @@ async function testarRascunhoTTL(assert) {
       !store.has("atento.forms:v1:termos_aceite_rascunho_v1") && !store.has("k") && !store.has("m"),
       JSON.stringify([...store.keys()]));
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TESTE 20 — Conta Salário "Ainda vou abrir": geração do PDF bloqueada
+//
+// Estrutural: o modal existe com a mensagem exigida e os dois botões
+// ("Manter rascunho por 24 horas" e "Preencher Carta"), e o gerarPDF()
+// interrompe o fluxo antes do LGPD e da geração.
+// Comportamental: as funções da página são extraídas e executadas em
+// node:vm com stubs — a condição de pendência bloqueia só o caso
+// "vai_abrir" sem agência/conta; o botão de manter grava o rascunho,
+// registra a decisão do TTL e fecha a modal; o botão da Carta grava o
+// rascunho e redireciona para carta_bradesco.html.
+// ═══════════════════════════════════════════════════════════════════
+async function testarContaSalarioSemDados(assert) {
+  const vm = await import("node:vm");
+  const ficha = readFileSync(join(ROOT, "ficha_cadastral.html"), "utf8");
+  const MSG = "Antes de gerar sua Ficha, é necessário informar AGÊNCIA e CONTA. Preencha a carta e dirija-se a uma agência de sua preferência.";
+
+  // ── 20.a — estruturais ──
+  const modalInicio = ficha.indexOf('<div id="modalContaSalarioSemDados"');
+  const modalFim = ficha.indexOf('<script src="https://unpkg.com/pdf-lib', modalInicio);
+  const modalHtml = modalInicio >= 0 && modalFim > modalInicio ? ficha.slice(modalInicio, modalFim) : "";
+  assert("conta salário: modal de bloqueio presente e oculto no load", !!modalHtml && modalHtml.includes('hidden aria-hidden="true"'), modalHtml.slice(0, 120));
+  assert("conta salário: mensagem exata exigida pelo fluxo", modalHtml.includes(MSG), modalHtml.slice(0, 240));
+  assert("conta salário: botão 'Manter rascunho por 24 horas'", modalHtml.includes(">Manter rascunho por 24 horas</button>"), modalHtml.slice(0, 300));
+  assert("conta salário: botão 'Preencher Carta'", modalHtml.includes(">Preencher Carta</button>"), modalHtml.slice(0, 300));
+  assert("conta salário: botões ligados aos handlers",
+    modalHtml.includes('onclick="manterRascunho24hContaSalario()"') && modalHtml.includes('onclick="preencherCartaContaSalario()"'),
+    modalHtml.slice(0, 400));
+  const iCond = ficha.indexOf("if (pendenciaContaSalarioSemDados())");
+  const iLgpd = ficha.indexOf("await confirmarPoliticaLGPD()");
+  const iGerar = ficha.indexOf("EmbeddedDocs.gerarPdf(");
+  assert("conta salário: gerarPDF interrompe antes do LGPD e da geração",
+    iCond > 0 && iLgpd > iCond && iGerar > iLgpd,
+    JSON.stringify({ iCond, iLgpd, iGerar }));
+
+  // Extrai o corpo de uma função da página para executá-lo em vm com stubs.
+  function extrairFuncao(nome) {
+    const inicio = ficha.indexOf(`function ${nome}(`);
+    if (inicio < 0) return "";
+    const fim = ficha.indexOf("\n}", inicio);
+    return fim < 0 ? "" : ficha.slice(inicio, fim + 2);
+  }
+
+  // ── 20.b — condição de bloqueio (vm) ──
+  const srcCond = extrairFuncao("pendenciaContaSalarioSemDados");
+  assert("conta salário: função de pendência extraída da página", srcCond.length > 0, "não encontrada");
+  const avaliarCondicao = (estado) => {
+    const ctx = { radio: (name) => estado[name] || "", v: (id) => estado[id] || "" };
+    ctx.globalThis = ctx;
+    vm.createContext(ctx);
+    vm.runInContext(`${srcCond}\nthis.resultado = pendenciaContaSalarioSemDados();`, ctx);
+    return ctx.resultado;
+  };
+  assert("vai_abrir sem agência/conta → geração bloqueada",
+    avaliarCondicao({ tipoConta: "bradesco", salarioBradesco: "vai_abrir" }) === true,
+    "condição não bloqueia");
+  assert("vai_abrir com agência/conta informadas → não bloqueia",
+    avaliarCondicao({ tipoConta: "bradesco", salarioBradesco: "vai_abrir", agenciaBradesco: "1234", contaBradesco: "12345-6" }) === false,
+    "bloqueia mesmo com dados");
+  assert("'já possuo' sem dados → validação comum (não esta modal)",
+    avaliarCondicao({ tipoConta: "bradesco", salarioBradesco: "ja_possui" }) === false,
+    "bloqueia fora do caso");
+  assert("outros bancos fora desta pendência",
+    avaliarCondicao({ tipoConta: "santander_salario", salarioBradesco: "vai_abrir" }) === false,
+    "bloqueia outros bancos");
+  assert("sem decisão de conta salário → não bloqueia",
+    avaliarCondicao({ tipoConta: "bradesco" }) === false,
+    "bloqueia sem decisão");
+
+  // ── 20.c — botões do modal (vm) ──
+  function rodarHandler(nome, semTtl) {
+    const src = extrairFuncao(nome);
+    if (!src) return null;
+    const chamadas = [];
+    const ctx = {
+      salvarRascunhoLocalSincrono: () => chamadas.push("salvar"),
+      showToast: (msg) => chamadas.push(`toast:${msg}`),
+      fecharModalContaSalarioSemDados: (acao) => chamadas.push(`fechar:${acao}`),
+      baixarCartaAberturaConta: () => chamadas.push("ir-para-carta"),
+      window: semTtl ? {} : { RascunhoTTL: { _internais: { decidir: (c) => chamadas.push(`decidir:${c}`) } } }
+    };
+    ctx.globalThis = ctx;
+    vm.createContext(ctx);
+    vm.runInContext(src, ctx);
+    ctx[nome]();
+    return chamadas;
+  }
+  const manter = rodarHandler("manterRascunho24hContaSalario", false);
+  assert("botão manter: grava rascunho, registra decisão do TTL (24 h) e fecha a modal",
+    !!manter && manter[0] === "salvar" && manter.includes("decidir:auto") && manter.indexOf("fechar:manter") > manter.indexOf("decidir:auto"),
+    JSON.stringify(manter));
+  assert("botão manter: avisa o prazo de 24 h e não segue para a Carta",
+    !!manter && manter.some((c) => c.startsWith("toast:Rascunho mantido por 24 horas")) && !manter.includes("ir-para-carta"),
+    JSON.stringify(manter));
+  const manterSemTtl = rodarHandler("manterRascunho24hContaSalario", true);
+  assert("botão manter: funciona mesmo sem o TTL carregado",
+    !!manterSemTtl && manterSemTtl.includes("salvar") && manterSemTtl.includes("fechar:manter"),
+    JSON.stringify(manterSemTtl));
+  const carta = rodarHandler("preencherCartaContaSalario", false);
+  assert("botão carta: grava rascunho e redireciona para a Carta de Abertura",
+    !!carta && carta[0] === "salvar" && carta.indexOf("fechar:carta") > 0 && carta.indexOf("ir-para-carta") > carta.indexOf("fechar:carta"),
+    JSON.stringify(carta));
 }
 
 
