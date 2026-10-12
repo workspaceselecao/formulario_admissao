@@ -357,6 +357,31 @@
   .banco-col .radio-label {
     width: 100%;
   }
+  /* Opções de tipo de conta na MESMA linha, em partes iguais: grade de colunas
+     automáticas — 3 no Bradesco, 2 no Santander e 1 na Next — sem quebra de
+     linha. Só a partir de 700px: em cartões mais estreitos os três botões
+     ficam menores que o próprio texto e o rótulo quebraria em duas linhas,
+     então abaixo disso a coluna segue empilhada (como no mobile). */
+  @media (min-width: 700px) {
+    .banco-col .radio-inline {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+  }
+  /* Faixa em que a linha de 3 opções ainda fica justa: o rótulo compacta para
+     o texto continuar em uma única linha. */
+  @media (min-width: 700px) and (max-width: 780px) {
+    .banco-col .radio-inline {
+      gap: 6px;
+    }
+    .banco-col .radio-label {
+      padding: 7px 8px;
+      font-size: 12px;
+      gap: 5px;
+    }
+  }
   .banco-col-detalhes {
     display: grid;
     gap: 12px;
@@ -983,6 +1008,13 @@
     .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
     .address-grid { grid-template-columns: 1fr; }
     .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade { grid-column: span 1; }
+    /* Tipo de conta empilhado em largura total (mobile como estava) */
+    .banco-col .radio-inline {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
     .nome-cpf-row {
       grid-template-columns: 1fr;
       grid-column: span 1;
@@ -1330,15 +1362,15 @@
               </div>
               <div id="cartaBradescoField" hidden>
                 <div class="gate-row" id="cartaBradescoGate">
-                  <p class="salario-question">Você já possui Conta Salário Bradesco ou ainda vai abrir?</p>
+                  <p class="salario-question">Você já possui Conta Salário Bradesco?</p>
                   <div class="salario-gate-btns">
                     <label class="salario-gate-btn">
                       <input type="radio" name="salarioBradesco" value="ja_possui" onchange="salarioBradescoDecisao(this)">
-                      <span>JÁ POSSUO</span>
+                      <span>SIM</span>
                     </label>
                     <label class="salario-gate-btn">
                       <input type="radio" name="salarioBradesco" value="vai_abrir" onchange="salarioBradescoDecisao(this)">
-                      <span>AINDA VOU ABRIR</span>
+                      <span>NÃO</span>
                     </label>
                   </div>
                 </div>
@@ -1346,8 +1378,8 @@
                   Preencher Carta de Abertura de Conta
                 </button>
               </div>
-              <!-- Agência/Conta ficam DEPOIS da linha JÁ POSSUO / AINDA VOU ABRIR:
-                   em "Já possuo" os campos abrem logo abaixo dos botões do gate. -->
+              <!-- Agência/Conta ficam DEPOIS da linha SIM / NÃO: respondendo
+                   SIM, os campos abrem logo abaixo dos botões do gate. -->
               <div class="banco-col-detalhes" id="bradescoDetalhes" hidden>
                 <div class="field">
                   <label>Agência / Dígito <span class="req">*</span></label>
@@ -1570,8 +1602,9 @@
   </div>
 </div>
 
-<!-- Conta Salário Bradesco "Ainda vou abrir": sem agência/conta a geração fica
-     bloqueada até o candidato preencher a Carta na agência e voltar com os dados.
+<!-- Conta Salário Bradesco respondida com "NÃO" (ainda vai abrir): sem
+     agência/conta a geração fica bloqueada até o candidato preencher a Carta na
+     agência e voltar com os dados.
      Ação única: Preencher Carta (persiste o rascunho por 24 h e redireciona). -->
 <div id="modalContaSalarioSemDados" class="modal-overlay" role="dialog" aria-labelledby="modalContaSalarioTitulo" hidden aria-hidden="true">
   <div class="modal-card">
@@ -2402,8 +2435,8 @@ function salarioBradescoDecisao(){
   sincronizarGateContaSalario();
   agendarSalvarRascunho();
 }
-/** Conta Salário (Bradesco): "Já possuo" libera o preenchimento de agência/conta;
- *  "Ainda vou abrir" libera apenas o botão da Carta de Abertura de Conta. */
+/** Conta Salário (Bradesco): "SIM" libera o preenchimento de agência/conta;
+ *  "NÃO" (ainda vai abrir) libera apenas o botão da Carta de Abertura de Conta. */
 function sincronizarGateContaSalario(){
   const decisao = radio('salarioBradesco');
   const jaPossui = decisao === 'ja_possui';
@@ -3357,7 +3390,7 @@ function confirmarLimparAssinaturaFichaExecutar() {
   updateProgress();
 }
 
-// ── MODAL: Conta Salário "Ainda vou abrir" sem agência/conta ──
+// ── MODAL: Conta Salário respondida com "NÃO" sem agência/conta ──
 // Quem ainda vai abrir a Conta Salário Bradesco não tem agência/conta para
 // informar (campos ocultos e limpos pelo gate), então a geração do PDF é
 // interrompida com a mensagem do RH. A única ação é **Preencher Carta**: o
@@ -3586,7 +3619,7 @@ function dadosDataAssinaturaIso() {
 async function gerarPDF(){
   try {
     if (!validarCamposObrigatorios()) return;
-    // Conta Salário "Ainda vou abrir": sem agência/conta o PDF é bloqueado
+    // Conta Salário respondida com "NÃO": sem agência/conta o PDF é bloqueado
     // pelo modal cuja ação única (Preencher Carta) persiste o rascunho por 24 h
     // antes de redirecionar.
     if (pendenciaContaSalarioSemDados()) {

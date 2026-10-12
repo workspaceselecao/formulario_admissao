@@ -1794,9 +1794,9 @@ async function testarContaSalarioSemDados(assert) {
     ficha.indexOf('<div class="banco-col banco-col--bradesco">'),
     ficha.indexOf('<div class="banco-col banco-col--next">')
   );
-  const posGate = colBradesco.indexOf(">AINDA VOU ABRIR</span>");
+  const posGate = colBradesco.indexOf(">NÃO</span>");
   const posDetalhes = colBradesco.indexOf('id="bradescoDetalhes"');
-  assert("conta salário: agência/conta abrem ABAIXO da linha JÁ POSSUO / AINDA VOU ABRIR",
+  assert("conta salário: agência/conta abrem ABAIXO da linha SIM / NÃO",
     posGate > 0 && posDetalhes > posGate && colBradesco.indexOf('id="cartaBradescoField"') < posDetalhes,
     JSON.stringify({ posGate, posDetalhes }));
   assert("conta salário: agência e conta seguem na mesma coluna do Bradesco",
@@ -1810,6 +1810,40 @@ async function testarContaSalarioSemDados(assert) {
   assert("agência: placeholder com dígito nas três alternativas",
     placeholdersAgencia === 3,
     `ocorrências: ${placeholdersAgencia}`);
+
+  // ── 20.d.1 — opções de tipo de conta: uma linha no desktop, empilhadas no mobile ──
+  const regraDoSeletor = (texto) => {
+    const inicio = texto.indexOf(".banco-col .radio-inline {");
+    return inicio < 0 ? "" : texto.slice(inicio, texto.indexOf("}", inicio)).replace(/\s+/g, " ").trim();
+  };
+  const blocoDesktop = ficha.slice(
+    ficha.indexOf("@media (min-width: 700px)"),
+    ficha.indexOf("@media (max-width: 640px)")
+  );
+  const regraDesktop = regraDoSeletor(blocoDesktop);
+  assert("tipo de conta: opções na MESMA linha (grade de colunas iguais) no desktop",
+    /display:\s*grid/.test(regraDesktop) && /grid-auto-flow:\s*column/.test(regraDesktop) && /minmax\(0, 1fr\)/.test(regraDesktop),
+    regraDesktop);
+  assert("tipo de conta: cartão estreito/mobile mantém o empilhamento em largura total",
+    /flex-direction:\s*column/.test(regraDoSeletor(ficha)) &&
+      /flex-direction:\s*column/.test(regraDoSeletor(ficha.slice(ficha.indexOf("@media (max-width: 640px)")))),
+    regraDoSeletor(ficha));
+
+  // ── 20.d.2 — gate da conta salário: SIM / NÃO ──
+  const perguntaGate = (colBradesco.match(/<p class="salario-question">([^<]+)<\/p>/) || [])[1] || "";
+  assert("gate conta salário: pergunta é 'Você já possui Conta Salário Bradesco?'",
+    perguntaGate.trim() === "Você já possui Conta Salário Bradesco?",
+    perguntaGate.trim());
+  const rotulosGate = colBradesco.match(/<span>(SIM|NÃO)<\/span>/g) || [];
+  assert("gate conta salário: botões respondem SIM / NÃO, nessa ordem",
+    rotulosGate.join(" ") === "<span>SIM</span> <span>NÃO</span>",
+    rotulosGate.join(" | "));
+  assert("gate conta salário: textos antigos não sobraram na ficha",
+    !/JÁ POSSUO/.test(ficha) && !/AINDA VOU ABRIR/.test(ficha) && !/ou ainda vai abrir/.test(ficha),
+    "texto antigo presente");
+  assert("gate conta salário: valores persistidos seguem ja_possui / vai_abrir",
+    /name="salarioBradesco" value="ja_possui"/.test(colBradesco) && /name="salarioBradesco" value="vai_abrir"/.test(colBradesco),
+    "valores alterados");
 }
 
 
