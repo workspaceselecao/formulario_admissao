@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T03:31:39-03:00",
-  "gitCommit": "71ae6d9",
-  "gitSubject": "refactor(ficha): agência/conta abaixo do gate e rótulo \"Agência / Dígito\"",
+  "ultimaValidacaoIso": "2026-10-12T04:37:40-03:00",
+  "gitCommit": "aabbd8b",
+  "gitSubject": "feat(ficha): opções de conta em linha e gate SIM/NÃO",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
