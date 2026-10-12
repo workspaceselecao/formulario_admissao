@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T17:05:53-03:00",
-  "gitCommit": "61fa62d",
-  "gitSubject": "style(formularios): padroniza layout dos botoes de opcao",
+  "ultimaValidacaoIso": "2026-10-12T17:14:05-03:00",
+  "gitCommit": "d8a0407",
+  "gitSubject": "style(ficha): botoes mobile em linha e colunas iguais",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
