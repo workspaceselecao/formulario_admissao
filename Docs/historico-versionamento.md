@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/10/2026 | Padroniza layout dos botoes de opcao |
 | 12/10/2026 | Opções de conta em linha e gate SIM/NÃO |
 | 12/10/2026 | Agência/conta abaixo do gate e rótulo "Agência / Dígito" |
 | 12/10/2026 | Ação única "Preencher Carta" no modal da Conta Salário |

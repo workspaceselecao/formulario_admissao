@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T04:37:40-03:00",
-  "gitCommit": "aabbd8b",
-  "gitSubject": "feat(ficha): opções de conta em linha e gate SIM/NÃO",
+  "ultimaValidacaoIso": "2026-10-12T17:05:53-03:00",
+  "gitCommit": "61fa62d",
+  "gitSubject": "style(formularios): padroniza layout dos botoes de opcao",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
