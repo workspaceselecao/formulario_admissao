@@ -82,7 +82,7 @@ Se adicionar um **campo novo** no formulário web, tem de existir **entrada corr
 | Cópia de dados para Assistência Médica | `localStorage` com chave partilhada (§8.1) — o fluxo copia `cidadeuf` e outros campos; ver funções de “copiar para assistência” no HTML. |
 | Rascunho | `RASCUNHO_STORAGE_KEY` em `ficha_cadastral.html` (§8.2). |
 | Nome do arquivo baixado | Lógica em `gerarPDF()` (prefixo do nome, nome do usuário, versão vazia). |
-| Conta Salário "Ainda vou abrir" sem agência/conta | `ficha_cadastral.html` — `pendenciaContaSalarioSemDados()` interrompe `gerarPDF()` e abre `modalContaSalarioSemDados` com a mensagem exigida e os botões **Manter rascunho por 24 horas** (grava o rascunho + decisão do TTL, §7.2) e **Preencher Carta** (`baixarCartaAberturaConta()` → `carta_bradesco.html`). Suíte: TESTE 20. |
+| Conta Salário "Ainda vou abrir" sem agência/conta | `ficha_cadastral.html` — `pendenciaContaSalarioSemDados()` interrompe `gerarPDF()` e abre `modalContaSalarioSemDados` com a mensagem exigida e **ação única**: **Preencher Carta** chama `preencherCartaContaSalario()`, que usa o módulo do rascunho persistente por 24 h (`persistirRascunho24hContaSalario()` → `salvarRascunhoLocalSincrono()` + decisão do TTL, §7.2) e só então `baixarCartaAberturaConta()` → `carta_bradesco.html`. ESC/clique no fundo também persistem o rascunho e fecham sem redirecionar. Suíte: TESTE 20. |
 | Evidência / IP (se aplicável) | Padrão semelhante à assistência em partes do fluxo; rever `fetch` a `api.ipify.org` e texto no PDF. |
 
 Template único: **não** há seleção por cidade; só um `F-075_...pdf`.

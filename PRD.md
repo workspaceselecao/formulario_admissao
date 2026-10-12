@@ -82,7 +82,7 @@ O site é uma **aplicação web estática** que permite ao candidato ou ao RH pr
 | RF-15 | Download opcional da carta Bradesco em `.docx` — **não implementado**: a versão atual gera apenas PDF | Should |
 | RF-16 | Após PDF gerado com sucesso: persistir rascunho local e manter o formulário preenchido até **Descartar rascunho** ou a expiração automática (24 h) | Must |
 | RF-17 | Opcional: sugerir cópia de dados para fluxo de Assistência Médica | Should |
-| RF-18 | Conta Salário Bradesco “Ainda vou abrir” sem AGÊNCIA/CONTA: ao gerar o PDF a geração é interrompida com modal (“Antes de gerar sua Ficha, é necessário informar AGÊNCIA e CONTA. Preencha a carta e dirija-se a uma agência de sua preferência.”) e botões **Manter rascunho por 24 horas** e **Preencher Carta** (redireciona para `carta_bradesco.html`) | Must |
+| RF-18 | Conta Salário Bradesco “Ainda vou abrir” sem AGÊNCIA/CONTA: ao gerar o PDF a geração é interrompida com modal (“Antes de gerar sua Ficha, é necessário informar AGÊNCIA e CONTA. Preencha a carta e dirija-se a uma agência de sua preferência.”) e **ação única Preencher Carta**, que grava o rascunho persistente por 24 h (módulo do TTL) antes de redirecionar para `carta_bradesco.html`; ESC/fundo persistem o rascunho e fecham sem redirecionar | Must |
 
 ### 5.3 Assistência médica
 

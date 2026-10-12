@@ -1672,14 +1672,14 @@ async function testarRascunhoTTL(assert) {
 // ═══════════════════════════════════════════════════════════════════
 // TESTE 20 — Conta Salário "Ainda vou abrir": geração do PDF bloqueada
 //
-// Estrutural: o modal existe com a mensagem exigida e os dois botões
-// ("Manter rascunho por 24 horas" e "Preencher Carta"), e o gerarPDF()
-// interrompe o fluxo antes do LGPD e da geração.
+// Estrutural: o modal existe com a mensagem exigida e UMA única ação
+// ("Preencher Carta"), e o gerarPDF() interrompe o fluxo antes do LGPD e da
+// geração.
 // Comportamental: as funções da página são extraídas e executadas em
 // node:vm com stubs — a condição de pendência bloqueia só o caso
-// "vai_abrir" sem agência/conta; o botão de manter grava o rascunho,
-// registra a decisão do TTL e fecha a modal; o botão da Carta grava o
-// rascunho e redireciona para carta_bradesco.html.
+// "vai_abrir" sem agência/conta; a ação única persiste o rascunho por 24 h
+// pelo módulo do TTL e redireciona para carta_bradesco.html; ESC/fundo
+// persistem o rascunho e fecham sem redirecionar.
 // ═══════════════════════════════════════════════════════════════════
 async function testarContaSalarioSemDados(assert) {
   const vm = await import("node:vm");
@@ -1692,10 +1692,16 @@ async function testarContaSalarioSemDados(assert) {
   const modalHtml = modalInicio >= 0 && modalFim > modalInicio ? ficha.slice(modalInicio, modalFim) : "";
   assert("conta salário: modal de bloqueio presente e oculto no load", !!modalHtml && modalHtml.includes('hidden aria-hidden="true"'), modalHtml.slice(0, 120));
   assert("conta salário: mensagem exata exigida pelo fluxo", modalHtml.includes(MSG), modalHtml.slice(0, 240));
-  assert("conta salário: botão 'Manter rascunho por 24 horas'", modalHtml.includes(">Manter rascunho por 24 horas</button>"), modalHtml.slice(0, 300));
-  assert("conta salário: botão 'Preencher Carta'", modalHtml.includes(">Preencher Carta</button>"), modalHtml.slice(0, 300));
-  assert("conta salário: botões ligados aos handlers",
-    modalHtml.includes('onclick="manterRascunho24hContaSalario()"') && modalHtml.includes('onclick="preencherCartaContaSalario()"'),
+  assert("conta salário: modal tem UMA única ação — Preencher Carta",
+    (modalHtml.match(/<button/g) || []).length === 1 && modalHtml.includes('id="btnContaSalarioPreencherCarta"') && modalHtml.includes(">Preencher Carta</button>"),
+    modalHtml.slice(0, 300));
+  assert("conta salário: botão 'Manter rascunho por 24 horas' removido do modal",
+    !modalHtml.includes(">Manter rascunho por 24 horas</button>") && !modalHtml.includes("btnContaSalarioManter24h") && !modalHtml.includes('onclick="manterRascunho24hContaSalario()"'),
+    modalHtml.slice(0, 400));
+  assert("conta salário: ação ligada ao handler; ESC/fundo ligados ao rascunho de 24 h",
+    modalHtml.includes('onclick="preencherCartaContaSalario()"') &&
+      ficha.includes("contaSalarioSemDadosEsc") &&
+      ficha.includes("if (ev.target === ev.currentTarget) manterRascunho24hContaSalario()"),
     modalHtml.slice(0, 400));
   const iCond = ficha.indexOf("if (pendenciaContaSalarioSemDados())");
   const iLgpd = ficha.indexOf("await confirmarPoliticaLGPD()");
@@ -1738,12 +1744,13 @@ async function testarContaSalarioSemDados(assert) {
     avaliarCondicao({ tipoConta: "bradesco" }) === false,
     "bloqueia sem decisão");
 
-  // ── 20.c — botões do modal (vm) ──
-  function rodarHandler(nome, semTtl) {
+  // ── 20.c — ações do modal (vm) ──
+  function rodarFuncao(nome, semTtl) {
     const src = extrairFuncao(nome);
     if (!src) return null;
     const chamadas = [];
     const ctx = {
+      persistirRascunho24hContaSalario: () => chamadas.push("persistir-24h"),
       salvarRascunhoLocalSincrono: () => chamadas.push("salvar"),
       showToast: (msg) => chamadas.push(`toast:${msg}`),
       fecharModalContaSalarioSemDados: (acao) => chamadas.push(`fechar:${acao}`),
@@ -1756,21 +1763,31 @@ async function testarContaSalarioSemDados(assert) {
     ctx[nome]();
     return chamadas;
   }
-  const manter = rodarHandler("manterRascunho24hContaSalario", false);
-  assert("botão manter: grava rascunho, registra decisão do TTL (24 h) e fecha a modal",
-    !!manter && manter[0] === "salvar" && manter.includes("decidir:auto") && manter.indexOf("fechar:manter") > manter.indexOf("decidir:auto"),
-    JSON.stringify(manter));
-  assert("botão manter: avisa o prazo de 24 h e não segue para a Carta",
-    !!manter && manter.some((c) => c.startsWith("toast:Rascunho mantido por 24 horas")) && !manter.includes("ir-para-carta"),
-    JSON.stringify(manter));
-  const manterSemTtl = rodarHandler("manterRascunho24hContaSalario", true);
-  assert("botão manter: funciona mesmo sem o TTL carregado",
-    !!manterSemTtl && manterSemTtl.includes("salvar") && manterSemTtl.includes("fechar:manter"),
-    JSON.stringify(manterSemTtl));
-  const carta = rodarHandler("preencherCartaContaSalario", false);
-  assert("botão carta: grava rascunho e redireciona para a Carta de Abertura",
-    !!carta && carta[0] === "salvar" && carta.indexOf("fechar:carta") > 0 && carta.indexOf("ir-para-carta") > carta.indexOf("fechar:carta"),
+
+  // módulo do rascunho persistente por 24 h: grava agora + registra a decisão
+  const persistir = rodarFuncao("persistirRascunho24hContaSalario", false);
+  assert("rascunho 24 h: grava agora e registra a decisão no módulo do TTL",
+    !!persistir && persistir[0] === "salvar" && persistir[1] === "decidir:auto",
+    JSON.stringify(persistir));
+  const persistirSemTtl = rodarFuncao("persistirRascunho24hContaSalario", true);
+  assert("rascunho 24 h: funciona mesmo sem o TTL carregado",
+    !!persistirSemTtl && persistirSemTtl[0] === "salvar" && !persistirSemTtl.includes("ir-para-carta"),
+    JSON.stringify(persistirSemTtl));
+
+  // ação única: persistir o rascunho de 24 h → fechar → redirecionar para a Carta
+  const carta = rodarFuncao("preencherCartaContaSalario", false);
+  assert("ação única: persiste o rascunho por 24 h, fecha a modal e redireciona para a Carta",
+    !!carta && carta[0] === "persistir-24h" && carta.indexOf("fechar:carta") > 0 && carta.indexOf("ir-para-carta") > carta.indexOf("fechar:carta"),
     JSON.stringify(carta));
+  assert("ação única: usa o módulo do rascunho (não grava por conta própria)",
+    !!carta && !carta.includes("salvar") && !carta.includes("decidir:auto"),
+    JSON.stringify(carta));
+
+  // ESC/fundo (sem botão dedicado): persiste, avisa e não redireciona
+  const manter = rodarFuncao("manterRascunho24hContaSalario", false);
+  assert("ESC/fundo: persiste o rascunho por 24 h, avisa o prazo e NÃO redireciona",
+    !!manter && manter[0] === "persistir-24h" && manter.includes("fechar:manter") && manter.some((c) => c.startsWith("toast:Rascunho mantido por 24 horas")) && !manter.includes("ir-para-carta"),
+    JSON.stringify(manter));
 }
 
 

@@ -1569,7 +1569,8 @@
 </div>
 
 <!-- Conta Salário Bradesco "Ainda vou abrir": sem agência/conta a geração fica
-     bloqueada até o candidato preencher a Carta na agência e voltar com os dados. -->
+     bloqueada até o candidato preencher a Carta na agência e voltar com os dados.
+     Ação única: Preencher Carta (persiste o rascunho por 24 h e redireciona). -->
 <div id="modalContaSalarioSemDados" class="modal-overlay" role="dialog" aria-labelledby="modalContaSalarioTitulo" hidden aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head modal-head--atencao" id="modalContaSalarioTitulo">Dados da Conta Salário</div>
@@ -1577,7 +1578,6 @@
       Antes de gerar sua Ficha, é necessário informar AGÊNCIA e CONTA. Preencha a carta e dirija-se a uma agência de sua preferência.
     </div>
     <div class="modal-actions">
-      <button type="button" id="btnContaSalarioManter24h" class="btn-modal cancel" onclick="manterRascunho24hContaSalario()">Manter rascunho por 24 horas</button>
       <button type="button" id="btnContaSalarioPreencherCarta" class="btn-modal confirm" onclick="preencherCartaContaSalario()">Preencher Carta</button>
     </div>
   </div>
@@ -3358,25 +3358,43 @@ function confirmarLimparAssinaturaFichaExecutar() {
 // ── MODAL: Conta Salário "Ainda vou abrir" sem agência/conta ──
 // Quem ainda vai abrir a Conta Salário Bradesco não tem agência/conta para
 // informar (campos ocultos e limpos pelo gate), então a geração do PDF é
-// interrompida com a mensagem do RH e as duas saídas do fluxo: manter o
-// rascunho por 24 horas (decisão registrada no TTL) ou preencher a Carta de
-// Abertura de Conta (carta_bradesco.html, com os dados já copiados).
+// interrompida com a mensagem do RH. A única ação é **Preencher Carta**: o
+// rascunho persistente de 24 h (rascunho-ttl.js) é gravado, a decisão de
+// mantê-lo é registrada e só então a Carta de Abertura de Conta abre
+// (carta_bradesco.html, com os dados já copiados). ESC/fundo apenas persistem
+// o rascunho e fecham — mesma convenção do modal do TTL (o descarte em 24 h
+// continua valendo; não há retenção indefinida).
 let contaSalarioSemDadosResolver = null;
+let contaSalarioSemDadosEsc = null;
 function pendenciaContaSalarioSemDados(){
   if (radio('tipoConta') !== 'bradesco' || radio('salarioBradesco') !== 'vai_abrir') return false;
   return v('agenciaBradesco').length === 0 || v('contaBradesco').length === 0;
 }
+/** Rascunho persistente por 24 h: grava agora e registra a decisão no módulo
+ *  do TTL (mesma semântica do modal de rascunho — sem retenção indefinida). */
+function persistirRascunho24hContaSalario(){
+  salvarRascunhoLocalSincrono();
+  window.RascunhoTTL?._internais?.decidir?.('auto');
+}
 function abrirModalContaSalarioSemDados(){
   const modal = document.getElementById('modalContaSalarioSemDados');
-  if (!modal) return Promise.resolve('manter');
+  if (!modal) return Promise.resolve('carta');
   setModalOverlayVisible(modal, true);
   sincronizarBodyModalOpenFicha();
-  setTimeout(() => document.getElementById('btnContaSalarioManter24h')?.focus(), 0);
+  setTimeout(() => document.getElementById('btnContaSalarioPreencherCarta')?.focus(), 0);
+  contaSalarioSemDadosEsc = (ev) => {
+    if (ev && (ev.key === 'Escape' || ev.key === 'Esc')) manterRascunho24hContaSalario();
+  };
+  document.addEventListener('keydown', contaSalarioSemDadosEsc, true);
   return new Promise((resolve) => { contaSalarioSemDadosResolver = resolve; });
 }
 function fecharModalContaSalarioSemDados(acao){
   const modal = document.getElementById('modalContaSalarioSemDados');
   if (modal) setModalOverlayVisible(modal, false);
+  if (contaSalarioSemDadosEsc) {
+    document.removeEventListener('keydown', contaSalarioSemDadosEsc, true);
+    contaSalarioSemDadosEsc = null;
+  }
   sincronizarBodyModalOpenFicha();
   if (contaSalarioSemDadosResolver) {
     const resolve = contaSalarioSemDadosResolver;
@@ -3384,17 +3402,16 @@ function fecharModalContaSalarioSemDados(acao){
     resolve(acao);
   }
 }
-/** Saída 1: grava o rascunho agora e registra a decisão de mantê-lo por 24 h
- *  (mesma semântica do modal do TTL — não há retenção indefinida). */
+/** Fechar sem escolher (ESC ou clique no fundo): persiste o rascunho por 24 h
+ *  e mantém o candidato no formulário — não redireciona para a Carta. */
 function manterRascunho24hContaSalario(){
-  salvarRascunhoLocalSincrono();
-  window.RascunhoTTL?._internais?.decidir?.('auto');
+  persistirRascunho24hContaSalario();
   fecharModalContaSalarioSemDados('manter');
   showToast('Rascunho mantido por 24 horas. Retome quando quiser.', true);
 }
-/** Saída 2: grava o rascunho e segue para a Carta de Abertura de Conta. */
+/** Ação única do modal: persiste o rascunho por 24 h e segue para a Carta. */
 function preencherCartaContaSalario(){
-  salvarRascunhoLocalSincrono();
+  persistirRascunho24hContaSalario();
   fecharModalContaSalarioSemDados('carta');
   baixarCartaAberturaConta();
 }
@@ -3568,7 +3585,8 @@ async function gerarPDF(){
   try {
     if (!validarCamposObrigatorios()) return;
     // Conta Salário "Ainda vou abrir": sem agência/conta o PDF é bloqueado
-    // pelo modal com as duas saídas (manter rascunho / preencher a Carta).
+    // pelo modal cuja ação única (Preencher Carta) persiste o rascunho por 24 h
+    // antes de redirecionar.
     if (pendenciaContaSalarioSemDados()) {
       await abrirModalContaSalarioSemDados();
       return;
@@ -3691,6 +3709,12 @@ function baixarCartaAberturaConta(){
   window.atentoGrantPath?.("/carta_bradesco.html");
   window.location.assign("carta_bradesco.html");
 }
+
+// Fechar pelo fundo equivale a ESC: persiste o rascunho por 24 h e mantém o
+// candidato no formulário (mesma convenção do modal do TTL).
+document.getElementById('modalContaSalarioSemDados')?.addEventListener('click', (ev) => {
+  if (ev.target === ev.currentTarget) manterRascunho24hContaSalario();
+});
 
 initAssinaturaCanvas();
 document.getElementById("vtNaoOptante")?.addEventListener("change", () => {
