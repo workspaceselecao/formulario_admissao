@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T03:19:20-03:00",
-  "gitCommit": "9919dd6",
-  "gitSubject": "refactor(ficha): ação única \"Preencher Carta\" no modal da Conta Salário",
+  "ultimaValidacaoIso": "2026-10-12T03:31:39-03:00",
+  "gitCommit": "71ae6d9",
+  "gitSubject": "refactor(ficha): agência/conta abaixo do gate e rótulo \"Agência / Dígito\"",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
