@@ -198,9 +198,29 @@
     border-color: var(--border);
     color: var(--accent-dark);
   }
+  /* Mesma cor do botão Gerar PDF (.btn-export): gradiente roxo → pêssego. */
   .btn-carta-bradesco {
-    width: fit-content;
+    width: 100%;
     justify-content: center;
+    text-align: center;
+    background: linear-gradient(to top right, #3b2447, #efa27f);
+    border: none;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(30, 14, 38, 0.35);
+    box-shadow: 0 2px 14px rgba(59, 36, 71, 0.38);
+    transition: filter 0.2s, transform 0.12s;
+  }
+  .btn-carta-bradesco:hover {
+    background: linear-gradient(to top right, #3b2447, #efa27f);
+    border: none;
+    color: #fff;
+    filter: brightness(1.07);
+  }
+  .carta-explicativo {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin: 12px 0 10px;
   }
 
   /* ── LAYOUT ── */
@@ -609,6 +629,8 @@
     display: block; margin-bottom: 8px;
   }
   .signature-pad-hint { font-size: 12px; color: var(--text-mid); line-height: 1.5; margin-bottom: 8px; }
+  .signature-hint-ampliar { display: none; }
+  #signaturePadWrap.tela-cheia .signature-hint-ampliar { display: none; }
   .signature-canvas-outer {
     position: relative;
     border: 1.5px solid var(--border);
@@ -663,6 +685,39 @@
     border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
   }
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-signature-expand {
+    background: var(--surface); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .signature-pad-tools .btn-signature-expand {
+    height: 36px;
+    margin: 0 auto;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(1,66,106,0.28);
+  }
+  .signature-pad-tools .btn-signature-expand:hover {
+    border-color: var(--accent-dark);
+    background: var(--accent-dark);
+    color: #fff;
+  }
+  /* Assinatura em tela cheia (o traço usa coordenadas relativas: nada muda no desenho) */
+  #signaturePadWrap.tela-cheia {
+    position: fixed; inset: 0; z-index: 1200;
+    background: #fff; margin: 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column;
+  }
+  #signaturePadWrap.tela-cheia .signature-canvas-outer { flex: 1; min-height: 0; display: flex; }
+  #signaturePadWrap.tela-cheia #assinaturaCanvas { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; flex: 1; }
+  #signaturePadWrap.tela-cheia #salvarPdfAvisoBox { display: none; }
+  body.travado-assinatura { overflow: hidden; }
   .field input::placeholder { color: var(--text-light); }
   .field select { cursor: pointer; }
   /* Date picker nativo (mobile/desktop): não herdar appearance:none dos inputs de texto */
@@ -1042,6 +1097,12 @@
     .form-actions-bottom { width: 100%; flex-direction: column; }
     .download-empty-wrapper { width: 100%; }
     .form-actions-bottom .btn-export { width: 100%; justify-content: center; }
+    /* Mobile: botão Ampliar da assinatura visível; ferramentas compactas */
+    .btn-signature-expand { display: inline-flex; }
+    .signature-hint-ampliar { display: block; }
+    .signature-pad-tools { gap: 8px; flex-wrap: wrap; }
+    .signature-pad-tools .btn-signature-clear,
+    .signature-pad-tools .btn-signature-expand { padding: 8px 10px; font-size: 12px; }
     .download-format-menu { left: 0; right: 0; min-width: 0; }
     .container { padding: 24px 16px 60px; }
     .section-body { padding: 20px 16px 16px; }
@@ -1446,8 +1507,9 @@
                     </label>
                   </div>
                 </div>
+                <p class="carta-explicativo" id="cartaBradescoExplicacao" hidden>Esta é a carta de encaminhamento que a empresa fornece para que você apresente na agência do Banco Bradesco de sua preferência para abertura da Conta Salário. Solicite ao atendente que forneça o DÍGITO de identificação da AGÊNCIA.</p>
                 <button class="btn-download-empty btn-carta-bradesco" type="button" onclick="baixarCartaAberturaConta()" id="btnBradescoAbrirConta" hidden>
-                  Preencher Carta de Abertura de Conta
+                  Carta para abrir Conta Salário
                 </button>
               </div>
               <!-- Agência/Conta ficam DEPOIS da linha SIM / NÃO: respondendo
@@ -1578,12 +1640,14 @@
       <div class="signature-pad-wrap" id="signaturePadWrap">
         <label>Assinatura manuscrita <span class="req" id="reqAssinaturaManuscrita">*</span></label>
         <p class="signature-pad-hint" id="hintAssinaturaManuscrita">Desenhe sua assinatura com o mouse ou o dedo na área abaixo. O traço será incluído no PDF.</p>
+        <p class="signature-pad-hint signature-hint-ampliar" id="hintAmpliarAssinatura">Para uma área maior, toque em <strong>⛶ Ampliar</strong> e gire o aparelho na horizontal.</p>
         <div class="signature-canvas-outer" id="signatureCanvasOuter">
           <canvas id="assinaturaCanvas" width="1000" height="280" aria-label="Área de assinatura manuscrita"></canvas>
           <canvas id="assinaturaGuide" width="1000" height="280"></canvas>
         </div>
         <div class="signature-pad-tools">
           <button type="button" class="btn-signature-clear" id="btnLimparAssinatura">Limpar assinatura</button>
+          <button type="button" class="btn-signature-expand" id="btnExpandirAssinatura">⛶ Ampliar</button>
           <label class="check-label nao-assinar-manual-label">
             <input type="checkbox" id="naoAssinarManualmente" name="naoAssinarManualmente" autocomplete="off" aria-label="Não assinar">
             Não assinar
@@ -2520,6 +2584,8 @@ function sincronizarGateContaSalario(){
   if (radio('tipoConta') !== 'bradesco') return;
   const btnAbrir = document.getElementById('btnBradescoAbrirConta');
   if (btnAbrir) btnAbrir.hidden = !vaiAbrir;
+  const cartaExp = document.getElementById('cartaBradescoExplicacao');
+  if (cartaExp) cartaExp.hidden = !vaiAbrir;
   const detalhes = document.getElementById('bradescoDetalhes');
   const agencia = document.getElementById('agenciaBradesco');
   const conta = document.getElementById('contaBradesco');
@@ -3943,6 +4009,56 @@ document.getElementById("modalCopiaAssistencia")?.addEventListener("click", (e) 
 });
 document.getElementById("btnDependentesSim")?.addEventListener("click", responderDependentesSim);
 document.getElementById("btnDependentesNao")?.addEventListener("click", responderDependentesNao);
+
+/* Assinatura em tela cheia (mobile): só reorganiza o layout; o desenho,
+   a validação e a exportação operam no bitmap e seguem intactos. */
+let assinaturaFullscreenNativoAtivo = false;
+async function entrarTelaCheiaNativa(el){
+  try {
+    if (el.requestFullscreen) await el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    assinaturaFullscreenNativoAtivo = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  } catch (_e) { assinaturaFullscreenNativoAtivo = false; }
+  try {
+    if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape");
+  } catch (_e) {}
+}
+async function sairTelaCheiaNativa(){
+  assinaturaFullscreenNativoAtivo = false;
+  try {
+    if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+  } catch (_e) {}
+  try {
+    if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+    else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+  } catch (_e) {}
+}
+async function alternarTelaCheiaAssinatura(){
+  const wrap = document.getElementById("signaturePadWrap");
+  if (!wrap || wrap.classList.contains("desativada")) return;
+  const abrir = !wrap.classList.contains("tela-cheia");
+  wrap.classList.toggle("tela-cheia", abrir);
+  document.body.classList.toggle("travado-assinatura", abrir);
+  const btn = document.getElementById("btnExpandirAssinatura");
+  if (btn) btn.textContent = abrir ? "✕ Fechar" : "⛶ Ampliar";
+  if (abrir) entrarTelaCheiaNativa(wrap);
+  else sairTelaCheiaNativa();
+}
+document.getElementById("btnExpandirAssinatura")?.addEventListener("click", alternarTelaCheiaAssinatura);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.getElementById("signaturePadWrap")?.classList.contains("tela-cheia")) alternarTelaCheiaAssinatura();
+});
+/* Saída do fullscreen pelo gesto do sistema: fecha o modo junto. */
+document.addEventListener("fullscreenchange", () => {
+  if (!assinaturaFullscreenNativoAtivo) return;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return;
+  assinaturaFullscreenNativoAtivo = false;
+  if (document.getElementById("signaturePadWrap")?.classList.contains("tela-cheia")) alternarTelaCheiaAssinatura();
+});
+document.getElementById("btnExpandirAssinatura")?.addEventListener("click", alternarTelaCheiaAssinatura);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.getElementById("signaturePadWrap")?.classList.contains("tela-cheia")) alternarTelaCheiaAssinatura();
+});
 
 document.getElementById("btnModalDescartarRascunhoCancelar")?.addEventListener("click", fecharModalConfirmarDescartarRascunhoFicha);
 document.getElementById("btnModalDescartarRascunhoConfirmar")?.addEventListener("click", () => {

@@ -10,6 +10,10 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/10/2026 | Botao ampliar centralizado com destaque |
+| 12/10/2026 | Melhorias no preenchimento e na geração da assinatura nos PDFs |
+| 12/10/2026 | Manual de utilizacao do painel administrativo |
+| 12/10/2026 | Add files via upload |
 | 12/10/2026 | Botoes mobile em linha e colunas iguais |
 | 12/10/2026 | Padroniza layout dos botoes de opcao |
 | 12/10/2026 | Opções de conta em linha e gate SIM/NÃO |

@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T17:14:05-03:00",
-  "gitCommit": "d8a0407",
-  "gitSubject": "style(ficha): botoes mobile em linha e colunas iguais",
+  "ultimaValidacaoIso": "2026-10-12T23:36:20-03:00",
+  "gitCommit": "3276119",
+  "gitSubject": "style(ficha): botao ampliar centralizado com destaque",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

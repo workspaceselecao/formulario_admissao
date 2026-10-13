@@ -1630,5 +1630,11 @@
     "UF": "SP",
     "CIDADE": "CATANDUVA",
     "FICHA A UTILIZAR": "FICHA GNDI"
+  },
+  {
+    "REGIONAL": "NE",
+    "UF": "BA",
+    "CIDADE": "BONITO",
+    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
   }
 ]
