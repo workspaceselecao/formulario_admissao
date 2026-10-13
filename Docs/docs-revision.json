@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T23:36:20-03:00",
-  "gitCommit": "3276119",
-  "gitSubject": "style(ficha): botao ampliar centralizado com destaque",
+  "ultimaValidacaoIso": "2026-10-12T23:58:57-03:00",
+  "gitCommit": "ffa0e57",
+  "gitSubject": "feat: botoes padronizados, carta conta salario e assinatura tela cheia",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
