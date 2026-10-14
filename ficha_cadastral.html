@@ -3983,6 +3983,11 @@ document.getElementById("btnCopiaAssistSim")?.addEventListener("click", () => {
   }
   payloadPosPdfAssistenciaPendente = null;
   fecharModalCopiaAssistencia();
+  // Redirecionamento interno entre formulários: quem chegou até aqui já
+  // informou o código nesta aba, então libera o destino sem nova chave.
+  // Acesso direto à URL, sem sessão, continua exigindo o código.
+  window.atentoGrantPath?.("/assistencia_medica");
+  window.atentoGrantPath?.("/assistencia_medica.html");
   window.location.assign("assistencia_medica.html");
 });
 function fecharModalCopiaAssistRecusandoRedirecionamento() {

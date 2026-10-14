@@ -42,6 +42,11 @@
   const TX = "atf_x";
   // `atf_p` guarda os caminhos liberados nesta sessão, separados por "|".
   const TP = "atf_p";
+  // `atf_g` marca o grupo único de formulários: quem informou o código uma
+  // vez nesta aba navega entre formulários sem reinserir (Ficha ↔
+  // Assistência ↔ Carta). Rotas fora do grupo (ex.: /admin, guard apartado)
+  // não usam esta chave e não são afetadas.
+  const TG = "atf_g";
   const EXPIRY_MS = 60 * 60 * 1000;
   // Janela deslizante: atividade do usuário prolonga a sessão (throttle para
   // não regravar a cada clique/tecla). Aviso amigável quando falta pouco.
@@ -152,9 +157,41 @@
     } catch (e) { return []; }
   }
 
+  // Normaliza qualquer forma de acesso ao mesmo formulário canônico:
+  // "/assistencia_medica.html", "/assistencia_medica", "/f089",
+  // "/sub/dir/assistencia_medica.html?x=1" → "/assistencia_medica".
+  // Sem isso, a sessão concedida em uma forma não era reconhecida na outra
+  // e o código era pedido de novo ao navegar entre formulários.
+  function normalizarRota(path) {
+    try {
+      var p = String(path || "").split("?")[0].split("#")[0].trim();
+      if (!p) return "";
+      var base = p.substring(p.lastIndexOf("/") + 1);
+      base = base.replace(/\.html?$/i, "").trim().toLowerCase();
+      if (!base || base === "index" || base === "/") return "";
+      if (base === "f075" || base === "f-075") return "/ficha_cadastral";
+      if (base === "f089" || base === "f-089") return "/assistencia_medica";
+      if (base === "bradesco") return "/carta_bradesco";
+      return "/" + base;
+    } catch (e) { return String(path || ""); }
+  }
+
+  function grupoLiberado() {
+    try { return sessionStorage.getItem(TG) === "1"; } catch (e) { return false; }
+  }
+
   function sessionValid(path) {
     if (!sessaoAtiva()) return false;
-    return caminhosLiberados().indexOf(path) !== -1;
+    // Grupo único: código informado uma vez vale para todos os formulários
+    // protegidos nesta aba, qualquer que seja a forma da URL.
+    if (grupoLiberado() && isProtected(path)) return true;
+    // Compatibilidade: sessões antigas guardavam caminhos literais em `atf_p`.
+    var atual = normalizarRota(path);
+    var libs = caminhosLiberados();
+    for (var i = 0; i < libs.length; i++) {
+      if (normalizarRota(libs[i]) === atual) return true;
+    }
+    return false;
   }
 
   function grantSession(path) {
@@ -165,11 +202,19 @@
     // Rotas fora deste grupo (ex.: /admin) usam guard apartado e não são
     // afetadas. Aplicações futuras de novas rotas em PROTECTED entram
     // automaticamente no grupo.
-    var keep = PROTECTED.slice();
-    if (keep.indexOf(path) === -1) keep.push(path);
+    var keep = [];
+    var vistos = {};
+    var i, n;
+    for (i = 0; i < PROTECTED.length; i++) {
+      n = normalizarRota(PROTECTED[i]);
+      if (n && !vistos[n]) { vistos[n] = true; keep.push(n); }
+    }
+    n = normalizarRota(path);
+    if (n && !vistos[n]) { vistos[n] = true; keep.push(n); }
     sessionStorage.setItem(TK, genToken());
     sessionStorage.setItem(TX, String(Date.now() + EXPIRY_MS));
     sessionStorage.setItem(TP, keep.join("|"));
+    sessionStorage.setItem(TG, "1");
   }
 
   function refreshSession() {
@@ -197,6 +242,7 @@
       sessionStorage.removeItem(TK);
       sessionStorage.removeItem(TX);
       sessionStorage.removeItem(TP);
+      sessionStorage.removeItem(TG);
     } catch (e) { /* ignore */ }
     window.location.reload();
   }
@@ -448,6 +494,7 @@
       sessionStorage.removeItem(TK);
       sessionStorage.removeItem(TX);
       sessionStorage.removeItem(TP);
+      sessionStorage.removeItem(TG);
     } catch (e) { /* ignore */ }
     window.location.reload();
   };
@@ -474,8 +521,10 @@
   // INICIALIZAÇÃO
   // ══════════════════════════════════════════════════════
   function isProtected(path) {
+    var atual = normalizarRota(path);
+    if (!atual) return false;
     for (var i = 0; i < PROTECTED.length; i++) {
-      if (path === PROTECTED[i]) return true;
+      if (normalizarRota(PROTECTED[i]) === atual) return true;
     }
     return false;
   }

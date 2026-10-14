@@ -152,9 +152,16 @@ async function runTests() {
   // Conceder um formulário protege o grupo inteiro (ficha ↔ assistência ↔
   // carta) nesta aba; rotas fora de PROTECTED (ex.: /admin) seguem apartadas.
   assert("guard.js libera grupo completo de formulários em grantSession",
-    /grantSession\(path\)\s*\{[\s\S]*?PROTECTED\.slice\(\)/.test(guardR.body), "grantSession sem grupo de formulários");
+    /grantSession\(path\)[\s\S]{0,1200}?PROTECTED/.test(guardR.body) && /setItem\(TG,\s*"1"\)/.test(guardR.body), "grantSession sem grupo de formulários");
   assert("guard.js grantSession preserva rota concedida não listada em PROTECTED",
-    guardR.body.includes("if (keep.indexOf(path) === -1) keep.push(path);"), "missing keep.push(path)");
+    guardR.body.includes("normalizarRota(path)"), "missing normalizarRota(path)");
+  // Redirecionamento interno entre formulários não pede o código de novo:
+  // a mesma rota vale com/sem ".html" (cleanUrls × arquivo) e por apelido
+  // (/f075 ↔ ficha, /f089 ↔ assistência, /bradesco ↔ carta).
+  assert("guard.js normaliza rotas (.html/clean/alias)",
+    guardR.body.includes("function normalizarRota") && guardR.body.includes("ficha_cadastral") && guardR.body.includes("assistencia_medica"), "missing normalizarRota");
+  assert("guard.js sessionValid aceita o grupo em qualquer forma da URL",
+    guardR.body.includes("grupoLiberado()"), "missing grupoLiberado");
 
   // ── TEST 3: Protected pages include guard ──
   console.log("\n📋 Teste 3: Páginas protegidas incluem guard");
