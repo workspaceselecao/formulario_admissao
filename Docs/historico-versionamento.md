@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 14/10/2026 | Mantem codigo entre formularios sem repedir na navegacao interna |
 | 14/10/2026 | Perf+feat : compacta fontes do PDF e sessao unica com aviso de expiracao |
 | 12/10/2026 | Melhorias no preenchimento e na geração da assinatura nos PDFs |
 | 12/10/2026 | Botoes mobile em linha e colunas iguais |

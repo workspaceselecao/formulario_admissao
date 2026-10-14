@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-14T20:01:35-03:00",
-  "gitCommit": "6c2e51e",
-  "gitSubject": "docs(manutencao): documenta subsets de fonte e sessao entre formularios",
+  "ultimaValidacaoIso": "2026-10-14T20:16:33-03:00",
+  "gitCommit": "9a90437",
+  "gitSubject": "fix(guard): mantem codigo entre formularios sem repedir na navegacao interna",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
