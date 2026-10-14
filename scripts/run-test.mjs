@@ -176,6 +176,12 @@ async function runTests() {
   console.log("\n📋 Teste 4: Home page NÃO inclui guard");
   const homeR = await fetch(`http://127.0.0.1:${PORT}/`);
   assert("/ não inclui guard.js script", !homeR.body.includes('src="guard.js"'), "guard.js should not be on home");
+  // Retorno ao início exige nova autenticação: o hub invalida a sessão dos
+  // formulários (inclusive via bfcache), sem incluir o guard.
+  assert("/ invalida a sessão dos formulários ao carregar",
+    homeR.body.includes('sessionStorage.removeItem("atf_t")') && homeR.body.includes('sessionStorage.removeItem("atf_g")'), "home sem invalidacao de sessao");
+  assert("/ invalida a sessão também via bfcache (pageshow)",
+    homeR.body.includes('"pageshow"') || homeR.body.includes("'pageshow'"), "home sem pageshow");
 
   // ── TEST 5: No real keys in source ──
   console.log("\n📋 Teste 5: Chaves reais ausentes do código");

@@ -420,5 +420,24 @@
       });
     })();
   </script>
+  <script>
+    // Retorno ao início invalida a sessão dos formulários: quem sair da
+    // ferramenta ou voltar ao hub e abrir outro formulário informa o código
+    // de novo. A navegação interna entre formulários (sem passar pelo hub)
+    // segue sem repetir o código, como antes.
+    (function () {
+      function encerrarSessaoFormularios() {
+        try {
+          sessionStorage.removeItem("atf_t");
+          sessionStorage.removeItem("atf_x");
+          sessionStorage.removeItem("atf_p");
+          sessionStorage.removeItem("atf_g");
+        } catch (e) { /* sem sessão — nada a encerrar */ }
+      }
+      encerrarSessaoFormularios();
+      // bfcache (voltar/avançar): a página pode ser restaurada sem recarregar.
+      window.addEventListener("pageshow", encerrarSessaoFormularios);
+    })();
+  </script>
 </body>
 </html>
