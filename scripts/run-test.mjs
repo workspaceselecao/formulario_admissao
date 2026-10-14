@@ -148,6 +148,13 @@ async function runTests() {
   assert("guard.js contém verifyCode", guardR.body.includes("verifyCode"), "missing verifyCode");
   assert("guard.js contém G array", guardR.body.includes("const G ="), "missing G array");
   assert("guard.js contém refreshSession", guardR.body.includes("refreshSession"), "missing refreshSession");
+  // Sessão única entre formulários: a chave é só para a inserção inicial.
+  // Conceder um formulário protege o grupo inteiro (ficha ↔ assistência ↔
+  // carta) nesta aba; rotas fora de PROTECTED (ex.: /admin) seguem apartadas.
+  assert("guard.js libera grupo completo de formulários em grantSession",
+    /grantSession\(path\)\s*\{[\s\S]*?PROTECTED\.slice\(\)/.test(guardR.body), "grantSession sem grupo de formulários");
+  assert("guard.js grantSession preserva rota concedida não listada em PROTECTED",
+    guardR.body.includes("if (keep.indexOf(path) === -1) keep.push(path);"), "missing keep.push(path)");
 
   // ── TEST 3: Protected pages include guard ──
   console.log("\n📋 Teste 3: Páginas protegidas incluem guard");
@@ -193,12 +200,23 @@ async function runTests() {
   assert("guard.js contém array G com 5 entries", (guardR.body.match(/\{s:"/g) || []).length === 5, "wrong count");
   assert("Verifiers são hex (64 chars)", /[a-f0-9]{64}/.test(guardR.body), "not hex");
 
-  // ── TEST 7: Session refresh mechanism ──
-  console.log("\n📋 Teste 7: Mecanismo de refresh de sessão");
+  // ── TEST 7: Session refresh + aviso de expiração ──
+  console.log("\n📋 Teste 7: Mecanismo de refresh e aviso de expiração");
   assert("guard.js contém refreshSession", guardR.body.includes("function refreshSession"), "missing");
-  assert("guard.js contém scheduleRefresh", guardR.body.includes("function scheduleRefresh"), "missing");
+  assert("guard.js prolonga sessão por ATIVIDADE (janela deslizante com throttle)",
+    guardR.body.includes("function registrarAtividade") && guardR.body.includes("REFRESH_THROTTLE_MS"), "missing");
   assert("guard.js escuta click para refresh", guardR.body.includes('addEventListener("click"') || guardR.body.includes("addEventListener(\"click\""), "missing click listener");
-  assert("guard.js escuta keypress para refresh", guardR.body.includes('addEventListener("keypress"') || guardR.body.includes("addEventListener(\"keypress\""), "missing keypress listener");
+  assert("guard.js escuta keydown para refresh", guardR.body.includes('addEventListener("keydown"') || guardR.body.includes("addEventListener(\"keydown\""), "missing keydown listener");
+  assert("guard.js tem aviso amigável de expiração próxima",
+    guardR.body.includes("function agendarAviso") && guardR.body.includes("AVISO_FALTA_MS"), "missing");
+  assert("aviso tem botões Continuar sessão / Encerrar agora e contagem regressiva",
+    guardR.body.includes("Continuar sessão") && guardR.body.includes("Encerrar agora") && guardR.body.includes("Sua sessão expira em"), "missing");
+  assert("aviso só aparece quando a sessão está na janela final",
+    guardR.body.includes("function mostrarBannerExpiracao") && guardR.body.includes("if (restante > AVISO_FALTA_MS)"), "missing");
+  assert("sessão é encerrada de fato ao vencer o prazo",
+    guardR.body.includes("function encerrarSessaoPorExpiracao"), "missing");
+  assert("vigência inicia após validar a chave (iniciarVigencia no doVerify)",
+    guardR.body.includes("function iniciarVigencia") && guardR.body.includes("iniciarVigencia();"), "missing");
 
   // ── TEST 8: Clean URLs config in vercel.json ──
   console.log("\n📋 Teste 8: Configuração vercel.json");

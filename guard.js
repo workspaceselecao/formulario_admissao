@@ -43,7 +43,13 @@
   // `atf_p` guarda os caminhos liberados nesta sessão, separados por "|".
   const TP = "atf_p";
   const EXPIRY_MS = 60 * 60 * 1000;
-  var _refreshTimer = null;
+  // Janela deslizante: atividade do usuário prolonga a sessão (throttle para
+  // não regravar a cada clique/tecla). Aviso amigável quando falta pouco.
+  const REFRESH_THROTTLE_MS = 60 * 1000;      // no máx. 1 prolongamento/60 s
+  const AVISO_FALTA_MS = 10 * 60 * 1000;      // banner quando faltar ≤10 min
+  var _lastActivityRefresh = 0;
+  var _warnTimer = null;
+  var _bannerIntl = null;
 
   // ══════════════════════════════════════════════════════
   // CRIPTOGRAFIA
@@ -152,9 +158,14 @@
   }
 
   function grantSession(path) {
-    // Preserva os caminhos já liberados e ainda válidos: quem digitou a chave
-    // na ficha continua autenticado ao voltar para ela depois de abrir a Carta.
-    var keep = sessaoAtiva() ? caminhosLiberados() : [];
+    // Grupo único de sessão entre formulários: a chave é só para a inserção
+    // inicial. Informada em qualquer formulário protegido (Ficha, Assistência
+    // Médica ou Carta), a navegação/redirecionamento entre eles nesta aba não
+    // solicita o código de novo (Ficha → Assistência e vice-versa, etc.).
+    // Rotas fora deste grupo (ex.: /admin) usam guard apartado e não são
+    // afetadas. Aplicações futuras de novas rotas em PROTECTED entram
+    // automaticamente no grupo.
+    var keep = PROTECTED.slice();
     if (keep.indexOf(path) === -1) keep.push(path);
     sessionStorage.setItem(TK, genToken());
     sessionStorage.setItem(TX, String(Date.now() + EXPIRY_MS));
@@ -168,9 +179,122 @@
     } catch (e) { /* ignore */ }
   }
 
-  function scheduleRefresh() {
-    clearTimeout(_refreshTimer);
-    _refreshTimer = setTimeout(refreshSession, 30000);
+  // Atividade do usuário → janela deslizante: prolonga a sessão (com
+  // throttle) e reagenda o aviso de expiração. Não é um tick cego: quem está
+  // trabalhando continua autenticado; quem só abriu e sumiu tem a sessão
+  // encerrada pelo TTL fixo, como antes.
+  function registrarAtividade() {
+    var agora = Date.now();
+    if (agora - _lastActivityRefresh >= REFRESH_THROTTLE_MS) {
+      _lastActivityRefresh = agora;
+      refreshSession();
+    }
+    agendarAviso();
+  }
+
+  function encerrarSessaoPorExpiracao() {
+    try {
+      sessionStorage.removeItem(TK);
+      sessionStorage.removeItem(TX);
+      sessionStorage.removeItem(TP);
+    } catch (e) { /* ignore */ }
+    window.location.reload();
+  }
+
+  // ══════════════════════════════════════════════════════
+  // BANNER — AVISO DE EXPIRAÇÃO PRÓXIMA
+  // ══════════════════════════════════════════════════════
+  var BANNER_CSS = [
+    "#afx{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:999998;display:none;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:92vw;box-sizing:border-box;padding:10px 16px;background:#01426A;color:#fff;border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.22)}",
+    "#afx.show{display:flex}",
+    "#afx b{font-weight:700;font-variant-numeric:tabular-nums}",
+    "#afx button{border:none;border-radius:8px;padding:8px 14px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer}",
+    "#afxKeep{background:#fff;color:#01426A}",
+    "#afxKeep:hover{background:#eef4f8}",
+    "#afxEnd{background:transparent;color:#cfe0ec;border:1px solid rgba(255,255,255,.45)}",
+    "#afxEnd:hover{border-color:#fff;color:#fff}",
+    "@media (max-width:380px){#afx{font-size:12px;padding:10px 12px}}"
+  ].join("\n");
+
+  function textoFalta(restante) {
+    var min = Math.max(0, Math.floor(restante / 60000));
+    if (min >= 1) return min + (min === 1 ? " minuto" : " minutos");
+    return "menos de um minuto";
+  }
+
+  function fecharBanner() {
+    try {
+      clearInterval(_bannerIntl);
+      _bannerIntl = null;
+      var b = document.getElementById("afx");
+      if (b && b.parentNode) b.parentNode.removeChild(b);
+    } catch (e) { /* ignore */ }
+  }
+
+  function agendarAviso() {
+    clearTimeout(_warnTimer);
+    fecharBanner();
+    try {
+      var tx = parseInt(sessionStorage.getItem(TX) || "0", 10);
+      if (!tx || !sessaoAtiva()) return;
+      var restante = tx - Date.now();
+      if (restante <= 0) return;
+      if (restante > AVISO_FALTA_MS) {
+        // Mostra o banner no momento em que faltarem exatamente 10 min.
+        _warnTimer = setTimeout(agendarAviso, restante - AVISO_FALTA_MS);
+        return;
+      }
+      mostrarBannerExpiracao(restante);
+    } catch (e) { /* sem sessão — nada a avisar */ }
+  }
+
+  function mostrarBannerExpiracao(restante) {
+    fecharBanner();
+    var style = document.createElement("style");
+    style.textContent = BANNER_CSS;
+    document.head.appendChild(style);
+    var b = document.createElement("div");
+    b.id = "afx";
+    b.setAttribute("role", "alert");
+    b.setAttribute("aria-live", "polite");
+    b.innerHTML =
+      '<span>Sua sessão expira em <b id="afxTime">' + textoFalta(restante) + '</b>.</span>' +
+      '<button type="button" id="afxKeep">Continuar sessão</button>' +
+      '<button type="button" id="afxEnd">Encerrar agora</button>';
+    document.body.appendChild(b);
+    b.classList.add("show");
+    document.getElementById("afxKeep").addEventListener("click", function () {
+      refreshSession();
+      agendarAviso();
+      registrarAtividade();
+    });
+    document.getElementById("afxEnd").addEventListener("click", function () {
+      encerrarSessaoPorExpiracao();
+    });
+    // Contagem regressiva: atualiza o texto e encerra a sessão com recarga
+    // (a tela de chave reaparece) quando o prazo vence de fato.
+    _bannerIntl = setInterval(function () {
+      var t = parseInt(sessionStorage.getItem(TX) || "0", 10);
+      var f = t - Date.now();
+      var el = document.getElementById("afxTime");
+      if (!el || !t || !sessaoAtiva()) { clearInterval(_bannerIntl); _bannerIntl = null; return; }
+      if (f <= 0) { clearInterval(_bannerIntl); _bannerIntl = null; encerrarSessaoPorExpiracao(); return; }
+      el.textContent = textoFalta(f);
+    }, 10000);
+  }
+
+  // Estado vigilante da sessão: atividade prolonga com throttle e o aviso é
+  // (re)agendado. Chamado no carregamento com sessão válida e logo após a
+  // validação da chave (antes, os escutas só existiam após uma recarga).
+  function iniciarVigencia() {
+    _lastActivityRefresh = Date.now();
+    document.addEventListener("click", registrarAtividade);
+    document.addEventListener("keydown", registrarAtividade);
+    document.addEventListener("touchstart", registrarAtividade);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) registrarAtividade();
+    });
+    agendarAviso();
   }
 
   // ══════════════════════════════════════════════════════
@@ -293,6 +417,7 @@
             overlay.classList.remove("show");
             overlay.parentNode.removeChild(overlay);
             revealContent();
+            iniciarVigencia();
           }, 600);
         } else {
           msg.textContent = "✕ Chave inválida. Não foi possível autorizar este acesso.";
@@ -364,10 +489,7 @@
       if (sessionValid(path)) {
         refreshSession();
         revealContent();
-        // Refresh on user activity
-        document.addEventListener("click", scheduleRefresh);
-        document.addEventListener("keypress", scheduleRefresh);
-        document.addEventListener("touchstart", scheduleRefresh);
+        iniciarVigencia();
       } else {
         createAuthUI();
       }

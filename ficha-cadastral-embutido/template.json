@@ -5,24 +5,24 @@
   },
   "fontes": {
     "Arial-Bold": {
-      "arquivo": "assets/arialbd.ttf",
+      "arquivo": "assets/arialbd-sub.ttf",
       "fallback": "Helvetica-Bold"
     },
     "Arial": {
-      "arquivo": "assets/arial.ttf",
+      "arquivo": "assets/arial-sub.ttf",
       "fallback": "Helvetica"
     },
     "Arial-Narrow-Bold": {
-      "arquivo": "assets/ARIALNB.ttf",
+      "arquivo": "assets/arialnb-sub.ttf",
       "fallback": "Helvetica-Bold"
     },
     "Arial-Narrow": {
-      "arquivo": "assets/ARIALN.ttf",
+      "arquivo": "assets/arialn-sub.ttf",
       "fallback": "Helvetica"
     }
   },
   "fonteCheckbox": {
-    "arquivo": "assets/seguisym.ttf"
+    "arquivo": "assets/seguisym-sub.ttf"
   },
   "images": [
     {

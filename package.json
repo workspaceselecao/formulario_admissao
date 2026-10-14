@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "fonteditor-core": "^2.6.3",
     "pdf-lib": "^1.17.1"
   }
 }
