@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-14T19:57:17-03:00",
-  "gitCommit": "9220bef",
-  "gitSubject": "perf+feat(pdf/sessao): compacta fontes do PDF e sessao unica com aviso de expiracao",
+  "ultimaValidacaoIso": "2026-10-14T20:01:35-03:00",
+  "gitCommit": "6c2e51e",
+  "gitSubject": "docs(manutencao): documenta subsets de fonte e sessao entre formularios",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
