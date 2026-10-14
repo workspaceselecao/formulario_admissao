@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-14T20:24:10-03:00",
-  "gitCommit": "ceef935",
-  "gitSubject": "fix(auth): retorno ao inicio invalida a sessao e exige novo codigo",
+  "ultimaValidacaoIso": "2026-10-14T20:32:48-03:00",
+  "gitCommit": "67458d3",
+  "gitSubject": "style(forms): expande layout horizontal em 20 por cento no desktop",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
