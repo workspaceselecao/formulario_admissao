@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-14T20:16:33-03:00",
-  "gitCommit": "9a90437",
-  "gitSubject": "fix(guard): mantem codigo entre formularios sem repedir na navegacao interna",
+  "ultimaValidacaoIso": "2026-10-14T20:24:10-03:00",
+  "gitCommit": "ceef935",
+  "gitSubject": "fix(auth): retorno ao inicio invalida a sessao e exige novo codigo",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
