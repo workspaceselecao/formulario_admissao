@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-12T23:58:57-03:00",
-  "gitCommit": "ffa0e57",
-  "gitSubject": "feat: botoes padronizados, carta conta salario e assinatura tela cheia",
+  "ultimaValidacaoIso": "2026-10-14T19:57:17-03:00",
+  "gitCommit": "9220bef",
+  "gitSubject": "perf+feat(pdf/sessao): compacta fontes do PDF e sessao unica com aviso de expiracao",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
