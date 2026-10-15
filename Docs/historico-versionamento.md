@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 15/10/2026 | Redistribui fileiras SUS-CPF e Telefone-Cargo |
 | 15/10/2026 | Grupo e cargo em listas suspensas e rebalanceamento do layout |
 | 14/10/2026 | Expande layout horizontal em 20 por cento no desktop |
 | 14/10/2026 | Retorno ao inicio invalida a sessao e exige novo codigo |

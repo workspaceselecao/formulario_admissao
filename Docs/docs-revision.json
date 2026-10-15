@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-15T01:08:23-03:00",
-  "gitCommit": "fa96eda",
-  "gitSubject": "feat(assistencia): grupo e cargo em listas suspensas e rebalanceamento do layout",
+  "ultimaValidacaoIso": "2026-10-15T01:29:35-03:00",
+  "gitCommit": "6c649fc",
+  "gitSubject": "style(assistencia): redistribui fileiras SUS-CPF e Telefone-Cargo",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
