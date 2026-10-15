@@ -257,7 +257,8 @@
   .address-numero { grid-column: span 1; }
   .address-complemento { grid-column: span 4; }
   .address-bairro { grid-column: span 4; }
-  .address-cidade { grid-column: span 6; }
+  .address-cidade { grid-column: span 5; }
+  .address-uf { grid-column: span 3; }
 
   /* ── SECTION CARDS ── */
   .section-card {
@@ -615,6 +616,19 @@
     background: #fff;
     box-shadow: none;
   }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-light);
+    border-bottom: 2px solid var(--text-light);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
   .radio-inline.group-invalid,
   .check-group.group-invalid {
     outline: 2px solid #d1432f;
@@ -821,6 +835,14 @@
   }
   .radio-label.active input {
     accent-color: #fff;
+  }
+  /* Vale Refeição/Alimentação: 3 opções em partes iguais na linha. */
+  #grupoValeRef { flex-wrap: nowrap; }
+  #grupoValeRef .radio-label {
+    flex: 1 1 0;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
   }
 
   .field-inline-row {
@@ -1110,6 +1132,8 @@
     .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
     .address-grid { grid-template-columns: 1fr; }
     .address-cep, .address-endereco, .address-numero, .address-complemento, .address-bairro, .address-cidade { grid-column: span 1; }
+    /* Mobile mantém o campo único Cidade - UF: o seletor de UF só existe no desktop. */
+    .address-uf { display: none; }
     /* Tipo de conta empilhado em largura total (mobile como estava) */
     .banco-col .radio-inline {
       display: flex;
@@ -1137,6 +1161,17 @@
     #grupoDeficiencia .radio-label {
       width: 100%;
       justify-content: flex-start;
+      margin: 0;
+    }
+    /* Mobile: Vale em coluna única, cada opção na largura total. */
+    #grupoValeRef {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    #grupoValeRef .radio-label {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
       margin: 0;
     }
     /* Mobile: Banco na mesma linha (3 colunas iguais) — sem as chaves há espaço */
@@ -1461,8 +1496,43 @@
           <input type="text" id="bairro" placeholder="Bairro">
         </div>
         <div class="field address-cidade">
-          <label>Cidade - UF <span class="req">*</span></label>
-          <input type="text" id="cidade" placeholder="Cidade - UF">
+          <label>Cidade <span class="req">*</span></label>
+          <input type="text" id="cidade" placeholder="Cidade">
+        </div>
+        <div class="field address-uf">
+          <label>UF <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="cidadeUf">
+              <option value="">—</option>
+              <option value="AC">AC – Acre</option>
+              <option value="AL">AL – Alagoas</option>
+              <option value="AM">AM – Amazonas</option>
+              <option value="AP">AP – Amapá</option>
+              <option value="BA">BA – Bahia</option>
+              <option value="CE">CE – Ceará</option>
+              <option value="DF">DF – Distrito Federal</option>
+              <option value="ES">ES – Espírito Santo</option>
+              <option value="GO">GO – Goiás</option>
+              <option value="MA">MA – Maranhão</option>
+              <option value="MG">MG – Minas Gerais</option>
+              <option value="MS">MS – Mato Grosso do Sul</option>
+              <option value="MT">MT – Mato Grosso</option>
+              <option value="PA">PA – Pará</option>
+              <option value="PB">PB – Paraíba</option>
+              <option value="PE">PE – Pernambuco</option>
+              <option value="PI">PI – Piauí</option>
+              <option value="PR">PR – Paraná</option>
+              <option value="RJ">RJ – Rio de Janeiro</option>
+              <option value="RN">RN – Rio Grande do Norte</option>
+              <option value="RO">RO – Rondônia</option>
+              <option value="RR">RR – Roraima</option>
+              <option value="RS">RS – Rio Grande do Sul</option>
+              <option value="SC">SC – Santa Catarina</option>
+              <option value="SE">SE – Sergipe</option>
+              <option value="SP">SP – São Paulo</option>
+              <option value="TO">TO – Tocantins</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="section-progress">
@@ -1931,10 +2001,39 @@ function preencherEnderecoPorCep(dados){
   if (bairroEl && dados.bairro) bairroEl.value = normalizarTextoEndereco(dados.bairro);
   if (cidadeEl) {
     const c = String(dados.cidade || "").trim();
-    const u = String(dados.uf || "").trim();
-    if (c && u) cidadeEl.value = normalizarTextoEndereco(`${c} - ${u}`);
-    else if (c) cidadeEl.value = normalizarTextoEndereco(c);
+    const u = String(dados.uf || "").trim().toUpperCase();
+    const ufSel = document.getElementById("cidadeUf");
+    const separa = !!u && ufSel && ufCidadeExigivel() &&
+      [...ufSel.options].some((o) => o.value === u);
+    if (c) cidadeEl.value = normalizarTextoEndereco(c);
+    if (separa) ufSel.value = u;
+    else if (c && u) cidadeEl.value = normalizarTextoEndereco(`${c} - ${u}`);
   }
+}
+// UF em campo próprio (desktop). No mobile o seletor fica oculto e a cidade
+// única mantém o comportamento antigo ("CIDADE - UF" num campo só).
+function ufCidadeExigivel(){
+  try {
+    const sel = document.getElementById("cidadeUf");
+    if (!sel) return false;
+    const wrap = sel.closest(".field");
+    if (!wrap) return true;
+    return getComputedStyle(wrap).display !== "none";
+  } catch (e) { return true; }
+}
+function cidadeUfCombinada(){
+  const cid = (document.getElementById("cidade")?.value || "").trim();
+  if (!cid) return "";
+  const uf = (document.getElementById("cidadeUf")?.value || "").trim().toUpperCase();
+  if (/^[A-Z]{2}$/.test(uf)) {
+    const base = cid.replace(/[\s\/\-]+[A-Za-z]{2}\s*$/, "").trim() || cid;
+    return `${base} - ${uf}`.toLocaleUpperCase("pt-BR");
+  }
+  return cid;
+}
+function atualizaPlaceholderCidade(){
+  const cid = document.getElementById("cidade");
+  if (cid) cid.placeholder = ufCidadeExigivel() ? "Cidade" : "Cidade - UF";
 }
 async function consultarCep(cep){
   if (cepCache.has(cep)) return cepCache.get(cep);
@@ -2882,8 +2981,9 @@ function montarCidadeUfParaCopiaAssistencia() {
   const c = (id) => (document.getElementById(id)?.value || "").trim();
   const cidade = c("cidade");
   if (!cidade) return "";
-  if (/\s\/\s*[A-Z]{2}$/i.test(cidade) || /\s-\s[A-Z]{2}$/i.test(cidade)) {
-    return cidade.toLocaleUpperCase("pt-BR");
+  const comb = cidadeUfCombinada();
+  if (/\s\/\s*[A-Z]{2}$/i.test(comb) || /\s-\s[A-Z]{2}$/i.test(comb)) {
+    return comb.toLocaleUpperCase("pt-BR");
   }
   const cep = c("cep").replace(/\D/g, "").slice(0, 8);
   if (cep.length === 8) {
@@ -2998,7 +3098,7 @@ function oferecerIrParaAssistenciaAposPdf(payload) {
 // ── RASCUNHO LOCAL (navegador; removido ao usar Descartar rascunho) ──
 const RASCUNHO_IDS = [
   "nomeCompleto", "nomeSocial", "telefone", "celular", "email", "estadoCivil", "pis",
-  "cep", "endereco", "endNum", "complemento", "bairro", "cidade",
+  "cep", "endereco", "endNum", "complemento", "bairro", "cidade", "cidadeUf",
   "cpf", "agenciaBradesco", "contaBradesco", "agenciaSantander", "contaSantander",
   "agenciaNext", "contaNext",
   "vtOnibusQtd", "vtOnibusVal", "vtMetroQtd", "vtMetroVal", "vtInterQtd", "vtInterVal", "vtIntegracaoQtd", "vtIntegracaoVal"
@@ -3094,6 +3194,15 @@ function aplicarEstadoRascunho(obj) {
   if (c.conta !== undefined && c.contaBradesco === undefined) {
     c.contaBradesco = c.conta;
     c.contaSantander = c.conta;
+  }
+  // Rascunhos antigos guardavam "CIDADE - UF" num campo único: divide para o
+  // seletor de UF (desktop). No mobile o combinado continua valendo.
+  if (c.cidadeUf === undefined && typeof c.cidade === "string") {
+    const m = c.cidade.match(/^(.*?)[\s\/\-]+([A-Za-z]{2})\s*$/);
+    if (m && /^[A-Za-z]{2}$/.test(m[2]) && m[1].trim()) {
+      c.cidade = m[1].trim();
+      c.cidadeUf = m[2].toUpperCase();
+    }
   }
   RASCUNHO_IDS.forEach((id) => {
     if (c[id] === undefined) return;
@@ -3351,6 +3460,7 @@ function validarCamposObrigatorios(){
   };
 
   obrigatoriosBase.forEach(validarCampo);
+  if (ufCidadeExigivel()) validarCampo({ id: 'cidadeUf', nome: 'UF' });
 
   const gruposRadioObrigatorios = [
     { name: 'primeiroEmprego', label: 'Primeiro Emprego', elId: 'grupoPrimeiroEmprego' },
@@ -3477,6 +3587,8 @@ function limparDadosFormulario(){
   });
   const pisEl = document.getElementById('pis');
   if (pisEl) pisEl.classList.remove('invalid');
+  const ufCidadeEl = document.getElementById('cidadeUf');
+  if (ufCidadeEl) { ufCidadeEl.value = ''; ufCidadeEl.classList.remove('invalid'); }
   document.querySelectorAll('.field input.invalid, .field select.invalid').forEach((el) => {
     el.classList.remove('invalid');
   });
@@ -3687,7 +3799,7 @@ async function montarDadosFicha() {
   dados[E + "complemento"] = v("complemento").slice(0, 35);
   dados[E + "cep"] = v("cep");
   dados[E + "bairro"] = v("bairro");
-  dados[E + "cidadeuf"] = v("cidade");
+  dados[E + "cidadeuf"] = cidadeUfCombinada();
   const defSim = radio("deficiencia") === "sim";
   dados["deficiencia.campos.possui_deficiencia.opcoes.sim"] = defSim;
   dados["deficiencia.campos.possui_deficiencia.opcoes.nao"] = radio("deficiencia") === "nao";
@@ -3869,7 +3981,7 @@ function baixarCartaAberturaConta(){
     endNum: c("endNum"),
     complemento: c("complemento"),
     bairro: c("bairro"),
-    municipio: c("cidade"),
+    municipio: cidadeUfCombinada(),
     __atentoSavedAt: Date.now()
   };
   const salvo = appStorage.setItem(PREFILL_CARTA_STORAGE_KEY, JSON.stringify(prefill));
@@ -3959,11 +4071,17 @@ const primeiroEmpregoSelecionado = document.querySelector('input[name="primeiroE
 if (primeiroEmpregoSelecionado) {
   togglePIS(primeiroEmpregoSelecionado);
 }
-['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cpf', 'pis', 'agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) => {
+['nomeCompleto', 'celular', 'email', 'estadoCivil', 'endereco', 'cidade', 'cidadeUf', 'cpf', 'pis', 'agenciaBradesco', 'contaBradesco', 'agenciaSantander', 'contaSantander', 'agenciaNext', 'contaNext'].forEach((id) => {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('input', () => marcarCampoInvalido(id, false));
   el.addEventListener('change', () => marcarCampoInvalido(id, false));
+});
+atualizaPlaceholderCidade();
+window.addEventListener('resize', atualizaPlaceholderCidade);
+document.getElementById('cidadeUf')?.addEventListener('change', () => {
+  updateProgress();
+  agendarSalvarRascunho();
 });
 document.getElementById('lgpdCancelarBtn')?.addEventListener('click', () => fecharModalLGPD(false));
 document.getElementById('lgpdContinuarBtn')?.addEventListener('click', () => fecharModalLGPD(true));
