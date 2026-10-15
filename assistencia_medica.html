@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared-header-nav.css">
 <script src="./rascunho-ttl.js"></script>
+<script src="carta_bradesco_cargos.js"></script>
 <style>
   /* ── TOKENS (página) ─────────────────── */
   :root {
@@ -145,19 +146,38 @@
   .address-cidade { grid-column: span 6; }
   .address-cidade-uf { grid-column: span 4; }
   /* Dados do funcionário — alinhamento vertical entre linhas */
-  .dados-func-uf { grid-column: span 2; }
-  .dados-func-cidade { grid-column: span 6; }
-  .dados-func-matricula { grid-column: span 4; }
+  .dados-func-uf { grid-column: span 3; }
+  .dados-func-cidade { grid-column: span 7; }
+  .dados-func-matricula { grid-column: span 2; }
   .dados-func-nome { grid-column: span 6; }
   .dados-func-nomemae { grid-column: span 6; }
-  .dados-func-sus { grid-column: span 4; }
-  .dados-func-rg { grid-column: span 4; }
-  .dados-func-cpf { grid-column: span 4; }
-  .dados-func-dnasc { grid-column: span 6; }
-  .dados-func-dadm { grid-column: span 6; }
-  .dados-func-cargo { grid-column: span 4; }
-  .dados-func-site { grid-column: span 4; }
-  .dados-func-tel { grid-column: span 4; }
+  .dados-func-sus { grid-column: span 2; }
+  .dados-func-rg { grid-column: span 2; }
+  .dados-func-cpf { grid-column: span 2; }
+  .dados-func-dnasc { grid-column: span 2; }
+  .dados-func-dadm { grid-column: span 2; }
+  .dados-func-cargo { grid-column: span 6; }
+  .dados-func-grupo { grid-column: span 3; }
+  .dados-func-site { grid-column: 1 / span 3; }
+  .dados-func-tel { grid-column: span 2; }
+  /* Rótulos da fileira Site/Grupo/Cargo em linha única: "SITE / UNIDADE"
+     quebrava em duas linhas e desalinhava os inputs da fileira. */
+  .dados-func-site label,
+  .dados-func-grupo label,
+  .dados-func-cargo label { white-space: nowrap; }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-light);
+    border-bottom: 2px solid var(--text-light);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
   .address-grid > .field {
     min-width: 0;
   }
@@ -176,6 +196,7 @@
     border: 1.5px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
+    height: 37px;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     color: var(--text);
@@ -197,7 +218,31 @@
     background: #fff;
     box-shadow: none;
   }
-  .field input::placeholder { color: var(--text-light); }
+  .field input::placeholder {
+    color: var(--text-light);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  /* Altura única de 37px (a do campo Cidade): respiro vertical menor nos
+     inputs de texto/data para sobrar 20px de conteúdo à fonte de 14px. */
+  .field input { padding-top: 7px; padding-bottom: 7px; }
+  /* Fileira estreita (SUS/RG/CPF/datas/telefone, 2 colunas): fonte no padrão
+     geral (14px, mesma altura dos demais campos) + elipse, para o texto
+     nunca estourar independente da resolução. */
+  .dados-func-sus input, .dados-func-rg input, .dados-func-cpf input,
+  .dados-func-dnasc input, .dados-func-dadm input, .dados-func-tel input {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dados-func-sus label, .dados-func-rg label, .dados-func-cpf label,
+  .dados-func-dnasc label, .dados-func-dadm label, .dados-func-tel label {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .field select { cursor: pointer; }
   .signature-pad-wrap { margin-bottom: 20px; }
   .signature-pad-wrap > label { font-size: 11px; font-weight: 600; color: var(--label); letter-spacing: 0.6px; text-transform: uppercase; font-family: "Poppins", sans-serif; display: block; margin-bottom: 8px; }
@@ -240,7 +285,7 @@
   .btn-signature-clear:hover { border-color: var(--accent); color: var(--accent); }
   .field input[type="date"] {
     width: 100%;
-    min-height: 42px;
+    min-height: 37px;
     appearance: auto;
     -webkit-appearance: auto;
   }
@@ -638,6 +683,7 @@
     .dados-func-dnasc,
     .dados-func-dadm,
     .dados-func-cargo,
+    .dados-func-grupo,
     .dados-func-site,
     .dados-func-tel {
       grid-column: span 1;
@@ -887,17 +933,29 @@
           <label>Data de Admissão</label>
           <input type="date" id="dataAdmissaoFunc" autocomplete="off">
         </div>
-        <div class="field dados-func-cargo">
-          <label>Cargo</label>
-          <input type="text" id="cargo" placeholder="">
+        <div class="field dados-func-tel">
+          <label>Telefone</label>
+          <input type="text" id="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="16" spellcheck="false" autocomplete="tel">
         </div>
         <div class="field dados-func-site">
           <label>Site / Unidade</label>
           <input type="text" id="site" placeholder="">
         </div>
-        <div class="field dados-func-tel">
-          <label>Telefone</label>
-          <input type="text" id="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="16" spellcheck="false" autocomplete="tel">
+        <div class="field dados-func-grupo">
+          <label>Grupo de Cargo</label>
+          <div class="select-wrap">
+            <select id="grupoDeCargo">
+              <option value="">SELECIONE...</option>
+            </select>
+          </div>
+        </div>
+        <div class="field dados-func-cargo">
+          <label>Cargo</label>
+          <div class="select-wrap">
+            <select id="cargo" disabled>
+              <option value="">SELECIONE O GRUPO...</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -2689,6 +2747,9 @@ function limparDadosFormulario() {
     elCidade.value = "";
     elCidade.disabled = true;
   }
+  const elGrupo = document.getElementById("grupoDeCargo");
+  if (elGrupo) elGrupo.value = "";
+  atualizarCargosPorGrupoAssist("", "");
   document.querySelectorAll('input[name="tipoAdesao"]').forEach((r) => {
     r.checked = false;
   });
@@ -2729,7 +2790,7 @@ function limparDadosFormulario() {
 const RASCUNHO_IDS = [
   "uf", "cidade", "funcionario", "matricula", "nomemae", "sus", "rg", "cpf",
   "dataNascimentoFunc", "dataAdmissaoFunc",
-  "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
+  "grupoDeCargo", "cargo", "site", "cep", "rua", "numero", "complemento", "bairro", "cidadeuf",
   "telefone",
   "conj_nome", "conj_cpf", "conj_nasc", "conj_sus", "conj_nomemae",
   "fil1_nome", "fil1_cpf", "fil1_nasc", "fil1_sus", "fil1_nomemae", "fil1_nascvivo",
@@ -2790,6 +2851,25 @@ function aplicarEstadoRascunho(obj) {
     const el = document.getElementById(id);
     if (el) el.value = c[id];
   });
+  // O select de cargos depende do grupo: reconstrói as opções antes de
+  // reaplicar o valor salvo (rascunhos antigos guardavam cargo em texto
+  // livre — o grupo é derivado dele nesses casos).
+  (function restaurarGrupoCargoAssist() {
+    const selG = document.getElementById("grupoDeCargo");
+    const selC = document.getElementById("cargo");
+    if (!selG || !selC || typeof GRUPOS_CARGOS !== "object") return;
+    let g = String(c.grupoDeCargo || "").trim();
+    const cargoTxt = String(c.cargo || "").trim();
+    if (!g && cargoTxt) g = encontrarGrupoPorCargoAssist(cargoTxt);
+    if (g && GRUPOS_CARGOS[g]) {
+      if (![...selG.options].some((o) => o.value === g)) preencherSelectGruposAssist();
+      selG.value = g;
+      atualizarCargosPorGrupoAssist(g, cargoTxt);
+    } else {
+      selG.value = "";
+      atualizarCargosPorGrupoAssist("", "");
+    }
+  })();
   const elTelefone = document.getElementById("telefone");
   if (elTelefone && !String(elTelefone.value).trim() && (c.tel_ddd != null || c.tel_numero != null)) {
     const a = String(c.tel_ddd ?? "").replace(/\D/g, "");
@@ -3579,6 +3659,74 @@ function onCidadeAlteradaAssistencia() {
 if (elCidadeSelect) {
   elCidadeSelect.addEventListener("change", onCidadeAlteradaAssistencia);
   elCidadeSelect.addEventListener("input", onCidadeAlteradaAssistencia);
+}
+// ── GRUPO DE CARGO → CARGO (mesma relação da Carta Bradesco) ──
+function encontrarGrupoPorCargoAssist(cargo) {
+  if (!cargo || typeof GRUPOS_CARGOS !== "object") return "";
+  for (const [grupo, cargos] of Object.entries(GRUPOS_CARGOS)) {
+    if (cargos.includes(cargo)) return grupo;
+  }
+  return "";
+}
+function preencherSelectGruposAssist() {
+  const sel = document.getElementById("grupoDeCargo");
+  if (!sel || typeof GRUPOS_CARGOS !== "object") return;
+  const atual = sel.value;
+  sel.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "SELECIONE...";
+  sel.appendChild(placeholder);
+  Object.keys(GRUPOS_CARGOS)
+    .sort((a, b) => a.localeCompare(b, "pt-BR"))
+    .forEach((grupo) => {
+      const opt = document.createElement("option");
+      opt.value = grupo;
+      opt.textContent = grupo;
+      sel.appendChild(opt);
+    });
+  if (atual && GRUPOS_CARGOS[atual]) sel.value = atual;
+}
+function atualizarCargosPorGrupoAssist(grupo, cargoPreservado = "") {
+  const sel = document.getElementById("cargo");
+  if (!sel) return;
+  sel.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = grupo ? "SELECIONE..." : "SELECIONE O GRUPO...";
+  sel.appendChild(placeholder);
+  sel.disabled = !grupo;
+  if (!grupo || typeof GRUPOS_CARGOS !== "object") return;
+  (GRUPOS_CARGOS[grupo] || []).forEach((cargo) => {
+    const opt = document.createElement("option");
+    opt.value = cargo;
+    opt.textContent = cargo;
+    sel.appendChild(opt);
+  });
+  if (cargoPreservado && (GRUPOS_CARGOS[grupo] || []).includes(cargoPreservado)) {
+    sel.value = cargoPreservado;
+  }
+}
+function onGrupoCargoAlteradoAssist() {
+  const sel = document.getElementById("grupoDeCargo");
+  marcarCampoInvalido("grupoDeCargo", false);
+  marcarCampoInvalido("cargo", false);
+  atualizarCargosPorGrupoAssist(sel ? sel.value : "", "");
+  agendarSalvarRascunho();
+}
+preencherSelectGruposAssist();
+const elGrupoCargoSelect = document.getElementById("grupoDeCargo");
+if (elGrupoCargoSelect) {
+  elGrupoCargoSelect.addEventListener("change", onGrupoCargoAlteradoAssist);
+  /* WebKit móvel (iOS) nem sempre dispara "change" ao fechar o picker; "input" cobre. */
+  elGrupoCargoSelect.addEventListener("input", onGrupoCargoAlteradoAssist);
+}
+const elCargoSelect = document.getElementById("cargo");
+if (elCargoSelect) {
+  elCargoSelect.addEventListener("change", () => {
+    marcarCampoInvalido("cargo", false);
+    agendarSalvarRascunho();
+  });
 }
 function salvarRascunhoAoSair() {
   salvarRascunhoLocalSincrono();
