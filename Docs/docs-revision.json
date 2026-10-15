@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-14T20:32:48-03:00",
-  "gitCommit": "67458d3",
-  "gitSubject": "style(forms): expande layout horizontal em 20 por cento no desktop",
+  "ultimaValidacaoIso": "2026-10-15T01:08:23-03:00",
+  "gitCommit": "fa96eda",
+  "gitSubject": "feat(assistencia): grupo e cargo em listas suspensas e rebalanceamento do layout",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

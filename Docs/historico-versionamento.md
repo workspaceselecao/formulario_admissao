@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 14 de outubro de 2026
+**Última atualização deste guia:** 15 de outubro de 2026
 
 ---
 
@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 15/10/2026 | Grupo e cargo em listas suspensas e rebalanceamento do layout |
 | 14/10/2026 | Expande layout horizontal em 20 por cento no desktop |
 | 14/10/2026 | Retorno ao inicio invalida a sessao e exige novo codigo |
 | 14/10/2026 | Mantem codigo entre formularios sem repedir na navegacao interna |
