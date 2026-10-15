@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-15T01:29:35-03:00",
-  "gitCommit": "6c649fc",
-  "gitSubject": "style(assistencia): redistribui fileiras SUS-CPF e Telefone-Cargo",
+  "ultimaValidacaoIso": "2026-10-15T19:36:49-03:00",
+  "gitCommit": "7cadeee",
+  "gitSubject": "feat(ficha): separa UF em campo proprio apos Cidade",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
