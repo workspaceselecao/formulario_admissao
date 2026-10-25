@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 15 de outubro de 2026
+**Última atualização deste guia:** 25 de outubro de 2026
 
 ---
 
@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 25/10/2026 | Auditoria e documentacao tecnica/funcional da aplicacao |
 | 15/10/2026 | Separa UF em campo proprio apos Cidade |
 | 15/10/2026 | Redistribui fileiras SUS-CPF e Telefone-Cargo |
 | 15/10/2026 | Grupo e cargo em listas suspensas e rebalanceamento do layout |

@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-10-15T19:36:49-03:00",
-  "gitCommit": "7cadeee",
-  "gitSubject": "feat(ficha): separa UF em campo proprio apos Cidade",
+  "ultimaValidacaoIso": "2026-10-25T03:49:44-03:00",
+  "gitCommit": "ae046df",
+  "gitSubject": "docs(auditoria): auditoria e documentacao tecnica/funcional da aplicacao",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
