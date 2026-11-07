@@ -2,9 +2,15 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 25 de outubro de 2026
+**Última atualização deste guia:** 6 de novembro de 2026
 
 ---
+
+## Novembro de 2026
+
+| Data | O que mudou |
+|------|-------------|
+| 06/11/2026 | Adiciona auditoria completa e gerador HTML |
 
 ## Outubro de 2026
 
