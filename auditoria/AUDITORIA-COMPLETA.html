@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Auditoria completa — Formulários de Admissão</title>
+<style>
+  :root { --line:#d9dee5; --muted:#5b6472; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; line-height:1.62; color:#1f2937; margin:0; background:#fff; }
+  .container { max-width:1080px; margin:0 auto; padding:0 24px 72px; }
+  .topnav { position:sticky; top:0; z-index:9; background:#fff; border-bottom:1px solid var(--line); padding:8px 24px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .topnav a { display:inline-block; padding:5px 12px; border-radius:999px; background:#eef2f7; color:#24405e; text-decoration:none; font-size:.85rem; }
+  .topnav a:hover { background:#dbe5f0; }
+  h1 { font-size:1.7rem; margin:2.2rem 0 .9rem; line-height:1.25; border-bottom:2px solid #e7ebf1; padding-bottom:.4rem; }
+  h2 { font-size:1.32rem; margin:2rem 0 .7rem; }
+  h3 { font-size:1.08rem; margin:1.4rem 0 .5rem; }
+  h4, h5 { margin:1.1rem 0 .4rem; }
+  table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; }
+  th { background:#f3f5f8; }
+  tr:nth-child(even) td { background:#fbfcfd; }
+  code { background:#f5f5f7; border:1px solid #ececf0; border-radius:4px; padding:1px 5px; font-size:.86em; font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace; }
+  pre.cod { background:#0f172a; color:#e2e8f0; padding:14px 16px; border-radius:8px; overflow-x:auto; }
+  pre.cod code { background:none; border:none; color:inherit; padding:0; }
+  pre.mermaid { background:#fbfcfe; border:1px dashed #cbd5e1; border-radius:8px; padding:16px; text-align:center; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:.82rem; color:#40506b; margin:1.2rem 0; }
+  .tocbox { background:#f7f9fc; border:1px solid var(--line); border-radius:10px; padding:14px 20px 14px 40px; margin:1rem 0 2rem; }
+  blockquote { border-left:4px solid #cbd5e1; margin:1rem 0; padding:.2rem 1rem; color:var(--muted); }
+  hr { border:none; border-top:1px solid var(--line); margin:2rem auto; width:70%; }
+  a { color:#1d4ed8; }
+  .nota { color:var(--muted); font-size:.85rem; margin-top:.4rem; }
+  @media print { .topnav { display:none; } pre.cod { white-space:pre-wrap; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener("load", () => {
+    if (window.mermaid) {
+      window.mermaid.initialize({ startOnLoad:false, theme:"neutral", flowchart:{ curve:"basis" } });
+      window.mermaid.run({ querySelector: "pre.mermaid" })
+        .catch(err => console.warn("Mermaid indisponível — os diagramas aparecem como código-fonte.", err));
+    }
+  });
+</script>
+</head>
+<body>
+  <  div class="topnav" style="width:100%"><a href="#parte-1-resumo-executivo">Parte 1</a><a href="#parte-2-prd-retrospectivo-funcionalidades-e-regras-de-negocio-existentes">Parte 2</a><a href="#parte-3-documentacao-tecnica-front-end-e-back-end">Parte 3</a><a href="#parte-4-inventario-telas-endpoints-entidades-integracoes-e-storage">Parte 4</a><a href="#parte-5-arquitetura-e-fluxos-diagramados">Parte 5</a><a href="#parte-6-matriz-de-constatacoes-debitos-e-referencias-de-codigo">Parte 6</a><a href="#toc">⌂ Sumário</a></div>
+  <div class="container">
+<h1 id="auditoria-completa-hub-de-recrutamento-selecao-formularios-de-admissao">AUDITORIA COMPLETA — Hub de Recrutamento &amp; Seleção (Formulários de Admissão)</h1>
+<p>Consolidação, em documento único para leitura, dos seis entregáveis produzidos na auditoria somente-leitura. O conteúdo de cada parte é o texto original dos arquivos-fonte, sem alteração de forma; apenas os títulos foram recuados um nível para caber na estrutura de partes.</p>
+<ul><li><strong>Data da auditoria:</strong> 25/10/2026 · Somente leitura · Suíte verificada: 498 testes, 0 falhas (exit 0)
+</li><li><strong>Fontes originais (preservadas):</strong> <a href="resumo-executivo.md">resumo-executivo.md</a> · <a href="prd-retrospectivo.md">prd-retrospectivo.md</a> · <a href="docs-tecnico.md">docs-tecnico.md</a> · <a href="inventario.md">inventario.md</a> · <a href="arquitetura-e-fluxos.md">arquitetura-e-fluxos.md</a> · <a href="constatacoes-matriz.md">constatacoes-matriz.md</a>
+</li></ul>
+<p><strong>Sumário:</strong></p>
+<ol><li>Resumo executivo
+</li><li>PRD retrospectivo — funcionalidades e regras de negócio existentes
+</li><li>Documentação técnica — front-end e &quot;back-end&quot;
+</li><li>Inventário — telas, endpoints, entidades, integrações e storage
+</li><li>Arquitetura e fluxos diagramados
+</li><li>Matriz de constatações, débitos e referências de código
+</li></ol>
+<hr/>
+<p>Earliest content (Parte 1) begins below.</p>
+<hr/>
+<h1 id="parte-1-resumo-executivo">Parte 1 — Resumo executivo</h1>
+<p><em>Fonte original: <code>resumo-executivo.md</code> ( headings recuados um nível na consolidação )</em></p>
+<h2 id="resumo-executivo-auditoria-do-hub-de-recrutamento-selecao-formularios-de-admissao">Resumo executivo — Auditoria do Hub de Recrutamento &amp; Seleção (Formulários de Admissão)</h2>
+<p><strong>Data:</strong> 25/10/2026 · <strong>Escopo:</strong> auditoria somente-leitura · <strong>Método:</strong> inspeção do repositório, rastreamento de fluxos no código e execução da suíte de testes local (nenhum código alterado, nenhuma dependência instalada).</p>
+<hr/>
+<h3 id="1-o-produto-em-uma-frase">1. O produto em uma frase</h3>
+<p>Aplicação <strong>web estática</strong> (sem backend em produção) por meio da qual candidato/RH preenchem formulários de admissão no navegador e <strong>geram PDFs preenchidos sobre os documentos oficiais corporativos</strong> — Ficha Cadastral F-075 (PR-011), Assistência Médica F-089 (PR-090), Declaração de Plano de Saúde e Carta de Abertura de Conta Salário Bradesco — com assinatura manuscrita em canvas, evidência técnica (documento, data/hora, IP) carimbada no rodapé e todos os dados de formulário <strong>restritos ao dispositivo do usuário</strong> (LGPD por desenho).</p>
+<h3 id="2-problema-de-negocio-atendido">2. Problema de negócio atendido</h3>
+<ul><li>Elimina o preenchimento manual em papel/impressão: PDF oficial sai idêntico ao modelo, já preenchido e assinado.
+</li><li>Reduz fricção do candidato (mobile-friendly, rascunho retomável por 24 h, copiar dados entre formulários, CEP autopreenchido).
+</li><li>Custo operacional mínimo: hospedagem estática em Vercel, sem banco de dados, sem servidor, sem variáveis de ambiente.
+</li><li>Conformidade LGPD documentada publicamente (hub <code>/Docs</code>: aviso de privacidade PO-026/027/029, política, termos, base legal, RIPD).
+</li></ul>
+<h3 id="3-publico-e-perfis">3. Público e perfis</h3>
+<table><thead><tr><th>Perfil</th><th>Uso</th><th>Acesso</th></tr></thead><tbody><tr><td><strong>Candidato</strong></td><td>Preenche e gera os PDFs (desktop ou mobile)</td><td>Chave episódica de acesso (família de 5 códigos <code>ATN-…</code>) — proteção client-side</td></tr><tr><td><strong>RH / operações</strong></td><td>Orienta links, valida PDFs, baixa modelos em branco</td><td>Mesmas chaves</td></tr><tr><td><strong>Administrador do painel</strong></td><td>Configura coordenadas, cidades, templates PDF; publica JSONs no repositório</td><td>Dois fatores client-side: e-mail exatamente <code>@atento.com</code> + código exclusivo do painel</td></tr><tr><td><strong>Técnico/manutenção</strong></td><td>Re-medir coordenadas, reextrair templates, CI/deploy</td><td>Git</td></tr></tbody></table>
+<h3 id="4-funcionalidades-principais-verificadas-em-codigo">4. Funcionalidades principais (verificadas em código)</h3>
+<ol><li><strong>Ficha Cadastral F-075:</strong> fluxo progressivo por etapas, dependentes dinâmicos, vale-transporte, seleção bancária Bradesco/Next/Santander, gate &quot;Conta Salário — Ainda vou abrir&quot; que interrompe a geração e redireciona para a Carta; geração via <strong>engine embarcada própria</strong> (<code>EmbeddedDocs.gerarPdf</code>) sobre <code>template.json</code> declarativo (fonte definitiva, mesma engine do painel).
+</li><li><strong>Assistência Médica F-089:</strong> dois fluxos — Plano de Benefícios (só assinatura na pág. 2 da declaração) e Outros Planos (ficha regional por UF/cidade).
+</li><li><strong>Carta Bradesco:</strong> geração do zero com timbrado, cargos/tab groups (<code>carta_bradesco_cargos.js</code>), autopreenchimento a partir da Ficha, CEP por ViaCEP.
+</li><li><strong>Painel administrativo <code>/admin</code>:</strong> overlay sobre os JSONs de coordenadas (nunca os edita diretamente), editor visual sobre o PDF, Field Builder, cidades, upload/versionamento de templates com rollback, exportação &quot;formato original + overlay aplicado&quot;, histórico append-only.
+</li><li><strong>Hub Docs LGPD</strong> e carimbos automáticos de revisão jurídica a cada push no <code>main</code> (GitHub Actions bot).
+</li></ol>
+<h3 id="5-arquitetura-em-4-linhas">5. Arquitetura em 4 linhas</h3>
+<ul><li><strong>Front-end:</strong> HTML5/CSS3/JS vanilla (ES2020+, zero frameworks), ~10,7 mil linhas inline nas 4 páginas + painel.
+</li><li><strong>PDF:</strong> <code>pdf-lib@1.17.1</code> via CDN com SRI; engine declarativa <code>embedded-docs.js</code> (template JSON + assets PNG extraídos do documento oficial + subsets de fonte de 17–20 KB → PDF de ~117 KB).
+</li><li><strong>&quot;Backend&quot;:</strong> nenhum em produção. Em dev, <code>scripts/test-server.mjs</code> emula rotas e expõe <code>API /api/admin/*</code> local (grava em <code>data/</code>, gitignored). O painel detecta o modo automaticamente (API ↔ exportação).
+</li><li><strong>Autenticação:</strong> guardas client-side derivadas (salt + SHA-256 + transformações), códigos reais nunca versionados.
+</li></ul>
+<h3 id="6-qualidade-e-infraestrutura">6. Qualidade e infraestrutura</h3>
+<ul><li><strong>Suíte local re-executada nesta auditoria: 498 testes passaram, 0 falharam</strong> (<code>node scripts/run-test.mjs</code>, exit 0).
+</li><li><strong>CI:</strong> GitHub Actions (Node 22) — sintaxe JS, estrutura/JSONs, suíte completa em todo push/PR.
+</li><li><strong>Bot de docs:</strong> workflow <code>docs-automacao.yml</code> regenera e commita carimbo de revisão jurídica e histórico de versões a cada push no <code>main</code> (commit <code>[skip ci]</code>, com retentativas).
+</li><li><strong>Deploy:</strong> Vercel, preset Other, sem build step; rotas/headers geridos por <code>vercel.json</code> (CSP com allowlist de integrações, HSTS, COOP/COEP, Permissions-Policy restritiva).
+</li></ul>
+<h3 id="7-constatacoes-principais">7. Constatações principais</h3>
+<table><thead><tr><th>#</th><th>Constatação</th><th>Status</th></tr></thead><tbody><tr><td>1</td><td>Arquitetura estática sem backend, sem banco, sem variáveis de ambiente — como documentado</td><td>✅ Verificada</td></tr><tr><td>2</td><td>Dados de formulário apenas no dispositivo; rascunho TTL 24 h sem retenção indefinida; copys LGPD alinhadas ao aviso publicado</td><td>✅ Verificada</td></tr><tr><td>3</td><td>Autenticação client-side é <strong>decisão documentada do projeto</strong>, não substitui server-side — conteúdo protegido é entregue ao navegador e um usuário avançado pode contornar a guarda</td><td>✅ Verificada (limitação declarada no próprio código)</td></tr><tr><td>4</td><td>Segredos não versionados: <code>keys*.txt</code> e <code>data/</code> gitignored; apenas verificadores derivados no código</td><td>✅ Verificada</td></tr><tr><td>5</td><td>Persistência do painel em produção é <strong>manual</strong> (exportar → commit → deploy) — não há gravacao central de configurações em produção</td><td>✅ Verificada (limitação por design)</td></tr><tr><td>6</td><td>Sem telemetria/analytics/observabilidade — falhas de API surfacem via toasts</td><td>✅ Verificada (mesma ausência que facilita a privacidade, dificulta diagnóstico em produção)</td></tr></tbody></table>
+<h3 id="8-principais-riscos-e-recomendacoes-detalhe-na-matriz">8. Principais riscos e recomendações (detalhe na matriz)</h3>
+<ol><li><strong>Proteção de branch ausente no <code>main</code></strong> — qualquer push direto publica (limitação operacional já documentada; CI é o único portão).
+</li><li><strong>Dependências externas via CDN</strong> (unpkg, Google Fonts) em rede corporativa restritiva podem indisponibilizar geração de PDF — mitigável hospedando assets no domínio.
+</li><li><strong>Número mágico do gate de tamanho:</strong> o PDF embarcado (~117 KB) cabe no limite de 248 KB de anexo; re-geração de fontes com TTF completo volta o PDF a ~2,7 MB sem falha automática durante o CI — recomenda-se teste de tamanho na suíte.
+</li><li><strong>Higiene local:</strong> pastas de trabalho <code>.kilo/worktrees/</code>, <code>.tmp_render</code>, <code>.tmp_viz</code> e <code>scratch_*.json</code> existem no disco mas estão ignoradas pelo Git (nenhuma vazou para o repositório).
+</li></ol>
+<h3 id="9-documentos-desta-auditoria">9. Documentos desta auditoria</h3>
+<table><thead><tr><th>Documento</th><th>Conteúdo</th></tr></thead><tbody><tr><td><a href="prd-retrospectivo.md">prd-retrospectivo.md</a></td><td>PRD retrospectivo — funcionalidades e regras de negócio existentes</td></tr><tr><td><a href="docs-tecnico.md">docs-tecnico.md</a></td><td>Técnica de front-end e do &quot;back-end&quot; (guards, engine, API local, painel)</td></tr><tr><td><a href="inventario.md">inventario.md</a></td><td>Inventário de telas, endpoints, entidades, integrações e chaves de storage</td></tr><tr><td><a href="arquitetura-e-fluxos.md">arquitetura-e-fluxos.md</a></td><td>Diagramas (Mermaid) de arquitetura e fluxos ponta a ponta</td></tr><tr><td><a href="constatacoes-matriz.md">constatacoes-matriz.md</a></td><td>Matriz verificada/inferida/não confirmada + débitos + referências de código</td></tr></tbody></table>
+<h3 id="10-pendencias-que-exigem-confirmacao-humana">10. Pendências que exigem confirmação humana</h3>
+<ul><li>Status do CI no GitHub (runs lá na nuvem) e estado do deploy na Vercel — não verificáveis 100% offline; local está verde e o <code>vercel.json</code> é a fonte de verdade versionada.
+</li><li>Política real de expiração/rotação das chaves corporativas <code>ATN-…</code> (conteúdo de <code>keys-testes.txt</code> foi deliberadamente não lido) — administrativo, fora do escopo técnico.
+</li></ul>
+<h1 id="parte-2-prd-retrospectivo-funcionalidades-e-regras-de-negocio-existentes">Parte 2 — PRD retrospectivo — funcionalidades e regras de negócio existentes</h1>
+<p><em>Fonte original: <code>prd-retrospectivo.md</code> ( headings recuados um nível na consolidação )</em></p>
+<h2 id="prd-retrospectivo-formularios-de-admissao-estado-atual-25-10-2026">PRD retrospectivo — Formulários de admissão (estado atual, 25/10/2026)</h2>
+<p><strong>Objetivo:</strong> descrever as funcionalidades e regras de negócio <strong>que existem hoje</strong>, com evidência de código. Não é um PRD prospectivo. Complementa <a href="../PRD.md">PRD.md</a> (prospectivo) e <a href="../MANUTENCAO.md">MANUTENCAO.md</a> (operações).</p>
+<hr/>
+<h3 id="1-funcionalidades-existentes">1. Funcionalidades existentes</h3>
+<h4 id="1-1-home-index-html-rota">1.1 Home (<code>index.html</code>, rota <code>/</code>)</h4>
+<ul><li>Hub de navegação: cards para F-075, F-089, Carta Bradesco e <strong>Configurações</strong> (painel), modal de instruções, identidade visual &quot;Gradiente + Tangerina&quot; (<code>#01426A</code> como cor institucional).
+</li><li>Não carrega <code>guard.js</code> (pública) — travado pela suíte (run-test.mjs:178).
+</li></ul>
+<h4 id="1-2-ficha-cadastral-f-075-ficha-cadastral-html-rotas-f075-ficha-cadastral">1.2 Ficha Cadastral F-075 (<code>ficha_cadastral.html</code>, rotas <code>/f075</code>, <code>/ficha_cadastral</code>)</h4>
+<table><thead><tr><th>Funcionalidade</th><th>Evidência</th></tr></thead><tbody><tr><td>Fluxo progressivo por etapas (percentuais por seção, etapas seguintes reveladas)</td><td><code>calcularPercentuaisSecoes()</code> (ficha_cadastral.html:2800), <code>atualizarVisibilidadeEtapas()</code> (:2878)</td></tr><tr><td>Dependentes dinâmicos (adicionar/remover linhas, limite no código)</td><td><code>adicionarDependente()</code> (:2957), <code>lerDependentesFormulario()</code> (:2928)</td></tr><tr><td>Conta bancária com regras por banco (Bradesco/Next/Santander) e gate da Conta Salário</td><td><code>tipoContaEh*</code> (:2581–:2595), <code>sincronizarGateContaSalario()</code> (:2675)</td></tr><tr><td>Vale-transporte com marca d'água &quot;não optante&quot;</td><td><code>atualizarUiValeTransporteNaoOptante()</code> (:2484), <code>desenharMarcaDaguaNaoOptanteValeTransporte()</code> (:2540)</td></tr><tr><td>CEP: ViaCEP com fallback Brasil API</td><td><code>consultarCep()</code> (:2038), fetch ViaCEP (:2041), fetch BrasilAPI (:2057)</td></tr><tr><td>Assinatura manuscrita (canvas → PNG) + opção &quot;não assinar manualmente&quot;</td><td><code>initAssinaturaCanvas()</code> (:2182), <code>canvasAssinaturaParaPngArrayBuffer()</code> (:2278)</td></tr><tr><td>Evidência técnica carimbada no rodapé do PDF (doc, data/hora, IP)</td><td><code>caixaRodapeEvidenciaPdf()</code> (:2357), IP via <code>api.ipify.org</code> (:2305)</td></tr><tr><td>Geração do PDF pela engine embarcada (mesmo caminho do painel)</td><td><code>EmbeddedDocs.gerarPdf</code> (:3885), template carregado por HTTP com <code>validarTemplate</code> (:3743–:3749), dados pela <code>montarDadosFicha()</code> (:3779)</td></tr><tr><td>Critério的血 de bloqueio: &quot;Ainda vou abrir&quot; sem agência/conta interrompe a geração e exige a Carta</td><td><code>pendenciaContaSalarioSemDados()</code> + <code>modalContaSalarioSemDados</code>, ação única <strong>Preencher Carta</strong> (MANUTENCAO §4, Teste 20)</td></tr><tr><td>Cópia de dados para a Assistência</td><td><code>construirPayloadCopiaParaAssistencia()</code> (:3010), <code>salvarPayloadCopiaAssistenciaNoStorage()</code> (:3070)</td></tr></tbody></table>
+<h4 id="1-3-assistencia-medica-f-089-assistencia-medica-html-rotas-f089-assistencia-medica">1.3 Assistência Médica F-089 (<code>assistencia_medica.html</code>, rotas <code>/f089</code>, <code>/assistencia_medica</code>)</h4>
+<table><thead><tr><th>Funcionalidade</th><th>Evidência</th></tr></thead><tbody><tr><td>Escolha inicial: <strong>Plano de Benefícios</strong> (só assinatura na pág. 2 da declaração) ou <strong>Outros Planos</strong> (ficha completa regional)</td><td><code>ehPlanoBeneficios()</code>/<code>ehOutrosPlanos()</code> (:1421–:1424), <code>gerarPDF()</code> ramifica (:3228)</td></tr><tr><td>Outros Planos: variante Infinity usa lista com UF (<code>cidades_infinity.json</code>); demais usem o catálogo <code>cidades_brasil.json</code></td><td><code>usaListaInfinity()</code> (:1430), <code>obterMapaCidadesAtivo()</code> (:1433)</td></tr><tr><td>UF → municípios via API kstr (lista completa, ordenada)</td><td><code>buscarMunicipiosPorUf()</code> (:1822)</td></tr><tr><td>Ficha regional resolvida pelo nome da cidade → arquivo físico</td><td><code>resolverArquivoPdfPorCidadeNome()</code> (:1491)</td></tr><tr><td>Dependentes (cônjuge + filhos 2–4) com campo DNV condicionado à idade em dias</td><td><code>idadeFilhoEmDiasAteHoje()</code> (:1608), <code>filhoDeveExibirCampoDnv()</code> (:1625)</td></tr><tr><td>&quot;Não optante&quot; omite a seção de dependentes no PDF</td><td>MANUTENCAO §5, RF-22</td></tr><tr><td>Download de modelo em branco</td><td><code>baixarPdfVazioExecucao()</code> (:3429)</td></tr><tr><td>Consumir payload copiado da Ficha ao abrir</td><td><code>tentarAplicarCopiaFichaCadastral()</code> (:2939)</td></tr></tbody></table>
+<h4 id="1-4-carta-bradesco-carta-bradesco-html-rotas-bradesco-carta-bradesco">1.4 Carta Bradesco (<code>carta_bradesco.html</code>, rotas <code>/bradesco</code>, <code>/carta_bradesco</code>)</h4>
+<table><thead><tr><th>Funcionalidade</th><th>Evidência</th></tr></thead><tbody><tr><td>Geração do zero com timbrado (logo/carimbo PNG) e <code>carta_bradesco_cargos.js</code> (grupos/cargos TB-047_09)</td><td><code>carregarAssetsCarta()</code> (:1120), <code>preencherSelectGrupos()</code> (:678)</td></tr><tr><td>Autopreenchimento a partir da Ficha</td><td><code>aplicarPrefillFichaCadastral()</code> (:1499)</td></tr><tr><td>CEP ViaCEP</td><td><code>consultarCep()</code> (:818)</td></tr><tr><td>Formatação de moeda e salário</td><td><code>maskMoeda()</code> (:905), <code>moedaParaPdfSemSimbolo()</code> (:918)</td></tr><tr><td>Geração de PDF escrita em parágrafos run-a-run</td><td><code>desenharParagrafo()</code> (:1144), <code>gerarPdfCartaBytes()</code> (:1227)</td></tr></tbody></table>
+<h4 id="1-5-sessao-de-acesso-entre-formularios-guard-js">1.5 Sessão de acesso entre formulários (<code>guard.js</code>)</h4>
+<table><thead><tr><th>Regra</th><th>Evidência</th></tr></thead><tbody><tr><td>Chave necessária só na inserção inicial; concede o grupo inteiro F-075/F-089/Carta nesta aba</td><td><code>grantSession()</code> (guard.js:197) marca <code>atf_g=1</code> sobre todos os caminhos de <code>PROTECTED</code>; <code>sessionValid()</code> (:183) aceita o grupo</td></tr><tr><td>Acesso direto sem sessão pede sempre a chave</td><td><code>createAuthUI()</code> no <code>DOMContentLoaded</code> (guard.js:369)</td></tr><tr><td>Expiração 60 min com <strong>janela deslizante por atividade</strong> (throttle 60 s; clique/tecla/toque/retorno à aba)</td><td><code>iniciarVigencia()</code> (guard.js:335), <code>registrarAtividade()</code> (:231), <code>EXPIRY_MS</code>/<code>REFRESH_THROTTLE_MS</code>/<code>AVISO_FALTA_MS</code> (:50–:54)</td></tr><tr><td>Banner a ≤ 10 min da expiração: &quot;Continuar sessão&quot; / &quot;Encerrar agora&quot;; ao vencer, sessão limpa e tela da chave recarrega</td><td><code>mostrarBannerExpiracao()</code> (guard.js:297), <code>agendarAviso()</code> (:280), <code>encerrarSessaoPorExpiracao()</code> (:240)</td></tr><tr><td><code>/admin</code> apartado (guard dedicado)</td><td><code>PROTECTED</code> não contém <code>/admin</code>; <code>admin-guard.js</code> independente</td></tr></tbody></table>
+<h4 id="1-6-rascunho-lgpd-todas-as-paginas-rascunho-ttl-js">1.6 Rascunho LGPD (todas as páginas, <code>rascunho-ttl.js</code>)</h4>
+<table><thead><tr><th>Regra</th><th>Evidência</th></tr></thead><tbody><tr><td>TTL fixo de 24 h <strong>desde o último salvamento</strong>, sem retenção indefinida</td><td><code>expirou()</code> em rascunho-ttl.js; política documentada em MANUTENCAO §7.2</td></tr><tr><td>Modal de decisão ao abrir com rascunho sem decisão e após gerar o PDF</td><td><code>verificarAposSalvar()</code> chamado por <code>salvarRascunhoLocalSincrono()</code>/<code>salvarRascunho()</code>; &quot;Apagar rascunho agora&quot; × &quot;Manter por 24 h&quot;; ESC/fundo = manter</td></tr><tr><td>Rascunho versionado por página</td><td>chaves e versão em MANUTENCAO §7.2 (<code>ficha_v2</code>, <code>assist_v5</code>, <code>carta_v1</code>)</td></tr><tr><td>Timeout do modal agendado por <code>agendarModal()</code> — quando expira com a página aberta, limpa o formulário junto</td><td>MANUTENCAO §1 §7.2</td></tr></tbody></table>
+<h4 id="1-7-painel-administrativo-admin">1.7 Painel Administrativo (<code>/admin</code>)</h4>
+<table><thead><tr><th>Funcionalidade</th><th>Evidência</th></tr></thead><tbody><tr><td>Autenticação apartada: e-mail exatamente <code>@atento.com</code> + código exclusivo do painel</td><td><code>isCorporateDomain()</code> (admin-guard.js:67 recusa subdomínios e <code>.com.br</code>), corpus <code>CG</code> (:37–:45) independente das 5 chaves dos formulários</td></tr><tr><td>Modelo <strong>overlay</strong>: os JSONs do repositório são a fonte primária e o painel nunca os edita diretamente</td><td>MANUTENCAO §9.1; <code>docEfetivoParaRepositorio</code> — export com overlay vazio é bit-a-bit igual ao do repo (auditoria de invariante)</td></tr><tr><td>Editor visual de coordenadas sobre o PDF, Field Builder, cidades, upload/versionamento de templates + rollback físico, histórico append-only</td><td>MANUTENCAO §9.1 (§10, §11, §18, §23/§24, §26) ; validação de schema no gate de publicação (<code>validarDocCampos</code>)</td></tr><tr><td>Persistência adaptativa: modo API (dev) ↔ modo exportação (produção estática)</td><td><code>detectMode()</code> (persistence.js:52); API local em scripts/test-server.mjs:152–:278</td></tr><tr><td>Configurações com regra &quot;config sem consumidor não existe&quot;</td><td><code>CONFIG_DEFS</code> — toda chave lida em um fluxo (MANUTENCAO §9.1 §22)</td></tr><tr><td>Exportação fecha o ciclo painel → repo</td><td><strong>Exportar arquivos do repositório (efetivos)</strong> regenera 4 JSONs com overlay aplicado (MANUTENCAO §9.1)</td></tr><tr><td>localStorage PROIBIDO como banco administrativo</td><td>persistence.js:26 (declaração de convenção)</td></tr></tbody></table>
+<h4 id="1-8-hub-docs-lgpd-docs">1.8 Hub Docs LGPD (<code>/Docs</code>)</h4>
+<ul><li>Aviso de privacidade (PO-026_04/PO-027_04/PO-029_05, DPO dpo-br@atento.com.br), política de privacidade, termos, base legal, RIPD, linha de resposta a incidentes, governança, baseline de segurança, fluxo de dados.
+</li><li>Rodapé &quot;Última validação&quot; lido de <code>Docs/docs-revision.json</code> por <code>Docs/doc-revision.js</code> (carimbo regenerado a cada push no <code>main</code> pelo workflow <code>docs-automacao.yml</code>).
+</li></ul>
+<h3 id="2-regras-de-negocio-consolidadas-max-prioridade">2. Regras de negócio consolidadas (máx. prioridade)</h3>
+<ol><li><strong>PDF oficial é inviolável:</strong> o arquivo em disco nunca é alterado; tudo é desenhado por cima na memória e baixado (RF-30).
+</li><li><strong>Dados permanecem no dispositivo:</strong> nenhum formulário envia dados a servidor; persistência = <code>localStorage</code> (rascunho TTL 24 h) + <code>sessionStorage</code> (sessão de acesso); sem cookies de rastreamento.
+</li><li><strong>Chave de acesso uma única vez por aba</strong> para o grupo de formulários; <code>/admin</code> exige fator duplo e código próprios.
+</li><li><strong>LGPD modais obrigatórias:</strong> confirmação antes de exportar; decisão sobre o rascunho na primeira visita com rascunho e após cada geração de PDF.
+</li><li><strong>Coordenadas em pontos PDF, origem inferior esquerda</strong> (convenção pdf-lib); os JSONs <code>*_campos.json</code> são a única fonte de geometria.
+</li><li><strong>Derivação sincronizada:</strong> se a versão da chave de rascunho de uma página muda, o bloco <code>RascunhoTTL.init(...)</code> precisa acompanhar (travado pela suíte, teste 18).
+</li><li><strong>Chave do catálogo <code>FICHA SAFO</code> ↔ arquivo físico <code>FICHA SA_FO.pdf</code></strong> precisa bater nas pontas em <code>assistencia_medica.html</code> e <code>admin/panel.js</code> (teste 14.6b).
+</li><li><strong>Log de incluição no PDF da assistência (Outros Planos)</strong>: metadados + IP + data/hora com a assinatura (RF-23).
+</li></ol>
+<h3 id="3-fora-de-escopo-atual-sem-vestigios-no-codigo">3. Fora de escopo atual (sem vestígios no código)</h3>
+<p>Envio por e-mail, ATS/ERP, assinatura ICP-Brasil, multi-idioma, exercício de direitos do titular na ferramenta (canalizado pelo DPO corporativo) e qualquer automação de submissão.</p>
+<h3 id="4-versionamento-e-governanca">4. Versionamento e governança</h3>
+<p>SemVer com tags <code>v0.1.0</code> → <code>v1.0.0</code>; branch única <code>main</code> com histórico linear; Conventional Commits com escopos <code>forms</code>, <code>pdf</code>, <code>admin</code>, <code>security</code>, <code>ui</code>, <code>embedded</code>; CI obrigatório antes do merge; a proteção formal de branch ainda não foi aplicada (procedimento descrito em MANUTENCAO §11.1).</p>
+<h1 id="parte-3-documentacao-tecnica-front-end-e-back-end">Parte 3 — Documentação técnica — front-end e &quot;back-end&quot;</h1>
+<p><em>Fonte original: <code>docs-tecnico.md</code> ( headings recuados um nível na consolidação )</em></p>
+<h2 id="documentacao-tecnica-front-end-e-back-end-estado-verificado-25-10-2026">Documentação técnica — front-end e &quot;back-end&quot; (estado verificado, 25/10/2026)</h2>
+<p>Auditoria somente-leitura. Todas as conclusões abaixo foram conferidas no código; onde não foi possível confirmar diretamente, está marcado na <a href="constatacoes-matriz.md">matriz de constatações</a>.</p>
+<hr/>
+<h3 id="1-front-end">1. Front-end</h3>
+<h4 id="1-1-stack-e-versoes">1.1 Stack e versões</h4>
+<table><thead><tr><th>Camada</th><th>Tecnologia</th><th>Versão/última</th><th>Evidência</th></tr></thead><tbody><tr><td>Linguagem</td><td>JavaScript ES2020+ vanilla, sem framework/bundler</td><td>—</td><td>inline em <code>ficha_cadastral.html</code> (4.359 linhas), <code>assistencia_medica.html</code> (3.811), <code>carta_bradesco.html</code> (1.555), <code>index.html</code> (443)</td></tr><tr><td>Geração de PDF</td><td><a href="https://github.com/Hopding/pdf-lib">pdf-lib</a> via unpkg com <strong>SRI</strong> (<code>integrity=&quot;sha384-weMABw…</code>&quot;)</td><td>1.17.1 (pinado)</td><td>ficha_cadastral.html:1827, assistencia_medica.html:1326, carta_bradesco.html:653; admin/index.html:690 (sem SRI no painel — ver débitos)</td></tr><tr><td>Fontkit</td><td><code>@pdf-lib/fontkit</code> via unpkg</td><td>1.1.1</td><td>ficha_cadastral.html:1830, admin/index.html:693</td></tr><tr><td>Preview de PDF no painel</td><td><code>pdfjs-dist</code> via unpkg</td><td>3.11.174</td><td>admin/index.html:694</td></tr><tr><td>Dev-dependências (Node)</td><td><code>pdf-lib@^1.17.1</code>, <code>fonteditor-core@^2.6.3</code> (subsets de fonte)</td><td>—</td><td>package.json</td></tr><tr><td>Fontes web</td><td>Google Fonts (DM Sans/DM Mono; Poppins nos guards/Docs)</td><td>—</td><td>CSP de vercel.json (<code>fonts.googleapis.com</code>/<code>fonts.gstatic.com</code>)</td></tr></tbody></table>
+<h4 id="1-2-estrutura-e-organizacao">1.2 Estrutura e organização</h4>
+<ul><li><strong>Sem build step</strong>: arquivos servidos como estão; a &quot;organização de módulos&quot; é por convenção de arquivos na raiz.
+</li><li>JS das páginas é <strong>inline no <code>&lt;body&gt;</code></strong> (uma SPA leve por página); módulos compartilhados na raiz: <code>guard.js</code>, <code>admin-guard.js</code>, <code>rascunho-ttl.js</code>, <code>embedded-docs.js</code>, <code>shared-header-nav.css</code>.
+</li><li>Painel: <code>admin/index.html</code> (+ <code>panel.js</code> 5.599 linhas, <code>persistence.js</code> 258, <code>panel.css</code> 651).
+</li><li>Dados sob <code>Docs/</code> (hub LGPD), <code>scripts/</code> (17 utilitários Node/Python), <code>ficha-cadastral-embutido/</code> (POC/template declarativo, <code>template.json</code> com 10.716 linhas + <code>assets/</code>).
+</li></ul>
+<h4 id="1-3-paginas-telas-e-responsabilidades">1.3 Páginas, telas e responsabilidades</h4>
+<table><thead><tr><th>Página</th><th>Rotas</th><th>Responsabilidade</th></tr></thead><tbody><tr><td><code>index.html</code></td><td><code>/</code></td><td>Hub de escolha + modal de instruções + card Configurações</td></tr><tr><td><code>ficha_cadastral.html</code></td><td><code>/f075</code>, <code>/ficha_cadastral(.html)</code></td><td>F-075 completa (seções, etapas, dependentes, bancos, VT, assinatura)</td></tr><tr><td><code>assistencia_medica.html</code></td><td><code>/f089</code>, <code>/assistencia_medica(.html)</code></td><td>F-089 nos dois fluxos (Plano de Benefícios e Outros Planos/regionais)</td></tr><tr><td><code>carta_bradesco.html</code></td><td><code>/bradesco</code>, <code>/carta_bradesco(.html)</code></td><td>Carta de abertura de conta salário</td></tr><tr><td><code>admin/index.html</code></td><td><code>/admin</code> (+variantes)</td><td>Painel de configuração v3 (nav por entidades, Ctrl+K)</td></tr><tr><td><code>Docs/*.html</code></td><td>redirects em vercel.json</td><td>Hub LGPD público</td></tr></tbody></table>
+<h4 id="1-4-estado-formularios-e-persistencia">1.4 Estado, formulários e persistência</h4>
+<ul><li><strong>Estado do formulário:</strong> DOM como fonte de verdade; serialização para rascunho via <code>coletarEstadoRascunho()</code>/<code>aplicarEstadoRascunho()</code> (assistência) e equivalentes na ficha/carta.
+</li><li><strong>Rascunho:</strong> <code>localStorage</code> com chaves versionadas (<code>atento.forms:v1:*</code>), expiração TTL 24 h via <code>rascunho-ttl.js</code> (meta em chave própria com <code>savedAt</code>, <code>sig</code>, <code>decidedAt</code>); persistência imediata em <code>change</code> no mobile.
+</li><li><strong>Copys entre formulários:</strong> <code>localStorage</code> com payloads de consumo único (<code>atento.forms:v1:cross_copy_ficha_para_assistencia</code>, <code>atento.forms:v1:carta_bradesco_prefill_v1</code>), removidos após consumo/descarte.
+</li><li><strong>Sessão de acesso:</strong> <code>sessionStorage</code> <code>atf_t/x/p/g</code> (formulários) e <code>adm_t/x/e</code> (painel); rascunho de config do painel em <code>adm_draft_cfg</code> (sessionStorage — nunca localStorage).
+</li><li><strong>Não há framework de estado</strong> nem biblioteca de formulários: máscaras/validações são implementadas à mão (ex.: <code>maskCPF</code>, <code>maskCep</code>, <code>maskTelefone</code>, <code>maskPIS</code>, <code>maskMoeda</code>, <code>aplicarMaiusculas</code>).
+</li></ul>
+<h4 id="1-5-validacoes-erros-e-carregamento">1.5 Validações, erros e carregamento</h4>
+<ul><li>Validação pré-geração: <code>validarCamposObrigatorios()</code> em cada página (ficha e assistência marcam campos inválidos via <code>marcarCampoInvalido()</code> e toasts <code>showToast()</code>); assistência tem <code>validarCamposPlanoBeneficios()</code> dedicado.
+</li><li>Falhas de rede (CEP, cidades, IP) aparecem como toasts; IPs externos possuem timeout via <code>AbortSignal.timeout</code> / <code>AbortController</code>.
+</li><li>Template PDF e assets são carregados por <code>fetch</code> com <code>cache: &quot;no-store&quot;</code> e validados por <code>EmbeddedDocs.validarTemplate()</code> antes de qualquer geração (ficha_cadastral.html:3728–:3771). Painel detecta 404/HTML de host estático → modo exportação (persistence.js:52–:63).
+</li></ul>
+<h4 id="1-6-comunicacao-com-o-exterior-a-partir-do-navegador">1.6 Comunicação com o exterior (a partir do navegador)</h4>
+<table><thead><tr><th>Destino</th><th>Uso</th><th>Páginas</th></tr></thead><tbody><tr><td><code>unpkg.com</code></td><td>pdf-lib/fontkit/pdfjs-dist</td><td>todas que geram PDF + painel</td></tr><tr><td><code>viacep.com.br/ws/{cep}/json/</code></td><td>CEP</td><td>ficha (:2041), assistência (:1931), carta (:818)</td></tr><tr><td><code>brasilapi.com.br/api/cep/v1/{cep}</code></td><td>fallback de CEP na ficha</td><td>ficha (:2057)</td></tr><tr><td><code>api.kstrtech.com.br/cidades/{UF}</code></td><td>lista de municípios da assistência</td><td>assistência (:1822); CORS declarado aberto (MANUTENCAO §6.1)</td></tr><tr><td><code>api.ipify.org</code></td><td>IP público para evidência do PDF</td><td>ficha (:2305), assistência (:2166)</td></tr><tr><td><code>fonts.googleapis.com</code> / <code>fonts.gstatic.com</code></td><td>tipografia</td><td>CSP de vercel.json</td></tr><tr><td><code>api.ibge</code>/IBGE</td><td><code>carregarMunicipiosIBGE()</code> existe (assistência:1839) — remanescente do fluxo antigo de municípios (hoje kstr é o ativo)</td><td>—</td></tr></tbody></table>
+<p>Não há chamadas de API para um backend do próprio produto em produção.</p>
+<h4 id="1-7-autenticacao-de-front-end-guards">1.7 Autenticação de front-end (guards)</h4>
+<ul><li><code>guard.js</code> — IIFE: 5 pares <code>{salt, verifier}</code> (<code>G</code>); pipeline <code>normalizar → concat(salt, entrada) → SHA-256 → inversão de bits por byte → XOR com máscara derivada do salt → troca de pares → hex</code> (<code>deriveVerifier()</code>, guard.js:66–:122). Formato da chave: inicia com <code>ATN</code>, 15 caracteres alfanuméricos (<code>verifyCode()</code>, guard.js:124). Sessão em <code>sessionStorage</code> com token aleatório de 32 bytes (<code>genToken()</code>).
+</li><li><code>admin-guard.js</code> — mesmo pipeline, corpus <code>CG</code> próprio (5 códigos exclusivos) <strong>+</strong> e-mail com domínio exatamente <code>@atento.com</code> (regex/<code>endsWith</code>; recusa subdomínios e <code>atento.com.br</code>). Sessão <code>adm_t/x/e</code>; refresh por atividade a cada 30 s (<code>scheduleRefresh()</code>). Mensagens de erro genéricas (não revelam qual fator falhou).
+</li><li><strong>Limitação declarada no código:</strong> proteção client-side; não substitui autenticação server-side (comentários de cabeçalho dos dois arquivos e README §Segurança).
+</li></ul>
+<h4 id="1-8-responsividade-e-acessibilidad">1.8 Responsividade e acessibilidad</h4>
+<ul><li>Layout responsivo collapse-to-1-column no mobile; selects com 16 px para evitar zoom do iOS; cabeçalho recolhível ao scroll (comportamento em rotação); guarda de teclado virtual via <code>visualViewport</code> nos overlays de autenticação (<code>createAuthUI</code>, guard.js:369).
+</li><li>A11y em melhor-esforço: <code>role=&quot;alert&quot;</code>/<code>aria-live</code> no banner de expiração, labels nos inputs do admin-guard, foco automático; <strong>não há auditoria WCAG formal</strong> (RNF-06 do PRD).
+</li></ul>
+<hr/>
+<h3 id="2-back-end">2. &quot;Back-end&quot;</h3>
+<h4 id="2-1-o-que-existe-de-fato">2.1 O que existe de fato</h4>
+<p><strong>Não há backend em produção.</strong> O único componente server-side do produto é o <strong>servidor local de desenvolvimento</strong> (<code>scripts/test-server.mjs</code>, 377 linhas, Node ≥ 18 sem frameworks — <code>node:http</code>):</p>
+<table><thead><tr><th>Endpoint</th><th>Métodos</th><th>Comportamento (verificado)</th></tr></thead><tbody><tr><td><code>/</code> e rotas do <code>vercel.json</code> (<code>/f075</code>, <code>/f089</code>, <code>/bradesco</code>, <code>/admin</code>, docs)</td><td>GET</td><td>serve os arquivos e emula rewrites</td></tr><tr><td><code>/api/admin/config</code></td><td>GET/HEAD; PUT/POST</td><td>HEAD = sonda de modo; PUT/POST grava <code>data/admin-config.json</code> <strong>com backup automático do estado anterior</strong> em <code>data/backups/</code> (test-server.mjs:152–:197); corpo limitado a 5 MB; JSON inválido → 400</td></tr><tr><td><code>/api/admin/backup</code></td><td>GET; GET <code>?id=</code></td><td>lista backups ou baixa um específico (nome sanitizado via <code>sanitizarNomeArquivo</code>)</td></tr><tr><td><code>/api/admin/upload</code></td><td>POST</td><td>recebe Base64 JSON; exige <code>%PDF-</code> na assinatura (:210), limite 20 MB (→413), nome <code>.pdf</code> sanitizado; registra <strong>versão física com timestamp</strong> (<code>registrarVersaoUpload</code>, :26) e index <code>data/uploads.json</code> (cap 200 versões, sha256 por versão)</td></tr><tr><td><code>/api/admin/uploads</code></td><td>GET</td><td>lista versões de uploads</td></tr><tr><td><code>/api/admin/uploads/restaurar</code></td><td>POST</td><td>rollback físico: recopia a versão anterior (§26)</td></tr><tr><td><code>/api/admin/historico</code></td><td>GET/POST</td><td>eventos de auditoria em <code>data/historico.json</code> — <strong>também é a sonda de detecção de modo</strong> do painel (persistence.js:52)</td></tr><tr><td><code>/api/admin/*</code> desconhecido</td><td>—</td><td>404 JSON (test-server.mjs:278)</td></tr></tbody></table>
+<p>Tudo grava em <code>data/</code> (gitignored). Em produção estática (Vercel preset Other, sem serverless), a API não existe e o painel opera em <strong>modo exportação</strong>: sessão do navegador + geração de JSON para o administrador versionar no repo.</p>
+<h4 id="2-2-tarefas-agendadas-assincronas">2.2 Tarefas agendadas / assíncronas</h4>
+<ul><li><strong>No navegador:</strong> timer do TTL do rascunho (<code>tick()</code> + <code>agendarModal()</code> em rascunho-ttl.js), contagem do banner de sessão (<code>setInterval</code> 10 s), regeneração de guardas por atividade com throttle.
+</li><li><strong>No GitHub Actions:</strong> workflow <code>docs-automacao.yml</code> em todo push no <code>main</code> — regenera <code>Docs/docs-revision.json</code> + <code>Docs/historico-versionamento.md</code>, valida e commita (bot <code>github-actions[bot]</code>, mensagem <code>[skip ci]</code>, até 3 tentativas com re-sync); <code>concurrency: docs-automacao</code> sem cancelamento.
+</li><li><strong>Nenhum cron, fila ou webhook</strong> no produto.
+</li></ul>
+<h4 id="2-3-engine-de-geracao-embarcada-embedded-docs-js-768-linhas">2.3 Engine de geração embarcada (<code>embedded-docs.js</code>, 768 linhas)</h4>
+<ul><li>API pública: <code>EmbeddedDocs.validarTemplate</code> e <code>EmbeddedDocs.gerarPdf</code> (UMD — funciona no browser e em Node, embedded-docs.js:48, :395).
+</li><li>Entradas: <code>template.json</code> declarativo (página, 3 imagens, 161 barras pretas, 89 textos estáticos, 17 marcações) + schema de coordenadas (<code>*_campos.json</code>) + mapa flat de dados + assets (PNGs e fontes TTF em bytes) + fontkit opcional.
+</li><li>Perfil de texto único da aplicação (<code>EmbeddedDocs.PERFIL_APP</code>: fonte 9 pt, <code>x+0,5</code>, baseline centrado na caixa) — MESMO caminho do painel e do <code>ficha_cadastral.html</code> (garantia de fidelidade, MANUTENCAO §3 nota).
+</li><li>Sem fontkit (CDN bloqueada) cai em <code>fallback</code> Helvetica e reporta em <code>relatorio.fontesFallback</code> (degradação visível, não silenciosa).
+</li><li>Fontes: subsets <code>*-sub.ttf</code> de 17–20 KB (Segoe apenas com glifo ❑ U+2751) → PDF de ~117 KB; TTFs completos só são insumo do <code>scripts/gerar-fontes-comprimidas.js</code>.
+</li></ul>
+<h4 id="2-4-seguranca-do-server-local">2.4 Segurança do server local</h4>
+<ul><li>Sanitização de nome de arquivo (normaliza acentos, proíbe <code>..</code>, trim 120 chars) antes de qualquer <code>join</code>/<code>basename</code>.
+</li><li>Validação de magia de PDF, limite de tamanho e rate-free (sem upload infinito: index cap 200).
+</li><li>Sem autenticação nas rotas <code>/api/admin/*</code> — aceitável <strong>apenas</strong> porque o servidor é local de dev (escuta localhost); não expor à rede. (Ver débitos.)
+</li></ul>
+<h4 id="2-5-logs-e-monitoramento">2.5 Logs e monitoramento</h4>
+<ul><li>Não há logging estruturado, APM ou telemetria em nenhuma camada (decisão LGPD-friendly). Diagnóstico hoje = console do navegador + suíte local.
+</li></ul>
+<hr/>
+<h3 id="3-testes-e-ci">3. Testes e CI</h3>
+<ul><li><strong>Suíte:</strong> <code>scripts/run-test.mjs</code> (1.880 linhas) — 20 grupos de testes cobrindo estrutura, guards (janela deslizante/banner em Testes 2/7), rascunho TTL (18), LGPD Docs (19), gate da conta salário (20), painel v2/v3 (9–13), cidades/regionais (14.6b), auditoria de dados via <code>audit-panel.mjs</code> (17). <strong>Execução desta auditoria: 498 passaram, 0 falharam (exit 0).</strong>
+</li><li><strong>Testes optativos por secret local:</strong> arquivos dependentes de <code>keys-testes.txt</code> são marcados <em>skipped</em> sem o arquivo (convencão documentada, MANUTENCAO §9.1).
+</li><li><strong>CI:</strong> <code>.github/workflows/ci.yml</code> (push/PR) — <code>node --check</code> em todos os JS, presença/JSON-parse de estruturas e JSONs-chave, presença dos PDFs modelo, suíte completa. <strong>Node 22</strong>.
+</li><li><strong>Bot de docs:</strong> <code>docs-automacao.yml</code> (ver §2.2).
+</li></ul>
+<hr/>
+<h3 id="4-infraestrutura-e-deploy">4. Infraestrutura e deploy</h3>
+<ul><li><strong>Vercel</strong>, preset Other, sem build: <code>vercel.json</code> única fonte de rotas (<code>cleanUrls</code>, redirects para Docs, rewrites <code>/f075</code>,<code>/f089</code>,<code>/bradesco</code>,<code>/admin</code>).
+</li><li><strong>Headers</strong> (todas as rotas): CSP (allowlist de viacep/brasilapi/ipify/kstrtech + unpkg + Google Fonts; <code>worker-src blob:</code> para o worker do pdf.js), HSTS preload, X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy restritiva, COOP same-origin, COEP require-corp, CORP same-origin, X-Permitted-Cross-Domain-Policies none.
+</li><li><strong>Variáveis de ambiente:</strong> nenhuma.
+</li><li><strong>Ambientes:</strong> produção (main → Vercel). Não há homologação dedicada; preview branches da Vercel são possíveis mas não configuradas como processo.
+</li><li><strong>CI/CD:</strong> GitHub Actions como acima; deploy automático a cada push no <code>main</code> (inclusive o commit do bot de docs).
+</li><li><strong>Pontos críticos de disponibilidade:</strong> unpkg (bibliotecas), Google Fonts, ViaCEP/BrasilAPI (CEP), kstrtech (municípios), ipify (evidência). Sem fallback nesses CDNs.
+</li></ul>
+<hr/>
+<h3 id="5-dados-e-armazenamento">5. Dados e armazenamento</h3>
+<table><thead><tr><th>Persistência</th><th>O que guarda</th><th>Tecnologia</th></tr></thead><tbody><tr><td><code>ficha_cadastral_campos.json</code> (911 ln)</td><td>schema + coordenadas F-075</td><td>arquivo estático versionado</td></tr><tr><td><code>assistencia_medica_campos.json</code> (969 ln)</td><td>schema + coordenadas F-089</td><td>idem</td></tr><tr><td><code>declaracao_plano_saude_campos.json</code> (83 ln)</td><td>coordenadas da declaração</td><td>idem</td></tr><tr><td><code>cidades_brasil.json</code> (1.366 ln) / <code>cidades_infinity.json</code> (1.639 ln)</td><td>catálogo cidade→ficha regional (sem/ com UF)</td><td>idem</td></tr><tr><td><code>ficha-cadastral-embutido/template.json</code> (10.716 ln)</td><td>template declarativo das camadas visuais</td><td>idem</td></tr><tr><td><code>localStorage</code></td><td>rascunhos TTL 24 h + copys entre formulários</td><td>navegador</td></tr><tr><td><code>sessionStorage</code></td><td>sessões de acesso + rascunho de config do painel</td><td>navegador</td></tr><tr><td><code>data/</code> (dev)</td><td>admin-config, backups, uploads versionados, histórico</td><td>filesystem gitignored</td></tr><tr><td>Nenhuma</td><td>dados de candidatos</td><td>—</td></tr></tbody></table>
+<ul><li><strong>Relacionamentos:</strong> schema aninhado por seção (<code>dados_pessoais</code>, <code>endereco</code>, <code>dependentes.0..n</code>, <code>vale_transporte.itens</code>); sem chaves estrangeiras formais — é design documental.
+</li><li><strong>Migrações:</strong> por versionamento de schema/chave do rascunho (v2/v5/v1) com <code>lsMigrateLegacy()</code>/<code>lsRemoveDual()</code>; overlay do painel tem migração aditiva v1→v3 (nenhum dado descartado, MANUTENCAO §9.1).
+</li><li><strong>Índices/backup:</strong> n/a (não há banco). Backups: automáticos no modo API (<code>data/backups/</code>), export/import JSON no modo estático, versões físicas de PDF com sha256 (cap 200).
+</li></ul>
+<hr/>
+<h3 id="6-seguranca-e-privacidade-levantamento">6. Segurança e privacidade (levantamento)</h3>
+<table><thead><tr><th>Aspecto</th><th>Estado verificado</th><th>Ref</th></tr></thead><tbody><tr><td>Credenciais/versionação</td><td>códigos reais NÃO versionados — apenas <code>{salt, verifier}</code> derivados; <code>keys*.txt</code>, <code>data/</code>, scripts auxiliares com chaves gitignored; <code>git ls-files</code> não contém arquivo de chaves</td><td>.gitignore; MANUTENCAO §9.1</td></tr><tr><td>Headers/CSP</td><td>CSP com allowlist fechada de integrações, COEP/COOP/CORP, frame-ancestors none, HSTS preload</td><td>vercel.json</td></tr><tr><td>Uploads dev</td><td>validação de assinatura PDF, tamanho, sanitização de nome, versionamento imutável</td><td>test-server.mjs</td></tr><tr><td>Autenticação</td><td>client-side (limitação declarada e aceita por decisão de projeto); painel com fator duplo local (domínio + código exclusivo)</td><td>guards</td></tr><tr><td>Dados pessoais</td><td>permanecem no dispositivo; PDF sai &quot;download&quot; sem upload; rascunho TTL 24 h sem retenção indefinida; evidência de assinatura inclui IP público e data/hora no próprio PDF</td><td>rascunho-ttl.js; guards</td></tr><tr><td>Comunicações externas</td><td>fetch sobre HTTPS para 5 serviços de terceiros com dados de endereço/IP — CSP ações correspondentes</td><td>vercel.json §connect-src</td></tr><tr><td>Riscos identificáveis</td><td>1) bypass da guarda client-side (documentado); 2) dependência de CDNs (indisponibilidade); 3) sessão em <code>sessionStorage</code> é apagada quando a aba fecha (by design); 4) e-mail do painel validado apenas por domínio (sem verificação de conta real); 5) sem CSP nonce/hash para inline scripts (<code>'unsafe-inline'</code> necessário pela arquitetura inline)</td><td>matriz</td></tr><tr><td>LGPD</td><td>hub Docs público + carimbo automático; rascunho com expiração; modais de decisão; sem cookies de tracking</td><td>Docs/, run-test 19</td></tr></tbody></table>
+<p>Valores de segredos não foram lidos nem registrados neste documento (política da auditoria). Nome das variáveis relevantes: nenhuma variável de ambiente existe no produto.</p>
+<h1 id="parte-4-inventario-telas-endpoints-entidades-integracoes-e-storage">Parte 4 — Inventário — telas, endpoints, entidades, integrações e storage</h1>
+<p><em>Fonte original: <code>inventario.md</code> ( headings recuados um nível na consolidação )</em></p>
+<h2 id="inventario-telas-endpoints-entidades-integracoes-e-storage-25-10-2026">Inventário — telas, endpoints, entidades, integrações e storage (25/10/2026)</h2>
+<p>Referências <code>arquivo:linha</code> conforme o estado do repositório na data desta auditoria.</p>
+<hr/>
+<h3 id="1-telas-paginas">1. Telas / páginas</h3>
+<table><thead><tr><th>Rota(s)</th><th>Arquivo</th><th>Linhas</th><th>Papel</th><th>Proteção</th></tr></thead><tbody><tr><td><code>/</code></td><td><a href="../index.html">index.html</a></td><td>443</td><td>Home / hub</td><td>pública</td></tr><tr><td><code>/f075</code>, <code>/ficha_cadastral(.html)</code></td><td><a href="../ficha_cadastral.html">ficha_cadastral.html</a></td><td>4.359</td><td>F-075</td><td>guard.js</td></tr><tr><td><code>/f089</code>, <code>/assistencia_medica(.html)</code></td><td><a href="../assistencia_medica.html">assistencia_medica.html</a></td><td>3.811</td><td>F-089</td><td>guard.js</td></tr><tr><td><code>/bradesco</code>, <code>/carta_bradesco(.html)</code></td><td><a href="../carta_bradesco.html">carta_bradesco.html</a></td><td>1.555</td><td>Carta Bradesco</td><td>guard.js</td></tr><tr><td><code>/admin</code> (todas variantes <code>/admin/*</code>)</td><td><a href="../admin/index.html">admin/index.html</a></td><td>—</td><td>Painel v3</td><td>admin-guard.js</td></tr><tr><td><code>/aviso-de-privacidade</code> → <code>/aviso-de-privacidade.html</code> → <code>Docs/aviso-de-privacidade.html</code></td><td>Docs</td><td>.redirects vercel.json</td><td>Hub LGPD</td><td>pública</td></tr><tr><td><code>/politica-de-privacidade</code> → <code>Docs/privacy-policy.html</code>, <code>/termos-de-uso</code> → <code>Docs/terms-of-use.html</code>, <code>/privacidade-e-seguranca</code> → <code>Docs/index.html</code>; legado <code>/Forms/:path*</code> → <code>/Docs/:path*</code></td><td>Docs</td><td>redirects</td><td>Hub LGPD</td><td>pública</td></tr></tbody></table>
+<p>Seções da F-075 (jornada): dados pessoais → endereço → contato → dependentes → conta bancária (+ Carta) → benefícios/vale-transporte → declaração/assinatura → LGPD → PDF. Seções da F-089: tipo de adesão → (Plano de Benefícios: só assinatura) · (Outros Planos: UF/cidade → ficha completa → dependentes → assinatura) → LGPD → PDF.</p>
+<hr/>
+<h3 id="2-endpoints">2. Endpoints</h3>
+<h4 id="2-1-producao-rotas-estaticas-vercel-vercel-json">2.1 Produção (rotas estáticas Vercel — <code>vercel.json</code>)</h4>
+<table><thead><tr><th>Rota</th><th>Destino</th></tr></thead><tbody><tr><td><code>/</code></td><td><code>index</code> (rewrite)</td></tr><tr><td><code>/f075</code> / <code>/f089</code> / <code>/bradesco</code> / <code>/admin</code></td><td>rewrites correspondentes</td></tr><tr><td>redirects</td><td>6 regras para Docs + <code>/Forms/:path*</code></td></tr></tbody></table>
+<h4 id="2-2-api-local-de-desenvolvimento-scripts-test-server-mjs">2.2 API local de desenvolvimento (<code>scripts/test-server.mjs</code>)</h4>
+<table><thead><tr><th>Endpoint</th><th>Método</th><th>Estado/confirmação</th><th>Efeito</th></tr></thead><tbody><tr><td><code>/api/admin/config</code></td><td>GET/HEAD</td><td>200 JSON / 200 sem corpo (HEAD como sonda de modo)</td><td>retorna overlay</td></tr><tr><td><code>/api/admin/config</code></td><td>PUT/POST</td><td>200 <code>{ ok, arquivo, backup }</code>; 400 JSON inválido</td><td>grava <code>data/admin-config.json</code> + backup automático</td></tr><tr><td><code>/api/admin/backup</code></td><td>GET</td><td>200 lista</td><td>lista backups</td></tr><tr><td><code>/api/admin/backup?id=</code></td><td>GET</td><td>200 arquivo / 404</td><td>baixa backup</td></tr><tr><td><code>/api/admin/upload</code></td><td>POST</td><td>200 <code>{ ok, nome, bytes, destino, versao }</code>; 400 sem <code>.pdf</code>/sem <code>%PDF-</code>/sem dados; 413 &gt;20 MB</td><td>grava PDF + registra versão (timestamp, sha256)</td></tr><tr><td><code>/api/admin/uploads</code></td><td>GET</td><td>200 lista</td><td>index de versões (cap 200)</td></tr><tr><td><code>/api/admin/uploads/restaurar</code></td><td>POST</td><td>200 rollback</td><td>recopia versão anterior</td></tr><tr><td><code>/api/admin/historico</code></td><td>GET/POST</td><td>200</td><td>lê/registra eventos (também sonda de modo)</td></tr><tr><td><code>/api/admin/*</code></td><td>outro</td><td>404 JSON</td><td>test-server.mjs:278</td></tr></tbody></table>
+<p><strong>Autenticação:</strong> nenhuma nas rotas API (restrito a uso local). <strong>Parâmetros:</strong> corpo JSON; query <code>id</code> em backup.</p>
+<hr/>
+<h3 id="3-entidades-de-dados">3. Entidades de dados</h3>
+<table><thead><tr><th>Entidade</th><th>Fonte</th><th>Campos-chave</th><th>Relacionamentos</th></tr></thead><tbody><tr><td>Schema F-075</td><td><code>ficha_cadastral_campos.json</code></td><td><code>documento</code> (id/título/versão), <code>campos.&lt;secao&gt;</code> com <code>coordenadas</code> por campo/opção</td><td>—</td></tr><tr><td>Schema F-089</td><td><code>assistencia_medica_campos.json</code></td><td>idem + <code>tipo_adesao</code> (grupos de opções), <code>dependentes</code> (cônjuge + slots filhos)</td><td>—</td></tr><tr><td>Schema declaração</td><td><code>declaracao_plano_saude_campos.json</code></td><td>assinatura + <code>evidencia.coordenadas</code></td><td>—</td></tr><tr><td>Catálogo de cidades</td><td><code>cidades_brasil.json</code></td><td><code>REGIONAL</code>, <code>CIDADE</code>, <code>FICHA A UTILIZAR</code> (sem UF)</td><td>→ arquivo <code>FICHA *.pdf</code></td></tr><tr><td>Catálogo Infinity</td><td><code>cidades_infinity.json</code></td><td>idem + <code>UF</code></td><td>→ arquivo; usado no fluxo Infinity</td></tr><tr><td>Chave normalizada de cidade</td><td>painel</td><td>convenção <code>FICHA SAFO</code> (chave) ↔ <code>FICHA SA_FO.pdf</code> (físico)</td><td>trava de sincronia (run-test 14.6b)</td></tr><tr><td>Template declarativo</td><td><code>ficha-cadastral-embutido/template.json</code></td><td><code>images</code>, <code>blackBars</code> (161), <code>whiteBoxes</code>, <code>checkboxes</code>, <code>texts</code> (89), <code>marcacoes</code> (17), <code>fontes</code>/<code>fonteCheckbox</code> (subsets)</td><td>→ assets PNG + TTF</td></tr><tr><td>Overlay administrativo</td><td><code>data/admin-config.json</code> (dev)</td><td><code>campos_ficha</code>, <code>campos_declaracao</code>, <code>cidades</code> (patch), <code>cidades_novas</code>, <code>pdfs_meta</code>, <code>forms_meta</code>, <code>templates_versoes</code>, <code>configuracoes</code>, <code>campos_custom</code></td><td>aplicado sobre os JSONs base (migração v1→v3 aditiva)</td></tr><tr><td>Versões de upload</td><td><code>data/uploads.json</code></td><td><code>{nome, arquivo, data, bytes, sha256}</code></td><td>→ arquivos em <code>data/uploads/nome__TIMESTAMP.pdf</code></td></tr><tr><td>Histórico do painel</td><td><code>data/historico.json</code></td><td>eventos append-only (+<code>desfazer</code>)</td><td>—</td></tr><tr><td>Carimbo de revisão</td><td><code>Docs/docs-revision.json</code></td><td><code>ultimaValidacaoIso</code>, <code>gitCommit</code>, <code>gitRemote/branch</code></td><td>lido por <code>Docs/doc-revision.js</code></td></tr></tbody></table>
+<hr/>
+<h3 id="4-integracoes-externas">4. Integrações externas</h3>
+<table><thead><tr><th>Serviço</th><th>URL/pacote</th><th>Consumidor</th><th>Uso</th><th>Fallback</th></tr></thead><tbody><tr><td>pdf-lib (CDN)</td><td>unpkg.com, pinado 1.17.1, SRI nas páginas públicas</td><td>todas as gerações</td><td>escrita em PDF</td><td>nenhum (crítico)</td></tr><tr><td>fontkit (CDN)</td><td>unpkg.com 1.1.1</td><td>ficha + painel</td><td>embutir TTF subsets</td><td>fallback Helvetica declarado no relatório</td></tr><tr><td>pdf.js (CDN)</td><td>unpkg.com 3.11.174</td><td>painel</td><td>preview/overlay visual</td><td>nenhum</td></tr><tr><td>ViaCEP</td><td>viacep.com.br/ws/{cep}/json</td><td>ficha, assistência, carta</td><td>endereço por CEP</td><td>BrasilAPI (somente ficha)</td></tr><tr><td>Brasil API</td><td>brasilapi.com.br/api/cep/v1</td><td>ficha</td><td>fallback CEP</td><td>—</td></tr><tr><td>API kstrtech</td><td>api.kstrtech.com.br/cidades/{UF}</td><td>assistência</td><td>municípios por UF (CORS aberto declarado)</td><td><code>carregarMunicipiosIBGE</code> existe como remanescente</td></tr><tr><td>ipify</td><td>api.ipify.org</td><td>ficha, assistência</td><td>IP público para evidência no PDF</td><td>omitido do bloco em falha (toast)</td></tr><tr><td>Google Fonts</td><td>fonts.googleapis/gstatic</td><td>páginas</td><td>tipografia</td><td>nenhum</td></tr></tbody></table>
+<p>Todas permitidas no CSP (<code>connect-src</code>), exceto pdf.js/painel (scripts <code>unpkg</code> object). Sem chaves de API: todas as integrações são públicas/awaits por contrato.</p>
+<hr/>
+<h3 id="5-scripts-do-repositorio-scripts">5. Scripts do repositório (<code>scripts/</code>)</h3>
+<table><thead><tr><th>Script</th><th>Linhas aprox.</th><th>Papel</th></tr></thead><tbody><tr><td>run-test.mjs</td><td>1.880</td><td>suíte de rotas/proteção/privacidade (498 atual)</td></tr><tr><td>test-server.mjs</td><td>377</td><td>servidor local + API admin</td></tr><tr><td>audit-panel.mjs</td><td>—</td><td>auditoria do painel contra dados reais (<code>node:vm</code>), roda no Teste 17</td></tr><tr><td>atualizar-docs-revision.mjs / gerar-historico-versionamento.mjs</td><td>30/214</td><td>carimbos LGPD (automatizados no push)</td></tr><tr><td>gerar-ficha-vazia.js / gerar-ficha-preenchida.js</td><td>41/105</td><td>geração via engine para comparativo/validação</td></tr><tr><td>gerar-fontes-comprimidas.js</td><td>—</td><td>subsets TTF (fonteditor-core), regera <code>*-sub.ttf</code></td></tr><tr><td>generate-admin-verifiers.mjs</td><td>—</td><td>gera novos <code>{salt, verifier}</code> do painel (não contém segredos, versionado)</td></tr><tr><td>verify-no-leaked-keys.mjs / pre-commit-check.mjs</td><td>—</td><td>segurança (apenas locais, gitignored)</td></tr><tr><td>audit-mobile.mjs, tmp-audit-bancos-iguais.mjs</td><td>—</td><td>auditorias auxiliares de UI (contidas no repo de scripts)</td></tr><tr><td>conferir-caixas-v38.py, fidelidade-ficha.py, remapear-campos-v38.py, extract_template.py</td><td>—</td><td>perícia/extração/validação das coordenadas (Python 3)</td></tr><tr><td>gerar-docx-privacidade.py</td><td>243</td><td>gera <code>Docs/Servicos_Privacidade_Termos.docx</code></td></tr></tbody></table>
+<hr/>
+<h3 id="6-chaves-de-armazenamento-do-navegador">6. Chaves de armazenamento do navegador</h3>
+<table><thead><tr><th>Chave</th><th>Tipo</th><th>Escopo</th></tr></thead><tbody><tr><td><code>atento.forms:v1:ficha_cadastral_rascunho_v2</code></td><td>localStorage</td><td>rascunho TTL 24 h ficha</td></tr><tr><td><code>atento.forms:v1:rascunho_ttl_ficha_v1</code></td><td>localStorage</td><td>meta do TTL (<code>savedAt</code>, <code>sig</code>, <code>decidedAt</code>)</td></tr><tr><td><code>atento.forms:v1:assistencia_medica_rascunho_v5</code> / <code>…rascunho_ttl_assist_v1</code></td><td>idem</td><td>assistência</td></tr><tr><td><code>atento.forms:v1:carta_bradesco_rascunho_v1</code> / <code>…rascunho_ttl_carta_v1</code></td><td>idem</td><td>carta</td></tr><tr><td><code>atento.forms:v1:cross_copy_ficha_para_assistencia</code> (legada <code>_v1</code>)</td><td>localStorage</td><td>payload de cópia entre formulários</td></tr><tr><td><code>atento.forms:v1:carta_bradesco_prefill_v1</code></td><td>localStorage</td><td>prefill da carta</td></tr><tr><td><code>ficha_cadastral_nao_perguntar_copia_assistencia</code></td><td>localStorage</td><td>preferência do usuário</td></tr><tr><td><code>atf_t</code>, <code>atf_x</code>, <code>atf_p</code>, <code>atf_g</code></td><td>sessionStorage</td><td>sessão dos formulários (token, expiração, caminhos legados, flag de grupo)</td></tr><tr><td><code>adm_t</code>, <code>adm_x</code>, <code>adm_e</code></td><td>sessionStorage</td><td>sessão do painel</td></tr><tr><td><code>adm_draft_cfg</code></td><td>sessionStorage</td><td>rascunho de config do painel (modo exportação)</td></tr><tr><td>— proibido —</td><td>localStorage como banco do painel</td><td>persistência.js:26 declara a proibição</td></tr></tbody></table>
+<hr/>
+<h3 id="7-workflows-ci-cd">7. Workflows CI/CD</h3>
+<table><thead><tr><th>Workflow</th><th>Gatilho</th><th>Ações</th></tr></thead><tbody><tr><td><code>ci.yml</code></td><td>push em <code>main</code>, qualquer PR</td><td><code>node --check</code> (14 grupos de arquivos), presença/parse de estruturas e JSONs, presença do template F-075, <code>run-test.mjs</code></td></tr><tr><td><code>docs-automacao.yml</code></td><td>push em <code>main</code> (não disparado pelos commits do próprio bot), <code>workflow_dispatch</code></td><td>regenera/commita carimbo de revisão e histórico (3 tentativas, <code>concurrency</code> não-cancelável,히 <code>[skip ci]</code>)</td></tr><tr><td>Vercel</td><td>push em <code>main</code></td><td>deploy estático automático (sem build)</td></tr></tbody></table>
+<h1 id="parte-5-arquitetura-e-fluxos-diagramados">Parte 5 — Arquitetura e fluxos diagramados</h1>
+<p><em>Fonte original: <code>arquitetura-e-fluxos.md</code> ( headings recuados um nível na consolidação )</em></p>
+<h2 id="arquitetura-e-fluxos-auditoria-diagramada-25-10-2026">Arquitetura e fluxos — auditória diagramada (25/10/2026)</h2>
+<p>Diagramas em Mermaid. Estado verificado no repositório; não descreve nada além do que existe.</p>
+<hr/>
+<h3 id="1-diagrama-de-arquitetura-atual">1. Diagrama de arquitetura atual</h3>
+<pre class="mermaid">flowchart LR
+    subgraph Cliente[&quot;Navegador do usuário&quot;]
+        UI[&quot;Páginas estáticas&lt;br/&gt;ficha / assistência / carta / home&quot;]
+        GUARD[&quot;guard.js — chave ATN-…&lt;br/&gt;sessão sessionStorage&quot;]
+        TTL[&quot;rascunho-ttl.js | TTL 24h&quot;]
+        ENGINE[&quot;embedded-docs.js&lt;br/&gt;template.json + schema + dados&quot;]
+        PANEL[&quot;painel /admin&lt;br/&gt;admin-guard.js&quot;]
+    end
+
+    subgraph Edge[&quot;Vercel — site estático&quot;]
+        STATIC[&quot;arquivos do repo&lt;br/&gt;vercel.json: rotas/headers&quot;]
+    end
+
+    subgraph Dados[&quot;Dados versionados no Git&quot;]
+        JSONS[&quot;*_campos.json · cidades*.json&lt;br/&gt;template.json · docs-revision.json&quot;]
+        PDFS[&quot;PDFs modelo oficiais&quot;]
+        SUBSET[&quot;assets/*-sub.ttf&quot;]
+    end
+
+    subgraph Externos[&quot;Serviços externos (HTTPS)&quot;]
+        CEP[&quot;ViaCEP / BrasilAPI&quot;]
+        CID[&quot;kstrtech cidades&quot;]
+        IP[&quot;ipify&quot;]
+        CDN[&quot;unpkg.com&lt;br/&gt;pdf-lib · fontkit · pdf.js&quot;]
+        GFONTS[&quot;Google Fonts&quot;]
+    end
+
+    subgraph DevOps[&quot;CI/CD (GitHub Actions)&quot;]
+        CI[&quot;ci.yml — Node 22&lt;br/&gt;check + suíte 498&quot;]
+        BOT[&quot;docs-automation.yml&lt;br/&gt;carimbo jurídico automático&quot;]
+    end
+
+    subgraph Dev[&quot;Somente desenvolvimento&quot;]
+        API[&quot;test-server.mjs&lt;br/&gt;/api/admin/* → data/&quot;]
+    end
+
+    UI --&gt; GUARD --&gt; ENGINE
+    UI --&gt; TTL
+    UI --&gt; CEP &amp; CID &amp; IP &amp; CDN &amp; GFONTS
+    ENGINE --&gt; JSONS &amp; SUBSET &amp; PDFS
+    STATIC --&gt; UI
+    PANEL --&gt; API
+    PANEL --&gt; CDN &amp; JSONS
+    CI --&gt; BOT --&gt; JSONS</pre>
+<p><strong>Leitura:</strong> o cliente concentra 100% da lógica de dados; a edge (Vercel) só entrega arquivos e headers; a única escrita server-side do produto é do servidor <strong>local</strong> de dev em <code>data/</code>.</p>
+<hr/>
+<h3 id="2-fluxo-a-autenticacao-e-sessao-entre-formularios">2. Fluxo A — Autenticação e sessão entre formulários</h3>
+<pre class="mermaid">sequenceDiagram
+    actor U as Usuário
+    participant P as Página protegida (f075/f089/bradesco)
+    participant G as guard.js
+    participant ST as sessionStorage
+
+    U-&gt;&gt;P: abre rota protegida
+    P-&gt;&gt;G: isProtected(path) ✔
+    G-&gt;&gt;ST: lê atf_t/atf_x/atf_g
+    alt sessão válida e grupo liberado
+        G-&gt;&gt;P: revela conteúdo + iniciarVigencia()
+        Note right of G: atividade prolonga 60 min (throttle 60 s)
+    else sem sessão
+        G-&gt;&gt;U: tela de chave (overlay #af)
+        U-&gt;&gt;G: digita ATN-… e valida
+        G-&gt;&gt;G: SHA-256(salt‖chave)+transformações × 5 pares
+        alt confere ≡ algum verifier
+            G-&gt;&gt;ST: grava atf_t (token 32B), atf_x (+60 min), atf_p, atf_g=1
+            G-&gt;&gt;P: revela + iniciarVigencia()
+            Note right of G: faltando ≤10 min: banner &quot;Continuar sessão / Encerrar agora&quot;
+        else não confere
+            G-&gt;&gt;U: &quot;✕ Chave inválida&quot; (foco no campo)
+        end
+    end</pre>
+<p>Falha tratada: expiração real → <code>encerrarSessaoPorExpiracao()</code> limpa as 4 chaves e recarrega (tela de chave volta). Navegação entre f075↔f089↔bradesco <strong>não</strong> repete a chave (<code>atf_g</code> cobre o grupo; <code>atf_p</code> mantém compatibilidade com sessões antigas).</p>
+<hr/>
+<h3 id="3-fluxo-b-ficha-cadastral-pdf-caminho-feliz">3. Fluxo B — Ficha Cadastral → PDF (caminho feliz)</h3>
+<pre class="mermaid">sequenceDiagram
+    actor U
+    participant FC as ficha_cadastral.html
+    participant EXT as ViaCEP → BrasilAPI · ipify
+    participant ED as EmbeddedDocs (engine)
+    participant CDN as pdf-lib@1.17.1 (unpkg)
+    participant ARQ as template.json + campos + assets (mesmo domínio)
+
+    U-&gt;&gt;FC: carrega (sessão já válida)
+    FC-&gt;&gt;ARQ: fetch JSONs/assets com cache:no-store
+    ED-&gt;&gt;FC: validarTemplate(template, schema) ✔
+    U-&gt;&gt;FC: preenche (dependentes, banco, VT…)
+    FC-&gt;&gt;EXT: CEP → autopreenche endereço (fallback BrasilAPI)
+    U-&gt;&gt;FC: confirma modal LGPD
+    FC-&gt;&gt;EXT: IP público (evidência) com timeout
+    FC-&gt;&gt;FC: validarCamposObrigatorios() → gate Conta Salário
+    alt pendência &quot;Ainda vou abrir&quot; sem agência/conta
+        FC-&gt;&gt;U: modal obrigatória → Preencher Carta (rascunho 24 h) → carta_bradesco
+    else ok
+        FC-&gt;&gt;ED: gerarPdf(template, schema, montarDadosFicha())
+        ED-&gt;&gt;CDN: desenha camadas/dados sobre o template (em memória)
+        ED-&gt;&gt;FC: bytes ~117 KB
+        FC-&gt;&gt;U: download + registro do rascunho (TTL 24 h)
+    end</pre>
+<p>Tratamentos de falha: template/schema ausentes → toast e geração bloqueada; LGPD cancelado → nada é gerado; rascunho expira com a página aberta → modal + limpeza do formulário no vencimento.</p>
+<hr/>
+<h3 id="4-fluxo-c-assistencia-medica-ramificacao">4. Fluxo C — Assistência Médica (ramificação)</h3>
+<pre class="mermaid">flowchart TD
+    A[Abre /f089] --&gt; B{Plano?}
+    B -- Plano de Benefícios --&gt; C[Somente assinatura&lt;br/&gt;DECLARACAO PLANO DE SAUDE.pdf&lt;br/&gt;assinatura na pág. 2]
+    B -- Outros Planos --&gt; D{Variante?}
+    D -- Infinity --&gt; E[lê cidades_infinity.json&lt;br/&gt;UF incluída]
+    D -- Outros --&gt; F[lê cidades_brasil.json]
+    E --&gt; G[UF → kstrtech /cidades/UF]
+    F --&gt; G
+    G --&gt; H[cidade selecionada →&lt;br/&gt;resolverArquivoPdfPorCidadeNome&lt;br/&gt;chave FICHA SAFO → FICHA SA_FO.pdf]
+    H --&gt; I[formulário + dependentes&lt;br/&gt;não optante omite dependentes no PDF]
+    I --&gt; J[assinatura + evidência IP]
+    J --&gt; K[EmbeddedDocs.gerarPdf&lt;br/&gt;+ rubrica PNG + marca d'água VT]
+    C --&gt; L[LGPD → PDF]
+    K --&gt; L</pre>
+<p>Dependência crítica: nome da cidade tem de bater entre o JSON da lista e <code>FICHA_UTILIZAR_PARA_ARQUIVO</code> nas duas pontas (app e painel); divergência = cidade sem template.</p>
+<hr/>
+<h3 id="5-fluxo-d-carta-bradesco">5. Fluxo D — Carta Bradesco</h3>
+<pre class="mermaid">sequenceDiagram
+    actor U
+    participant CB as carta_bradesco.html
+    participant FC as Ficha (localStorage prefill)
+    participant VIA as ViaCEP
+    participant PDF as pdf-lib
+
+    U-&gt;&gt;CB: abre (via ficha ou direto)
+    CB-&gt;&gt;FC: aplicarPrefillFichaCadastral() (payload de consumo único)
+    CB-&gt;&gt;VIA: CEP → rua/bairro
+    U-&gt;&gt;CB: grupo/cargo (carta_bradesco_cargos.js), salário (moeda)
+    U-&gt;&gt;CB: LGPD confirmado
+    CB-&gt;&gt;PDF: gerarPdfCartaBytes — desenha timbrado, logo, carimbo e parágrafos run-a-run
+    CB-&gt;&gt;U: download da carta</pre>
+<hr/>
+<h3 id="6-fluxo-e-configuracao-painel-aplicacao-publica">6. Fluxo E — Configuração (painel → aplicação pública)</h3>
+<pre class="mermaid">sequenceDiagram
+    actor A as Administrador
+    participant AD as /admin (painel)
+    participant DET as persistence.js detectMode()
+    participant API as test-server.mjs (dev)
+    participant REPO as JSONs/PDFs do repo
+    participant VER as Vercel
+
+    A-&gt;&gt;AD: valida e-mail @atento.com + código exclusivo (CG)
+    AD-&gt;&gt;DET: sonda GET /api/admin/historico
+    alt JSON ⇒ modo API (dev)
+        AD-&gt;&gt;API: PUT config (backup auto), POST upload (PDF assinatura/tamanho), POST historico
+    else 404/HTML ⇒ modo exportação
+        AD-&gt;&gt;AD: sessão do navegador; Exportar JSON / Exportar arquivos do repo
+    end
+    AD-&gt;&gt;AD: Editar overlay (Field Builder, editor visual, cidades)&lt;br/&gt;validarDocCampos no gate
+    A-&gt;&gt;REPO: substitui JSONs exportados (bit-a-bit = base + overlay)
+    A-&gt;&gt;VER: commit/push → deploy automático
+    Note over A,VER: app pública lê os JSONs do repo — painel nunca lhes escreve direto</pre>
+<hr/>
+<h3 id="7-fluxo-f-ciclo-de-docs-lgpd-automatico">7. Fluxo F — Ciclo de docs LGPD (automático)</h3>
+<pre class="mermaid">flowchart LR
+    push[&quot;push no main&quot;] --&gt; CI[&quot;ci.yml: síntese + suíte (498)&quot;]
+    push --&gt; BOT[&quot;docs-automation.yml&quot;]
+    BOT --&gt; R1[&quot;docs-revision.json (carimbo)&quot;]
+    BOT --&gt; R2[&quot;historico-versionamento.md&quot;]
+    R1 --&gt; COMMIT[&quot;commit [skip ci] — sem loop&quot;]
+    R2 --&gt; COMMIT
+    COMMIT --&gt; VER[&quot;Vercel redeploy&quot;]</pre>
+<hr/>
+<h3 id="8-fluxo-g-rascunho-ttl-decisao-lgpd">8. Fluxo G — Rascunho (TTL/decisão LGPD)</h3>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; SemDecisao : rascunho gravado (savedAt)
+    SemDecisao --&gt; Apagar : usuário escolhe &quot;Apagar agora&quot;
+    SemDecisao --&gt; Manter : &quot;Manter 24 h&quot; (ou ESC/fundo)
+    Manter --&gt; Expirado : passa o TTL após último salvamento
+    Expirado --&gt; Limpo : limpa rascunho + formulário
+    Apagar --&gt; Limpo
+    Limpo --&gt; [*]</pre>
+<h1 id="parte-6-matriz-de-constatacoes-debitos-e-referencias-de-codigo">Parte 6 — Matriz de constatações, débitos e referências de código</h1>
+<p><em>Fonte original: <code>constatacoes-matriz.md</code> ( headings recuados um nível na consolidação )</em></p>
+<h2 id="matriz-de-constatacoes-debitos-e-referencias-25-10-2026">Matriz de constatações, débitos e referências — 25/10/2026</h2>
+<p>Classificação por constatação: <strong>[V]</strong> verificada diretamente no código/config/execução · <strong>[I]</strong> inferida (descrita em documento do repositório, coerente com o código aqui conferido, não re-verificada linha a linha nesta auditoria) · <strong>[N]</strong> não confirmada / precisa de acesso externo.</p>
+<p>Segredos: nenhum valor de token/senha/chave foi lido ou registrado (nem o conteúdo de <code>keys-testes.txt</code>).</p>
+<hr/>
+<h3 id="1-matriz">1. Matriz</h3>
+<table><thead><tr><th>#</th><th>Constatação</th><th>Status</th><th>Fundamento (arquivo:linha)</th></tr></thead><tbody><tr><td>1</td><td>Aplicação estática sem backend produção, sem banco de dados, sem variáveis de ambiente</td><td>[V]</td><td><a href="../vercel.json">vercel.json</a> (rewrite/headers apenas); package.json (sem deps de runtime); README §Deploy; inventário §4 (5 APIs só leitura)</td></tr><tr><td>2</td><td>Stack front-end: JS vanilla ES2020+, pdf-lib 1.17.1 pinado com SRI, fontkit 1.1.1, pdf.js 3.11.174</td><td>[V]</td><td>ficha_cadastral.html:1827/1830; assistencia_medica.html:1326; carta_bradesco.html:653; admin/index.html:690–694</td></tr><tr><td>3</td><td>Autenticação client-side por derivados (salt + SHA-256 + transformações), 5 chaves de formulários, formato <code>ATN</code> + 15 alfanuméricos</td><td>[V]</td><td>guard.js:32–37 (G), :79/:139 (derive/verify); NFSR keys reais ausentes (git ls-files sem <code>keys*</code>)</td></tr><tr><td>4</td><td>Sessão de formulários: <code>sessionStorage</code> atf_t/x/p/g, expiração 60 min, janela deslizante throttle 60 s, banner a 10 min, grupo Ficha↔Assistência↔Carta sem repetição de chave</td><td>[V]</td><td>guard.js:22–:32 (G), :36 (PROTECTED), :50–:54 (constantes), :66–:122 (deriveVerifier), :124 (verifyCode), :144–:246 (sessão/grupo), :231–:347 (vigência/banner), MANUTENCAO §7.1.1</td></tr><tr><td>5</td><td>Painel com fator duplo client-side (domínio exato <code>@atento.com</code> + código exclusivo em corpus <code>CG</code> distinto das chaves de formulários)</td><td>[V]</td><td>admin-guard.js:37–:45 (CG), :48/:67 (domínio); pipeline idêntico declarado e comparado</td></tr><tr><td>6</td><td>Limite declarado da guarda client-side (não substitui server-side)</td><td>[V]</td><td>comentário de cabeçalho guard.js:4–:10 e admin-guard.js:20–:22; README §Segurança</td></tr><tr><td>7</td><td>Rascunho com TTL de 24 h pós-último salvamento, modal de decisão, sem retenção indefinida</td><td>[I]→[V parcial]</td><td>rascunho-ttl.js (442 ln) conferido por rascunho (API <code>RascunhoTTL.init/verificarAposSalvar</code> chamada pelas páginas: ficha <code>salvarRascunhoLocalSincrono</code>, assistência após <code>gerarPDF</code>); detalhes de meta (<code>savedAt/sig/decidedAt</code>) conforme MANUTENCAO §7.2 — não refizemos o timer físico nesta auditoria</td></tr><tr><td>8</td><td>Chaves de storage versionadas por página conforme documentação</td><td>[V]</td><td>ficha_cadastral.html:1897 (<code>_v2</code>); busca de <code>LS_NS</code> nas demais páginas confirmou o mesmo namespace <code>atento.forms:v1:*</code></td></tr><tr><td>9</td><td>CEP: ViaCEP em todos os fluxos + fallback BrasilAPI na ficha</td><td>[V]</td><td>ficha_cadastral.html:2041/:2057; assistencia_medica.html:1931; carta_bradesco.html:818</td></tr><tr><td>10</td><td>Municípios da assistência via kstrtech (CORS aberto declarado)</td><td>[I]</td><td>assistencia_medica.html:1822 (chamada); CORS <strong>declarado</strong> em MANUTENCAO §6.1 — não testado em rede nesta auditoria</td></tr><tr><td>11</td><td>IP público de evidência via ipify</td><td>[V]</td><td>ficha_cadastral.html:2305; assistencia_medica.html:2166</td></tr><tr><td>12</td><td>Geração unificada via <code>EmbeddedDocs.gerarPdf</code> (app público = painel = scripts)</td><td>[V]</td><td>ficha_cadastral.html:3885; assistencia_medica.html (gerarPDF:3228); admin/panel.js:2989; scripts/gerar-ficha-preenchida.js:98; embedded-docs.js:395</td></tr><tr><td>13</td><td>Template declarativo (página + 3 imagens + 161 barras + 89 textos + 17 marcações) e subsets de fonte 17–20 KB ⇒ PDF ~117 KB</td><td>[I]</td><td>números extraídos de MANUTENCAO §2 (e essa fonte é o README da POC); <code>template.json</code> (10.716 ln) existe e <code>assets/*-sub.ttf</code> confirmados por listagem</td></tr><tr><td>14</td><td>Route guards/rewrites idênticos em local e Vercel</td><td>[V]</td><td>vercel.json (rewrites); test-server.mjs emulam as rotas; suíte roda as duas pontas (run-test.mjs:170–178)</td></tr><tr><td>15</td><td>API admin local: config (backup automático), upload validado (assinatura <code>%PDF-</code>, 20 MB, sha256, versão imutável cap 200), rollback, histórico (sonda de modo)</td><td>[V]</td><td>test-server.mjs:26, :108, :152–:278; persistence.js:52–:63</td></tr><tr><td>16</td><td>Modo exportação em produção estática: alterações do painel exigem commit manual; localStorage proibido como banco</td><td>[V]</td><td>persistence.js:17–:29; MANUTENCAO §9.1</td></tr><tr><td>17</td><td>Painel nunca edita os JSONs do repo; export com overlay vazio ≡ arquivo do repo</td><td>[I]</td><td>MANUTENCAO §9.1 + scripts/audit-panel.mjs:286 (invariante executada no Teste 17; suíte verde nesta auditoria)</td></tr><tr><td>18</td><td>Suíte atual: 498 testes, 0 falhas</td><td>[V]</td><td>execução de <code>node scripts/run-test.mjs</code> nesta auditoria (exit 0)</td></tr><tr><td>19</td><td>CI: sintaxe JS, estrutura/JSONs, presença de PDFs, suíte completa — Node 22</td><td>[V]</td><td>.github/workflows/ci.yml</td></tr><tr><td>20</td><td>Bot de docs regenera/commita carimbo + histórico em todo push <code>main</code>, <code>[skip ci]</code>, 3 tentativas</td><td>[V]</td><td>.github/workflows/docs-automacao.yml; histórico de commits do bot visível no repo (5b01369, 0371d40, bbea776)</td></tr><tr><td>21</td><td>Headers/CSP: allowlist de integrações (viacep/brasilapi/ipify/kstrtech/unpkg/Google Fonts), COEP/COOP/CORP, HSTS preload, frame-ancestors none</td><td>[V]</td><td>vercel.json (bloco headers)</td></tr><tr><td>22</td><td>Segredos: códigos reais fora do repo (<code>keys*.txt</code>, <code>data/</code>, <code>scripts/verify-no-leaked-keys.mjs</code>, <code>pre-commit-check.mjs</code> gitignored); só derivados versionados</td><td>[V]</td><td>.gitignore; <code>git ls-files</code> sem match de chaves; guards</td></tr><tr><td>23</td><td>LGPD: hub Docs público + carimbo automático + rascunho TTL + modais; sem cookies de rastreamento</td><td>[V]/[I]</td><td>Docs/* (17 arquivos), docs-rewrites, workflow; textos LGPD de acordo com MANUTENCAO §7.4–7.5</td></tr><tr><td>24</td><td>Sem telemetria/APM/logs centralizados; diagnóstico via suíte local + console</td><td>[V]</td><td>ausência de instrumentação em todas as páginas e no test-server</td></tr><tr><td>25</td><td>Perfis de usuário (candidato/RH/admin)</td><td>[I]</td><td>PRD §3 + fluxo real de dois guards — sem contas/roles formais</td></tr><tr><td>26</td><td>Fidelidade do PDF embarcado ≥ 99,5% / determinismo de datas</td><td>[I]</td><td>README da POC (ficha-cadastral-embutido/README.md) + scripts fidelidade-ficha.py — não reexecutamos a comparação visual nesta auditoria</td></tr><tr><td>27</td><td>Status do CI na plataforma GitHub e deploys da Vercel</td><td>[N]</td><td>precisa de acesso aos dashboards; local: suíte verde</td></tr><tr><td>28</td><td>Disponibilidade real das APIs/CDNs externas em produção</td><td>[N]</td><td>não testado em rede nesta auditoria</td></tr><tr><td>29</td><td>Política real de emissão/rotação das chaves <code>ATN-…</code> por RH</td><td>[N]</td><td>operação fora do repo; keys reais não versionadas por design</td></tr><tr><td>30</td><td>Versão Node local exigida</td><td>[V]</td><td>CI usa Node 22; README diz &quot;Node ≥ 18&quot; para scripts (test-server usa APIs pós-18)</td></tr></tbody></table>
+<hr/>
+<h3 id="2-limitacoes-e-debitos-tecnicos-identificados">2. Limitações e débitos técnicos identificados</h3>
+<table><thead><tr><th>Débito</th><th>Impacto</th><th>Mitigação sugerida</th><th>Confiança</th></tr></thead><tbody><tr><td>Autenticação client-side (documentada como decisão)</td><td>conteúdo e lógica das páginas protegidas chegam ao navegador; contorno possível por usuário avançado</td><td>manter decisão, mas registrar junto ao jurídico como barreira de conveniência (não controle de acesso)</td><td>alta — declarada no código</td></tr><tr><td>SRI ausente no painel (unpkg sem <code>integrity</code>) ao contrário das páginas públicas</td><td>risco de supply-chain no <code>/admin</code></td><td>adicionar <code>integrity</code>/<code>crossorigin</code> em admin/index.html:690–694</td><td>alta</td></tr><tr><td>Sem proteção de branch no <code>main</code></td><td>push direto publica em produção</td><td>MANUTENCAO §11.1 já define a receita p/ quando houver admin</td><td>alta</td></tr><tr><td><code>admin-guard</code> guarda apenas o lado do navegador — arquivos sob <code>/admin/</code> são estáticos públicos</td><td>abre o HTML/JS do painel sem login (o conteúdo só não é exibido)</td><td>mesma natureza da decisão de projeto; linha de base no relatório jurídico</td><td>alta</td></tr><tr><td>Sem fallback para os CDNs (unpkg/Google Fonts)</td><td>indisponibilidade externa quebra a geração de PDF</td><td>hospedar assets no domínio próprio</td><td>alta</td></tr><tr><td>Sem gate de tamanho de PDF no CI</td><td>regressão de ~2,7 MB (fontes completas) não travaria o deploy executando a suíte de rotas</td><td>teste que gera via engine e assesta bytes ≤ 248 KB</td><td>alta — sugestão nova;¢ limite documentado no MANUTENCAO §2</td></tr><tr><td>API admin local sem autenticação</td><td>se exposto à rede (fora do localhost), qualquer cliente escreve config</td><td>bind explícito em loopback + aviso no help do script</td><td>alta (código escuta apenas onde iniciado)</td></tr><tr><td>Sem telemetria</td><td>falhas de UX/API em produção invisíveis</td><td>manter (LGPD) mas considerar eventos anônimos agregados opcionais</td><td>alta</td></tr><tr><td><code>.kilo/</code> tool-config versionado (<code>.kilo/kilo.jsonc</code>) + worktree local não versionado</td><td>ruído de repositório, sem risco de vazar código</td><td>avaliar mover config para gitignore/pasta dedicada</td><td>alta</td></tr><tr><td>Inline scripts + <code>'unsafe-inline'</code> no CSP</td><td>superfície XSS ampliada (necessária à arquitetura atual, mitigada por COEP/COOP/CORP e sem inputs servidor)</td><td>migração gradual para <code>&lt;script type=module&gt;</code> externos com nonces</td><td>média — inferência arquitetural</td></tr><tr><td>Remanescente <code>carregarMunicipiosIBGE()</code> no fluxo ativo</td><td>dependência morta/alt no caminho de cidades</td><td>confirmar se é fallback real ou código morto e documentar</td><td>média</td></tr><tr><td>Acessibilidade sem auditoria formal</td><td>risco de não-conformidade WCAG a longo prazo</td><td>auditoria dirigida (teclado, contraste)</td><td>alta (declarada em RNF-06)</td></tr></tbody></table>
+<hr/>
+<h3 id="3-referencias-principais-de-codigo-fundamentos">3. Referências principais de código (fundamentos)</h3>
+<table><thead><tr><th>Tema</th><th>Referências</th></tr></thead><tbody><tr><td>Guards/sessão</td><td>guard.js:22–:54, :66–:124, :144–:246, :231–:297, :369–:523 · admin-guard.js:37–:48, :67–:67, :123–:179, :349–:368</td></tr><tr><td>Sessão entre formulários + expiração</td><td>guard.js (<code>grantSession</code> :197, <code>registrarAtividade</code> :231, <code>agendarAviso</code> :280, <code>mostrarBannerExpiracao</code> :297, <code>iniciarVigencia</code> :335) · MANUTENCAO §7.1.1</td></tr><tr><td>Rascunho TTL</td><td>rascunho-ttl.js (442 ln) · chaves em MANUTENCAO §7.2 · chamadas <code>verificarAposSalvar</code> nos HTMLs</td></tr><tr><td>Engine PDF</td><td>embedded-docs.js:33 (API), :395 (<code>gerarPdf</code>) · ficha_cadastral.html:3728–:3779 (carga/validação/template), :3885 (chamada)</td></tr><tr><td>Ficha F-075</td><td>ficha_cadastral.html (funções listadas em docs-tecnico §1)</td></tr><tr><td>Assistência F-089</td><td>assistencia_medica.html:1421–:1491, :1608–:1839, :2495, :3228, :3429, :2939</td></tr><tr><td>Carta Bradesco</td><td>carta_bradesco.html:678–:706, :818, :1120, :1227, :1358, :1499</td></tr><tr><td>API admin local</td><td>test-server.mjs:26, :108, :152–:278 · persistence.js:17–:63</td></tr><tr><td>Infra/segurança</td><td>vercel.json (headers/redirects/rewrites) · .gitignore · ci.yml · docs-automacao.yml</td></tr><tr><td>Documentação interna</td><td>README.md · PRD.md · MANUTENCAO.md · Docs/admin-panel.md · Docs/historico-versionamento.md</td></tr></tbody></table>
+<hr/>
+<h3 id="4-o-que-nao-foi-verificado-e-por-que">4. O que <em>não</em> foi verificado (e por quê)</h3>
+<ul><li><strong>Dashboards externos</strong> (GitHub Actions runs, Vercel): sem acesso de rede/dashboards nesta auditoria.
+</li><li><strong>Disponibilidade de APIs de terceiros</strong> e CORS do kstrtech em tempo real: não chamados de rede — citados por código e por documentação interna.
+</li><li><strong>Conteúdo de <code>keys-testes.txt</code></strong>: deliberadamente não lido (política de não expor segredos); estatuto confirmado via <code>git ls-files</code> e .gitignore (não versionado).
+</li><li><strong>Comparações visuais de PDF</strong> (fidelidade ≥ 99,5%): os scripts existem e a suíte os executa indiretamente; a convergência numérica não foi reexecutada nesta auditoria.
+</li><li><strong>Comportamento em iOS/Safari/Desktop real</strong>: fora do escopo (requer dispositivos).
+</li></ul>
+  </div>
+</body>
+</html>
