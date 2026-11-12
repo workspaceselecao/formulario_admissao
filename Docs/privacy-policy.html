@@ -34,7 +34,8 @@
       <li>São processados <strong>exclusivamente no navegador</strong> (client-side), para composição do PDF;</li>
       <li><strong>Não são enviados</strong> a servidores desta aplicação para armazenamento de formulário ou finalização obrigatória do PDF;</li>
       <li><strong>Não são armazenados</strong> em bases de dados remotas operadas por esta solução para os dados digitados nos formulários;</li>
-      <li>Algumas funcionalidades fazem chamadas técnicas a serviços externos para consultar CEP, listar municípios ou obter o IP público usado como evidência no PDF. Essas chamadas transmitem somente os dados mínimos indicados abaixo; o conteúdo integral do formulário não é enviado a esses serviços, nem o PDF gerado.</li>
+      <li>Algumas funcionalidades fazem chamadas técnicas a serviços externos para consultar CEP ou obter o IP público usado como evidência no PDF. Essas chamadas transmitem somente os dados mínimos indicados abaixo; o conteúdo integral do formulário não é enviado a esses serviços, nem o PDF gerado.</li>
+      <li>A lista de municípios por UF exibida na assistência médica é um <strong>arquivo estático do próprio site</strong> (<code>municipios_por_uf.json</code>, base pública do IBGE), carregado do mesmo domínio — não há consulta a serviços de terceiros para montar essa lista. A BrasilAPI é acionada, com a sigla da UF, apenas como contingência se esse arquivo não carregar.</li>
       <li>Permanecem durante o preenchimento na <strong>memória do dispositivo</strong> e, quando aplicável, em <strong>armazenamento local opcional</strong> exclusivamente no navegador (ver §7);</li>
       <li>Após a geração do PDF, podem permanecer no dispositivo o conteúdo do formulário e o <strong>rascunho local</strong> (quando ativo) — o rascunho é <strong>descartado automaticamente 24 horas após o último salvamento</strong>, sem opção de retenção indefinida, e pode ser eliminado a qualquer momento com <strong>Descartar rascunho</strong> ou limpeza do navegador;</li>
     </ul>
@@ -55,13 +56,8 @@
         </tr>
         <tr>
           <td>BrasilAPI</td>
-          <td>Alternativa de consulta de endereço quando a consulta principal não retorna resultado.</td>
-          <td>CEP enviado no caminho da requisição.</td>
-        </tr>
-        <tr>
-          <td><code>api.kstrtech.com.br</code></td>
-          <td>Consultar a lista de municípios correspondente à UF.</td>
-          <td>Sigla da UF enviada no caminho da requisição.</td>
+          <td>Alternativa de consulta de endereço quando a consulta principal não retorna resultado e contingência da lista de municípios se o arquivo local do site não carregar.</td>
+          <td>CEP ou sigla da UF enviados no caminho da requisição.</td>
         </tr>
         <tr>
           <td><code>api.ipify.org</code></td>
@@ -107,7 +103,7 @@
 
     <h2>6. Compartilhamento de Dados</h2>
     <p>Não há encaminhamento do conteúdo integral dos formulários para terceiros com finalidade de armazenamento centralizado ou geração remota do documento.</p>
-    <p>Funcionalidades técnicas podem utilizar serviços externos necessários ao funcionamento (por exemplo, consultas de CEP e de lista de municípios), transmitindo somente os dados <strong>estritamente necessários</strong> à execução da funcionalidade, observando os princípios da necessidade, segurança e transparência.</p>
+    <p>Funcionalidades técnicas podem utilizar serviços externos necessários ao funcionamento (por exemplo, consultas de CEP e, em contingência, da lista de municípios), transmitindo somente os dados <strong>estritamente necessários</strong> à execução da funcionalidade, observando os princípios da necessidade, segurança e transparência.</p>
     <p>Serviços de infraestrutura (por exemplo hospedagem estática ou CDN) podem processar metadados de acesso conforme políticas do fornecedor; não devem incluir o <strong>corpo dos formulários</strong> nos registros operacionais da aplicação. O eventual compartilhamento posterior com prestadores relacionados ao vínculo e benefícios (bancos, operadoras de assistência médica, fornecedores tecnológicos) segue as regras corporativas das políticas da Atento.</p>
 
     <h2>7. Armazenamento e Retenção</h2>

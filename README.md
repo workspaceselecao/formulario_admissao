@@ -24,7 +24,7 @@ Deploy de referência: **Vercel** (site estático). Sem banco de dados — os PD
 |---|---|
 | Front-end | HTML5, CSS3, JavaScript (ES2020+, sem framework) |
 | Geração de PDF | [pdf-lib](https://github.com/Hopding/pdf-lib) via CDN (com SRI), pdf.js (worker em blob) |
-| APIs externas | ViaCEP, Brasil API, IBGE (cidades), ipify, kstrtech (municípios) |
+| APIs externas | ViaCEP, Brasil API (CEP e contingência de municípios) e ipify; municípios vêm de índice local do IBGE (`municipios_por_uf.json`), sem dependência de terceiros |
 | Infra | [Vercel](https://vercel.com) (headers de segurança, redirects e rewrites em `vercel.json`) |
 | Qualidade | GitHub Actions (CI + carimbo de revisão jurídica e histórico automáticos), suíte `scripts/run-test.mjs` |
 

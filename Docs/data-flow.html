@@ -51,13 +51,8 @@
         </tr>
         <tr>
           <td>BrasilAPI</td>
-          <td>Alternativa para consulta de endereço quando a consulta principal não retorna resultado.</td>
-          <td>CEP enviado no caminho da requisição.</td>
-        </tr>
-        <tr>
-          <td><code>api.kstrtech.com.br</code></td>
-          <td>Consultar municípios da unidade federativa selecionada.</td>
-          <td>Sigla da UF enviada no caminho da requisição.</td>
+          <td>Alternativa para consulta de endereço quando a consulta principal não retorna resultado; contingência da lista de municípios se o arquivo local não carregar.</td>
+          <td>CEP ou sigla da UF enviados no caminho da requisição.</td>
         </tr>
         <tr>
           <td><code>api.ipify.org</code></td>
@@ -66,6 +61,7 @@
         </tr>
       </tbody>
     </table>
+    <p><strong>Lista de municípios (assistência médica):</strong> o seletor de cidade é montado a partir de <code>municipios_por_uf.json</code>, arquivo estático do próprio site com a base pública do IBGE por UF (5.571 municípios, nomes oficiais). Nenhum serviço de terceiros é consultado para exibir essa lista; a BrasilAPI só é acionada, com a sigla da UF, se o arquivo local não carregar.</p>
     <p>Os provedores podem registrar o IP de origem e metadados de acesso conforme suas próprias políticas. O PDF gerado não é enviado a esses serviços; o conteúdo integral do formulário não é enviado.</p>
     <p><strong>Modelo corporativo original (minimização máxima):</strong> ausência de uso de <code>localStorage</code>, <code>sessionStorage</code> ou <code>IndexedDB</code> para dados pessoais — estado puramente efêmero.</p>
     <p><strong>Versões implantadas com recurso de rascunho:</strong> pode existir uso <strong>controlado</strong> de <code>localStorage</code> (ou equivalente) <strong>apenas</strong> para permitir retomar o preenchimento no mesmo navegador/dispositivo, com:</p>

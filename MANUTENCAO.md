@@ -30,7 +30,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
 | `cidades_brasil.json` | Base de cidades do fluxo **Outros Planos** (REGIONAL/CIDADE/FICHA A UTILIZAR — **sem** UF). Lida pela aplicação pública e pelo painel. |
 | `cidades_infinity.json` | Mesmas cidades com a coluna **UF**; usada pelo fluxo Outros Planos → variante Infinity e para o painel exibir/validar UF. |
-| `municipios_por_uf.json` | **Índice local de municípios por UF** (snapshot do IBGE: 5.571 municípios, 27 UFs, nomes oficiais). Fonte **primária e garantida** do select de cidade da assistência: vem do próprio domínio, sem CORS nem dependência de API de terceiros. `assistencia_medica.html` cai para `api.kstrtech.com.br` e depois `brasilapi.com.br` apenas se este arquivo não carregar. Regenerar com `node scripts/gerar-municipios-por-uf.mjs` só quando o IBGE publicar novos municípios. |
+| `municipios_por_uf.json` | **Índice local de municípios por UF** (snapshot do IBGE: 5.571 municípios, 27 UFs, nomes oficiais). Fonte **primária e garantida** do select de cidade da assistência: vem do próprio domínio, sem CORS nem dependência de API de terceiros. `assistencia_medica.html` cai para `brasilapi.com.br` (contingência) apenas se este arquivo não carregar. Regenerar com `node scripts/gerar-municipios-por-uf.mjs` só quando o IBGE publicar novos municípios. |
 | `F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf` | Template da ficha (documento canônico v38; nome referenciado no HTML e no painel). |
 | `F-075_38 (PR-011) Ficha Cadastral para Admissão_com caixa.pdf` | Mesmo v38 com as 65 caixas de preenchimento desenhadas por cima — fonte das coordenadas de `ficha_cadastral_campos.json`. |
 | `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Versão anterior (v37), mantida no repositório como histórico. **Não** é mais o template. |
@@ -108,14 +108,17 @@ Onde o código toca o schema:
 
 ## 6. Cidades e template PDF (assistência)
 
-### 6.1 API de municípios (lista por UF)
+### 6.1 Lista de municípios (por UF)
 
-- **URL base:** `https://api.kstrtech.com.br/cidades/{UF}` (ex.: `.../SP`).
-- **Resposta:** array JSON de **strings** com o nome oficial do município.
-- **CORS:** a API expõe `Access-Control-Allow-Origin: *` (pode ser chamada do browser).
-- Constante no código: `CIDADES_KSTR_API_BASE` em `assistencia_medica.html`.
+- **Fonte primária (garantida):** `municipios_por_uf.json` na raiz — snapshot da base pública do IBGE (5.571 municípios, 27 UFs, nomes oficiais), servido pelo **próprio domínio**. Sem CORS, sem CDN e sem terceiros: é o que garante o carregamento do select.
+- **Contingência:** `https://brasilapi.com.br/api/ibge/municipios/v1/{UF}` (array de objetos `{nome, codigo}`), acionada com a sigla da UF apenas se o arquivo local não carregar. O parser aceita também array de strings.
+- **Prazo:** cada fonte tem 8 s (`MUNICIPIOS_FONTE_TIMEOUT_MS`); o aviso "Não foi possível carregar as cidades" só aparece se **todas** falharem.
+- Constantes/funções em `assistencia_medica.html`: `MUNICIPIOS_POR_UF_JSON_PATH`, `CIDADES_BRASILAPI_API_BASE`, `fetchComPrazo`, `carregarMunicipiosLocaisPorUf`, `buscarMunicipiosBrasilApi`, `buscarMunicipiosPorUf`, `carregarMunicipiosIBGE`.
+- **Regenerar o índice:** `node scripts/gerar-municipios-por-uf.mjs` (só quando o IBGE publicar municípios novos). A CI valida o arquivo (27 UFs + DF/Brasília).
 
-A lista completa devolvida pela API é apresentada no select `#cidade` (ordenada por nome).
+O select `#cidade` mostra os municípios da UF que constam do catálogo ativo (`cidades_brasil.json` / `cidades_infinity.json`), ordenados por nome.
+
+> **Histórico:** até 11/2026 a lista vinha de `api.kstrtech.com.br/cidades/{UF}`, única fonte do select. O domínio deixou de resolver (DNS) e o formulário passou a exibir erro em todas as UFs — daí a fonte local. A dependência e a entrada correspondente no CSP foram removidas.
 
 ### 6.2 Template PDF único
 
@@ -192,13 +195,14 @@ Se alterar a **estrutura** do objeto guardado (novos campos obrigatórios no ras
 
 | Serviço | Uso |
 |---------|-----|
-| `api.kstrtech.com.br/cidades/{UF}` | Lista de municípios (assistência). |
+| `municipios_por_uf.json` (arquivo local) | Lista de municípios por UF (assistência) — fonte primária, sem terceiros. |
+| `brasilapi.com.br/api/ibge/municipios/v1/{UF}` | Contingência da lista de municípios se o índice local não carregar. |
 | `viacep.com.br` | CEP (ambos os fluxos na assistência; ficha com ViaCEP + fallback). |
 | `brasilapi.com.br/api/cep/v1` | Fallback de CEP na ficha, se ViaCEP falhar. |
 | `api.ipify.org` | IP público (evidência no rodapé / texto de assinatura — conforme o HTML). |
 | `unpkg.com/pdf-lib` | Biblioteca de PDF (script em CDN). |
 
-Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades kstr **declara** CORS aberto, ao contrário de tentativas antigas (IBGE/Brasil API no fluxo de municípios) documentadas comentário no HTML.
+Monitorize falhas de rede (CORS, 504): o código mostra toasts e registra o erro real no console. A lista de municípios não depende de rede externa — só a contingência (BrasilAPI) depende, e por isso deixou de haver ponto único de falha.
 
 ---
 

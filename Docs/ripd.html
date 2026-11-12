@@ -63,7 +63,7 @@
         </tr>
         <tr>
           <td>Transmissão a serviços externos (CEP/município/IP)</td>
-          <td>ViaCEP e BrasilAPI recebem o CEP para consulta de endereço; <code>api.kstrtech.com.br</code> recebe a UF para listar municípios; <code>api.ipify.org</code> identifica o IP público de origem e o retorna como evidência técnica. Todos recebem o IP de origem e metadados técnicos da requisição. Há risco inerente de acesso, registro ou retenção desses dados pelos provedores conforme suas políticas; o IP é dado pessoal. Risco inerente médio; residual baixo a médio, sujeito à validação dos provedores, após HTTPS, minimização e ausência de envio do formulário completo ou PDF.</td>
+          <td>ViaCEP e BrasilAPI recebem o CEP para consulta de endereço; a BrasilAPI recebe também a UF, apenas como contingência se o índice local de municípios não carregar — a lista de municípios por UF é servida pelo próprio site (<code>municipios_por_uf.json</code>, base pública do IBGE); <code>api.ipify.org</code> identifica o IP público de origem e o retorna como evidência técnica. Todos recebem o IP de origem e metadados técnicos da requisição. Há risco inerente de acesso, registro ou retenção desses dados pelos provedores conforme suas políticas; o IP é dado pessoal. Risco inerente médio; residual baixo a médio, sujeito à validação dos provedores, após HTTPS, minimização e ausência de envio do formulário completo ou PDF.</td>
         </tr>
       </tbody>
     </table>
@@ -83,7 +83,7 @@
     <p><strong>Risco BAIXO a MÉDIO-BAIXO</strong> no que respeita a tratamentos remotos centralizados por esta app, considerando:</p>
     <ul>
       <li>Não há retenção em bases de dados remotas operadas pela aplicação; os serviços externos podem processar ou registrar os dados mínimos das requisições conforme suas próprias políticas;</li>
-      <li>Há transmissão técnica limitada a ViaCEP, BrasilAPI, <code>api.kstrtech.com.br</code> e <code>api.ipify.org</code>: CEP, UF e IP de origem conforme a funcionalidade, sem envio do formulário completo ou do PDF;</li>
+      <li>Há transmissão técnica limitada a ViaCEP, BrasilAPI e <code>api.ipify.org</code>: CEP e, em contingência, UF, além do IP de origem conforme a funcionalidade, sem envio do formulário completo ou do PDF;</li>
       <li>Tráfego obrigatório dos campos do formulário para servidores próprios da aplicação <strong>não</strong> faz parte do fluxo de conclusão do PDF.</li>
     </ul>
     <p>Riscos residuais concentram-se em <strong>ambiente do usuário</strong>, <strong>integridade do deploy</strong>, <strong>cadeia de dependências</strong> e eventual registro ou retenção por provedores externos — ver mitigações acima e validação pendente no ROPA.</p>

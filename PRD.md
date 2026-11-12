@@ -166,7 +166,8 @@ Utilizador confirma descarte → estado local apagado e UI atualizada.
 | `unpkg.com` / pdf-lib | Biblioteca de manipulação PDF |
 | ViaCEP | Endereço por CEP |
 | Brasil API (`/api/cep/v1`) | Fallback CEP (ficha) |
-| `api.kstrtech.com.br/cidades/{UF}` | Lista de municípios (assistência) |
+| `municipios_por_uf.json` (arquivo local, base IBGE) | Lista de municípios por UF (assistência) |
+| Brasil API (`/api/ibge/municipios/v1`) | Contingência da lista de municípios |
 | `api.ipify.org` | IP público (evidência no PDF — assistência) |
 
 **Ficheiros de dados no repositório:** `ficha_cadastral_campos.json`, `assistencia_medica_campos.json`, `cidades_brasil.json`, PDFs modelo na raiz.

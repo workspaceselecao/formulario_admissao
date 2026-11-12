@@ -438,7 +438,8 @@ async function runTests() {
     assert("política §2 não nega compartilhamentos técnicos externos", !/Não são compartilhados<\/strong> com terceiros/i.test(secao2Politica), secao2Politica);
     assert("política §2 identifica ViaCEP e CEP", /ViaCEP[\s\S]*CEP|CEP[\s\S]*ViaCEP/i.test(secao2Politica), secao2Politica);
     assert("política §2 identifica BrasilAPI e CEP", /BrasilAPI[\s\S]*CEP|CEP[\s\S]*BrasilAPI/i.test(secao2Politica), secao2Politica);
-    assert("política §2 identifica api.kstrtech.com.br e UF", /api\.kstrtech\.com\.br[\s\S]*UF|UF[\s\S]*api\.kstrtech\.com\.br/i.test(secao2Politica), secao2Politica);
+    assert("política §2 identifica a lista de municípios como arquivo do próprio site", /municípios[\s\S]*arquivo estático do próprio site/i.test(secao2Politica), secao2Politica);
+    assert("política §2 não cita a API kstrtech removida", !secao2Politica.includes("api.kstrtech.com.br"), secao2Politica);
     assert("política §2 identifica api.ipify.org e IP público", /api\.ipify\.org[\s\S]*IP público|IP público[\s\S]*api\.ipify\.org/i.test(secao2Politica), secao2Politica);
     assert("política §2 informa IP de origem e metadados técnicos", /IP de origem[\s\S]*metadados técnicos/i.test(secao2Politica), secao2Politica);
     assert("política §2 esclarece que o conteúdo integral do formulário não é enviado", /conteúdo integral do formulário não é enviado/i.test(secao2Politica), secao2Politica);
@@ -446,7 +447,8 @@ async function runTests() {
     const ripdR = await fetch(`http://127.0.0.1:${PORT}/Docs/ripd.html`);
     assert("RIPD não nega compartilhamento técnico com terceiros", !ripdR.body.includes("Não há compartilhamento por esta camada com terceiros"), ripdR.body);
     assert("RIPD registra risco de transmissão a serviços externos", ripdR.body.includes("Transmissão a serviços externos (CEP/município/IP)"), ripdR.body);
-    assert("RIPD relaciona o risco aos quatro serviços", ["ViaCEP", "BrasilAPI", "api.kstrtech.com.br", "api.ipify.org"].every((servico) => ripdR.body.includes(servico)), ripdR.body);
+    assert("RIPD relaciona o risco aos serviços externos efetivos", ["ViaCEP", "BrasilAPI", "api.ipify.org"].every((servico) => ripdR.body.includes(servico)), ripdR.body);
+    assert("RIPD aponta a lista de municípios como arquivo do próprio site", ripdR.body.includes("municipios_por_uf.json") && !ripdR.body.includes("api.kstrtech.com.br"), ripdR.body);
     assert("RIPD prevê mitigação por minimização e HTTPS", /Transmissão a serviços externos[\s\S]*HTTPS[\s\S]*minimização/i.test(ripdR.body), ripdR.body);
     const baseR = await fetch(`http://127.0.0.1:${PORT}/Docs/legal-basis.html`);
     assert("base legal cita PO-026_04 e PO-027_04", baseR.body.includes("PO-026_04") && baseR.body.includes("PO-027_04"), "missing");
@@ -457,9 +459,10 @@ async function runTests() {
     const fluxoR = await fetch(`http://127.0.0.1:${PORT}/Docs/data-flow.html`);
     assert("fluxo de dados declara expiração automática de 24 h", fluxoR.body.includes("24 horas após o último salvamento"), "missing");
     assert("fluxo distingue geração local das consultas externas", !fluxoR.body.includes("Processamento ocorre exclusivamente no navegador."), fluxoR.body);
-    assert("fluxo de dados identifica os quatro serviços externos", ["ViaCEP", "BrasilAPI", "api.kstrtech.com.br", "api.ipify.org"].every((servico) => fluxoR.body.includes(servico)), fluxoR.body);
+    assert("fluxo de dados identifica os serviços externos efetivos", ["ViaCEP", "BrasilAPI", "api.ipify.org"].every((servico) => fluxoR.body.includes(servico)), fluxoR.body);
+    assert("fluxo de dados aponta a lista de municípios como arquivo local", fluxoR.body.includes("municipios_por_uf.json") && !fluxoR.body.includes("api.kstrtech.com.br"), fluxoR.body);
     assert("fluxo de dados relaciona ViaCEP e BrasilAPI ao CEP", /ViaCEP[\s\S]*CEP[\s\S]*BrasilAPI[\s\S]*CEP/i.test(fluxoR.body), fluxoR.body);
-    assert("fluxo de dados relaciona api.kstrtech.com.br à UF", /api\.kstrtech\.com\.br[\s\S]*UF/i.test(fluxoR.body), fluxoR.body);
+    assert("fluxo de dados explica a contingência da UF na BrasilAPI", /BrasilAPI[\s\S]*UF[\s\S]*contingência|contingência[\s\S]*UF/i.test(fluxoR.body), fluxoR.body);
     assert("fluxo de dados explica o IP de origem no ipify", /api\.ipify\.org[\s\S]*IP público de origem/i.test(fluxoR.body), fluxoR.body);
     assert("fluxo de dados informa que PDF e formulário integral não são enviados", /PDF gerado não é enviado[\s\S]*conteúdo integral do formulário não é enviado/i.test(fluxoR.body), fluxoR.body);
     const servR = await fetch(`http://127.0.0.1:${PORT}/termos-de-uso`);

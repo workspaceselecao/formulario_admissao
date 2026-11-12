@@ -1404,8 +1404,7 @@ const CIDADES_INFINITY_JSON_PATH = "/cidades_infinity.json";
  */
 const MUNICIPIOS_POR_UF_JSON_PATH = "/municipios_por_uf.json";
 const MUNICIPIOS_POR_UF_FETCH_PATH = encodeURI(MUNICIPIOS_POR_UF_JSON_PATH);
-/** Fontes de contingência, usadas apenas se o índice local não carregar. */
-const CIDADES_KSTR_API_BASE = "https://api.kstrtech.com.br/cidades/";
+/** Contingência (base IBGE): usada apenas se o índice local não carregar. */
 const CIDADES_BRASILAPI_API_BASE = "https://brasilapi.com.br/api/ibge/municipios/v1/";
 /** Prazo por fonte de municípios: evita select travado em "— Selecione —" quando a rede demora. */
 const MUNICIPIOS_FONTE_TIMEOUT_MS = 8000;
@@ -1879,18 +1878,7 @@ async function carregarMunicipiosLocaisPorUf(sigla, sinalExterno) {
   return normalizarListaMunicipios(lista);
 }
 
-/** Contingência 1: API kstrtech (fonte histórica). */
-async function buscarMunicipiosKstr(sigla, sinalExterno) {
-  const res = await fetchComPrazo(
-    `${CIDADES_KSTR_API_BASE}${encodeURIComponent(sigla)}`,
-    { method: "GET", cache: "default" },
-    sinalExterno
-  );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return normalizarListaMunicipios(await res.json());
-}
-
-/** Contingência 2: BrasilAPI (base IBGE). */
+/** Contingência: BrasilAPI (base IBGE). */
 async function buscarMunicipiosBrasilApi(sigla, sinalExterno) {
   const res = await fetchComPrazo(
     `${CIDADES_BRASILAPI_API_BASE}${encodeURIComponent(sigla)}`,
@@ -1902,13 +1890,13 @@ async function buscarMunicipiosBrasilApi(sigla, sinalExterno) {
 }
 
 /**
- * Municípios por UF. Fontes em cascata: índice local (garantido) → kstrtech → BrasilAPI.
+ * Municípios por UF. Fontes em cascata: índice local (garantido) → BrasilAPI (contingência).
  * Cada fonte tem prazo próprio; só propaga erro — e o aviso ao usuário — se todas falharem.
  */
 async function buscarMunicipiosPorUf(sigla, ctrl, cargaId) {
   const genOk = () => cargaId === ibgeMunicipiosCargaGen;
   if (!genOk() || ctrl.signal.aborted) return null;
-  const fontes = [carregarMunicipiosLocaisPorUf, buscarMunicipiosKstr, buscarMunicipiosBrasilApi];
+  const fontes = [carregarMunicipiosLocaisPorUf, buscarMunicipiosBrasilApi];
   let ultimoErro = null;
   for (const fonte of fontes) {
     try {
