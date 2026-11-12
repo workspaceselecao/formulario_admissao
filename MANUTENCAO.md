@@ -30,6 +30,7 @@ Não existe banco de dados nem servidor de formulário: o usuário gera o PDF no
 | `assistencia_medica_campos.json` | Schema + coordenadas (um layout comum; o template muda o **arquivo** PDF, não este JSON, salvo ajuste manual). |
 | `cidades_brasil.json` | Base de cidades do fluxo **Outros Planos** (REGIONAL/CIDADE/FICHA A UTILIZAR — **sem** UF). Lida pela aplicação pública e pelo painel. |
 | `cidades_infinity.json` | Mesmas cidades com a coluna **UF**; usada pelo fluxo Outros Planos → variante Infinity e para o painel exibir/validar UF. |
+| `municipios_por_uf.json` | **Índice local de municípios por UF** (snapshot do IBGE: 5.571 municípios, 27 UFs, nomes oficiais). Fonte **primária e garantida** do select de cidade da assistência: vem do próprio domínio, sem CORS nem dependência de API de terceiros. `assistencia_medica.html` cai para `api.kstrtech.com.br` e depois `brasilapi.com.br` apenas se este arquivo não carregar. Regenerar com `node scripts/gerar-municipios-por-uf.mjs` só quando o IBGE publicar novos municípios. |
 | `F-075_38 (PR-011) Ficha Cadastral para Admissão.pdf` | Template da ficha (documento canônico v38; nome referenciado no HTML e no painel). |
 | `F-075_38 (PR-011) Ficha Cadastral para Admissão_com caixa.pdf` | Mesmo v38 com as 65 caixas de preenchimento desenhadas por cima — fonte das coordenadas de `ficha_cadastral_campos.json`. |
 | `F-075_37__PR-011__Ficha_Cadastral_para_Admissão.pdf` | Versão anterior (v37), mantida no repositório como histórico. **Não** é mais o template. |
@@ -249,7 +250,7 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts; a API de cidades
 
 ### Nova **cidade** na assistência
 
-Qualquer município retornado pela API já aparece no select; não é necessário alterar `cidades_brasil.json`. Testar: UF → cidade → gerar PDF com `DECLARACAO PLANO DE SAUDE.pdf`.
+O select lista os municípios da UF que existem no catálogo ativo (`cidades_brasil.json` / `cidades_infinity.json`), lidos de `municipios_por_uf.json` (índice local). Cidade nova que não esteja no catálogo **não** aparece — nesse caso cadastre-a no catálogo (painel → Cidades) ou ajuste o nome ao oficial do IBGE (ex.: `BRASILIA` ↔ `Brasília`). Testar: UF → cidade → gerar PDF com `DECLARACAO PLANO DE SAUDE.pdf`.
 
 ### Novo **template** da assistência (substituir PDF único)
 

@@ -36,10 +36,17 @@ jobs:
           node -e "
             const fs = require('fs');
             JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
-            for (const f of ['ficha_cadastral_campos.json', 'assistencia_medica_campos.json', 'declaracao_plano_saude_campos.json', 'cidades_brasil.json', 'Docs/docs-revision.json']) {
+            for (const f of ['ficha_cadastral_campos.json', 'assistencia_medica_campos.json', 'declaracao_plano_saude_campos.json', 'cidades_brasil.json', 'municipios_por_uf.json', 'Docs/docs-revision.json']) {
               JSON.parse(fs.readFileSync(f, 'utf8'));
               console.log('OK  ' + f);
             }
+          "
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('municipios_por_uf.json', 'utf8'));
+            const ufs = Object.keys(m).filter(k => k !== '_meta');
+            if (ufs.length !== 27) throw new Error('municipios_por_uf.json: esperadas 27 UFs, encontradas ' + ufs.length);
+            if (!Array.isArray(m.DF) || !m.DF.includes('Brasília')) throw new Error('municipios_por_uf.json: DF/Brasília ausente');
+            console.log('OK  municipios_por_uf.json (' + ufs.length + ' UFs)')
           "
           ls F-075*.pdf >/dev/null || { echo 'Template F-075 ausente'; exit 1; }
 

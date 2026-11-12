@@ -1397,8 +1397,20 @@ const CAMPOS_PLANO_BENEFICIOS_JSON_PATH = "/declaracao_plano_saude_campos.json";
 const CAMPOS_PLANO_BENEFICIOS_FETCH_PATH = encodeURI(CAMPOS_PLANO_BENEFICIOS_JSON_PATH);
 const CIDADES_BRASIL_JSON_PATH = "/cidades_brasil.json";
 const CIDADES_INFINITY_JSON_PATH = "/cidades_infinity.json";
-/** Lista oficial de municípios por UF (CORS aberto, cache no CDN). */
+/**
+ * Índice local de municípios por UF (snapshot do IBGE versionado no repositório).
+ * É a fonte primária e garantida do select de cidade: mesmo domínio do site, sem CORS,
+ * sem cache de CDN e sem dependência de API de terceiros que possa sair do ar.
+ */
+const MUNICIPIOS_POR_UF_JSON_PATH = "/municipios_por_uf.json";
+const MUNICIPIOS_POR_UF_FETCH_PATH = encodeURI(MUNICIPIOS_POR_UF_JSON_PATH);
+/** Fontes de contingência, usadas apenas se o índice local não carregar. */
 const CIDADES_KSTR_API_BASE = "https://api.kstrtech.com.br/cidades/";
+const CIDADES_BRASILAPI_API_BASE = "https://brasilapi.com.br/api/ibge/municipios/v1/";
+/** Prazo por fonte de municípios: evita select travado em "— Selecione —" quando a rede demora. */
+const MUNICIPIOS_FONTE_TIMEOUT_MS = 8000;
+let municipiosPorUfLocal = null;
+let municipiosPorUfLocalPromessa = null;
 /** Declaração — fluxo Plano de Benefícios. */
 const TEMPLATE_DECLARACAO_PLANO_SAUDE_PDF = "DECLARACAO PLANO DE SAUDE.pdf";
 /** Tipo em cidades_brasil.json → PDF regional (fluxo Outros Planos). */
@@ -1815,27 +1827,105 @@ let cepBuscaTimer = null;
 let ibgeMunicipiosCargaGen = 0;
 let ibgeMunicipiosAbort = null;
 
+/** fetch com prazo próprio: combina o cancelamento externo (troca de UF) com o timeout da fonte. */
+async function fetchComPrazo(url, opcoes, sinalExterno, prazoMs) {
+  const ctrl = new AbortController();
+  const abortar = () => ctrl.abort();
+  const timer = setTimeout(abortar, prazoMs || MUNICIPIOS_FONTE_TIMEOUT_MS);
+  if (sinalExterno) {
+    if (sinalExterno.aborted) abortar();
+    else sinalExterno.addEventListener("abort", abortar, { once: true });
+  }
+  try {
+    return await fetch(url, { ...opcoes, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+    if (sinalExterno) sinalExterno.removeEventListener("abort", abortar);
+  }
+}
+
+/** Normaliza o retorno das fontes de municípios (array de strings, {nome} ou {name}). */
+function normalizarListaMunicipios(j) {
+  if (!Array.isArray(j)) throw new Error("formato");
+  return j
+    .map((item) =>
+      typeof item === "string" ? item : item && (item.nome || item.name || item.CIDADE || "")
+    )
+    .map((n) => ({ nome: String(n || "").trim() }))
+    .filter((m) => m.nome);
+}
+
 /**
- * Municípios por UF via api.kstrtech.com.br (JSON array de strings; CORS *).
- * O select lista todos os municípios retornados pela API para a UF escolhida.
+ * Índice local de municípios (municipios_por_uf.json).
+ * Fonte garantida do select: baixada do próprio domínio e mantida em memória na sessão.
+ * A promessa fica em cache para que chamadas simultâneas (troca rápida de UF) não repitam o download.
+ */
+async function carregarMunicipiosLocaisPorUf(sigla, sinalExterno) {
+  if (!municipiosPorUfLocalPromessa) {
+    municipiosPorUfLocalPromessa = (async () => {
+      const res = await fetchComPrazo(MUNICIPIOS_POR_UF_FETCH_PATH, { cache: "force-cache" }, sinalExterno);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const j = await res.json();
+      if (!j || typeof j !== "object" || Array.isArray(j)) throw new Error("formato");
+      return j;
+    })();
+    municipiosPorUfLocalPromessa.catch(() => {
+      municipiosPorUfLocalPromessa = null;
+    });
+  }
+  municipiosPorUfLocal = await municipiosPorUfLocalPromessa;
+  const lista = municipiosPorUfLocal?.[sigla];
+  if (!Array.isArray(lista) || !lista.length) throw new Error("UF ausente no índice local");
+  return normalizarListaMunicipios(lista);
+}
+
+/** Contingência 1: API kstrtech (fonte histórica). */
+async function buscarMunicipiosKstr(sigla, sinalExterno) {
+  const res = await fetchComPrazo(
+    `${CIDADES_KSTR_API_BASE}${encodeURIComponent(sigla)}`,
+    { method: "GET", cache: "default" },
+    sinalExterno
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return normalizarListaMunicipios(await res.json());
+}
+
+/** Contingência 2: BrasilAPI (base IBGE). */
+async function buscarMunicipiosBrasilApi(sigla, sinalExterno) {
+  const res = await fetchComPrazo(
+    `${CIDADES_BRASILAPI_API_BASE}${encodeURIComponent(sigla)}`,
+    { method: "GET", cache: "default" },
+    sinalExterno
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return normalizarListaMunicipios(await res.json());
+}
+
+/**
+ * Municípios por UF. Fontes em cascata: índice local (garantido) → kstrtech → BrasilAPI.
+ * Cada fonte tem prazo próprio; só propaga erro — e o aviso ao usuário — se todas falharem.
  */
 async function buscarMunicipiosPorUf(sigla, ctrl, cargaId) {
   const genOk = () => cargaId === ibgeMunicipiosCargaGen;
   if (!genOk() || ctrl.signal.aborted) return null;
-  const res = await fetch(
-    `${CIDADES_KSTR_API_BASE}${encodeURIComponent(sigla)}`,
-    { method: "GET", cache: "default", signal: ctrl.signal }
-  );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const j = await res.json();
-  if (!Array.isArray(j)) throw new Error("formato");
-  if (!genOk() || ctrl.signal.aborted) return null;
-  return j
-    .map((n) => ({ nome: String(n).trim() }))
-    .filter((m) => m.nome);
+  const fontes = [carregarMunicipiosLocaisPorUf, buscarMunicipiosKstr, buscarMunicipiosBrasilApi];
+  let ultimoErro = null;
+  for (const fonte of fontes) {
+    try {
+      const lista = await fonte(sigla, ctrl.signal);
+      if (!genOk() || ctrl.signal.aborted) return null;
+      if (Array.isArray(lista) && lista.length) return lista;
+      ultimoErro = new Error("lista vazia");
+    } catch (e) {
+      if (ctrl.signal.aborted) throw e;
+      ultimoErro = e && e.name === "AbortError" ? new Error("tempo esgotado") : e;
+      console.warn("Fonte de municípios indisponível (" + sigla + "):", ultimoErro);
+    }
+  }
+  throw ultimoErro || new Error("sem fonte de municípios");
 }
 
-/** Preenche o select de cidade (id cidade) com municípios da API kstr (Outros Planos: filtrado por cidades_brasil). */
+/** Preenche o select de cidade (id cidade) com os municípios da UF (Outros Planos: filtrado por cidades_brasil/infinity). */
 async function carregarMunicipiosIBGE(uf) {
   if (ehPlanoBeneficios()) return;
   if (!(await garantirMapaCidadesBrasil())) return;
@@ -1888,6 +1978,7 @@ async function carregarMunicipiosIBGE(uf) {
     }
   } catch (e) {
     if (e && e.name === "AbortError") return;
+    console.error("Falha ao carregar cidades:", e);
     if (cargaId === ibgeMunicipiosCargaGen) {
       showToast("Não foi possível carregar as cidades. Verifique a conexão e tente de novo.", false);
     }
