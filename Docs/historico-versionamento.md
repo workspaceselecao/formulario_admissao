@@ -2,7 +2,7 @@
 
 Guia informativo das principais mudanças na experiência de preenchimento dos formulários e na documentação de privacidade. Não inclui detalhes técnicos internos.
 
-**Última atualização deste guia:** 6 de novembro de 2026
+**Última atualização deste guia:** 12 de novembro de 2026
 
 ---
 
@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/11/2026 | Garante a lista de cidades com índice local do IBGE |
 | 06/11/2026 | Adiciona auditoria completa e gerador HTML |
 
 ## Outubro de 2026

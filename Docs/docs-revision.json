@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-11-06T23:44:49-03:00",
-  "gitCommit": "29cff3d",
-  "gitSubject": "feat(auditoria): adiciona auditoria completa e gerador HTML",
+  "ultimaValidacaoIso": "2026-11-12T19:09:13-03:00",
+  "gitCommit": "94a4a12",
+  "gitSubject": "fix(assistencia): garante a lista de cidades com índice local do IBGE",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
