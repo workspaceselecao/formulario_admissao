@@ -664,7 +664,37 @@ async function testarCidadesPorUf(assert) {
       pdfR.status === 200 && pdfR.body.slice(0, 5) === "%PDF-", `status ${pdfR.status}`);
   }
 
-  // ── 21.6 — a lista não depende mais de API externa de municípios ──
+  // ── 21.6 — cidade sem ficha designada é direcionada para a ficha padrão ──
+  assert("cidades: página define a ficha padrão como FICHA GNDI",
+    /const FICHA_PADRAO_SEM_DESIGNACAO = "FICHA GNDI"/.test(html), "constante ausente");
+  assert("cidades: a ficha padrão tem PDF mapeado", !!mapaFichas["FICHA GNDI"], "FICHA GNDI sem PDF");
+  const srcResolverTipo = trechoFuncao("resolverTipoFichaPorCidadeNome");
+  const srcResolverArquivo = trechoFuncao("resolverArquivoPdfPorCidadeNome");
+  assert("cidades: página expõe os resolvedores de ficha por cidade",
+    !!srcResolverTipo && !!srcResolverArquivo, "funções ausentes");
+  if (srcResolverTipo && srcResolverArquivo) {
+    const montarResolvedor = (mapa) => new Function(
+      "obterMapaCidadesAtivo", "FICHA_UTILIZAR_PARA_ARQUIVO", "normalizarChaveCidade", "FICHA_PADRAO_SEM_DESIGNACAO",
+      srcResolverTipo + "\n" + srcResolverArquivo + "\nreturn resolverArquivoPdfPorCidadeNome;"
+    )(() => mapa, mapaFichas, normalizar, "FICHA GNDI");
+    const catalogoTeste = new Map([
+      ["CIDADE COM FICHA", "FICHA BH"],
+      ["CIDADE SEM FICHA", ""],
+      ["CIDADE FICHA ANTIGA", "FICHA REMOVIDA"]
+    ]);
+    const resolver = montarResolvedor(catalogoTeste);
+    assert("cidades: cidade com ficha designada usa a ficha do catálogo",
+      resolver("Cidade com ficha") === mapaFichas["FICHA BH"], resolver("Cidade com ficha"));
+    assert("cidades: cidade com ficha vazia vai para a FICHA GNDI",
+      resolver("Cidade sem ficha") === "FICHA GNDI.pdf", resolver("Cidade sem ficha"));
+    assert("cidades: cidade com ficha desconhecida vai para a FICHA GNDI",
+      resolver("Cidade ficha antiga") === "FICHA GNDI.pdf", resolver("Cidade ficha antiga"));
+    assert("cidades: cidade fora do catálogo vai para a FICHA GNDI",
+      resolver("Cidade fora do catalogo") === "FICHA GNDI.pdf", resolver("Cidade fora do catalogo"));
+    assert("cidades: sem cidade selecionada não há ficha", resolver("") === null, String(resolver("")));
+  }
+
+  // ── 21.7 — a lista não depende mais de API externa de municípios ──
   assert("cidades: página usa o índice local como fonte primária",
     html.includes('MUNICIPIOS_POR_UF_JSON_PATH = "/municipios_por_uf.json"'), "constante ausente");
   assert("cidades: cascata consulta o índice local antes da contingência",

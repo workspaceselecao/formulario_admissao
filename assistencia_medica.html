@@ -1412,6 +1412,12 @@ let municipiosPorUfLocal = null;
 let municipiosPorUfLocalPromessa = null;
 /** Declaração — fluxo Plano de Benefícios. */
 const TEMPLATE_DECLARACAO_PLANO_SAUDE_PDF = "DECLARACAO PLANO DE SAUDE.pdf";
+/**
+ * Ficha regional padrão: usada quando a cidade não tem ficha designada no
+ * catálogo (linha sem "FICHA A UTILIZAR") ou quando a ficha gravada não existe
+ * no mapa abaixo. Sem ela, a geração do PDF seria bloqueada para essas cidades.
+ */
+const FICHA_PADRAO_SEM_DESIGNACAO = "FICHA GNDI";
 /** Tipo em cidades_brasil.json → PDF regional (fluxo Outros Planos). */
 const FICHA_UTILIZAR_PARA_ARQUIVO = {
   "FICHA GOIANIA": "FICHA GOIANIA.pdf",
@@ -1493,10 +1499,16 @@ async function garantirMapaCidadesBrasil() {
   }
 }
 
+/**
+ * Ficha da cidade: a designada no catálogo ativo; na ausência dela (linha sem
+ * ficha, ficha desconhecida ou cidade fora do catálogo) usa a ficha padrão.
+ */
 function resolverTipoFichaPorCidadeNome(nomeIbge) {
   const mapa = obterMapaCidadesAtivo();
   if (!nomeIbge || !mapa) return null;
-  return mapa.get(normalizarChaveCidade(nomeIbge)) || null;
+  const tipo = mapa.get(normalizarChaveCidade(nomeIbge)) || "";
+  if (tipo && FICHA_UTILIZAR_PARA_ARQUIVO[tipo]) return tipo;
+  return FICHA_PADRAO_SEM_DESIGNACAO;
 }
 
 function resolverArquivoPdfPorCidadeNome(nomeIbge) {

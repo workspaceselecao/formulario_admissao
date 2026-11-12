@@ -115,6 +115,7 @@ Onde o código toca o schema:
 - **Prazo:** cada fonte tem 8 s (`MUNICIPIOS_FONTE_TIMEOUT_MS`); o aviso "Não foi possível carregar as cidades" só aparece se **todas** falharem.
 - Constantes/funções em `assistencia_medica.html`: `MUNICIPIOS_POR_UF_JSON_PATH`, `CIDADES_BRASILAPI_API_BASE`, `fetchComPrazo`, `carregarMunicipiosLocaisPorUf`, `buscarMunicipiosBrasilApi`, `buscarMunicipiosPorUf`, `carregarMunicipiosIBGE`.
 - **Regenerar o índice:** `node scripts/gerar-municipios-por-uf.mjs` (só quando o IBGE publicar municípios novos). A CI valida o arquivo (27 UFs + DF/Brasília).
+- **Ficha padrão:** cidade **sem ficha designada** (linha do catálogo sem `FICHA A UTILIZAR`, ficha desconhecida ou cidade fora do catálogo) é direcionada para `FICHA GNDI` — constante `FICHA_PADRAO_SEM_DESIGNACAO` em `assistencia_medica.html`, aplicada em `resolverTipoFichaPorCidadeNome()`. Assim a geração do PDF não é bloqueada; para trocar o padrão, altere a constante (o valor precisa existir em `FICHA_UTILIZAR_PARA_ARQUIVO`). O aviso "Não há PDF configurado para esta cidade" fica restrito a falha de carregamento do catálogo.
 
 O select `#cidade` mostra os municípios da UF que constam do catálogo ativo (`cidades_brasil.json` / `cidades_infinity.json`), ordenados por nome.
 
