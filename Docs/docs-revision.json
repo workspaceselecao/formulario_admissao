@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-11-12T19:15:18-03:00",
-  "gitCommit": "5967a5d",
-  "gitSubject": "refactor(assistencia): remove a dependência da API kstrtech de municípios",
+  "ultimaValidacaoIso": "2026-11-12T19:20:40-03:00",
+  "gitCommit": "6c1a242",
+  "gitSubject": "test(assistencia): trava a lista de cidades por UF contra catálogo e PDFs",
   "gitBranch": "main",
   "gitRemote": "origin"
 }

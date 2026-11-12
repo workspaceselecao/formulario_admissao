@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/11/2026 | Test : trava a lista de cidades por UF contra catálogo e PDFs |
 | 12/11/2026 | Remove a dependência da API kstrtech de municípios |
 | 12/11/2026 | Garante a lista de cidades com índice local do IBGE |
 | 06/11/2026 | Adiciona auditoria completa e gerador HTML |
