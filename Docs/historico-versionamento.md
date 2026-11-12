@@ -10,6 +10,7 @@ Guia informativo das principais mudanças na experiência de preenchimento dos f
 
 | Data | O que mudou |
 |------|-------------|
+| 12/11/2026 | Resolve a ficha por cidade + UF e acaba com a herança entre estados |
 | 12/11/2026 | Direciona cidade sem ficha designada para a FICHA GNDI |
 | 12/11/2026 | Alinha o catálogo à grafia oficial do IBGE |
 | 12/11/2026 | Test : trava a lista de cidades por UF contra catálogo e PDFs |

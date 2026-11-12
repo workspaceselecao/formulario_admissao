@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-11-12T19:30:15-03:00",
-  "gitCommit": "4e298c8",
-  "gitSubject": "feat(assistencia): direciona cidade sem ficha designada para a FICHA GNDI",
+  "ultimaValidacaoIso": "2026-11-12T19:35:00-03:00",
+  "gitCommit": "80efed1",
+  "gitSubject": "fix(assistencia): resolve a ficha por cidade + UF e acaba com a herança entre estados",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
