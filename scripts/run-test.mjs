@@ -98,7 +98,9 @@ const PANEL_CODES = lerChavesTestes().slice(5, 10);
 
 // Start server
 const server = createServer((req, res) => {
-  let pathname = new URL(req.url, `http://localhost:${PORT}`).pathname;
+  const rawPath = new URL(req.url, `http://localhost:${PORT}`).pathname;
+  let pathname = rawPath;
+  try { pathname = decodeURIComponent(rawPath); } catch { /* caminho inválido: mantém cru */ }
   if (REWRITES[pathname]) pathname = REWRITES[pathname];
   if (!extname(pathname) && existsSync(join(ROOT, pathname + ".html"))) pathname += ".html";
   const fp = join(ROOT, pathname);
@@ -481,6 +483,10 @@ async function runTests() {
   console.log("\n📋 Teste 20: Conta Salário sem agência/conta — modal de bloqueio na geração");
   await testarContaSalarioSemDados(assert);
 
+  // ── TEST 21: lista de cidades por UF (índice local × catálogo × PDFs) ──
+  console.log("\n📋 Teste 21: Lista de cidades por UF — índice local, catálogo e PDFs regionais");
+  await testarCidadesPorUf(assert);
+
   // ── Summary ──
   console.log(`\n${"═".repeat(50)}`);
   console.log(`Resultados: ${pass} passaram, ${fail} falharam`);
@@ -491,6 +497,185 @@ async function runTests() {
 }
 
 runTests().catch(e => { console.error(e); server.close(); process.exit(1); });
+
+// ═══════════════════════════════════════════════════════════════════
+// TESTE 21 — Lista de cidades por UF: índice local × catálogo × PDFs
+//
+// O select #cidade da assistência é montado a partir de
+// municipios_por_uf.json (fonte garantida, servida pelo próprio domínio),
+// filtrado pelo catálogo ativo (cidades_brasil.json / cidades_infinity.json).
+// Este teste reproduz esse caminho sem navegador:
+//   1) baixa o índice pelo MESMO servidor desta suíte (prova same-origin);
+//   2) reproduz normalização e filtro com o código REAL extraído da página;
+//   3) confere que cada cidade do catálogo cai na lista da sua UF e que a
+//      ficha correspondente resolve um PDF regional existente no repositório.
+// Regressão coberta: a lista ficou vazia em TODAS as UFs quando a antiga API
+// única de municípios saiu do ar (11/2026).
+// ═══════════════════════════════════════════════════════════════════
+async function testarCidadesPorUf(assert) {
+  const UFS_OFICIAIS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"];
+  // Grafias do catálogo que ainda não batem com o nome oficial do IBGE.
+  // Enquanto estiverem aqui, essas cidades não aparecem no select; o teste
+  // acusa qualquer divergência NOVA que entrar no catálogo.
+  const DIVERGENCIAS_IBGE_CONHECIDAS = [
+    "CAMPO DOS GOYTACAZES", "EMBU GUACU", "ILHA BELA", "PINDAMONHAGABA",
+    "SANTA BARBARA D OESTE", "CACHOEIRO DO SUL", "SANTANA DO LIVRAMENTO"
+  ];
+
+  const html = readFileSync(join(ROOT, "assistencia_medica.html"), "utf8");
+
+  // Corpo de uma função da página, para executar o código REAL no teste.
+  function trechoFuncao(nome) {
+    const inicio = html.indexOf(`function ${nome}(`);
+    if (inicio < 0) return "";
+    let nivel = 0;
+    for (let i = html.indexOf("{", inicio); i < html.length; i++) {
+      if (html[i] === "{") nivel++;
+      else if (html[i] === "}" && --nivel === 0) return html.slice(inicio, i + 1);
+    }
+    return "";
+  }
+
+  const srcNormalizar = trechoFuncao("normalizarChaveCidade");
+  assert("cidades: página expõe normalizarChaveCidade (usada no filtro)", !!srcNormalizar, "missing");
+  if (!srcNormalizar) return;
+  const normalizar = new Function(`${srcNormalizar}\nreturn normalizarChaveCidade;`)();
+
+  const mapaFichasSrc = html.match(/const FICHA_UTILIZAR_PARA_ARQUIVO = (\{[\s\S]*?\});/)?.[1] || "";
+  let mapaFichas = null;
+  try { mapaFichas = mapaFichasSrc ? new Function(`return ${mapaFichasSrc};`)() : null; } catch (_e) { mapaFichas = null; }
+  assert("cidades: página expõe FICHA_UTILIZAR_PARA_ARQUIVO", !!mapaFichas && Object.keys(mapaFichas).length > 0, "missing");
+  if (!mapaFichas) return;
+
+  const normalizarFicha = (v) => {
+    const tipo = String(v || "").trim().toUpperCase().replace(/\s+/g, " ");
+    return tipo === "FICHA REEBOLSO" ? "FICHA REEMBOLSO" : tipo;
+  };
+  const mapaDoCatalogo = (rows) => {
+    const mapa = new Map();
+    for (const row of rows) {
+      const chave = normalizar(row.CIDADE);
+      if (chave) mapa.set(chave, normalizarFicha(row["FICHA A UTILIZAR"]));
+    }
+    return mapa;
+  };
+
+  // ── 21.1 — o índice local é servido pelo próprio domínio ──
+  const idxR = await fetch(`http://127.0.0.1:${PORT}/municipios_por_uf.json`);
+  assert("cidades: GET /municipios_por_uf.json → 200 (same-origin)", idxR.status === 200 && idxR.body.length > 10000, `status ${idxR.status}, ${idxR.length} bytes`);
+  let indice = null;
+  try { indice = JSON.parse(idxR.body); } catch (_e) { indice = null; }
+  assert("cidades: índice local é JSON válido", !!indice && typeof indice === "object" && !Array.isArray(indice), "parse falhou");
+  if (!indice) return;
+
+  const siglas = Object.keys(indice).filter(k => k !== "_meta").sort();
+  const totalIndex = siglas.reduce((n, uf) => n + (Array.isArray(indice[uf]) ? indice[uf].length : 0), 0);
+  assert("cidades: índice cobre exatamente as 27 UFs", siglas.join(",") === UFS_OFICIAIS.join(","), siglas.join(","));
+  assert("cidades: total do índice bate com _meta e passa de 5.000 municípios",
+    totalIndex === indice._meta?.total_municipios && totalIndex > 5000, `${totalIndex} vs ${indice._meta?.total_municipios}`);
+  assert("cidades: nenhuma UF fica sem municípios (select nunca só com placeholder)",
+    siglas.every(uf => Array.isArray(indice[uf]) && indice[uf].length > 0), "UF vazia no índice");
+  assert("cidades: nenhuma UF tem município repetido",
+    siglas.every(uf => new Set(indice[uf]).size === indice[uf].length), "duplicata no índice");
+  assert("cidades: DF contém Brasília (caso do incidente)", (indice.DF || []).includes("Brasília"), JSON.stringify(indice.DF));
+
+  // ── 21.2 — a interface oferece as mesmas UFs do índice ──
+  const ufSelect = html.match(/<select id="uf">([\s\S]*?)<\/select>/)?.[1] || "";
+  const ufOpcoes = [...ufSelect.matchAll(/<option value="([^"]*)"/g)].map(m => m[1]).filter(Boolean).sort();
+  assert("cidades: select #uf oferece exatamente as UFs do índice", ufOpcoes.join(",") === siglas.join(","), ufOpcoes.join(","));
+
+  // ── 21.3 — catálogo × índice × UF → a lista que o select monta ──
+  const catalogoBrasil = JSON.parse(readFileSync(join(ROOT, "cidades_brasil.json"), "utf8"));
+  const catalogoInfinity = JSON.parse(readFileSync(join(ROOT, "cidades_infinity.json"), "utf8"));
+  // cidades_brasil.json não tem UF; o painel enriquece por cidades_infinity.json.
+  const ufPorCidade = new Map();
+  for (const row of catalogoInfinity) {
+    const uf = String(row.UF || "").toUpperCase().trim();
+    if (uf) ufPorCidade.set(normalizar(row.CIDADE), uf);
+  }
+
+  const listaCidades = (uf, mapa) => (indice[uf] || [])
+    .map(nome => String(nome).trim())
+    .filter(nome => nome && mapa.has(normalizar(nome)))
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+  for (const [arquivo, catalogo] of [["cidades_brasil.json", catalogoBrasil], ["cidades_infinity.json", catalogoInfinity]]) {
+    const mapa = mapaDoCatalogo(catalogo);
+
+    const esperadoPorUf = new Map();
+    const semUf = [];
+    for (const row of catalogo) {
+      const uf = String(row.UF || "").toUpperCase().trim() || ufPorCidade.get(normalizar(row.CIDADE)) || "";
+      if (!uf) { semUf.push(row.CIDADE); continue; }
+      if (!esperadoPorUf.has(uf)) esperadoPorUf.set(uf, []);
+      esperadoPorUf.get(uf).push(String(row.CIDADE || "").trim());
+    }
+    assert(`${arquivo}: toda cidade do catálogo tem UF resolvida`, semUf.length === 0, JSON.stringify(semUf));
+
+    const ufsVazias = [];
+    const ausentes = [];
+    for (const [uf, esperadas] of esperadoPorUf) {
+      const lista = listaCidades(uf, mapa);
+      const chavesNaLista = new Set(lista.map(normalizar));
+      if (!lista.length) ufsVazias.push(`${uf}: ${esperadas.length} cidade(s)`);
+      for (const nome of esperadas) {
+        if (!chavesNaLista.has(normalizar(nome))) ausentes.push({ uf, nome });
+      }
+    }
+    assert(`${arquivo}: toda UF com cidade no catálogo monta a lista`, ufsVazias.length === 0, JSON.stringify(ufsVazias));
+
+    const nomesAusentes = [...new Set(ausentes.map(a => normalizar(a.nome)))];
+    const novos = nomesAusentes.filter(n => !DIVERGENCIAS_IBGE_CONHECIDAS.includes(n));
+    assert(`${arquivo}: nenhuma divergência NOVA de grafia em relação ao IBGE`, novos.length === 0,
+      "cadastre a cidade no catálogo ou use o nome oficial do IBGE: " + JSON.stringify(novos));
+
+    const semFicha = [...new Set(mapa.values())].filter(f => !mapaFichas[f]);
+    assert(`${arquivo}: toda ficha do catálogo tem PDF mapeado na página`, semFicha.length === 0, JSON.stringify(semFicha));
+
+    if (arquivo === "cidades_brasil.json") {
+      const totalListavel = [...esperadoPorUf.keys()].reduce((n, uf) => n + listaCidades(uf, mapa).length, 0);
+      console.log(`   índice: ${totalIndex} municípios | ${arquivo}: ${esperadoPorUf.size} UFs, ${totalListavel} cidades listáveis | divergências conhecidas: ${nomesAusentes.length}`);
+    }
+  }
+
+  // ── 21.4 — PDFs regionais existem e são PDFs de verdade ──
+  const semArquivo = [];
+  const naoPdf = [];
+  for (const [ficha, arquivo] of Object.entries(mapaFichas)) {
+    const caminho = join(ROOT, arquivo);
+    if (!existsSync(caminho) || statSync(caminho).size < 10000) { semArquivo.push(`${ficha} → ${arquivo}`); continue; }
+    if (readFileSync(caminho).subarray(0, 5).toString("latin1") !== "%PDF-") naoPdf.push(arquivo);
+  }
+  assert("cidades: cada ficha mapeada aponta para um PDF regional existente", semArquivo.length === 0, JSON.stringify(semArquivo));
+  assert("cidades: os PDFs regionais mapeados são arquivos PDF válidos", naoPdf.length === 0, JSON.stringify(naoPdf));
+
+  // ── 21.5 — ponta a ponta: UF → cidade → ficha → PDF servido ──
+  const mapaPadrao = mapaDoCatalogo(catalogoBrasil);
+  const listaDF = listaCidades("DF", mapaPadrao);
+  assert("cidades: DF monta a lista com Brasília no caminho real", listaDF.includes("Brasília"), JSON.stringify(listaDF));
+  const listaSP = listaCidades("SP", mapaPadrao);
+  assert("cidades: SP monta uma lista extensa (≥ 90 cidades)", listaSP.length >= 90, `${listaSP.length} cidades`);
+  const fichaBrasilia = mapaPadrao.get(normalizar("Brasília")) || "";
+  const arquivoBrasilia = mapaFichas[fichaBrasilia] || "";
+  assert("cidades: Brasília resolve a ficha regional esperada", !!arquivoBrasilia, `ficha: ${fichaBrasilia || "nenhuma"}`);
+  if (arquivoBrasilia) {
+    const pdfR = await fetch(`http://127.0.0.1:${PORT}/${encodeURI(arquivoBrasilia)}`);
+    assert("cidades: o PDF regional de Brasília é servido pela aplicação",
+      pdfR.status === 200 && pdfR.body.slice(0, 5) === "%PDF-", `status ${pdfR.status}`);
+  }
+
+  // ── 21.6 — a lista não depende mais de API externa de municípios ──
+  assert("cidades: página usa o índice local como fonte primária",
+    html.includes('MUNICIPIOS_POR_UF_JSON_PATH = "/municipios_por_uf.json"'), "constante ausente");
+  assert("cidades: cascata consulta o índice local antes da contingência",
+    /const fontes = \[carregarMunicipiosLocaisPorUf,\s*buscarMunicipiosBrasilApi\]/.test(html), "ordem das fontes diferente");
+  assert("cidades: página não depende da API kstrtech (removida)", !/kstrtech/i.test(html), "ainda cita kstrtech");
+  const cspCidades = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")).headers?.[0]?.headers
+    ?.find(h => h.key === "Content-Security-Policy")?.value || "";
+  assert("cidades: CSP não autoriza API de municípios fora da contingência",
+    !/kstrtech/i.test(cspCidades) && cspCidades.includes("https://brasilapi.com.br"),
+    cspCidades.match(/connect-src[^;]*/)?.[0] || "sem connect-src");
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // TESTE 17 — Auditoria do painel contra os dados reais

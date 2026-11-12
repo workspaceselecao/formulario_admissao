@@ -209,7 +209,7 @@ Monitorize falhas de rede (CORS, 504): o código mostra toasts e registra o erro
 ## 9. Scripts na pasta `scripts/`
 
 - `test-server.mjs` — servidor local de desenvolvimento: serve o site e emula as rotas de acesso do `vercel.json` (`/f075`, `/f089`, `/bradesco`, `/admin`), além da API administrativa `/api/admin/*` (config com backup automático, uploads validados, histórico) gravando em `data/` (gitignored). Executar com `node scripts/test-server.mjs`.
-- `run-test.mjs` — suíte de testes do projeto (o 14 cobre o painel v2, o 15/16 o painel v3/Field Builder e o 17 a auditoria de dados); executar com `node scripts/run-test.mjs`.
+- `run-test.mjs` — suíte de testes do projeto (o 14 cobre o painel v2, o 15/16 o painel v3/Field Builder, o 17 a auditoria de dados e o 21 a lista de cidades por UF × catálogo × PDFs regionais); executar com `node scripts/run-test.mjs`.
 - `audit-panel.mjs` — auditoria do painel contra os dados reais do repositório: roda o pipeline do painel (`carregarTudo` + coletores + gate de publicação) em `node:vm` e falha em qualquer falso positivo ou configuração sem consumidor. Executar com `node scripts/audit-panel.mjs` (também roda no Teste 17).
 - `atualizar-docs-revision.mjs` — regenera `Docs/docs-revision.json` (carimbo de revisão jurídica). Roda **automaticamente a cada push no `main`** pelo workflow `.github/workflows/docs-automacao.yml` (ver §7.5); localmente serve para pré-visualizar.
 - `gerar-historico-versionamento.mjs` — regenera `Docs/historico-versionamento.md` (guia público de atualizações, RIPD). Também automático no push (ver §7.5).
