@@ -1430,6 +1430,9 @@ const FICHA_UTILIZAR_PARA_ARQUIVO = {
 };
 let mapaCidadePadrao = null;
 let mapaCidadeInfinity = null;
+/** "UF|CIDADE" → ficha: evita que cidade homônima herde a ficha de outro estado. */
+let mapaCidadeUfPadrao = null;
+let mapaCidadeUfInfinity = null;
 let camposSchemaCacheKey = null;
 
 function radioTipoPlano() {
@@ -1450,6 +1453,10 @@ function usaListaInfinity() {
 function obterMapaCidadesAtivo() {
   return usaListaInfinity() ? mapaCidadeInfinity : mapaCidadePadrao;
 }
+/** Ficha por "UF|CIDADE" do catálogo ativo (null/empty se a UF não pôde ser resolvida). */
+function obterMapaCidadesUfAtivo() {
+  return usaListaInfinity() ? mapaCidadeUfInfinity : mapaCidadeUfPadrao;
+}
 function nomeArquivoListaCidadesAtiva() {
   return usaListaInfinity() ? CIDADES_INFINITY_JSON_PATH : CIDADES_BRASIL_JSON_PATH;
 }
@@ -1463,33 +1470,82 @@ function normalizarChaveCidade(s) {
     .trim();
 }
 
-async function carregarMapaCidadesDeJson(path) {
+/** Linhas do catálogo, com cache por caminho (o catálogo sem UF é enriquecido pelo infinity). */
+const catalogoCidadesCache = new Map();
+async function carregarLinhasCidades(path) {
+  if (catalogoCidadesCache.has(path)) return catalogoCidadesCache.get(path);
   const res = await fetch(encodeURI(path), { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const arr = await res.json();
   if (!Array.isArray(arr)) throw new Error("formato");
-  const m = new Map();
+  catalogoCidadesCache.set(path, arr);
+  return arr;
+}
+
+function normalizarFichaCatalogo(valor) {
+  let tipo = String(valor || "").trim().toUpperCase().replace(/\s+/g, " ");
+  if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
+  return tipo;
+}
+
+/** UF de cada cidade em cidades_infinity.json (mesmas cidades do catálogo padrão, com UF). */
+async function carregarUfPorNomeDoCatalogoInfinity() {
+  const ufPorNome = new Map();
+  const arr = await carregarLinhasCidades(CIDADES_INFINITY_JSON_PATH);
   for (const row of arr) {
-    const k = normalizarChaveCidade(row.CIDADE);
-    if (!k) continue;
-    let tipo = String(row["FICHA A UTILIZAR"] || "")
-      .trim()
-      .toUpperCase()
-      .replace(/\s+/g, " ");
-    if (tipo === "FICHA REEBOLSO") tipo = "FICHA REEMBOLSO";
-    m.set(k, tipo);
+    const chave = normalizarChaveCidade(row.CIDADE);
+    const uf = String(row.UF || "").toUpperCase().trim();
+    if (chave && uf) ufPorNome.set(chave, uf);
   }
-  return m;
+  return ufPorNome;
+}
+
+/**
+ * Mapas do catálogo:
+ *  - `porNome`: CIDADE → ficha (monta a lista de cidades do select);
+ *  - `porUf`: "UF|CIDADE" → ficha (define a ficha da cidade selecionada).
+ * `cidades_brasil.json` não tem coluna UF: a UF vem de `cidades_infinity.json`,
+ * que lista as mesmas cidades. Se esse enriquecimento falhar, `porUf` fica vazio
+ * e a resolução volta a ser só por nome.
+ */
+async function carregarMapaCidadesDeJson(path) {
+  const arr = await carregarLinhasCidades(path);
+  const porNome = new Map();
+  for (const row of arr) {
+    const chave = normalizarChaveCidade(row.CIDADE);
+    if (!chave) continue;
+    porNome.set(chave, normalizarFichaCatalogo(row["FICHA A UTILIZAR"]));
+  }
+  const ufDaLinha = (row) => String(row.UF || "").toUpperCase().trim();
+  const porUf = new Map();
+  if (arr.some((row) => ufDaLinha(row))) {
+    for (const row of arr) {
+      const chave = normalizarChaveCidade(row.CIDADE);
+      const uf = ufDaLinha(row);
+      if (chave && uf) porUf.set(`${uf}|${chave}`, normalizarFichaCatalogo(row["FICHA A UTILIZAR"]));
+    }
+  } else {
+    const ufPorNome = await carregarUfPorNomeDoCatalogoInfinity();
+    for (const [chave, ficha] of porNome) {
+      const uf = ufPorNome.get(chave);
+      if (uf) porUf.set(`${uf}|${chave}`, ficha);
+    }
+  }
+  return { porNome, porUf };
 }
 
 async function garantirMapaCidadesBrasil() {
   try {
     if (usaListaInfinity()) {
       if (!mapaCidadeInfinity) {
-        mapaCidadeInfinity = await carregarMapaCidadesDeJson(CIDADES_INFINITY_JSON_PATH);
+        const { porNome, porUf } = await carregarMapaCidadesDeJson(CIDADES_INFINITY_JSON_PATH);
+        mapaCidadeInfinity = porNome;
+        mapaCidadeUfInfinity = porUf;
       }
     } else if (!mapaCidadePadrao) {
-      mapaCidadePadrao = await carregarMapaCidadesDeJson(CIDADES_BRASIL_JSON_PATH);
+      const { porNome, porUf } = await carregarMapaCidadesDeJson(CIDADES_BRASIL_JSON_PATH);
+      mapaCidadePadrao = porNome;
+      mapaCidadeUfPadrao = porUf;
     }
     return true;
   } catch (e) {
@@ -1500,19 +1556,28 @@ async function garantirMapaCidadesBrasil() {
 }
 
 /**
- * Ficha da cidade: a designada no catálogo ativo; na ausência dela (linha sem
- * ficha, ficha desconhecida ou cidade fora do catálogo) usa a ficha padrão.
+ * Ficha da cidade: a designada no catálogo ativo **para aquela cidade naquela UF**.
+ * Cidade homônima de outro estado não herda a ficha alheia (ex.: Rio Claro/RJ ×
+ * Rio Claro/SP). Sem designação (linha sem ficha, ficha desconhecida ou cidade
+ * fora do catálogo) usa `FICHA_PADRAO_SEM_DESIGNACAO`.
  */
-function resolverTipoFichaPorCidadeNome(nomeIbge) {
+function resolverTipoFichaPorCidadeNome(nomeIbge, ufIbge) {
   const mapa = obterMapaCidadesAtivo();
   if (!nomeIbge || !mapa) return null;
-  const tipo = mapa.get(normalizarChaveCidade(nomeIbge)) || "";
+  const chave = normalizarChaveCidade(nomeIbge);
+  const uf = String(ufIbge || "").toUpperCase().trim();
+  const mapaUf = obterMapaCidadesUfAtivo();
+  if (uf && mapaUf?.size) {
+    const tipoUf = mapaUf.get(`${uf}|${chave}`) || "";
+    return tipoUf && FICHA_UTILIZAR_PARA_ARQUIVO[tipoUf] ? tipoUf : FICHA_PADRAO_SEM_DESIGNACAO;
+  }
+  const tipo = mapa.get(chave) || "";
   if (tipo && FICHA_UTILIZAR_PARA_ARQUIVO[tipo]) return tipo;
   return FICHA_PADRAO_SEM_DESIGNACAO;
 }
 
-function resolverArquivoPdfPorCidadeNome(nomeIbge) {
-  const tipo = resolverTipoFichaPorCidadeNome(nomeIbge);
+function resolverArquivoPdfPorCidadeNome(nomeIbge, ufIbge) {
+  const tipo = resolverTipoFichaPorCidadeNome(nomeIbge, ufIbge);
   if (!tipo) return null;
   return FICHA_UTILIZAR_PARA_ARQUIVO[tipo] || null;
 }
@@ -1602,7 +1667,7 @@ async function carregarTemplateParaCidadeSelecionada() {
   }
   if (!(await garantirMapaCidadesBrasil())) return null;
   const nome = v("cidade");
-  const arq = resolverArquivoPdfPorCidadeNome(nome);
+  const arq = resolverArquivoPdfPorCidadeNome(nome, v("uf"));
   if (!arq) {
     if (nome) showToast("Não há PDF configurado para esta cidade na lista do plano selecionado.", false);
     marcarCampoInvalido("cidade", !!nome);
@@ -2644,7 +2709,7 @@ async function validarCamposObrigatorios() {
       document.getElementById("cidade")?.focus();
       return false;
     }
-    if (!resolverArquivoPdfPorCidadeNome(v("cidade"))) {
+    if (!resolverArquivoPdfPorCidadeNome(v("cidade"), v("uf"))) {
       marcarCampoInvalido("cidade", true);
       faltantes.push({ id: "cidade", nome: "Cidade (sem ficha configurada)" });
     }
@@ -3551,7 +3616,7 @@ async function baixarPdfVazioExecucao() {
     link.href = url;
     link.download = ehPlanoBeneficios()
       ? "DECLARACAO_PLANO_DE_SAUDE.pdf"
-      : (resolverArquivoPdfPorCidadeNome(v("cidade")) || "assistencia_medica.pdf");
+      : (resolverArquivoPdfPorCidadeNome(v("cidade"), v("uf")) || "assistencia_medica.pdf");
     document.body.appendChild(link);
     link.click();
     link.remove();

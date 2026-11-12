@@ -673,16 +673,24 @@ async function testarCidadesPorUf(assert) {
   assert("cidades: página expõe os resolvedores de ficha por cidade",
     !!srcResolverTipo && !!srcResolverArquivo, "funções ausentes");
   if (srcResolverTipo && srcResolverArquivo) {
-    const montarResolvedor = (mapa) => new Function(
-      "obterMapaCidadesAtivo", "FICHA_UTILIZAR_PARA_ARQUIVO", "normalizarChaveCidade", "FICHA_PADRAO_SEM_DESIGNACAO",
+    const montarResolvedor = (mapa, mapaUf) => new Function(
+      "obterMapaCidadesAtivo", "obterMapaCidadesUfAtivo", "FICHA_UTILIZAR_PARA_ARQUIVO",
+      "normalizarChaveCidade", "FICHA_PADRAO_SEM_DESIGNACAO",
       srcResolverTipo + "\n" + srcResolverArquivo + "\nreturn resolverArquivoPdfPorCidadeNome;"
-    )(() => mapa, mapaFichas, normalizar, "FICHA GNDI");
+    )(() => mapa, () => mapaUf, mapaFichas, normalizar, "FICHA GNDI");
+
+    // 21.6a — ficha designada × ficha padrão
     const catalogoTeste = new Map([
       ["CIDADE COM FICHA", "FICHA BH"],
       ["CIDADE SEM FICHA", ""],
-      ["CIDADE FICHA ANTIGA", "FICHA REMOVIDA"]
+      ["CIDADE FICHA ANTIGA", "FICHA REMOVIDA"],
+      ["RIO CLARO", "FICHA REEMBOLSO"]
     ]);
-    const resolver = montarResolvedor(catalogoTeste);
+    const catalogoUfTeste = new Map([
+      ["SP|CIDADE COM FICHA", "FICHA BH"],
+      ["SP|RIO CLARO", "FICHA REEMBOLSO"]
+    ]);
+    const resolver = montarResolvedor(catalogoTeste, catalogoUfTeste);
     assert("cidades: cidade com ficha designada usa a ficha do catálogo",
       resolver("Cidade com ficha") === mapaFichas["FICHA BH"], resolver("Cidade com ficha"));
     assert("cidades: cidade com ficha vazia vai para a FICHA GNDI",
@@ -692,6 +700,45 @@ async function testarCidadesPorUf(assert) {
     assert("cidades: cidade fora do catálogo vai para a FICHA GNDI",
       resolver("Cidade fora do catalogo") === "FICHA GNDI.pdf", resolver("Cidade fora do catalogo"));
     assert("cidades: sem cidade selecionada não há ficha", resolver("") === null, String(resolver("")));
+
+    // 21.6b — homônimo de outro estado não herda a ficha alheia
+    assert("cidades: Rio Claro/SP usa a ficha de SP",
+      resolver("Rio Claro", "SP") === mapaFichas["FICHA REEMBOLSO"], resolver("Rio Claro", "SP"));
+    assert("cidades: Rio Claro/RJ NÃO herda a ficha de Rio Claro/SP",
+      resolver("Rio Claro", "RJ") === "FICHA GNDI.pdf", String(resolver("Rio Claro", "RJ")));
+    assert("cidades: sem UF informada a resolução usa o mapa por nome",
+      resolver("Rio Claro") === mapaFichas["FICHA REEMBOLSO"], resolver("Rio Claro"));
+
+    // 21.6c — invariante sobre os catálogos reais: ficha sempre pela UF da cidade
+    const mapaUfReal = new Map();
+    for (const row of catalogoInfinity) {
+      const uf = String(row.UF || "").toUpperCase().trim();
+      const chave = normalizar(row.CIDADE);
+      if (uf && chave) mapaUfReal.set(`${uf}|${chave}`, normalizarFicha(row["FICHA A UTILIZAR"]));
+    }
+    const resolverReal = montarResolvedor(mapaPadrao, mapaUfReal);
+    const ufDaLinha = (row) => String(row.UF || "").toUpperCase().trim() || ufPorCidade.get(normalizar(row.CIDADE)) || "";
+    const erradas = [];
+    for (const row of catalogoBrasil) {
+      const esperado = mapaFichas[normalizarFicha(row["FICHA A UTILIZAR"])];
+      if (resolverReal(row.CIDADE, ufDaLinha(row)) !== esperado) erradas.push(ufDaLinha(row) + "/" + row.CIDADE);
+    }
+    assert("cidades: cada cidade resolve a própria ficha na sua UF", erradas.length === 0, JSON.stringify(erradas.slice(0, 5)));
+
+    const homonimos = [];
+    const homonimosErrados = [];
+    for (const uf of siglas) {
+      for (const nome of indice[uf] || []) {
+        const chave = normalizar(nome);
+        if (!mapaPadrao.has(chave) || mapaUfReal.has(`${uf}|${chave}`)) continue;
+        homonimos.push(uf + "/" + nome);
+        if (resolverReal(nome, uf) !== "FICHA GNDI.pdf") homonimosErrados.push(uf + "/" + nome);
+      }
+    }
+    assert("cidades: homônimos de outro estado existem na base", homonimos.length > 0, "nenhum caso encontrado");
+    assert("cidades: todo homônimo de outro estado vai para a ficha padrão",
+      homonimosErrados.length === 0, JSON.stringify(homonimosErrados.slice(0, 5)));
+    console.log(`   homônimos de outro estado → ficha padrão: ${homonimos.length} (ex.: ${homonimos.slice(0, 3).join(", ")})`);
   }
 
   // ── 21.7 — a lista não depende mais de API externa de municípios ──
