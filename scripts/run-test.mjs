@@ -573,11 +573,23 @@ async function testarCidadesPorUf(assert) {
   assert("cidades: índice cobre exatamente as 27 UFs", siglas.join(",") === UFS_OFICIAIS.join(","), siglas.join(","));
   assert("cidades: total do índice bate com _meta e passa de 5.000 municípios",
     totalIndex === indice._meta?.total_municipios && totalIndex > 5000, `${totalIndex} vs ${indice._meta?.total_municipios}`);
+  assert("cidades: cada município do índice traz { codigo, nome } do IBGE",
+    siglas.every(uf => (indice[uf] || []).every(m => m && /^\d{7}$/.test(String(m.codigo || "")) && !!String(m.nome || "").trim())),
+    "entrada sem código/nome: " + JSON.stringify((indice.SP || []).filter(m => !m || !m.codigo).slice(0, 3)));
   assert("cidades: nenhuma UF fica sem municípios (select nunca só com placeholder)",
     siglas.every(uf => Array.isArray(indice[uf]) && indice[uf].length > 0), "UF vazia no índice");
   assert("cidades: nenhuma UF tem município repetido",
-    siglas.every(uf => new Set(indice[uf]).size === indice[uf].length), "duplicata no índice");
-  assert("cidades: DF contém Brasília (caso do incidente)", (indice.DF || []).includes("Brasília"), JSON.stringify(indice.DF));
+    siglas.every(uf => new Set((indice[uf] || []).map(m => m.nome)).size === (indice[uf] || []).length), "duplicata no índice");
+  const municipiosIndex = []
+  for (const uf of siglas) for (const m of indice[uf] || []) municipiosIndex.push({ uf, codigo: String(m.codigo), nome: m.nome });
+  const codigosUnicos = new Set(municipiosIndex.map(m => m.codigo));
+  assert("cidades: o código IBGE é único em todo o país",
+    codigosUnicos.size === municipiosIndex.length, `${codigosUnicos.size} códigos para ${municipiosIndex.length} municípios`);
+  const UF_CODIGO_IBGE = { RO: 11, AC: 12, AM: 13, RR: 14, PA: 15, AP: 16, TO: 17, MA: 21, PI: 22, CE: 23, RN: 24, PB: 25, PE: 26, AL: 27, SE: 28, BA: 29, MG: 31, ES: 32, RJ: 33, SP: 35, PR: 41, SC: 42, RS: 43, MS: 50, MT: 51, GO: 52, DF: 53 };
+  const foraDaUf = municipiosIndex.filter(m => m.codigo.slice(0, 2) !== String(UF_CODIGO_IBGE[m.uf]));
+  assert("cidades: o prefixo do código IBGE corresponde à UF do município",
+    foraDaUf.length === 0, JSON.stringify(foraDaUf.slice(0, 3)));
+  assert("cidades: DF contém Brasília (caso do incidente)", (indice.DF || []).some(m => m.nome === "Brasília"), JSON.stringify(indice.DF));
 
   // ── 21.2 — a interface oferece as mesmas UFs do índice ──
   const ufSelect = html.match(/<select id="uf">([\s\S]*?)<\/select>/)?.[1] || "";
@@ -595,7 +607,7 @@ async function testarCidadesPorUf(assert) {
   }
 
   const listaCidades = (uf, mapa) => (indice[uf] || [])
-    .map(nome => String(nome).trim())
+    .map(m => String((m && m.nome) || "").trim())
     .filter(nome => nome && mapa.has(normalizar(nome)))
     .sort((a, b) => a.localeCompare(b, "pt-BR"));
 
@@ -670,27 +682,40 @@ async function testarCidadesPorUf(assert) {
   assert("cidades: a ficha padrão tem PDF mapeado", !!mapaFichas["FICHA GNDI"], "FICHA GNDI sem PDF");
   const srcResolverTipo = trechoFuncao("resolverTipoFichaPorCidadeNome");
   const srcResolverArquivo = trechoFuncao("resolverArquivoPdfPorCidadeNome");
+  const srcCodigoIbge = trechoFuncao("codigoIbgeDaCidade");
   assert("cidades: página expõe os resolvedores de ficha por cidade",
-    !!srcResolverTipo && !!srcResolverArquivo, "funções ausentes");
-  if (srcResolverTipo && srcResolverArquivo) {
-    const montarResolvedor = (mapa, mapaUf) => new Function(
-      "obterMapaCidadesAtivo", "obterMapaCidadesUfAtivo", "FICHA_UTILIZAR_PARA_ARQUIVO",
-      "normalizarChaveCidade", "FICHA_PADRAO_SEM_DESIGNACAO",
-      srcResolverTipo + "\n" + srcResolverArquivo + "\nreturn resolverArquivoPdfPorCidadeNome;"
-    )(() => mapa, () => mapaUf, mapaFichas, normalizar, "FICHA GNDI");
+    !!srcResolverTipo && !!srcResolverArquivo && !!srcCodigoIbge, "funções ausentes");
+  if (srcResolverTipo && srcResolverArquivo && srcCodigoIbge) {
+    const montarResolvedor = (catalogo, codigos) => new Function(
+      "obterCatalogoAtivo", "FICHA_UTILIZAR_PARA_ARQUIVO", "normalizarChaveCidade",
+      "FICHA_PADRAO_SEM_DESIGNACAO", "codigoIbgePorCidadeUf",
+      srcCodigoIbge + "\n" + srcResolverTipo + "\n" + srcResolverArquivo +
+      "\nreturn { resolverArquivoPdfPorCidadeNome, resolverTipoFichaPorCidadeNome, codigoIbgeDaCidade };"
+    )(() => catalogo, mapaFichas, normalizar, "FICHA GNDI", codigos);
 
-    // 21.6a — ficha designada × ficha padrão
-    const catalogoTeste = new Map([
-      ["CIDADE COM FICHA", "FICHA BH"],
-      ["CIDADE SEM FICHA", ""],
-      ["CIDADE FICHA ANTIGA", "FICHA REMOVIDA"],
-      ["RIO CLARO", "FICHA REEMBOLSO"]
+    // 21.6a — catálogo de teste chaveado por código IBGE
+    // Rio Claro/SP = 3554003; Rio Claro/RJ = 3304805 (fora do catálogo).
+    const catalogoTeste = {
+      porNome: new Map([
+        ["CIDADE COM FICHA", "FICHA BH"],
+        ["CIDADE SEM FICHA", ""],
+        ["CIDADE FICHA ANTIGA", "FICHA REMOVIDA"],
+        ["RIO CLARO", "FICHA REEMBOLSO"]
+      ]),
+      porUf: new Map([
+        ["SP|CIDADE COM FICHA", "FICHA BH"],
+        ["SP|RIO CLARO", "FICHA REEMBOLSO"]
+      ]),
+      porCodigo: new Map([["3554003", "FICHA REEMBOLSO"]]),
+      codigoPorCidadeUf: new Map([["SP|RIO CLARO", "3554003"], ["SP|CIDADE COM FICHA", "3500000"]])
+    };
+    const codigosTeste = new Map([
+      ["SP|RIO CLARO", "3554003"],
+      ["RJ|RIO CLARO", "3304805"],
+      ["SP|CIDADE COM FICHA", "3500000"]
     ]);
-    const catalogoUfTeste = new Map([
-      ["SP|CIDADE COM FICHA", "FICHA BH"],
-      ["SP|RIO CLARO", "FICHA REEMBOLSO"]
-    ]);
-    const resolver = montarResolvedor(catalogoTeste, catalogoUfTeste);
+    const teste = montarResolvedor(catalogoTeste, codigosTeste);
+    const resolver = teste.resolverArquivoPdfPorCidadeNome;
     assert("cidades: cidade com ficha designada usa a ficha do catálogo",
       resolver("Cidade com ficha") === mapaFichas["FICHA BH"], resolver("Cidade com ficha"));
     assert("cidades: cidade com ficha vazia vai para a FICHA GNDI",
@@ -701,39 +726,80 @@ async function testarCidadesPorUf(assert) {
       resolver("Cidade fora do catalogo") === "FICHA GNDI.pdf", resolver("Cidade fora do catalogo"));
     assert("cidades: sem cidade selecionada não há ficha", resolver("") === null, String(resolver("")));
 
-    // 21.6b — homônimo de outro estado não herda a ficha alheia
-    assert("cidades: Rio Claro/SP usa a ficha de SP",
+    // 21.6b — a identidade é o código IBGE, não o nome
+    assert("cidades: o código IBGE vem do índice e distingue homônimos de UFs diferentes",
+      teste.codigoIbgeDaCidade("Rio Claro", "SP") === "3554003" && teste.codigoIbgeDaCidade("Rio Claro", "RJ") === "3304805",
+      `${teste.codigoIbgeDaCidade("Rio Claro", "SP")} / ${teste.codigoIbgeDaCidade("Rio Claro", "RJ")}`);
+    assert("cidades: Rio Claro/SP usa a ficha de SP (pelo código)",
       resolver("Rio Claro", "SP") === mapaFichas["FICHA REEMBOLSO"], resolver("Rio Claro", "SP"));
     assert("cidades: Rio Claro/RJ NÃO herda a ficha de Rio Claro/SP",
       resolver("Rio Claro", "RJ") === "FICHA GNDI.pdf", String(resolver("Rio Claro", "RJ")));
-    assert("cidades: sem UF informada a resolução usa o mapa por nome",
+    assert("cidades: sem UF informada a resolução usa a contingência por nome",
       resolver("Rio Claro") === mapaFichas["FICHA REEMBOLSO"], resolver("Rio Claro"));
+    const soCodigo = montarResolvedor(
+      Object.assign({}, catalogoTeste, { porNome: new Map(), porUf: new Map() }),
+      codigosTeste
+    );
+    assert("cidades: a ficha sai só do código, mesmo sem mapa por nome/UF",
+      soCodigo.resolverArquivoPdfPorCidadeNome("Rio Claro", "SP") === mapaFichas["FICHA REEMBOLSO"],
+      String(soCodigo.resolverArquivoPdfPorCidadeNome("Rio Claro", "SP")));
 
-    // 21.6c — invariante sobre os catálogos reais: ficha sempre pela UF da cidade
-    const mapaUfReal = new Map();
-    for (const row of catalogoInfinity) {
-      const uf = String(row.UF || "").toUpperCase().trim();
-      const chave = normalizar(row.CIDADE);
-      if (uf && chave) mapaUfReal.set(`${uf}|${chave}`, normalizarFicha(row["FICHA A UTILIZAR"]));
+    // 21.6c — invariantes sobre os dados reais
+    const municipiosReais = [];
+    const codigosReais = new Map();
+    for (const uf of siglas) {
+      for (const muni of indice[uf] || []) {
+        municipiosReais.push({ uf, codigo: String(muni.codigo), nome: muni.nome });
+        codigosReais.set(`${uf}|${normalizar(muni.nome)}`, String(muni.codigo));
+      }
     }
-    const resolverReal = montarResolvedor(mapaPadrao, mapaUfReal);
     const ufDaLinha = (row) => String(row.UF || "").toUpperCase().trim() || ufPorCidade.get(normalizar(row.CIDADE)) || "";
+    const montarCatalogo = (rows) => {
+      const porNome = new Map(), porUf = new Map(), porCodigo = new Map(), codigoPorCidadeUf = new Map();
+      for (const row of rows) {
+        const chave = normalizar(row.CIDADE), uf = ufDaLinha(row);
+        const codigo = String(row["CODIGO IBGE"] || "").trim();
+        const ficha = normalizarFicha(row["FICHA A UTILIZAR"]);
+        porNome.set(chave, ficha);
+        if (uf) porUf.set(`${uf}|${chave}`, ficha);
+        if (codigo) {
+          porCodigo.set(codigo, ficha);
+          if (uf) codigoPorCidadeUf.set(`${uf}|${chave}`, codigo);
+        }
+      }
+      return { porNome, porUf, porCodigo, codigoPorCidadeUf };
+    };
+
+    const codigoInvalido = [];
+    const codigoVisto = new Map();
+    for (const row of catalogoBrasil) {
+      const uf = ufDaLinha(row), chave = normalizar(row.CIDADE), codigo = String(row["CODIGO IBGE"] || "").trim();
+      if (!/^\d{7}$/.test(codigo) || codigosReais.get(`${uf}|${chave}`) !== codigo) {
+        codigoInvalido.push(`${uf}/${row.CIDADE}→${codigo || "sem código"}`);
+      }
+      if (codigoVisto.has(codigo)) codigoInvalido.push(`${codigo} repetido (${codigoVisto.get(codigo)} × ${row.CIDADE})`);
+      codigoVisto.set(codigo, row.CIDADE);
+    }
+    assert("cidades: todo catálogo traz o código IBGE do município (casa com UF + nome do IBGE)",
+      codigoInvalido.length === 0, JSON.stringify(codigoInvalido.slice(0, 5)));
+
+    const real = montarResolvedor(montarCatalogo(catalogoBrasil), codigosReais);
+    const resolverReal = real.resolverArquivoPdfPorCidadeNome;
     const erradas = [];
     for (const row of catalogoBrasil) {
       const esperado = mapaFichas[normalizarFicha(row["FICHA A UTILIZAR"])];
-      if (resolverReal(row.CIDADE, ufDaLinha(row)) !== esperado) erradas.push(ufDaLinha(row) + "/" + row.CIDADE);
+      if (resolverReal(row.CIDADE, ufDaLinha(row)) !== esperado) erradas.push(`${ufDaLinha(row)}/${row.CIDADE}`);
     }
-    assert("cidades: cada cidade resolve a própria ficha na sua UF", erradas.length === 0, JSON.stringify(erradas.slice(0, 5)));
+    assert("cidades: cada cidade resolve a própria ficha pelo seu código", erradas.length === 0, JSON.stringify(erradas.slice(0, 5)));
 
+    const codigosDoCatalogo = new Set(catalogoBrasil.map(row => String(row["CODIGO IBGE"] || "").trim()));
     const homonimos = [];
     const homonimosErrados = [];
-    for (const uf of siglas) {
-      for (const nome of indice[uf] || []) {
-        const chave = normalizar(nome);
-        if (!mapaPadrao.has(chave) || mapaUfReal.has(`${uf}|${chave}`)) continue;
-        homonimos.push(uf + "/" + nome);
-        if (resolverReal(nome, uf) !== "FICHA GNDI.pdf") homonimosErrados.push(uf + "/" + nome);
-      }
+    for (const muni of municipiosReais) {
+      if (!mapaPadrao.has(normalizar(muni.nome))) continue;
+      if (codigosDoCatalogo.has(muni.codigo)) continue;
+      homonimos.push(`${muni.uf}/${muni.nome}`);
+      if (resolverReal(muni.nome, muni.uf) !== "FICHA GNDI.pdf") homonimosErrados.push(`${muni.uf}/${muni.nome}`);
     }
     assert("cidades: homônimos de outro estado existem na base", homonimos.length > 0, "nenhum caso encontrado");
     assert("cidades: todo homônimo de outro estado vai para a ficha padrão",
@@ -1070,12 +1136,12 @@ async function testarPainelV2(assert) {
   const realBrasil = JSON.parse(readFile(join(ROOT, "cidades_brasil.json"), "utf8"));
   const guardCid = { cidades: st.overlay.cidades, novas: st.overlay.cidades_novas, arr: st.cityArr };
   st.overlay.cidades = {}; st.overlay.cidades_novas = [];
-  st.cityArr = realBrasil.map((r, i) => ({ idx: i, cidade: String(r.CIDADE || ""), uf: "", regional: String(r.REGIONAL || ""), ficha: T.normalizarFicha(r["FICHA A UTILIZAR"]), fonte: "cidades_brasil.json" }));
+  st.cityArr = realBrasil.map((r, i) => ({ idx: i, cidade: String(r.CIDADE || ""), uf: "", regional: String(r.REGIONAL || ""), ficha: T.normalizarFicha(r["FICHA A UTILIZAR"]), codigoIbge: String(r["CODIGO IBGE"] || ""), fonte: "cidades_brasil.json" }));
   assert("overlay vazio → cidades_brasil.json gerado idêntico ao do repositório",
     JSON.stringify(T.cidadesEfetivasParaRepositorio(false)) === JSON.stringify(realBrasil), "divergiu");
   const comUfGerado = T.cidadesEfetivasParaRepositorio(true)[0];
   assert("variante com UF gerada tem a coluna UF (formato cidades_infinity)",
-    Object.keys(comUfGerado).join(",") === "REGIONAL,UF,CIDADE,FICHA A UTILIZAR", Object.keys(comUfGerado).join(","));
+    Object.keys(comUfGerado).join(",") === "REGIONAL,UF,CIDADE,FICHA A UTILIZAR,CODIGO IBGE", Object.keys(comUfGerado).join(","));
   st.overlay.cidades_novas = [{ id: 1, cidade: "Cidade Nova", uf: "CE", regional: "NE", ficha: "FICHA SAFO" }];
   T.aplicarOverlayCidades();
   const linhasNovas = T.cidadesEfetivasParaRepositorio(true);
@@ -1371,8 +1437,8 @@ async function testarPainelV3(assert) {
   assert("v3: importação rejeita ficha inexistente", cls3.invalidos.length === 1 && cls3.invalidos[0].motivo.includes("ficha"), JSON.stringify(cls3.invalidos));
 
   // 15.13 — exportação de cidades: linha CSV com escape (§17)
-  const linhaCsv = T3.cidadeLinhaCSV({ cidade: 'Vila "X", Y', uf: "BA", regional: "BA", ficha: "FICHA BH" });
-  assert("v3: CSV escapa aspas e vírgulas", linhaCsv === '"Vila ""X"", Y","BA","BA","FICHA BH"', linhaCsv);
+  const linhaCsv = T3.cidadeLinhaCSV({ cidade: 'Vila "X", Y', uf: "BA", regional: "BA", ficha: "FICHA BH", codigoIbge: "2903201" });
+  assert("v3: CSV escapa aspas e vírgulas", linhaCsv === '"Vila ""X"", Y","BA","BA","FICHA BH","2903201"', linhaCsv);
 
   // 15.14 — lista de uploads do adapter (sem API → [])
   {

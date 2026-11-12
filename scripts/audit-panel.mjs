@@ -181,6 +181,18 @@ for (const r of st.cityArr) {
 }
 check("nenhuma cidade duplicada na visão do painel", dup.length === 0, dup.slice(0, 5).join(" | "));
 
+const codigosVistos = new Set(), codigoDup = [], semCodigo = [];
+for (const r of st.cityArr) {
+  const codigo = String(r.codigoIbge || "").trim();
+  if (!/^\d{7}$/.test(codigo)) { if (r.fonte !== "overlay administrativo") semCodigo.push(r.cidade + "/" + r.uf); continue; }
+  if (codigosVistos.has(codigo)) codigoDup.push(codigo + ": " + r.cidade);
+  codigosVistos.add(codigo);
+}
+check("toda cidade do repositório carrega o código IBGE", semCodigo.length === 0,
+  semCodigo.slice(0, 5).join(" | "));
+check("nenhum código IBGE repetido na visão do painel", codigoDup.length === 0, codigoDup.slice(0, 5).join(" | "));
+
+
 // ── 5. Alterações Pendentes: overlay vazio ⇒ nada pendente ────────────
 const pendVazio = T.calcularPendentes(T.exportarOverlayPuro(), null);
 check("overlay vazio ⇒ 0 alteração(ões) pendente(s)", pendVazio.length === 0,

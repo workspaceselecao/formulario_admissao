@@ -165,7 +165,7 @@
     overlay: { campos_ficha: {}, campos_declaracao: {}, campos_custom: {}, cidades: {}, cidades_novas: [], pdfs_meta: {}, forms_meta: {}, templates_versoes: {}, configuracoes: {}, textos: {}, rotulos: {} },
     docData: {},        // por docKey: {json, flat:[], pageSizes:[], pdfjsDoc, page, sel, dirty}
     docBase: {},        // por docKey: JSON original do repositório (sem overlay) — fonte para reconstrução e validação
-    cityMap: {}, cityArr: [], citySource: null,
+    cityMap: {}, cityCodigos: {}, cityArr: [], citySource: null,
     historicoLocal: [],
     cidadesNovasSeq: 1,
     // ── v2 ──
@@ -669,7 +669,7 @@
       state.citySource = "cidades_infinity.json";
     }
     state.cityArr = (Array.isArray(cidadesBase) ? cidadesBase : []).map(function (r, i) {
-      return { idx: i, cidade: String(r.CIDADE || ""), uf: String(r.UF || ""), regional: String(r.REGIONAL || ""), ficha: normalizarFicha(r["FICHA A UTILIZAR"]), fonte: state.citySource };
+      return { idx: i, cidade: String(r.CIDADE || ""), uf: String(r.UF || ""), regional: String(r.REGIONAL || ""), ficha: normalizarFicha(r["FICHA A UTILIZAR"]), codigoIbge: String(r["CODIGO IBGE"] || ""), fonte: state.citySource };
     });
     // Enriquecimento de UF: cidades_infinity.json lista as MESMAS cidades, mas com
     // a coluna UF. Sem isso o painel exibia UF vazia nas 272 cidades e as
@@ -677,12 +677,18 @@
     if (state.citySource === "cidades_brasil.json") {
       try {
         const inf = await fetchJSON("../cidades_infinity.json");
-        const ufPorCidade = {};
+        const infoPorCidade = {};
         for (const r of (Array.isArray(inf) ? inf : [])) {
           const k = normalizarChaveCidade(r.CIDADE);
-          if (k && r.UF) ufPorCidade[k] = String(r.UF);
+          if (!k) continue;
+          infoPorCidade[k] = { uf: String(r.UF || ""), codigo: String(r["CODIGO IBGE"] || "") };
         }
-        for (const r of state.cityArr) if (!r.uf) r.uf = ufPorCidade[normalizarChaveCidade(r.cidade)] || "";
+        for (const r of state.cityArr) {
+          const info = infoPorCidade[normalizarChaveCidade(r.cidade)];
+          if (!info) continue;
+          if (!r.uf) r.uf = info.uf || "";
+          if (!r.codigoIbge) r.codigoIbge = info.codigo || "";
+        }
       } catch (e) { /* UF é enriquecimento opcional: sem o arquivo, segue sem UF */ }
     }
     applyCidadesOverlay();
@@ -716,7 +722,8 @@
       if (state.cityArr.some(function (r) { return r.fonte === "overlay administrativo" && r.idx === "n" + nova.id; })) continue;
       state.cityArr.push({
         idx: "n" + nova.id, cidade: nova.cidade, uf: nova.uf, regional: nova.regional,
-        ficha: normalizarFicha(nova.ficha), fonte: "overlay administrativo", overlayId: nova.id
+        ficha: normalizarFicha(nova.ficha), codigoIbge: String(nova.codigoIbge || ""),
+        fonte: "overlay administrativo", overlayId: nova.id
       });
     }
     // garante sequência de ids nova maior que a maior já usada (import pode trazer ids altos)
@@ -727,9 +734,12 @@
 
   function rebuildCityMap() {
     state.cityMap = {};
+    state.cityCodigos = {};
     for (const r of state.cityArr) {
       const k = normalizarChaveCidade(r.cidade);
       if (k) state.cityMap[k] = r.ficha;
+      const codigo = String(r.codigoIbge || "").trim();
+      if (codigo) state.cityCodigos[codigo] = r.cidade;
     }
   }
 
@@ -3201,7 +3211,8 @@
   /** Serializa uma linha de cidade para CSV (com escape). */
   function cidadeLinhaCSV(r) {
     const esc2 = function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; };
-    return [esc2(r.cidade), esc2(r.uf), esc2(r.regional), esc2(r.ficha)].join(",");
+    return [esc2(r.cidade), esc2(r.uf), esc2(r.regional), esc2(r.ficha), esc2(r.codigoIbge || "")].join(",");
+
   }
 
   /** §17 — exportação dos dados FILTRADOS (JSON ou CSV), incluindo a origem. */
@@ -3209,11 +3220,11 @@
     const rows = state._cidadesFiltradas || state.cityArr;
     if (!rows.length) { toast("Nenhuma cidade no filtro atual para exportar.", false); return; }
     const dados = rows.map(function (r) {
-      return { cidade: r.cidade, uf: r.uf, regional: r.regional, ficha: r.ficha, origem: r.fonte };
+      return { cidade: r.cidade, uf: r.uf, regional: r.regional, ficha: r.ficha, codigoIbge: r.codigoIbge || "", origem: r.fonte };
     });
     const sufixo = new Date().toISOString().slice(0, 10);
     if (formato === "csv") {
-      const conteudo = "cidade,uf,regional,ficha,origem\n" + dados.map(cidadeLinhaCSV).join("\n");
+      const conteudo = "cidade,uf,regional,ficha,codigo\n" + dados.map(cidadeLinhaCSV).join("\n");
       const blob = new Blob(["\ufeff" + conteudo], { type: "text/csv;charset=utf-8" }); // BOM p/ Excel
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -3235,7 +3246,8 @@
     const k = normalizarChaveCidade(novoNome);
     if (state.cityMap[k]) { toast('Não foi possível duplicar: já existe "' + novoNome + '".', false); return; }
     state.overlay.cidades_novas = state.overlay.cidades_novas || [];
-    state.overlay.cidades_novas.push({ id: state.cidadesNovasSeq++, cidade: novoNome, uf: r.uf, regional: r.regional, ficha: r.ficha });
+    // a cópia não herda o código IBGE: o mesmo município não pode entrar duas vezes
+    state.overlay.cidades_novas.push({ id: state.cidadesNovasSeq++, cidade: novoNome, uf: r.uf, regional: r.regional, ficha: r.ficha, codigoIbge: "" });
     await persistOverlaySilencioso("duplicacao_cidade", novoNome,
       { overlayKey: "cidades_novas", itens: [{ chave: "n" + (state.cidadesNovasSeq - 1), anterior: null }] },
       "duplicada de " + r.cidade + " (" + r.uf + ") → " + r.ficha);
@@ -3366,7 +3378,7 @@
       if (!Array.isArray(json)) return { erro: erroEstrutura };
       for (const item of json) {
         if (item && typeof item === "object") {
-          registros.push({ cidade: String(item.cidade || item.CIDADE || ""), uf: String(item.uf || item.UF || ""), regional: String(item.regional || item.REGIONAL || ""), ficha: String(item.ficha || item["FICHA A UTILIZAR"] || item["FICHA A UTILIZAR".toLowerCase()] || item["ficha a utilizar"] || "") });
+          registros.push({ cidade: String(item.cidade || item.CIDADE || ""), uf: String(item.uf || item.UF || ""), regional: String(item.regional || item.REGIONAL || ""), ficha: String(item.ficha || item["FICHA A UTILIZAR"] || item["FICHA A UTILIZAR".toLowerCase()] || item["ficha a utilizar"] || ""), codigo: String(item.codigo || item.codigoIbge || item["CODIGO IBGE"] || "") });
         }
       }
     } else {
@@ -3375,12 +3387,13 @@
       const sep = linhas[0].indexOf(";") !== -1 ? ";" : ",";
       const head = linhas[0].toLowerCase().split(sep).map(function (h) { return h.trim(); });
       const iC = head.indexOf("cidade"), iU = head.indexOf("uf"), iR = head.indexOf("regional"), iF = head.indexOf("ficha");
+      const iK = head.indexOf("codigo") > -1 ? head.indexOf("codigo") : head.indexOf("codigo ibge");
       if (iC === -1 || iU === -1) {
         return { erro: "Cabeçalho ausente — a primeira linha deve conter ao menos: cidade" + sep + "uf" + sep + "regional" + sep + "ficha" };
       }
       for (let i = 1; i < linhas.length; i++) {
         const cols = linhas[i].split(sep).map(function (c) { return c.trim(); });
-        registros.push({ cidade: cols[iC] || "", uf: iU > -1 ? (cols[iU] || "") : "", regional: iR > -1 ? (cols[iR] || "") : "", ficha: iF > -1 ? (cols[iF] || "") : "" });
+        registros.push({ cidade: cols[iC] || "", uf: iU > -1 ? (cols[iU] || "") : "", regional: iR > -1 ? (cols[iR] || "") : "", ficha: iF > -1 ? (cols[iF] || "") : "", codigo: iK > -1 ? (cols[iK] || "") : "" });
       }
     }
     return { registros: registros };
@@ -3398,11 +3411,17 @@
       if (!k || k.length < 2) { invalidos.push(Object.assign({ motivo: "cidade ausente" }, r)); continue; }
       if (validarUf && (!r.uf || r.uf.trim().length !== 2 || !ufValida(r.uf))) { invalidos.push(Object.assign({ motivo: "UF ausente ou inválida (use a sigla de um dos 27 estados)" }, r)); continue; }
       if (r.ficha && !(FICHA_UTILIZAR_PARA_ARQUIVO[normalizarFicha(r.ficha)])) { invalidos.push(Object.assign({ motivo: "ficha informada não existe (use: " + Object.keys(FICHA_UTILIZAR_PARA_ARQUIVO).join(", ") + ")" }, r)); continue; }
-      if (vistasNaImportacao[k]) { duplicados.push(Object.assign({ motivo: "duplicado no arquivo" }, r)); continue; }
-      vistasNaImportacao[k] = true;
-      if (state.cityMap[k]) { duplicados.push(Object.assign({ motivo: "já cadastrada" }, r)); continue; }
+      // A identidade da cidade é o código IBGE quando ele existe; o nome normalizado
+      // é só a contingência (importação sem código). O mesmo município não entra duas
+      // vezes, mas homônimos de UFs diferentes continuam sendo cidades distintas.
+      const codigo = String(r.codigo || "").trim();
+      const kUnica = codigo ? "ibge:" + codigo : k;
+      if (vistasNaImportacao[kUnica]) { duplicados.push(Object.assign({ motivo: codigo ? "duplicado no arquivo (código IBGE)" : "duplicado no arquivo" }, r)); continue; }
+      vistasNaImportacao[kUnica] = true;
+      if (codigo && state.cityCodigos && state.cityCodigos[codigo]) { duplicados.push(Object.assign({ motivo: "já cadastrada (código IBGE " + codigo + ")" }, r)); continue; }
+      if (!codigo && state.cityMap[k]) { duplicados.push(Object.assign({ motivo: "já cadastrada" }, r)); continue; }
       const ufLimpa = String(r.uf || "").trim().toUpperCase();
-      validos.push({ cidade: r.cidade.trim(), uf: ufLimpa, regional: (r.regional || "").trim().toUpperCase() || ufLimpa, ficha: normalizarFicha(r.ficha) || "FICHA REEMBOLSO" });
+      validos.push({ cidade: r.cidade.trim(), uf: ufLimpa, regional: (r.regional || "").trim().toUpperCase() || ufLimpa, ficha: normalizarFicha(r.ficha) || "FICHA REEMBOLSO", codigoIbge: codigo });
     }
     return { validos: validos, duplicados: duplicados, invalidos: invalidos };
   }
@@ -3439,7 +3458,7 @@
           "<p>Serão adicionadas <strong>" + cls.validos.length + " cidade(s)</strong> ao overlay administrativo. Duplicados e inválidos <strong>não</strong> são aplicados.</p>", "Importar");
         if (!ok) return;
         for (const r of cls.validos) {
-          state.overlay.cidades_novas.push({ id: state.cidadesNovasSeq++, cidade: r.cidade, uf: r.uf, regional: r.regional, ficha: r.ficha });
+          state.overlay.cidades_novas.push({ id: state.cidadesNovasSeq++, cidade: r.cidade, uf: r.uf, regional: r.regional, ficha: r.ficha, codigoIbge: r.codigoIbge || "" });
         }
         await persistOverlaySilencioso("importacao_cidades", file.name, null,
           cls.validos.length + " cidade(s) importada(s) de " + file.name + " (" + total + " registros: " + cls.validos.length + " válidos, " + cls.duplicados.length + " duplicados, " + cls.invalidos.length + " inválidos)");
@@ -3469,7 +3488,7 @@
       "\nUF: " + esc(uf) + "\nRegional: " + esc(regional || uf) + "\nFicha: " + esc(ficha) + "\nChave normalizada: " + esc(k) + "</pre>", "Adicionar");
     if (!ok) return;
     state.overlay.cidades_novas = state.overlay.cidades_novas || [];
-    state.overlay.cidades_novas.push({ id: state.cidadesNovasSeq++, cidade: nome, uf: uf, regional: regional || uf, ficha: ficha });
+    state.overlay.cidades_novas.push({ id: state.cidadesNovasSeq++, cidade: nome, uf: uf, regional: regional || uf, ficha: ficha, codigoIbge: "" });
     $("cidNome").value = ""; $("cidUf").value = ""; $("cidRegional").value = "";
     msg.innerHTML = '<div class="notice ok">Cidade adicionada ao overlay.</div>';
     persistOverlaySilencioso("criacao_cidade", nome + " (" + uf + ") → " + ficha);
@@ -3709,8 +3728,9 @@
    */
   function cidadesEfetivasParaRepositorio(comUf) {
     return state.cityArr.map(function (r) {
-      if (comUf) return { REGIONAL: r.regional || "", UF: r.uf || "", CIDADE: r.cidade, "FICHA A UTILIZAR": r.ficha };
-      return { REGIONAL: r.regional || "", CIDADE: r.cidade, "FICHA A UTILIZAR": r.ficha };
+      const codigo = String(r.codigoIbge || "").trim();
+      if (comUf) return { REGIONAL: r.regional || "", UF: r.uf || "", CIDADE: r.cidade, "FICHA A UTILIZAR": r.ficha, "CODIGO IBGE": codigo };
+      return { REGIONAL: r.regional || "", CIDADE: r.cidade, "FICHA A UTILIZAR": r.ficha, "CODIGO IBGE": codigo };
     });
   }
 

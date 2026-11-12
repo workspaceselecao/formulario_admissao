@@ -1428,11 +1428,16 @@ const FICHA_UTILIZAR_PARA_ARQUIVO = {
   "FICHA BH": "FICHA BH.pdf",
   "FICHA SJC": "FICHA SJC.pdf"
 };
-let mapaCidadePadrao = null;
-let mapaCidadeInfinity = null;
-/** "UF|CIDADE" → ficha: evita que cidade homônima herde a ficha de outro estado. */
-let mapaCidadeUfPadrao = null;
-let mapaCidadeUfInfinity = null;
+/**
+ * Catálogo ativo: `{ porNome, porUf, porCodigo, codigoPorCidadeUf }`.
+ * A cidade é identificada pelo **código IBGE** (`porCodigo`), então homônimos de
+ * UFs diferentes nunca compartilham ficha; nome/UF ficam só como ponte e como
+ * contingência para catálogo antigo sem código.
+ */
+let catalogoPadrao = null;
+let catalogoInfinity = null;
+/** "UF|NOME" → código IBGE, do índice local (municipios_por_uf.json). */
+let codigoIbgePorCidadeUf = null;
 let camposSchemaCacheKey = null;
 
 function radioTipoPlano() {
@@ -1450,12 +1455,19 @@ function planoOutrosVariante() {
 function usaListaInfinity() {
   return ehOutrosPlanos() && planoOutrosVariante() === "infinity";
 }
-function obterMapaCidadesAtivo() {
-  return usaListaInfinity() ? mapaCidadeInfinity : mapaCidadePadrao;
+function obterCatalogoAtivo() {
+  return usaListaInfinity() ? catalogoInfinity : catalogoPadrao;
 }
-/** Ficha por "UF|CIDADE" do catálogo ativo (null/empty se a UF não pôde ser resolvida). */
+function obterMapaCidadesAtivo() {
+  return obterCatalogoAtivo()?.porNome || null;
+}
+/** Ficha por "UF|CIDADE" do catálogo ativo (contingência quando não há código IBGE). */
 function obterMapaCidadesUfAtivo() {
-  return usaListaInfinity() ? mapaCidadeUfInfinity : mapaCidadeUfPadrao;
+  return obterCatalogoAtivo()?.porUf || null;
+}
+/** Ficha por **código IBGE** do catálogo ativo — a chave real da resolução. */
+function obterMapaFichaPorCodigoAtivo() {
+  return obterCatalogoAtivo()?.porCodigo || null;
 }
 function nomeArquivoListaCidadesAtiva() {
   return usaListaInfinity() ? CIDADES_INFINITY_JSON_PATH : CIDADES_BRASIL_JSON_PATH;
@@ -1488,64 +1500,71 @@ function normalizarFichaCatalogo(valor) {
   return tipo;
 }
 
-/** UF de cada cidade em cidades_infinity.json (mesmas cidades do catálogo padrão, com UF). */
-async function carregarUfPorNomeDoCatalogoInfinity() {
-  const ufPorNome = new Map();
+/**
+ * UF e código IBGE de cada cidade em cidades_infinity.json — o catálogo padrão
+ * lista as mesmas cidades, mas sem essas colunas.
+ */
+async function carregarCatalogoInfinityPorNome() {
+  const infoPorNome = new Map();
   const arr = await carregarLinhasCidades(CIDADES_INFINITY_JSON_PATH);
   for (const row of arr) {
     const chave = normalizarChaveCidade(row.CIDADE);
+    if (!chave) continue;
     const uf = String(row.UF || "").toUpperCase().trim();
-    if (chave && uf) ufPorNome.set(chave, uf);
+    const codigo = String(row["CODIGO IBGE"] || "").trim();
+    infoPorNome.set(chave, { uf, codigo });
   }
-  return ufPorNome;
+  return infoPorNome;
 }
 
 /**
- * Mapas do catálogo:
+ * Mapas do catálogo — a ficha é chaveada pelo **código IBGE** do município:
+ *  - `porCodigo`: código IBGE → ficha (chave real da resolução);
+ *  - `codigoPorCidadeUf`: "UF|CIDADE" → código (ponte nome → código);
  *  - `porNome`: CIDADE → ficha (monta a lista de cidades do select);
- *  - `porUf`: "UF|CIDADE" → ficha (define a ficha da cidade selecionada).
- * `cidades_brasil.json` não tem coluna UF: a UF vem de `cidades_infinity.json`,
- * que lista as mesmas cidades. Se esse enriquecimento falhar, `porUf` fica vazio
- * e a resolução volta a ser só por nome.
+ *  - `porUf`: "UF|CIDADE" → ficha (contingência se algum catálogo vier sem código).
+ * `cidades_brasil.json` não tem as colunas UF/CODIGO IBGE: ambas vêm de
+ * `cidades_infinity.json`, que lista as mesmas cidades. Se esse enriquecimento
+ * falhar, `porCodigo` fica vazio e a resolução cai no mapa por UF e depois por nome.
  */
 async function carregarMapaCidadesDeJson(path) {
   const arr = await carregarLinhasCidades(path);
+  const codigoDaLinha = (row) => String(row["CODIGO IBGE"] || "").trim();
+  const ufDaLinha = (row) => String(row.UF || "").toUpperCase().trim();
+  const precisaEnriquecer = arr.some((row) => !codigoDaLinha(row) || !ufDaLinha(row));
+  const infoPorNome = precisaEnriquecer ? await carregarCatalogoInfinityPorNome() : new Map();
+
   const porNome = new Map();
   for (const row of arr) {
     const chave = normalizarChaveCidade(row.CIDADE);
     if (!chave) continue;
     porNome.set(chave, normalizarFichaCatalogo(row["FICHA A UTILIZAR"]));
   }
-  const ufDaLinha = (row) => String(row.UF || "").toUpperCase().trim();
   const porUf = new Map();
-  if (arr.some((row) => ufDaLinha(row))) {
-    for (const row of arr) {
-      const chave = normalizarChaveCidade(row.CIDADE);
-      const uf = ufDaLinha(row);
-      if (chave && uf) porUf.set(`${uf}|${chave}`, normalizarFichaCatalogo(row["FICHA A UTILIZAR"]));
-    }
-  } else {
-    const ufPorNome = await carregarUfPorNomeDoCatalogoInfinity();
-    for (const [chave, ficha] of porNome) {
-      const uf = ufPorNome.get(chave);
-      if (uf) porUf.set(`${uf}|${chave}`, ficha);
+  const porCodigo = new Map();
+  const codigoPorCidadeUf = new Map();
+  for (const row of arr) {
+    const chave = normalizarChaveCidade(row.CIDADE);
+    if (!chave) continue;
+    const info = infoPorNome.get(chave);
+    const uf = ufDaLinha(row) || info?.uf || "";
+    const codigo = codigoDaLinha(row) || info?.codigo || "";
+    const ficha = normalizarFichaCatalogo(row["FICHA A UTILIZAR"]);
+    if (uf) porUf.set(`${uf}|${chave}`, ficha);
+    if (codigo) {
+      porCodigo.set(codigo, ficha);
+      if (uf) codigoPorCidadeUf.set(`${uf}|${chave}`, codigo);
     }
   }
-  return { porNome, porUf };
+  return { porNome, porUf, porCodigo, codigoPorCidadeUf };
 }
 
 async function garantirMapaCidadesBrasil() {
   try {
     if (usaListaInfinity()) {
-      if (!mapaCidadeInfinity) {
-        const { porNome, porUf } = await carregarMapaCidadesDeJson(CIDADES_INFINITY_JSON_PATH);
-        mapaCidadeInfinity = porNome;
-        mapaCidadeUfInfinity = porUf;
-      }
-    } else if (!mapaCidadePadrao) {
-      const { porNome, porUf } = await carregarMapaCidadesDeJson(CIDADES_BRASIL_JSON_PATH);
-      mapaCidadePadrao = porNome;
-      mapaCidadeUfPadrao = porUf;
+      if (!catalogoInfinity) catalogoInfinity = await carregarMapaCidadesDeJson(CIDADES_INFINITY_JSON_PATH);
+    } else if (!catalogoPadrao) {
+      catalogoPadrao = await carregarMapaCidadesDeJson(CIDADES_BRASIL_JSON_PATH);
     }
     return true;
   } catch (e) {
@@ -1556,22 +1575,41 @@ async function garantirMapaCidadesBrasil() {
 }
 
 /**
- * Ficha da cidade: a designada no catálogo ativo **para aquela cidade naquela UF**.
- * Cidade homônima de outro estado não herda a ficha alheia (ex.: Rio Claro/RJ ×
- * Rio Claro/SP). Sem designação (linha sem ficha, ficha desconhecida ou cidade
- * fora do catálogo) usa `FICHA_PADRAO_SEM_DESIGNACAO`.
+ * Código IBGE do município: primeiro o índice local (5.571 municípios, com UF e
+ * código), depois o próprio catálogo (que também traz "CODIGO IBGE").
+ * Sem UF não há como distinguir homônimos — devolve vazio e a resolução usa o
+ * caminho de contingência.
  */
-function resolverTipoFichaPorCidadeNome(nomeIbge, ufIbge) {
-  const mapa = obterMapaCidadesAtivo();
-  if (!nomeIbge || !mapa) return null;
+function codigoIbgeDaCidade(nomeIbge, ufIbge) {
   const chave = normalizarChaveCidade(nomeIbge);
   const uf = String(ufIbge || "").toUpperCase().trim();
-  const mapaUf = obterMapaCidadesUfAtivo();
-  if (uf && mapaUf?.size) {
-    const tipoUf = mapaUf.get(`${uf}|${chave}`) || "";
+  if (!chave || !uf) return "";
+  const doIndice = codigoIbgePorCidadeUf?.get(`${uf}|${chave}`) || "";
+  if (doIndice) return doIndice;
+  return obterCatalogoAtivo()?.codigoPorCidadeUf?.get(`${uf}|${chave}`) || "";
+}
+
+/**
+ * Ficha da cidade, resolvida pelo **código IBGE** do município — nunca pelo nome.
+ * Assim cidade homônima de outro estado não herda a ficha alheia (ex.: Rio
+ * Claro/RJ × Rio Claro/SP, Palmas/PR × Palmas/TO). Sem designação (ficha vazia ou
+ * desconhecida, ou município fora do catálogo) usa `FICHA_PADRAO_SEM_DESIGNACAO`.
+ */
+function resolverTipoFichaPorCidadeNome(nomeIbge, ufIbge) {
+  const catalogo = obterCatalogoAtivo();
+  if (!nomeIbge || !catalogo) return null;
+  const chave = normalizarChaveCidade(nomeIbge);
+  const uf = String(ufIbge || "").toUpperCase().trim();
+  const codigo = codigoIbgeDaCidade(nomeIbge, uf);
+  if (codigo) {
+    const tipoCodigo = catalogo.porCodigo.get(codigo) || "";
+    return tipoCodigo && FICHA_UTILIZAR_PARA_ARQUIVO[tipoCodigo] ? tipoCodigo : FICHA_PADRAO_SEM_DESIGNACAO;
+  }
+  if (uf && catalogo.porUf.size) {
+    const tipoUf = catalogo.porUf.get(`${uf}|${chave}`) || "";
     return tipoUf && FICHA_UTILIZAR_PARA_ARQUIVO[tipoUf] ? tipoUf : FICHA_PADRAO_SEM_DESIGNACAO;
   }
-  const tipo = mapa.get(chave) || "";
+  const tipo = catalogo.porNome.get(chave) || "";
   if (tipo && FICHA_UTILIZAR_PARA_ARQUIVO[tipo]) return tipo;
   return FICHA_PADRAO_SEM_DESIGNACAO;
 }
@@ -1924,10 +1962,12 @@ async function fetchComPrazo(url, opcoes, sinalExterno, prazoMs) {
 function normalizarListaMunicipios(j) {
   if (!Array.isArray(j)) throw new Error("formato");
   return j
-    .map((item) =>
-      typeof item === "string" ? item : item && (item.nome || item.name || item.CIDADE || "")
-    )
-    .map((n) => ({ nome: String(n || "").trim() }))
+    .map((item) => {
+      if (typeof item === "string") return { nome: item, codigo: "" };
+      const nome = item && (item.nome || item.name || item.CIDADE || "");
+      const codigo = item && (item.codigo || item.codigo_ibge || item["CODIGO IBGE"] || "");
+      return { nome: String(nome || "").trim(), codigo: String(codigo || "").trim() };
+    })
     .filter((m) => m.nome);
 }
 
@@ -1943,6 +1983,19 @@ async function carregarMunicipiosLocaisPorUf(sigla, sinalExterno) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const j = await res.json();
       if (!j || typeof j !== "object" || Array.isArray(j)) throw new Error("formato");
+      // "UF|NOME" → código IBGE de todas as UFs: é o que permite resolver a ficha
+      // pelo código do município, e não pelo nome.
+      const mapaCodigos = new Map();
+      for (const uf of Object.keys(j)) {
+        if (uf === "_meta" || !Array.isArray(j[uf])) continue;
+        for (const item of j[uf]) {
+          const nome = typeof item === "string" ? item : item && item.nome;
+          const codigo = item && typeof item === "object" ? String(item.codigo || "").trim() : "";
+          const chave = normalizarChaveCidade(nome);
+          if (chave && codigo) mapaCodigos.set(`${uf}|${chave}`, codigo);
+        }
+      }
+      if (mapaCodigos.size) codigoIbgePorCidadeUf = mapaCodigos;
       return j;
     })();
     municipiosPorUfLocalPromessa.catch(() => {
@@ -2039,6 +2092,7 @@ async function carregarMunicipiosIBGE(uf) {
       const opt = document.createElement("option");
       opt.value = m.nome;
       opt.textContent = m.nome;
+      if (m.codigo) opt.dataset.codigo = m.codigo; // identidade do município (IBGE)
       sel.appendChild(opt);
     }
   } catch (e) {

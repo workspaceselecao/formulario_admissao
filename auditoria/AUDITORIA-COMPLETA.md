@@ -449,7 +449,8 @@ Seções da F-089: tipo de adesão → (Plano de Benefícios: só assinatura) ·
 | Schema F-075 | `ficha_cadastral_campos.json` | `documento` (id/título/versão), `campos.<secao>` com `coordenadas` por campo/opção | — |
 | Schema F-089 | `assistencia_medica_campos.json` | idem + `tipo_adesao` (grupos de opções), `dependentes` (cônjuge + slots filhos) | — |
 | Schema declaração | `declaracao_plano_saude_campos.json` | assinatura + `evidencia.coordenadas` | — |
-| Catálogo de cidades | `cidades_brasil.json` | `REGIONAL`, `CIDADE`, `FICHA A UTILIZAR` (sem UF) | → arquivo `FICHA *.pdf` |
+| Catálogo de cidades | `cidades_brasil.json` | `REGIONAL`, `CIDADE`, `FICHA A UTILIZAR`, `CODIGO IBGE` (sem UF) | → arquivo `FICHA *.pdf` |
+
 | Catálogo Infinity | `cidades_infinity.json` | idem + `UF` | → arquivo; usado no fluxo Infinity |
 | Chave normalizada de cidade | painel | convenção `FICHA SAFO` (chave) ↔ `FICHA SA_FO.pdf` (físico) | trava de sincronia (run-test 14.6b) |
 | Template declarativo | `ficha-cadastral-embutido/template.json` | `images`, `blackBars` (161), `whiteBoxes`, `checkboxes`, `texts` (89), `marcacoes` (17), `fontes`/`fonteCheckbox` (subsets) | → assets PNG + TTF |
