@@ -590,7 +590,7 @@
   {
     "REGIONAL": "RJ",
     "UF": "RJ",
-    "CIDADE": "CAMPO DOS GOYTACAZES",
+    "CIDADE": "CAMPOS DOS GOYTACAZES",
     "FICHA A UTILIZAR": "FICHA GNDI"
   },
   {
@@ -732,12 +732,6 @@
     "FICHA A UTILIZAR": "FICHA GNDI"
   },
   {
-    "REGIONAL": "RJ",
-    "UF": "RJ",
-    "CIDADE": "CAMPOS DOS GOYTACAZES",
-    "FICHA A UTILIZAR": "FICHA REEMBOLSO"
-  },
-  {
     "REGIONAL": "SP",
     "UF": "SP",
     "CIDADE": "APARECIDA",
@@ -824,7 +818,7 @@
   {
     "REGIONAL": "SP",
     "UF": "SP",
-    "CIDADE": "EMBU GUACU",
+    "CIDADE": "EMBU-GUACU",
     "FICHA A UTILIZAR": "FICHA GNDI"
   },
   {
@@ -842,7 +836,7 @@
   {
     "REGIONAL": "SP",
     "UF": "SP",
-    "CIDADE": "ILHA BELA",
+    "CIDADE": "ILHABELA",
     "FICHA A UTILIZAR": "FICHA GNDI"
   },
   {
@@ -920,7 +914,7 @@
   {
     "REGIONAL": "SP",
     "UF": "SP",
-    "CIDADE": "PINDAMONHAGABA",
+    "CIDADE": "PINDAMONHANGABA",
     "FICHA A UTILIZAR": "FICHA GNDI"
   },
   {
@@ -1256,7 +1250,7 @@
   {
     "REGIONAL": "SP",
     "UF": "SP",
-    "CIDADE": "SANTA BARBARA D OESTE",
+    "CIDADE": "SANTA BARBARA D'OESTE",
     "FICHA A UTILIZAR": "FICHA GNDI"
   },
   {
@@ -1364,7 +1358,7 @@
   {
     "REGIONAL": "SUL",
     "UF": "RS",
-    "CIDADE": "CACHOEIRO DO SUL",
+    "CIDADE": "CACHOEIRA DO SUL",
     "FICHA A UTILIZAR": "FICHA REEMBOLSO"
   },
   {
@@ -1544,7 +1538,7 @@
   {
     "REGIONAL": "SUL",
     "UF": "RS",
-    "CIDADE": "SANTANA DO LIVRAMENTO",
+    "CIDADE": "SANT'ANA DO LIVRAMENTO",
     "FICHA A UTILIZAR": "FICHA REEMBOLSO"
   },
   {

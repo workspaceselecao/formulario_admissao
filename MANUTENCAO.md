@@ -118,6 +118,8 @@ Onde o código toca o schema:
 
 O select `#cidade` mostra os municípios da UF que constam do catálogo ativo (`cidades_brasil.json` / `cidades_infinity.json`), ordenados por nome.
 
+No catálogo, a coluna `CIDADE` usa a grafia oficial do IBGE **sem acentos e em maiúsculas**, preservando hífen e apóstrofo quando oficiais (`EMBU-GUACU`, `SANTA BARBARA D'OESTE`, `SANT'ANA DO LIVRAMENTO`, `CACHOEIRA DO SUL`). É essa chave — normalizada por `normalizarChaveCidade` — que casa com o índice local: grafia divergente faz a cidade desaparecer do select e o Teste 21 da suíte reprova.
+
 > **Histórico:** até 11/2026 a lista vinha de `api.kstrtech.com.br/cidades/{UF}`, única fonte do select. O domínio deixou de resolver (DNS) e o formulário passou a exibir erro em todas as UFs — daí a fonte local. A dependência e a entrada correspondente no CSP foram removidas.
 
 ### 6.2 Template PDF único

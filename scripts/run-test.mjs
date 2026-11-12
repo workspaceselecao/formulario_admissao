@@ -515,12 +515,12 @@ runTests().catch(e => { console.error(e); server.close(); process.exit(1); });
 async function testarCidadesPorUf(assert) {
   const UFS_OFICIAIS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"];
   // Grafias do catálogo que ainda não batem com o nome oficial do IBGE.
-  // Enquanto estiverem aqui, essas cidades não aparecem no select; o teste
-  // acusa qualquer divergência NOVA que entrar no catálogo.
-  const DIVERGENCIAS_IBGE_CONHECIDAS = [
-    "CAMPO DOS GOYTACAZES", "EMBU GUACU", "ILHA BELA", "PINDAMONHAGABA",
-    "SANTA BARBARA D OESTE", "CACHOEIRO DO SUL", "SANTANA DO LIVRAMENTO"
-  ];
+  // Vazio desde 11/2026: as 7 divergências históricas (CAMPO DOS GOYTACAZES,
+  // EMBU GUACU, ILHA BELA, PINDAMONHAGABA, SANTA BARBARA D OESTE, CACHOEIRO DO
+  // SUL, SANTANA DO LIVRAMENTO) foram corrigidas em cidades_brasil.json e
+  // cidades_infinity.json. Cidade que volte a divergir reprova o teste — o
+  // certo é corrigir a grafia em "CIDADE", não engordar esta lista.
+  const DIVERGENCIAS_IBGE_CONHECIDAS = [];
 
   const html = readFileSync(join(ROOT, "assistencia_medica.html"), "utf8");
 
@@ -626,8 +626,8 @@ async function testarCidadesPorUf(assert) {
 
     const nomesAusentes = [...new Set(ausentes.map(a => normalizar(a.nome)))];
     const novos = nomesAusentes.filter(n => !DIVERGENCIAS_IBGE_CONHECIDAS.includes(n));
-    assert(`${arquivo}: nenhuma divergência NOVA de grafia em relação ao IBGE`, novos.length === 0,
-      "cadastre a cidade no catálogo ou use o nome oficial do IBGE: " + JSON.stringify(novos));
+    assert(`${arquivo}: toda cidade do catálogo usa a grafia oficial do IBGE`, novos.length === 0,
+      "corrija a grafia em CIDADE para o nome oficial do IBGE: " + JSON.stringify(novos));
 
     const semFicha = [...new Set(mapa.values())].filter(f => !mapaFichas[f]);
     assert(`${arquivo}: toda ficha do catálogo tem PDF mapeado na página`, semFicha.length === 0, JSON.stringify(semFicha));
