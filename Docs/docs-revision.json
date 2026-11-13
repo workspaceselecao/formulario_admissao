@@ -1,7 +1,7 @@
 {
-  "ultimaValidacaoIso": "2026-11-12T21:00:30-03:00",
-  "gitCommit": "507c978",
-  "gitSubject": "ci: valida o índice de municípios no formato {codigo, nome}",
+  "ultimaValidacaoIso": "2026-11-12T21:34:46-03:00",
+  "gitCommit": "438e505",
+  "gitSubject": "fix(test): compara o host do connect-src em vez de substring da URL",
   "gitBranch": "main",
   "gitRemote": "origin"
 }
