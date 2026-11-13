@@ -45,7 +45,10 @@ jobs:
             const m = JSON.parse(require('fs').readFileSync('municipios_por_uf.json', 'utf8'));
             const ufs = Object.keys(m).filter(k => k !== '_meta');
             if (ufs.length !== 27) throw new Error('municipios_por_uf.json: esperadas 27 UFs, encontradas ' + ufs.length);
-            if (!Array.isArray(m.DF) || !m.DF.includes('Brasília')) throw new Error('municipios_por_uf.json: DF/Brasília ausente');
+            const df = m.DF || [];
+            if (!df.some(x => x && x.nome === 'Brasília')) throw new Error('municipios_por_uf.json: DF/Brasília ausente');
+            const semCodigo = ufs.flatMap(uf => m[uf]).filter(x => !/^\d{7}$/.test(String((x && x.codigo) || '')));
+            if (semCodigo.length) throw new Error('municipios_por_uf.json: ' + semCodigo.length + ' município(s) sem código IBGE');
             console.log('OK  municipios_por_uf.json (' + ufs.length + ' UFs)')
           "
           ls F-075*.pdf >/dev/null || { echo 'Template F-075 ausente'; exit 1; }
