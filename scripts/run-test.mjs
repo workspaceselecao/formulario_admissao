@@ -815,8 +815,15 @@ async function testarCidadesPorUf(assert) {
   assert("cidades: página não depende da API kstrtech (removida)", !/kstrtech/i.test(html), "ainda cita kstrtech");
   const cspCidades = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")).headers?.[0]?.headers
     ?.find(h => h.key === "Content-Security-Policy")?.value || "";
+  // Comparação por HOST das origens declaradas em connect-src (não por substring
+  // da URL): a checagem do CSP fica exata e não vira um teste de "a string contém".
+  const hostsConectSrc = ((cspCidades.match(/(?:^|;)\s*connect-src([^;]*)/) || [])[1] || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((origem) => { try { return new URL(origem).host; } catch (_e) { return ""; } });
   assert("cidades: CSP não autoriza API de municípios fora da contingência",
-    !/kstrtech/i.test(cspCidades) && cspCidades.includes("https://brasilapi.com.br"),
+    !/kstrtech/i.test(cspCidades) && hostsConectSrc.some((host) => host === "brasilapi.com.br"),
     cspCidades.match(/connect-src[^;]*/)?.[0] || "sem connect-src");
 }
 
